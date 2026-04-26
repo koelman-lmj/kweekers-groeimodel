@@ -6,9 +6,12 @@ type ViewId =
   | "dashboard"
   | "nieuwe-scan"
   | "scan"
+  | "diagnose"
   | "resultaten"
   | "roadmap"
   | "rapport";
+
+type TriageAnswer = "Vaak" | "Soms" | "Nee" | "Weet ik niet";
 
 type ScanForm = {
   organisatienaam: string;
@@ -23,10 +26,18 @@ type ScanForm = {
   context: string;
 };
 
+type TriageQuestion = {
+  id: string;
+  section: string;
+  question: string;
+  helpText?: string;
+};
+
 const navigation: { id: ViewId; label: string }[] = [
   { id: "dashboard", label: "Dashboard" },
   { id: "nieuwe-scan", label: "Nieuwe scan" },
   { id: "scan", label: "Praktijktriage" },
+  { id: "diagnose", label: "Diagnosekaart" },
   { id: "resultaten", label: "Resultaten" },
   { id: "roadmap", label: "Roadmap" },
   { id: "rapport", label: "Rapport" },
@@ -80,6 +91,81 @@ const scanReasonOptions = [
   "Anders",
 ];
 
+const triageQuestions: TriageQuestion[] = [
+  {
+    id: "FIN-TRIAGE-001",
+    section: "Geld / facturen / betalingen",
+    question: "Versturen jullie facturen naar klanten?",
+    helpText: "Het gaat hier om verkoopfacturen, declaraties of andere bedragen die naar klanten gaan.",
+  },
+  {
+    id: "FIN-TRIAGE-002",
+    section: "Geld / facturen / betalingen",
+    question: "Krijgen jullie facturen van leveranciers?",
+    helpText: "Denk aan inkoopfacturen, kostenfacturen of facturen die eerst beoordeeld moeten worden.",
+  },
+  {
+    id: "FIN-TRIAGE-003",
+    section: "Geld / facturen / betalingen",
+    question: "Moeten facturen eerst worden goedgekeurd?",
+    helpText: "Bijvoorbeeld door een budgethouder, manager, projectleider of administratie.",
+  },
+  {
+    id: "FIN-TRIAGE-004",
+    section: "Geld / facturen / betalingen",
+    question: "Is snel inzicht in kosten, betalingen of openstaande posten belangrijk?",
+    helpText: "Denk aan grip op geld, kosten, betalingen, openstaande facturen of verplichtingen.",
+  },
+  {
+    id: "PROJ-TRIAGE-001",
+    section: "Klussen / opdrachten / projecten",
+    question: "Doen jullie werk dat over meerdere dagen of weken loopt?",
+    helpText: "We bedoelen werk dat je als opdracht, klus, traject, project of dossier zou kunnen volgen.",
+  },
+  {
+    id: "PROJ-TRIAGE-002",
+    section: "Klussen / opdrachten / projecten",
+    question: "Willen jullie weten of een klus of opdracht goed loopt qua uren, kosten of opbrengst?",
+    helpText: "Dit hoeft nog geen projectadministratie te zijn. Het gaat om grip op werk en resultaat.",
+  },
+  {
+    id: "PROJ-TRIAGE-003",
+    section: "Klussen / opdrachten / projecten",
+    question: "Moeten uren of kosten aan een opdracht worden gekoppeld?",
+    helpText: "Bijvoorbeeld voor facturatie, budgetbewaking, subsidie, nacalculatie of interne sturing.",
+  },
+  {
+    id: "PROJ-TRIAGE-004",
+    section: "Klussen / opdrachten / projecten",
+    question: "Is het belangrijk om eerder te zien of werk uit de pas loopt?",
+    helpText: "Bijvoorbeeld als er te veel uren, kosten, vertraging of onduidelijkheid ontstaat.",
+  },
+];
+
+const painPointOptions = [
+  "Veel handwerk",
+  "Veel Excel-lijstjes",
+  "Dubbele invoer",
+  "Achter mensen aan voor akkoord",
+  "Veel uitzonderingen",
+  "Cijfers worden niet altijd vertrouwd",
+  "Afhankelijk van kennis van één of enkele mensen",
+  "Onduidelijk wie eigenaar is",
+  "Samenwerking tussen afdelingen loopt stroef",
+];
+
+const wishOptions = [
+  "Minder handwerk",
+  "Minder Excel",
+  "Sneller goedkeuren",
+  "Betere overzichten",
+  "Eerder zien waar het misloopt",
+  "Minder fouten en herstelwerk",
+  "Duidelijkere afspraken",
+  "Minder afhankelijk van losse kennis",
+  "Beter kunnen sturen",
+];
+
 const mockScans = [
   {
     klant: "Participe",
@@ -122,9 +208,26 @@ const initialForm: ScanForm = {
     "De scan wordt gebruikt als gesprekstool tijdens een nulmeting en vormt de basis voor prioriteiten en een eerste roadmap.",
 };
 
+const initialTriageAnswers: Record<string, TriageAnswer> = Object.fromEntries(
+  triageQuestions.map((question) => [question.id, "Weet ik niet"])
+);
+
 export default function Home() {
   const [activeView, setActiveView] = useState<ViewId>("dashboard");
   const [form, setForm] = useState<ScanForm>(initialForm);
+  const [triageAnswers, setTriageAnswers] =
+    useState<Record<string, TriageAnswer>>(initialTriageAnswers);
+  const [painPoints, setPainPoints] = useState<string[]>([
+    "Veel handwerk",
+    "Veel Excel-lijstjes",
+  ]);
+  const [wishes, setWishes] = useState<string[]>([
+    "Minder handwerk",
+    "Betere overzichten",
+  ]);
+  const [practiceExample, setPracticeExample] = useState(
+    "Vorige maand kostte het veel tijd om de juiste cijfers en goedkeuringen boven water te krijgen."
+  );
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-950">
@@ -193,9 +296,24 @@ export default function Home() {
             )}
 
             {activeView === "scan" && (
+              <PracticeTriage
+                answers={triageAnswers}
+                setAnswers={setTriageAnswers}
+                painPoints={painPoints}
+                setPainPoints={setPainPoints}
+                wishes={wishes}
+                setWishes={setWishes}
+                practiceExample={practiceExample}
+                setPracticeExample={setPracticeExample}
+                onBack={() => setActiveView("nieuwe-scan")}
+                onNext={() => setActiveView("diagnose")}
+              />
+            )}
+
+            {activeView === "diagnose" && (
               <PlaceholderScreen
-                title="Scherm 2 – Praktijktriage"
-                description="Hier bouwen we straks de gewone werkvragen zonder AFAS-taal."
+                title="Scherm 3 – Diagnosekaart"
+                description="Hier vertalen we straks de antwoorden naar herkenbare signalen, relevante domeinen en onderwerpen die nader verkend moeten worden."
               />
             )}
 
@@ -437,6 +555,230 @@ function NewScan({
   );
 }
 
+function PracticeTriage({
+  answers,
+  setAnswers,
+  painPoints,
+  setPainPoints,
+  wishes,
+  setWishes,
+  practiceExample,
+  setPracticeExample,
+  onBack,
+  onNext,
+}: {
+  answers: Record<string, TriageAnswer>;
+  setAnswers: (answers: Record<string, TriageAnswer>) => void;
+  painPoints: string[];
+  setPainPoints: (values: string[]) => void;
+  wishes: string[];
+  setWishes: (values: string[]) => void;
+  practiceExample: string;
+  setPracticeExample: (value: string) => void;
+  onBack: () => void;
+  onNext: () => void;
+}) {
+  const financeQuestions = triageQuestions.filter(
+    (question) => question.section === "Geld / facturen / betalingen"
+  );
+  const projectQuestions = triageQuestions.filter(
+    (question) => question.section === "Klussen / opdrachten / projecten"
+  );
+
+  return (
+    <div className="space-y-6">
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-slate-500">
+              Stap 2 van 7
+            </p>
+            <h3 className="mt-2 text-2xl font-semibold">Praktijktriage</h3>
+            <p className="mt-2 max-w-3xl text-slate-600">
+              We stellen eerst gewone vragen over hoe het werk nu loopt. Geen
+              systeemtaal. Het gaat om herkenbare situaties uit de praktijk.
+            </p>
+          </div>
+
+          <button
+            onClick={onNext}
+            className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+          >
+            Naar diagnosekaart
+          </button>
+        </div>
+      </section>
+
+      <TriageSection
+        title="1. Geld / facturen / betalingen"
+        intro="We kijken eerst of geldstromen, facturen, goedkeuringen en inzicht in kosten belangrijk zijn. Dit zegt nog niets over de oplossing; het helpt alleen om te bepalen of we hier dieper op moeten ingaan."
+        questions={financeQuestions}
+        answers={answers}
+        setAnswers={setAnswers}
+      />
+
+      <TriageSection
+        title="2. Klussen / opdrachten / projecten"
+        intro="Veel organisaties noemen iets geen project, terwijl ze wel werk doen dat over meerdere dagen of weken loopt. Daarom vragen we naar het werk zelf, niet naar een module of systeem."
+        questions={projectQuestions}
+        answers={answers}
+        setAnswers={setAnswers}
+      />
+
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h4 className="text-xl font-semibold">3. Waar wringt het?</h4>
+        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+          Kruis aan wat herkenbaar is. Juist deze punten laten vaak zien waar de
+          echte verbetering zit.
+        </p>
+
+        <div className="mt-6">
+          <MultiSelectField
+            label="Wat kost nu vaak tijd of geeft gedoe?"
+            options={painPointOptions}
+            values={painPoints}
+            onChange={setPainPoints}
+          />
+        </div>
+
+        <div className="mt-6">
+          <TextArea
+            label="Praktijkvoorbeeld"
+            value={practiceExample}
+            onChange={setPracticeExample}
+          />
+          <p className="mt-2 text-sm text-slate-600">
+            Bijvoorbeeld: “Vorige maand ging het mis toen…”
+          </p>
+        </div>
+      </section>
+
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h4 className="text-xl font-semibold">
+          4. Wat willen jullie straks beter?
+        </h4>
+        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+          Kies de wensen die het beste passen. Dit helpt om straks prioriteiten
+          te maken die de klant ook echt herkent.
+        </p>
+
+        <div className="mt-6">
+          <MultiSelectField
+            label="Wat zou merkbaar beter moeten worden?"
+            options={wishOptions}
+            values={wishes}
+            onChange={setWishes}
+          />
+        </div>
+      </section>
+
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h4 className="text-xl font-semibold">5. Interne vertaling</h4>
+        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+          Dit deel is bedoeld voor het klantteam. De klant hoeft nog geen
+          AFAS-termen te kennen. Wij vertalen herkenbare signalen later naar
+          domeinen, verdieping en een eerste roadmap.
+        </p>
+
+        <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <SignalCard label="Veel handwerk" value="Proces nog niet strak genoeg" />
+          <SignalCard label="Veel Excel" value="Informatie buiten het hoofdproces" />
+          <SignalCard label="Achter mensen aan" value="Eigenaarschap of workflow ontbreekt" />
+          <SignalCard label="Cijfers niet vertrouwd" value="Data of definities niet eenduidig" />
+          <SignalCard label="Afhankelijk van personen" value="Kennis is onvoldoende geborgd" />
+          <SignalCard label="Eerder zien waar het misloopt" value="Behoefte aan stuurinformatie" />
+        </div>
+
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-between">
+          <button
+            onClick={onBack}
+            className="rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-700 ring-1 ring-slate-200 transition hover:bg-slate-100"
+          >
+            Terug naar organisatieprofiel
+          </button>
+
+          <button
+            onClick={onNext}
+            className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+          >
+            Naar diagnosekaart
+          </button>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function TriageSection({
+  title,
+  intro,
+  questions,
+  answers,
+  setAnswers,
+}: {
+  title: string;
+  intro: string;
+  questions: TriageQuestion[];
+  answers: Record<string, TriageAnswer>;
+  setAnswers: (answers: Record<string, TriageAnswer>) => void;
+}) {
+  return (
+    <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <h4 className="text-xl font-semibold">{title}</h4>
+      <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+        {intro}
+      </p>
+
+      <div className="mt-6 space-y-4">
+        {questions.map((question) => (
+          <div
+            key={question.id}
+            className="rounded-2xl border border-slate-200 bg-slate-50 p-5"
+          >
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                  {question.id}
+                </div>
+                <div className="mt-2 font-semibold">{question.question}</div>
+                {question.helpText && (
+                  <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+                    {question.helpText}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex flex-wrap gap-2 lg:min-w-[360px] lg:justify-end">
+                {(["Vaak", "Soms", "Nee", "Weet ik niet"] as TriageAnswer[]).map(
+                  (option) => (
+                    <button
+                      type="button"
+                      key={option}
+                      onClick={() =>
+                        setAnswers({
+                          ...answers,
+                          [question.id]: option,
+                        })
+                      }
+                      className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                        answers[question.id] === option
+                          ? "bg-slate-950 text-white"
+                          : "bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-100"
+                      }`}
+                    >
+                      {option}
+                    </button>
+                  )
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function PlaceholderScreen({
   title,
   description,
@@ -462,6 +804,15 @@ function StatCard({ label, value }: { label: string; value: string }) {
     <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
       <p className="text-sm font-medium text-slate-500">{label}</p>
       <div className="mt-3 text-3xl font-semibold">{value}</div>
+    </div>
+  );
+}
+
+function SignalCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-200">
+      <div className="text-sm font-semibold">{label}</div>
+      <p className="mt-2 text-sm leading-6 text-slate-600">{value}</p>
     </div>
   );
 }
