@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 type ViewId =
   | "dashboard"
@@ -12,6 +12,33 @@ type ViewId =
   | "rapport";
 
 type TriageAnswer = "Vaak" | "Soms" | "Nee" | "Weet ik niet";
+
+type DiagnosisStatus =
+  | "Waarschijnlijk relevant"
+  | "Kort toetsen"
+  | "Nader verkennen"
+  | "Nu niet primair";
+
+type DiagnosisCategory =
+  | "Werkdomeinen"
+  | "Digitale basis"
+  | "Organisatievolwassenheid"
+  | "Verandervermogen";
+
+type DiagnosisKey =
+  | "crm"
+  | "financieel"
+  | "ordermanagement"
+  | "projecten"
+  | "hrm"
+  | "payroll"
+  | "rapportage"
+  | "integraties"
+  | "data"
+  | "samenwerking"
+  | "eigenaarschap"
+  | "verandervermogen"
+  | "capaciteitBudget";
 
 type ScanForm = {
   organisatienaam: string;
@@ -31,6 +58,21 @@ type TriageQuestion = {
   section: string;
   question: string;
   helpText?: string;
+  diagnosisKeys: DiagnosisKey[];
+};
+
+type DiagnosisItem = {
+  key: DiagnosisKey;
+  category: DiagnosisCategory;
+  title: string;
+  description: string;
+  whatToExplore: string[];
+};
+
+type DiagnosisResult = DiagnosisItem & {
+  score: number;
+  status: DiagnosisStatus;
+  reason: string;
 };
 
 const navigation: { id: ViewId; label: string }[] = [
@@ -93,52 +135,196 @@ const scanReasonOptions = [
 
 const triageQuestions: TriageQuestion[] = [
   {
+    id: "CRM-TRIAGE-001",
+    section: "Klanten / relaties / afspraken",
+    question: "Hebben jullie klanten, relaties of contactpersonen die centraal bekend moeten zijn?",
+    helpText:
+      "Denk aan klantgegevens, contactpersonen, afspraken, contactmomenten of klantteams.",
+    diagnosisKeys: ["crm"],
+  },
+  {
+    id: "CRM-TRIAGE-002",
+    section: "Klanten / relaties / afspraken",
+    question: "Moeten afspraken met klanten voor meerdere collega’s zichtbaar zijn?",
+    helpText:
+      "Bijvoorbeeld afspraken die sales, administratie, uitvoering of consultancy moet kennen.",
+    diagnosisKeys: ["crm", "samenwerking"],
+  },
+  {
     id: "FIN-TRIAGE-001",
     section: "Geld / facturen / betalingen",
     question: "Versturen jullie facturen naar klanten?",
-    helpText: "Het gaat hier om verkoopfacturen, declaraties of andere bedragen die naar klanten gaan.",
+    helpText:
+      "Het gaat om verkoopfacturen, declaraties of andere bedragen die naar klanten gaan.",
+    diagnosisKeys: ["financieel"],
   },
   {
     id: "FIN-TRIAGE-002",
     section: "Geld / facturen / betalingen",
     question: "Krijgen jullie facturen van leveranciers?",
-    helpText: "Denk aan inkoopfacturen, kostenfacturen of facturen die eerst beoordeeld moeten worden.",
+    helpText:
+      "Denk aan inkoopfacturen, kostenfacturen of facturen die eerst beoordeeld moeten worden.",
+    diagnosisKeys: ["financieel"],
   },
   {
     id: "FIN-TRIAGE-003",
     section: "Geld / facturen / betalingen",
     question: "Moeten facturen eerst worden goedgekeurd?",
-    helpText: "Bijvoorbeeld door een budgethouder, manager, projectleider of administratie.",
+    helpText:
+      "Bijvoorbeeld door een budgethouder, manager, projectleider of administratie.",
+    diagnosisKeys: ["financieel", "eigenaarschap"],
   },
   {
-    id: "FIN-TRIAGE-004",
-    section: "Geld / facturen / betalingen",
-    question: "Is snel inzicht in kosten, betalingen of openstaande posten belangrijk?",
-    helpText: "Denk aan grip op geld, kosten, betalingen, openstaande facturen of verplichtingen.",
+    id: "ORD-TRIAGE-001",
+    section: "Orders / aanvragen / leveringen",
+    question: "Hebben jullie aanvragen, orders, leveringen, inkopen of voorraadstromen?",
+    helpText:
+      "Denk aan werk dat van aanvraag naar levering, uitvoering of betaling loopt.",
+    diagnosisKeys: ["ordermanagement"],
+  },
+  {
+    id: "ORD-TRIAGE-002",
+    section: "Orders / aanvragen / leveringen",
+    question: "Zijn er vaak uitzonderingen in het order- of leverproces?",
+    helpText:
+      "Bijvoorbeeld blokkades, afwijkende afspraken, wachtstatussen of handmatige controles.",
+    diagnosisKeys: ["ordermanagement", "eigenaarschap"],
   },
   {
     id: "PROJ-TRIAGE-001",
     section: "Klussen / opdrachten / projecten",
     question: "Doen jullie werk dat over meerdere dagen of weken loopt?",
-    helpText: "We bedoelen werk dat je als opdracht, klus, traject, project of dossier zou kunnen volgen.",
+    helpText:
+      "We bedoelen werk dat je als opdracht, klus, traject, project of dossier zou kunnen volgen.",
+    diagnosisKeys: ["projecten"],
   },
   {
     id: "PROJ-TRIAGE-002",
     section: "Klussen / opdrachten / projecten",
     question: "Willen jullie weten of een klus of opdracht goed loopt qua uren, kosten of opbrengst?",
-    helpText: "Dit hoeft nog geen projectadministratie te zijn. Het gaat om grip op werk en resultaat.",
+    helpText:
+      "Dit hoeft nog geen projectadministratie te zijn. Het gaat om grip op werk en resultaat.",
+    diagnosisKeys: ["projecten", "rapportage"],
   },
   {
-    id: "PROJ-TRIAGE-003",
-    section: "Klussen / opdrachten / projecten",
-    question: "Moeten uren of kosten aan een opdracht worden gekoppeld?",
-    helpText: "Bijvoorbeeld voor facturatie, budgetbewaking, subsidie, nacalculatie of interne sturing.",
+    id: "HRM-TRIAGE-001",
+    section: "Medewerkers / HR-processen",
+    question: "Hebben jullie processen rondom medewerkers, verlof, verzuim, onboarding of wijzigingen?",
+    helpText:
+      "Denk aan alles rondom instroom, doorstroom, uitstroom en wijzigingen van medewerkers.",
+    diagnosisKeys: ["hrm"],
   },
   {
-    id: "PROJ-TRIAGE-004",
-    section: "Klussen / opdrachten / projecten",
-    question: "Is het belangrijk om eerder te zien of werk uit de pas loopt?",
-    helpText: "Bijvoorbeeld als er te veel uren, kosten, vertraging of onduidelijkheid ontstaat.",
+    id: "PAY-TRIAGE-001",
+    section: "Salaris / personeelsmutaties",
+    question: "Worden salarissen, contracten of personeelsmutaties verwerkt?",
+    helpText:
+      "Ook als dit deels extern gebeurt, kan het relevant zijn voor proces, data en controle.",
+    diagnosisKeys: ["payroll", "hrm"],
+  },
+  {
+    id: "REP-TRIAGE-001",
+    section: "Rapportage / overzichten / grip",
+    question: "Maken jullie veel overzichten in Excel?",
+    helpText:
+      "Excel is niet fout, maar veel losse bestanden kunnen wijzen op ontbrekende stuurinformatie.",
+    diagnosisKeys: ["rapportage", "data"],
+  },
+  {
+    id: "REP-TRIAGE-002",
+    section: "Rapportage / overzichten / grip",
+    question: "Zijn cijfers soms onderwerp van discussie?",
+    helpText:
+      "Bijvoorbeeld omdat definities verschillen of omdat niet duidelijk is welk overzicht klopt.",
+    diagnosisKeys: ["rapportage", "data", "eigenaarschap"],
+  },
+  {
+    id: "REP-TRIAGE-003",
+    section: "Rapportage / overzichten / grip",
+    question: "Hebben management, directie of teams vaste rapportages nodig?",
+    helpText:
+      "Denk aan rapportages voor sturing, overleg, bestuur, MT of klantteams.",
+    diagnosisKeys: ["rapportage"],
+  },
+  {
+    id: "INT-TRIAGE-001",
+    section: "Systemen / koppelingen / dubbele invoer",
+    question: "Gebruiken jullie naast AFAS ook andere systemen?",
+    helpText:
+      "Bijvoorbeeld brancheapplicaties, planningssystemen, CRM-systemen, portalen of BI-tools.",
+    diagnosisKeys: ["integraties"],
+  },
+  {
+    id: "INT-TRIAGE-002",
+    section: "Systemen / koppelingen / dubbele invoer",
+    question: "Wordt informatie dubbel ingevoerd?",
+    helpText:
+      "Bijvoorbeeld eerst in een ander systeem en daarna nog eens in AFAS of Excel.",
+    diagnosisKeys: ["integraties", "data"],
+  },
+  {
+    id: "INT-TRIAGE-003",
+    section: "Systemen / koppelingen / dubbele invoer",
+    question: "Is onduidelijk welk systeem leidend is voor bepaalde gegevens?",
+    helpText:
+      "Bijvoorbeeld klantgegevens, medewerkersgegevens, orders, projecten of financiële data.",
+    diagnosisKeys: ["integraties", "data", "eigenaarschap"],
+  },
+  {
+    id: "ORG-TRIAGE-001",
+    section: "Samenwerking / communicatie / eigenaarschap",
+    question: "Gaan afspraken vooral via mail, Teams of losse lijstjes?",
+    helpText:
+      "Dat kan prima werken, maar het maakt afspraken vaak minder zichtbaar en minder overdraagbaar.",
+    diagnosisKeys: ["samenwerking"],
+  },
+  {
+    id: "ORG-TRIAGE-002",
+    section: "Samenwerking / communicatie / eigenaarschap",
+    question: "Is voor iedereen duidelijk wie waarvoor verantwoordelijk is?",
+    helpText:
+      "Denk aan eigenaarschap van proces, data, besluitvorming en opvolging.",
+    diagnosisKeys: ["eigenaarschap"],
+  },
+  {
+    id: "ORG-TRIAGE-003",
+    section: "Samenwerking / communicatie / eigenaarschap",
+    question: "Loopt overdracht tussen afdelingen soms stroef?",
+    helpText:
+      "Bijvoorbeeld tussen sales, administratie, uitvoering, HR, finance of management.",
+    diagnosisKeys: ["samenwerking", "eigenaarschap"],
+  },
+  {
+    id: "CHANGE-TRIAGE-001",
+    section: "Veranderen / capaciteit / hulpvraag",
+    question: "Is er weerstand als processen of werkwijzen veranderen?",
+    helpText:
+      "Weerstand is normaal, maar bepaalt wel hoe je de aanpak moet faseren en begeleiden.",
+    diagnosisKeys: ["verandervermogen"],
+  },
+  {
+    id: "CHANGE-TRIAGE-002",
+    section: "Veranderen / capaciteit / hulpvraag",
+    question: "Loopt er nu een reorganisatie, herstructurering of grote verandering?",
+    helpText:
+      "Dan moet de aanpak vaak rustiger, kleiner en duidelijker worden opgebouwd.",
+    diagnosisKeys: ["verandervermogen", "capaciteitBudget"],
+  },
+  {
+    id: "CHANGE-TRIAGE-003",
+    section: "Veranderen / capaciteit / hulpvraag",
+    question: "Is er tijd en budget beschikbaar om verbeteringen echt op te pakken?",
+    helpText:
+      "Zonder tijd, budget of key-users blijft verbetering vaak hangen in goede intenties.",
+    diagnosisKeys: ["capaciteitBudget"],
+  },
+  {
+    id: "CHANGE-TRIAGE-004",
+    section: "Veranderen / capaciteit / hulpvraag",
+    question: "Kan de organisatie dit grotendeels zelf, of is begeleiding nodig?",
+    helpText:
+      "Dit bepaalt of Kweekers vooral adviseert, begeleidt, uitvoert of tijdelijk extra structuur biedt.",
+    diagnosisKeys: ["capaciteitBudget", "verandervermogen"],
   },
 ];
 
@@ -152,6 +338,10 @@ const painPointOptions = [
   "Afhankelijk van kennis van één of enkele mensen",
   "Onduidelijk wie eigenaar is",
   "Samenwerking tussen afdelingen loopt stroef",
+  "Veel weerstand bij verandering",
+  "Te weinig tijd of capaciteit",
+  "Budget is nog onduidelijk",
+  "Organisatie zit in herstructurering",
 ];
 
 const wishOptions = [
@@ -164,6 +354,182 @@ const wishOptions = [
   "Duidelijkere afspraken",
   "Minder afhankelijk van losse kennis",
   "Beter kunnen sturen",
+  "Beter samenwerken tussen afdelingen",
+  "Meer eigenaarschap",
+  "Rustiger en beter kunnen veranderen",
+  "Duidelijk weten welke hulp nodig is",
+];
+
+const diagnosisCatalog: DiagnosisItem[] = [
+  {
+    key: "crm",
+    category: "Werkdomeinen",
+    title: "CRM / Relatiebeheer",
+    description:
+      "Relaties, klantafspraken, contactmomenten, commerciële opvolging en zichtbaarheid voor klantteams.",
+    whatToExplore: [
+      "Welke klantinformatie moet centraal bekend zijn?",
+      "Welke afspraken moeten zichtbaar zijn voor meerdere collega’s?",
+      "Hoe loopt opvolging nu?",
+      "Waar zit informatie nu verspreid?",
+    ],
+  },
+  {
+    key: "financieel",
+    category: "Werkdomeinen",
+    title: "Financieel",
+    description:
+      "Facturen, betalingen, goedkeuringen, openstaande posten, afsluiting en financiële grip.",
+    whatToExplore: [
+      "Hoe lopen facturen en betalingen nu?",
+      "Waar zitten handmatige controles?",
+      "Wie keurt wat goed?",
+      "Welke cijfers zijn nodig voor sturing?",
+    ],
+  },
+  {
+    key: "ordermanagement",
+    category: "Werkdomeinen",
+    title: "Ordermanagement",
+    description:
+      "Aanvragen, orders, inkopen, leveringen, voorraad, uitzonderingen en overdracht tussen stappen.",
+    whatToExplore: [
+      "Welke order- of leverstromen zijn er?",
+      "Waar ontstaan uitzonderingen?",
+      "Welke overdrachten zijn kwetsbaar?",
+      "Welke informatie moet eerder zichtbaar zijn?",
+    ],
+  },
+  {
+    key: "projecten",
+    category: "Werkdomeinen",
+    title: "Projecten / opdrachten",
+    description:
+      "Werk dat over meerdere dagen of weken loopt, met uren, kosten, budget, voortgang of resultaat.",
+    whatToExplore: [
+      "Wanneer is iets een project, opdracht of dossier?",
+      "Welke uren en kosten moeten worden gevolgd?",
+      "Hoe wordt voortgang bewaakt?",
+      "Waar mist inzicht in resultaat?",
+    ],
+  },
+  {
+    key: "hrm",
+    category: "Werkdomeinen",
+    title: "HRM",
+    description:
+      "Medewerkersprocessen zoals instroom, doorstroom, uitstroom, verlof, verzuim en wijzigingen.",
+    whatToExplore: [
+      "Welke HR-processen kosten nu veel tijd?",
+      "Waar zijn overdrachten of goedkeuringen nodig?",
+      "Welke medewerkersdata moet betrouwbaar zijn?",
+      "Wat loopt nu buiten het systeem om?",
+    ],
+  },
+  {
+    key: "payroll",
+    category: "Werkdomeinen",
+    title: "Payroll / salaris",
+    description:
+      "Salarisverwerking, contracten, mutaties, controles en aansluiting met HR- en financiële processen.",
+    whatToExplore: [
+      "Wie verwerkt mutaties?",
+      "Waar zitten controles?",
+      "Wat gebeurt intern en wat extern?",
+      "Welke informatie moet beter aansluiten?",
+    ],
+  },
+  {
+    key: "rapportage",
+    category: "Digitale basis",
+    title: "Rapportage & sturing",
+    description:
+      "Overzichten, dashboards, KPI’s, managementinformatie en eerder zien waar iets misloopt.",
+    whatToExplore: [
+      "Welke overzichten zijn nodig?",
+      "Wie gebruikt welke cijfers?",
+      "Welke rapportages staan nu in Excel?",
+      "Welke informatie moet sneller zichtbaar zijn?",
+    ],
+  },
+  {
+    key: "integraties",
+    category: "Digitale basis",
+    title: "Integraties & datastromen",
+    description:
+      "Andere systemen naast AFAS, koppelingen, imports, exports, dubbele invoer en datastromen.",
+    whatToExplore: [
+      "Welke systemen zijn betrokken?",
+      "Waar wordt informatie dubbel ingevoerd?",
+      "Welke koppelingen of imports zijn er?",
+      "Welk systeem is leidend?",
+    ],
+  },
+  {
+    key: "data",
+    category: "Digitale basis",
+    title: "Data & definities",
+    description:
+      "Betrouwbaarheid van gegevens, definities, eigenaarschap van data en discussie over cijfers.",
+    whatToExplore: [
+      "Welke cijfers worden niet vertrouwd?",
+      "Welke definities zijn onduidelijk?",
+      "Wie is eigenaar van data?",
+      "Waar ontstaan verschillen tussen overzichten?",
+    ],
+  },
+  {
+    key: "samenwerking",
+    category: "Organisatievolwassenheid",
+    title: "Samenwerking & communicatie",
+    description:
+      "Hoe teams samenwerken, informatie delen, afspraken vastleggen en overdrachten organiseren.",
+    whatToExplore: [
+      "Waar loopt overdracht stroef?",
+      "Welke afspraken staan in mail of Teams?",
+      "Wie mist welke informatie?",
+      "Welke samenwerking moet beter?",
+    ],
+  },
+  {
+    key: "eigenaarschap",
+    category: "Organisatievolwassenheid",
+    title: "Eigenaarschap & besluitvorming",
+    description:
+      "Wie eigenaar is van processen, data, keuzes, opvolging en verbetering.",
+    whatToExplore: [
+      "Wie beslist over werkwijze?",
+      "Wie is eigenaar van proces en data?",
+      "Waar blijven acties liggen?",
+      "Welke besluiten zijn nodig?",
+    ],
+  },
+  {
+    key: "verandervermogen",
+    category: "Verandervermogen",
+    title: "Adoptie & verandervermogen",
+    description:
+      "Hoe makkelijk de organisatie nieuwe werkwijzen accepteert en volhoudt.",
+    whatToExplore: [
+      "Waar zit weerstand?",
+      "Welke veranderingen lopen al?",
+      "Hoe worden gebruikers meegenomen?",
+      "Wat is nodig om verandering te laten landen?",
+    ],
+  },
+  {
+    key: "capaciteitBudget",
+    category: "Verandervermogen",
+    title: "Capaciteit, budget & hulpvraag",
+    description:
+      "Of de organisatie tijd, budget, key-users en kennis heeft om verbetering zelf op te pakken.",
+    whatToExplore: [
+      "Is er tijd vrijgemaakt?",
+      "Is budget duidelijk?",
+      "Zijn key-users beschikbaar?",
+      "Is externe hulp nodig?",
+    ],
+  },
 ];
 
 const mockScans = [
@@ -208,9 +574,9 @@ const initialForm: ScanForm = {
     "De scan wordt gebruikt als gesprekstool tijdens een nulmeting en vormt de basis voor prioriteiten en een eerste roadmap.",
 };
 
-const initialTriageAnswers: Record<string, TriageAnswer> = Object.fromEntries(
+const initialTriageAnswers = Object.fromEntries(
   triageQuestions.map((question) => [question.id, "Weet ik niet"])
-);
+) as Record<string, TriageAnswer>;
 
 export default function Home() {
   const [activeView, setActiveView] = useState<ViewId>("dashboard");
@@ -220,13 +586,20 @@ export default function Home() {
   const [painPoints, setPainPoints] = useState<string[]>([
     "Veel handwerk",
     "Veel Excel-lijstjes",
+    "Cijfers worden niet altijd vertrouwd",
   ]);
   const [wishes, setWishes] = useState<string[]>([
     "Minder handwerk",
     "Betere overzichten",
+    "Beter kunnen sturen",
   ]);
   const [practiceExample, setPracticeExample] = useState(
-    "Vorige maand kostte het veel tijd om de juiste cijfers en goedkeuringen boven water te krijgen."
+    "Vorige maand kostte het veel tijd om de juiste cijfers, goedkeuringen en eigenaars boven water te krijgen."
+  );
+
+  const diagnosisResults = useMemo(
+    () => calculateDiagnosis(triageAnswers, painPoints, wishes),
+    [triageAnswers, painPoints, wishes]
   );
 
   return (
@@ -264,8 +637,7 @@ export default function Home() {
           <div className="mt-10 rounded-2xl border border-slate-200 bg-slate-50 p-4">
             <div className="text-sm font-semibold">MVP-scope</div>
             <p className="mt-2 text-sm leading-6 text-slate-600">
-              Geen database, geen login en geen koppelingen. Eerst toetsen of
-              het model waarde toevoegt in klantgesprekken.
+              Eerst bepalen wat relevant is. Daarna pas verdiepen per onderdeel.
             </p>
           </div>
         </aside>
@@ -311,9 +683,14 @@ export default function Home() {
             )}
 
             {activeView === "diagnose" && (
-              <PlaceholderScreen
-                title="Scherm 3 – Diagnosekaart"
-                description="Hier vertalen we straks de antwoorden naar herkenbare signalen, relevante domeinen en onderwerpen die nader verkend moeten worden."
+              <DiagnosisCard
+                form={form}
+                results={diagnosisResults}
+                painPoints={painPoints}
+                wishes={wishes}
+                practiceExample={practiceExample}
+                onBack={() => setActiveView("scan")}
+                onNext={() => setActiveView("resultaten")}
               />
             )}
 
@@ -578,11 +955,8 @@ function PracticeTriage({
   onBack: () => void;
   onNext: () => void;
 }) {
-  const financeQuestions = triageQuestions.filter(
-    (question) => question.section === "Geld / facturen / betalingen"
-  );
-  const projectQuestions = triageQuestions.filter(
-    (question) => question.section === "Klussen / opdrachten / projecten"
+  const sections = Array.from(
+    new Set(triageQuestions.map((question) => question.section))
   );
 
   return (
@@ -609,24 +983,21 @@ function PracticeTriage({
         </div>
       </section>
 
-      <TriageSection
-        title="1. Geld / facturen / betalingen"
-        intro="We kijken eerst of geldstromen, facturen, goedkeuringen en inzicht in kosten belangrijk zijn. Dit zegt nog niets over de oplossing; het helpt alleen om te bepalen of we hier dieper op moeten ingaan."
-        questions={financeQuestions}
-        answers={answers}
-        setAnswers={setAnswers}
-      />
-
-      <TriageSection
-        title="2. Klussen / opdrachten / projecten"
-        intro="Veel organisaties noemen iets geen project, terwijl ze wel werk doen dat over meerdere dagen of weken loopt. Daarom vragen we naar het werk zelf, niet naar een module of systeem."
-        questions={projectQuestions}
-        answers={answers}
-        setAnswers={setAnswers}
-      />
+      {sections.map((section, index) => (
+        <TriageSection
+          key={section}
+          number={index + 1}
+          title={section}
+          questions={triageQuestions.filter(
+            (question) => question.section === section
+          )}
+          answers={answers}
+          setAnswers={setAnswers}
+        />
+      ))}
 
       <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h4 className="text-xl font-semibold">3. Waar wringt het?</h4>
+        <h4 className="text-xl font-semibold">Waar wringt het?</h4>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
           Kruis aan wat herkenbaar is. Juist deze punten laten vaak zien waar de
           echte verbetering zit.
@@ -655,7 +1026,7 @@ function PracticeTriage({
 
       <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
         <h4 className="text-xl font-semibold">
-          4. Wat willen jullie straks beter?
+          Wat willen jullie straks beter?
         </h4>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
           Kies de wensen die het beste passen. Dit helpt om straks prioriteiten
@@ -669,24 +1040,6 @@ function PracticeTriage({
             values={wishes}
             onChange={setWishes}
           />
-        </div>
-      </section>
-
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h4 className="text-xl font-semibold">5. Interne vertaling</h4>
-        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-          Dit deel is bedoeld voor het klantteam. De klant hoeft nog geen
-          AFAS-termen te kennen. Wij vertalen herkenbare signalen later naar
-          domeinen, verdieping en een eerste roadmap.
-        </p>
-
-        <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <SignalCard label="Veel handwerk" value="Proces nog niet strak genoeg" />
-          <SignalCard label="Veel Excel" value="Informatie buiten het hoofdproces" />
-          <SignalCard label="Achter mensen aan" value="Eigenaarschap of workflow ontbreekt" />
-          <SignalCard label="Cijfers niet vertrouwd" value="Data of definities niet eenduidig" />
-          <SignalCard label="Afhankelijk van personen" value="Kennis is onvoldoende geborgd" />
-          <SignalCard label="Eerder zien waar het misloopt" value="Behoefte aan stuurinformatie" />
         </div>
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-between">
@@ -709,25 +1062,212 @@ function PracticeTriage({
   );
 }
 
+function DiagnosisCard({
+  form,
+  results,
+  painPoints,
+  wishes,
+  practiceExample,
+  onBack,
+  onNext,
+}: {
+  form: ScanForm;
+  results: DiagnosisResult[];
+  painPoints: string[];
+  wishes: string[];
+  practiceExample: string;
+  onBack: () => void;
+  onNext: () => void;
+}) {
+  const categories: DiagnosisCategory[] = [
+    "Werkdomeinen",
+    "Digitale basis",
+    "Organisatievolwassenheid",
+    "Verandervermogen",
+  ];
+
+  const topResults = [...results]
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 5);
+
+  return (
+    <div className="space-y-6">
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-slate-500">
+              Stap 3 van 7
+            </p>
+            <h3 className="mt-2 text-2xl font-semibold">Diagnosekaart</h3>
+            <p className="mt-2 max-w-3xl text-slate-600">
+              Op basis van de praktijkvragen stellen we voor welke onderdelen
+              verder bekeken moeten worden. Dit is geen eindconclusie, maar een
+              startpunt voor het gesprek.
+            </p>
+          </div>
+
+          <button
+            onClick={onNext}
+            className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+          >
+            Naar resultaten
+          </button>
+        </div>
+      </section>
+
+      <section className="grid gap-6 lg:grid-cols-3">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h4 className="text-lg font-semibold">Klantcontext</h4>
+          <div className="mt-5 space-y-3">
+            <MiniInfo label="Organisatie" value={form.organisatienaam} />
+            <MiniInfo label="Sector" value={form.sector} />
+            <MiniInfo label="Omvang" value={form.medewerkers} />
+            <MiniInfo label="Gesprek" value={form.klantSituatie} />
+          </div>
+        </div>
+
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h4 className="text-lg font-semibold">Herkenbare signalen</h4>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {painPoints.map((item) => (
+              <span
+                key={item}
+                className="rounded-full bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700"
+              >
+                {item}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h4 className="text-lg font-semibold">Gewenste beweging</h4>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {wishes.map((item) => (
+              <span
+                key={item}
+                className="rounded-full bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700"
+              >
+                {item}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h4 className="text-xl font-semibold">Belangrijkste aandachtspunten</h4>
+        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+          Deze onderdelen komen het sterkst naar voren uit de triage.
+        </p>
+
+        <div className="mt-6 grid gap-4 lg:grid-cols-5">
+          {topResults.map((item) => (
+            <div
+              key={item.key}
+              className="rounded-2xl bg-slate-950 p-4 text-white"
+            >
+              <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-300">
+                {item.category}
+              </div>
+              <div className="mt-3 font-semibold">{item.title}</div>
+              <div className="mt-3 text-sm text-slate-300">{item.status}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {categories.map((category) => (
+        <section
+          key={category}
+          className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
+        >
+          <h4 className="text-xl font-semibold">{category}</h4>
+          <div className="mt-6 grid gap-4 lg:grid-cols-2">
+            {results
+              .filter((item) => item.category === category)
+              .map((item) => (
+                <DiagnosisItemCard key={item.key} item={item} />
+              ))}
+          </div>
+        </section>
+      ))}
+
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h4 className="text-xl font-semibold">Praktijkvoorbeeld</h4>
+        <p className="mt-3 max-w-4xl leading-7 text-slate-700">
+          {practiceExample}
+        </p>
+
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-between">
+          <button
+            onClick={onBack}
+            className="rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-700 ring-1 ring-slate-200 transition hover:bg-slate-100"
+          >
+            Terug naar praktijktriage
+          </button>
+
+          <button
+            onClick={onNext}
+            className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+          >
+            Naar resultaten
+          </button>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function DiagnosisItemCard({ item }: { item: DiagnosisResult }) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h5 className="font-semibold">{item.title}</h5>
+          <p className="mt-2 text-sm leading-6 text-slate-600">
+            {item.description}
+          </p>
+        </div>
+        <StatusBadge status={item.status} />
+      </div>
+
+      <p className="mt-4 text-sm leading-6 text-slate-700">
+        <strong>Waarom?</strong> {item.reason}
+      </p>
+
+      <div className="mt-4">
+        <div className="text-sm font-semibold text-slate-700">
+          Wat verder bekijken?
+        </div>
+        <ul className="mt-2 space-y-2 text-sm leading-6 text-slate-600">
+          {item.whatToExplore.map((point) => (
+            <li key={point}>• {point}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
 function TriageSection({
+  number,
   title,
-  intro,
   questions,
   answers,
   setAnswers,
 }: {
+  number: number;
   title: string;
-  intro: string;
   questions: TriageQuestion[];
   answers: Record<string, TriageAnswer>;
   setAnswers: (answers: Record<string, TriageAnswer>) => void;
 }) {
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-      <h4 className="text-xl font-semibold">{title}</h4>
-      <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-        {intro}
-      </p>
+      <h4 className="text-xl font-semibold">
+        {number}. {title}
+      </h4>
 
       <div className="mt-6 space-y-4">
         {questions.map((question) => (
@@ -779,6 +1319,143 @@ function TriageSection({
   );
 }
 
+function calculateDiagnosis(
+  answers: Record<string, TriageAnswer>,
+  painPoints: string[],
+  wishes: string[]
+): DiagnosisResult[] {
+  const scores: Record<DiagnosisKey, number> = {
+    crm: 0,
+    financieel: 0,
+    ordermanagement: 0,
+    projecten: 0,
+    hrm: 0,
+    payroll: 0,
+    rapportage: 0,
+    integraties: 0,
+    data: 0,
+    samenwerking: 0,
+    eigenaarschap: 0,
+    verandervermogen: 0,
+    capaciteitBudget: 0,
+  };
+
+  triageQuestions.forEach((question) => {
+    const answer = answers[question.id];
+
+    const value =
+      answer === "Vaak"
+        ? 2
+        : answer === "Soms"
+          ? 1
+          : answer === "Weet ik niet"
+            ? 0.5
+            : 0;
+
+    question.diagnosisKeys.forEach((key) => {
+      scores[key] += value;
+    });
+  });
+
+  const signalMap: Record<string, DiagnosisKey[]> = {
+    "Veel handwerk": ["eigenaarschap", "samenwerking"],
+    "Veel Excel-lijstjes": ["rapportage", "data"],
+    "Dubbele invoer": ["integraties", "data"],
+    "Achter mensen aan voor akkoord": ["eigenaarschap"],
+    "Veel uitzonderingen": ["ordermanagement", "eigenaarschap"],
+    "Cijfers worden niet altijd vertrouwd": ["rapportage", "data"],
+    "Afhankelijk van kennis van één of enkele mensen": [
+      "eigenaarschap",
+      "verandervermogen",
+    ],
+    "Onduidelijk wie eigenaar is": ["eigenaarschap"],
+    "Samenwerking tussen afdelingen loopt stroef": ["samenwerking"],
+    "Veel weerstand bij verandering": ["verandervermogen"],
+    "Te weinig tijd of capaciteit": ["capaciteitBudget"],
+    "Budget is nog onduidelijk": ["capaciteitBudget"],
+    "Organisatie zit in herstructurering": [
+      "verandervermogen",
+      "capaciteitBudget",
+    ],
+    "Minder handwerk": ["eigenaarschap"],
+    "Minder Excel": ["rapportage", "data"],
+    "Sneller goedkeuren": ["eigenaarschap", "financieel"],
+    "Betere overzichten": ["rapportage"],
+    "Eerder zien waar het misloopt": ["rapportage"],
+    "Minder fouten en herstelwerk": ["data", "eigenaarschap"],
+    "Duidelijkere afspraken": ["eigenaarschap", "samenwerking"],
+    "Minder afhankelijk van losse kennis": ["eigenaarschap"],
+    "Beter kunnen sturen": ["rapportage"],
+    "Beter samenwerken tussen afdelingen": ["samenwerking"],
+    "Meer eigenaarschap": ["eigenaarschap"],
+    "Rustiger en beter kunnen veranderen": ["verandervermogen"],
+    "Duidelijk weten welke hulp nodig is": ["capaciteitBudget"],
+  };
+
+  [...painPoints, ...wishes].forEach((signal) => {
+    signalMap[signal]?.forEach((key) => {
+      scores[key] += 1.5;
+    });
+  });
+
+  return diagnosisCatalog.map((item) => {
+    const score = scores[item.key];
+    const status = getDiagnosisStatus(score);
+    const reason = getDiagnosisReason(item, score, status);
+
+    return {
+      ...item,
+      score,
+      status,
+      reason,
+    };
+  });
+}
+
+function getDiagnosisStatus(score: number): DiagnosisStatus {
+  if (score >= 4) return "Waarschijnlijk relevant";
+  if (score >= 2) return "Kort toetsen";
+  if (score > 0) return "Nader verkennen";
+  return "Nu niet primair";
+}
+
+function getDiagnosisReason(
+  item: DiagnosisItem,
+  score: number,
+  status: DiagnosisStatus
+) {
+  if (status === "Waarschijnlijk relevant") {
+    return `De antwoorden wijzen duidelijk op dit onderdeel. Het is verstandig om ${item.title.toLowerCase()} mee te nemen in de verdiepende scan.`;
+  }
+
+  if (status === "Kort toetsen") {
+    return `Er zijn signalen dat dit onderdeel kan meespelen. Toets kort of ${item.title.toLowerCase()} echt relevant is voordat je de diepte ingaat.`;
+  }
+
+  if (status === "Nader verkennen") {
+    return `Er is nog te weinig zekerheid. Laat dit onderdeel zichtbaar, zodat het niet te vroeg buiten beeld raakt.`;
+  }
+
+  return `Op basis van de huidige antwoorden lijkt dit onderdeel nu niet de eerste focus. Niet verwijderen, wel parkeren.`;
+}
+
+function StatusBadge({ status }: { status: DiagnosisStatus }) {
+  const className =
+    status === "Waarschijnlijk relevant"
+      ? "bg-slate-950 text-white"
+      : status === "Kort toetsen"
+        ? "bg-white text-slate-800 ring-1 ring-slate-300"
+        : status === "Nader verkennen"
+          ? "bg-slate-100 text-slate-700"
+          : "bg-slate-50 text-slate-500 ring-1 ring-slate-200";
+
+  return (
+    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${className}`}>
+      {status}
+    </span>
+  );
+}
+
 function PlaceholderScreen({
   title,
   description,
@@ -808,11 +1485,13 @@ function StatCard({ label, value }: { label: string; value: string }) {
   );
 }
 
-function SignalCard({ label, value }: { label: string; value: string }) {
+function MiniInfo({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-200">
-      <div className="text-sm font-semibold">{label}</div>
-      <p className="mt-2 text-sm leading-6 text-slate-600">{value}</p>
+    <div className="rounded-2xl bg-white p-3 ring-1 ring-slate-200">
+      <div className="text-xs font-medium uppercase tracking-[0.15em] text-slate-500">
+        {label}
+      </div>
+      <div className="mt-1 font-semibold text-slate-900">{value}</div>
     </div>
   );
 }
