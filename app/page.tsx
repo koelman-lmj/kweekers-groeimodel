@@ -15,7 +15,7 @@ type ScanForm = {
   sector: string;
   medewerkers: string;
   administraties: string;
-  typeScan: string;
+  klantSituatie: string;
   consultant: string;
   datum: string;
   deelnemersGesprek: string;
@@ -26,7 +26,7 @@ type ScanForm = {
 const navigation: { id: ViewId; label: string }[] = [
   { id: "dashboard", label: "Dashboard" },
   { id: "nieuwe-scan", label: "Nieuwe scan" },
-  { id: "scan", label: "Scan invullen" },
+  { id: "scan", label: "Praktijktriage" },
   { id: "resultaten", label: "Resultaten" },
   { id: "roadmap", label: "Roadmap" },
   { id: "rapport", label: "Rapport" },
@@ -54,22 +54,29 @@ const employeeOptions = [
 
 const administrationOptions = ["1", "2-5", "6-10", "Meer dan 10"];
 
-const scanTypeOptions = [
-  "Eerste verkenning",
-  "Nulmeting",
-  "Herijking bestaande klant",
-  "Verdieping op bekend knelpunt",
-  "Strategisch klantteamgesprek",
+const customerSituationOptions = [
+  "We spreken elkaar voor het eerst",
+  "We starten net samen op",
+  "We werken al samen",
+  "Er loopt iets vast of moet beter",
+  "We doen een periodieke check",
 ];
 
 const scanReasonOptions = [
-  "AFAS beter benutten",
-  "Grip op processen",
-  "Rapportage verbeteren",
-  "Standaardisatie",
-  "Nieuwe inrichting of herinrichting",
-  "Voorbereiding klantteam-roadmap",
-  "Groei",
+  "Eerst een goed beeld krijgen",
+  "Weten waar we nu staan",
+  "Zien wat beter kan",
+  "AFAS beter gebruiken",
+  "Minder handwerk",
+  "Minder werken in Excel",
+  "Betere overzichten en rapportages",
+  "Sneller en duidelijker werken",
+  "Minder fouten en herstelwerk",
+  "Minder afhankelijk zijn van losse kennis",
+  "Duidelijkere afspraken en eigenaarschap",
+  "Betere samenwerking tussen afdelingen",
+  "Groei beter kunnen opvangen",
+  "Een duidelijke verbeteragenda maken",
   "Anders",
 ];
 
@@ -102,14 +109,14 @@ const initialForm: ScanForm = {
   sector: "Onderwijs",
   medewerkers: "t/m 250",
   administraties: "2-5",
-  typeScan: "Nulmeting",
+  klantSituatie: "We werken al samen",
   consultant: "Sjoerd Koelman",
   datum: "2026-04-26",
   deelnemersGesprek: "Directie, proceseigenaar, key-user en consultant",
   aanleidingScan: [
-    "AFAS beter benutten",
-    "Rapportage verbeteren",
-    "Voorbereiding klantteam-roadmap",
+    "AFAS beter gebruiken",
+    "Betere overzichten en rapportages",
+    "Een duidelijke verbeteragenda maken",
   ],
   context:
     "De scan wordt gebruikt als gesprekstool tijdens een nulmeting en vormt de basis voor prioriteiten en een eerste roadmap.",
@@ -365,10 +372,10 @@ function NewScan({
 
         <div className="mt-6 grid gap-5 md:grid-cols-2">
           <SelectField
-            label="Type scan"
-            value={form.typeScan}
-            options={scanTypeOptions}
-            onChange={(value) => setForm({ ...form, typeScan: value })}
+            label="Wat voor klantgesprek is dit?"
+            value={form.klantSituatie}
+            options={customerSituationOptions}
+            onChange={(value) => setForm({ ...form, klantSituatie: value })}
           />
 
           <TextField
@@ -399,11 +406,14 @@ function NewScan({
 
         <div className="mt-6">
           <MultiSelectField
-            label="Aanleiding voor de scan"
+            label="Waarom doen we deze scan?"
             options={scanReasonOptions}
             values={form.aanleidingScan}
             onChange={(values) => setForm({ ...form, aanleidingScan: values })}
           />
+          <p className="mt-2 text-sm text-slate-600">
+            Kies wat het beste past. Meerdere antwoorden zijn mogelijk.
+          </p>
         </div>
 
         <div className="mt-6">
