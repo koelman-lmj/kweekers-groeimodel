@@ -1219,7 +1219,7 @@ function labelOf(options: Option[], value: string) {
 
 function GlobalStyles() {
   return (
-    <style jsx global>{`
+    <style>{`
       :root {
         --bg: #f6f8fb;
         --card: #ffffff;
