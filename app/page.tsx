@@ -4,75 +4,69 @@ import { useMemo, useState, type ReactNode } from "react";
 
 type ViewId =
   | "dashboard"
-  | "startcheck"
-  | "nieuwe-scan"
-  | "crm-laag-1"
-  | "crm-laag-2"
-  | "crm-laag-3"
-  | "crm-laag-4"
+  | "start"
+  | "organisatie"
+  | "onderwerpen"
+  | "crm"
   | "diagnose"
-  | "verdieping"
-  | "resultaten"
-  | "roadmap"
-  | "rapport";
+  | "roadmap";
 
-type StartCheckAnswer = "Ja" | "Deels" | "Nee" | "Weet ik niet";
+type AfasStatus = "Ja" | "Deels" | "Nee" | "Weet ik niet";
 
-type TriageAnswer =
-  | "Ja, vaak"
+type RadarAnswer =
+  | "Ja"
   | "Soms"
   | "Nee"
   | "Weet ik niet"
   | "Niet van toepassing";
 
-type DiagnosisStatus =
+type Status =
   | "Waarschijnlijk relevant"
   | "Kort toetsen"
   | "Nader verkennen"
   | "Nu niet primair";
 
-type StartCheck = {
-  afasLiveStatus: StartCheckAnswer;
-  toelichting: string;
-};
+type TopicId =
+  | "crm"
+  | "financieel"
+  | "ordermanagement"
+  | "projecten"
+  | "hrm"
+  | "rapportage"
+  | "integraties"
+  | "samenwerking";
 
-type ScanForm = {
-  organisatienaam: string;
+type OrgKey =
+  | "situatie"
+  | "richting"
+  | "beheer"
+  | "eigenaarschap"
+  | "verandering"
+  | "randvoorwaarden";
+
+type Profile = {
+  organisatie: string;
   sector: string;
-  medewerkers: string;
-  administraties: string;
-  klantSituatie: string;
+  gesprekstype: string;
+  afasStatus: AfasStatus;
+  aanleiding: string;
   consultant: string;
   datum: string;
-  deelnemersGesprek: string;
-  aanleidingScan: string[];
-  context: string;
 };
 
-type CrmPainQuestion = {
+type Topic = {
+  id: TopicId;
+  title: string;
+  question: string;
+  shortLabel: string;
+  examples: Partial<Record<string, string>>;
+};
+
+type CrmQuestion = {
   id: string;
   question: string;
-  helpText: string;
-  sectorExamples: Partial<Record<string, string>>;
-  diagnosisLabels: string[];
-};
-
-type CrmState = {
-  relevantie: TriageAnswer;
-  pijn: Record<string, TriageAnswer>;
-  pijnVoorbeelden: Record<string, string>;
-  routes: string[];
-  prioriteiten: string[];
-  prioriteitToelichting: string;
-};
-
-type CrmDiagnosis = {
-  status: DiagnosisStatus;
-  score: number;
-  reason: string;
-  activeRoutes: string[];
-  nextQuestions: string[];
-  firstFocus: string;
+  help: string;
+  examples: Partial<Record<string, string>>;
 };
 
 const brand = {
@@ -82,21 +76,6 @@ const brand = {
   light: "#F6F8FB",
   border: "#E3E8F0",
 };
-
-const navigation: { id: ViewId; label: string }[] = [
-  { id: "dashboard", label: "Dashboard" },
-  { id: "startcheck", label: "Startcheck" },
-  { id: "nieuwe-scan", label: "Nieuwe scan" },
-  { id: "crm-laag-1", label: "CRM laag 1" },
-  { id: "crm-laag-2", label: "CRM laag 2" },
-  { id: "crm-laag-3", label: "CRM laag 3" },
-  { id: "crm-laag-4", label: "CRM laag 4" },
-  { id: "diagnose", label: "Diagnosekaart" },
-  { id: "verdieping", label: "Verdiepende scan" },
-  { id: "resultaten", label: "Resultaten" },
-  { id: "roadmap", label: "Roadmap" },
-  { id: "rapport", label: "Rapport" },
-];
 
 const sectorOptions = [
   "Onderwijs",
@@ -109,121 +88,234 @@ const sectorOptions = [
   "Anders",
 ];
 
-const employeeOptions = [
-  "t/m 25",
-  "t/m 50",
-  "t/m 250",
-  "t/m 1.000",
-  "t/m 2.500",
-  "> 2.500",
-];
+const profileInitial: Profile = {
+  organisatie: "LMJ BV",
+  sector: "Onderwijs",
+  gesprekstype: "Periodieke check",
+  afasStatus: "Ja",
+  aanleiding:
+    "We willen bepalen wat goed werkt, waar het knelt en welke stappen logisch zijn voor de roadmap.",
+  consultant: "Sjoerd Koelman",
+  datum: "2026-04-26",
+};
 
-const administrationOptions = ["1", "2-5", "6-10", "Meer dan 10"];
-
-const customerSituationOptions = [
-  "We spreken elkaar voor het eerst",
-  "We starten net samen op",
-  "We werken al samen",
-  "Er loopt iets vast of moet beter",
-  "We doen een periodieke check",
-];
-
-const scanReasonOptions = [
-  "Eerst een goed beeld krijgen",
-  "Weten waar we nu staan",
-  "Zien wat beter kan",
-  "AFAS beter gebruiken",
-  "Minder handwerk",
-  "Minder werken in Excel",
-  "Betere overzichten en rapportages",
-  "Sneller en duidelijker werken",
-  "Minder fouten en herstelwerk",
-  "Minder afhankelijk zijn van losse kennis",
-  "Duidelijkere afspraken en eigenaarschap",
-  "Betere samenwerking tussen afdelingen",
-  "Groei beter kunnen opvangen",
-  "Een duidelijke verbeteragenda maken",
-  "Anders",
-];
-
-const crmPainQuestions: CrmPainQuestion[] = [
+const orgQuestions: {
+  key: OrgKey;
+  title: string;
+  question: string;
+  options: string[];
+}[] = [
   {
-    id: "CRM-L2-001",
+    key: "situatie",
+    title: "Huidige situatie",
+    question: "Hoe voelt de huidige situatie?",
+    options: [
+      "Rustig en stabiel",
+      "In ontwikkeling",
+      "Er loopt veel tegelijk",
+      "Er is onrust of herstructurering",
+      "Sterke groei",
+      "Kosten- of capaciteitsdruk",
+    ],
+  },
+  {
+    key: "richting",
+    title: "Richting",
+    question: "Wat is de belangrijkste beweging voor de komende periode?",
+    options: [
+      "Meer grip",
+      "Minder handwerk",
+      "Betere samenwerking",
+      "Betere rapportage",
+      "Meer standaard werken",
+      "Meer uit AFAS halen",
+      "Voorbereiden op groei",
+    ],
+  },
+  {
+    key: "beheer",
+    title: "Beheerorganisatie",
+    question: "Wie zorgt dat AFAS, processen en afspraken goed blijven werken?",
+    options: [
+      "Duidelijk belegd",
+      "Bij een klein team",
+      "Bij één persoon",
+      "Verspreid over afdelingen",
+      "Niet duidelijk",
+    ],
+  },
+  {
+    key: "eigenaarschap",
+    title: "Eigenaarschap",
+    question: "Is duidelijk wie eigenaar is van processen en verbeteringen?",
+    options: [
+      "Meestal duidelijk",
+      "Soms duidelijk",
+      "Vaak onduidelijk",
+      "Besluiten blijven liggen",
+      "Iedere afdeling kijkt naar eigen stuk",
+    ],
+  },
+  {
+    key: "verandering",
+    title: "Veranderkracht",
+    question: "Hoe gaat de organisatie meestal om met verandering?",
+    options: [
+      "Mensen doen goed mee",
+      "Het lukt met begeleiding",
+      "Er is vaak weerstand",
+      "Verandering blijft soms hangen",
+      "Het hangt af van een paar mensen",
+    ],
+  },
+  {
+    key: "randvoorwaarden",
+    title: "Tijd, budget en capaciteit",
+    question: "Is er ruimte om verbeteringen ook echt op te pakken?",
+    options: ["Ja, duidelijk", "Deels", "Nog niet duidelijk", "Beperkt", "Nee"],
+  },
+];
+
+const orgInitial: Record<OrgKey, string> = {
+  situatie: "In ontwikkeling",
+  richting: "Meer grip",
+  beheer: "Bij een klein team",
+  eigenaarschap: "Soms duidelijk",
+  verandering: "Het lukt met begeleiding",
+  randvoorwaarden: "Deels",
+};
+
+const topics: Topic[] = [
+  {
+    id: "crm",
+    title: "Klanten & relaties",
+    shortLabel: "CRM / Relatiebeheer",
     question:
-      "Moet iemand zoeken in mail, Teams, Excel, losse lijstjes of eigen notities om de laatste afspraak met een relatie te vinden?",
-    helpText:
+      "Hebben jullie relaties, partners, klanten of andere partijen waar jullie vaker contact mee hebben?",
+    examples: {
+      Onderwijs:
+        "Denk aan stagebedrijven, studenten, ouders/verzorgers, gemeenten of samenwerkingspartners.",
+      "Zorg & welzijn":
+        "Denk aan cliënten, verwijzers, gemeenten, zorgpartners of leveranciers.",
+      "Zakelijke dienstverlening":
+        "Denk aan klanten, prospects, leveranciers, partners of contactpersonen.",
+    },
+  },
+  {
+    id: "financieel",
+    title: "Geld & facturen",
+    shortLabel: "Financieel",
+    question:
+      "Gaat er geld in of uit via facturen, betalingen, declaraties of kosten die gecontroleerd moeten worden?",
+    examples: {},
+  },
+  {
+    id: "ordermanagement",
+    title: "Orders & leveringen",
+    shortLabel: "Ordermanagement",
+    question:
+      "Hebben jullie aanvragen, orders, leveringen, inkopen of voorraadstromen?",
+    examples: {},
+  },
+  {
+    id: "projecten",
+    title: "Klussen & projecten",
+    shortLabel: "Projecten",
+    question:
+      "Doen jullie werk dat over meerdere dagen of weken loopt, waarbij uren, kosten of voortgang belangrijk zijn?",
+    examples: {},
+  },
+  {
+    id: "hrm",
+    title: "Medewerkers",
+    shortLabel: "HRM",
+    question:
+      "Spelen processen rondom medewerkers, verlof, verzuim, onboarding of wijzigingen een belangrijke rol?",
+    examples: {},
+  },
+  {
+    id: "rapportage",
+    title: "Rapportage & grip",
+    shortLabel: "Rapportage & sturing",
+    question:
+      "Hebben jullie vaste overzichten nodig om te sturen of besluiten te nemen?",
+    examples: {},
+  },
+  {
+    id: "integraties",
+    title: "Systemen & koppelingen",
+    shortLabel: "Integraties",
+    question:
+      "Gebruiken jullie naast AFAS ook andere systemen die informatie uitwisselen?",
+    examples: {},
+  },
+  {
+    id: "samenwerking",
+    title: "Samenwerking & verandering",
+    shortLabel: "Organisatievolwassenheid",
+    question:
+      "Zijn samenwerking, eigenaarschap, communicatie of verandervermogen belangrijke aandachtspunten?",
+    examples: {},
+  },
+];
+
+const topicInitial: Record<TopicId, RadarAnswer> = {
+  crm: "Ja",
+  financieel: "Soms",
+  ordermanagement: "Weet ik niet",
+  projecten: "Soms",
+  hrm: "Nee",
+  rapportage: "Ja",
+  integraties: "Soms",
+  samenwerking: "Ja",
+};
+
+const crmQuestions: CrmQuestion[] = [
+  {
+    id: "crm-1",
+    question:
+      "Zijn de laatste afspraken met een relatie snel terug te vinden?",
+    help:
       "Hiermee toetsen we of relatie-informatie centraal vindbaar is of verspreid staat.",
-    sectorExamples: {
+    examples: {
       Onderwijs:
-        "Bijvoorbeeld de laatste afspraak met een stagebedrijf, ouder/verzorger, student of samenwerkingspartner.",
+        "Bijvoorbeeld de laatste afspraak met een stagebedrijf, ouder/verzorger of samenwerkingspartner.",
       "Zorg & welzijn":
-        "Bijvoorbeeld de laatste afspraak met een gemeente, verwijzer, cliënt, zorgpartner of leverancier.",
+        "Bijvoorbeeld de laatste afspraak met een gemeente, verwijzer of zorgpartner.",
       "Zakelijke dienstverlening":
-        "Bijvoorbeeld de laatste afspraak met een klant, prospect, leverancier of samenwerkingspartner.",
-      Ledenorganisatie:
-        "Bijvoorbeeld de laatste afspraak met een lid, vrijwilliger, commissie, partner of leverancier.",
-      "Handel / groothandel":
-        "Bijvoorbeeld de laatste afspraak met een klant, leverancier, dealer of distributeur.",
-      "Overheid / non-profit":
-        "Bijvoorbeeld de laatste afspraak met een burger, instelling, ketenpartner of leverancier.",
+        "Bijvoorbeeld de laatste afspraak met een klant, prospect of partner.",
     },
-    diagnosisLabels: ["informatie-versnipperd", "afspraken-niet-vindbaar"],
   },
   {
-    id: "CRM-L2-002",
+    id: "crm-2",
     question:
-      "Zijn afspraken met relaties soms alleen bekend bij één of enkele collega’s?",
-    helpText:
-      "Dit laat zien of kennis goed overdraagbaar is of vooral bij personen zit.",
-    sectorExamples: {
-      Onderwijs:
-        "Bijvoorbeeld een docent of coördinator die als enige weet wat met een stagebedrijf is afgesproken.",
-      "Zorg & welzijn":
-        "Bijvoorbeeld een medewerker die als enige weet wat met een gemeente of verwijzer is besproken.",
-      "Zakelijke dienstverlening":
-        "Bijvoorbeeld een accountmanager die als enige weet welke afspraak met de klant is gemaakt.",
-      Ledenorganisatie:
-        "Bijvoorbeeld een collega die als enige weet wat met een lid, vrijwilliger of commissie is afgesproken.",
-    },
-    diagnosisLabels: ["kennis-bij-personen", "borging-kwetsbaar"],
+      "Staan relatiegegevens of afspraken verspreid in mail, Teams, Excel of losse lijstjes?",
+    help:
+      "Dit wijst vaak op versnipperde informatie en afhankelijkheid van personen.",
+    examples: {},
   },
   {
-    id: "CRM-L2-003",
+    id: "crm-3",
     question:
       "Blijft opvolging soms liggen omdat niet duidelijk is wie iets moet doen?",
-    helpText:
-      "Bijvoorbeeld terugbellen, een afspraak bevestigen, een offerte opvolgen of informatie toesturen.",
-    sectorExamples: {
-      Onderwijs:
-        "Bijvoorbeeld terugkoppeling naar een stagebedrijf, ouder/verzorger of samenwerkingspartner.",
-      "Zorg & welzijn":
-        "Bijvoorbeeld opvolging richting gemeente, cliënt, verwijzer of zorgpartner.",
-      "Zakelijke dienstverlening":
-        "Bijvoorbeeld opvolging van een offerte, klantvraag, verkoopkans of afspraak.",
-      "Handel / groothandel":
-        "Bijvoorbeeld opvolging van een klantvraag, prijsafspraak of leveringsafspraak.",
-    },
-    diagnosisLabels: ["opvolging-onduidelijk", "eigenaarschap"],
+    help:
+      "Denk aan terugbellen, bevestigen, informatie toesturen of een afspraak opvolgen.",
+    examples: {},
   },
   {
-    id: "CRM-L2-004",
-    question:
-      "Komt het voor dat collega’s langs elkaar heen communiceren met dezelfde relatie?",
-    helpText:
-      "Bijvoorbeeld doordat niet zichtbaar is wie al contact heeft gehad of wat is afgesproken.",
-    sectorExamples: {
-      Onderwijs:
-        "Bijvoorbeeld twee collega’s die hetzelfde stagebedrijf of dezelfde ouder benaderen.",
-      "Zorg & welzijn":
-        "Bijvoorbeeld meerdere collega’s die dezelfde gemeente, verwijzer of partner benaderen.",
-      "Zakelijke dienstverlening":
-        "Bijvoorbeeld sales en consultancy die allebei contact hebben met dezelfde klant zonder gedeeld beeld.",
-      Ledenorganisatie:
-        "Bijvoorbeeld meerdere collega’s die hetzelfde lid, dezelfde vrijwilliger of commissie benaderen.",
-    },
-    diagnosisLabels: ["samenwerking-kwetsbaar", "contactmomenten-onzichtbaar"],
+    id: "crm-4",
+    question: "Welke CRM-route past het beste?",
+    help:
+      "Niet elke klant heeft sales nodig. Soms gaat het vooral om relaties, afspraken of partners.",
+    examples: {},
   },
 ];
+
+const crmInitialAnswers: Record<string, RadarAnswer> = {
+  "crm-1": "Soms",
+  "crm-2": "Ja",
+  "crm-3": "Soms",
+};
 
 const crmRouteOptions = [
   "Relaties en afspraken centraal vastleggen",
@@ -232,338 +324,177 @@ const crmRouteOptions = [
   "Cursussen, trainingen of inschrijvingen beheren",
   "Sollicitanten of kandidaten opvolgen",
   "Weet ik nog niet",
-  "Niet van toepassing",
 ];
 
 const crmPriorityOptions = [
   "Relatiegegevens staan verspreid",
   "Afspraken zijn niet goed terug te vinden",
   "Opvolging blijft soms liggen",
-  "Offertes of kansen zijn niet goed zichtbaar",
-  "Klanten of partners krijgen niet altijd dezelfde informatie",
-  "We missen overzicht over contactmomenten",
   "We gebruiken veel Excel of losse lijstjes",
   "We zijn afhankelijk van kennis van één of enkele mensen",
-  "Niet van toepassing",
 ];
-
-const mockScans = [
-  {
-    klant: "Participe",
-    sector: "Zorg & welzijn",
-    status: "In gesprek",
-    score: "3.1",
-    datum: "24-04-2026",
-  },
-  {
-    klant: "Environ",
-    sector: "Zakelijke dienstverlening",
-    status: "Afgerond",
-    score: "3.8",
-    datum: "18-04-2026",
-  },
-  {
-    klant: "Codarts",
-    sector: "Onderwijs",
-    status: "Concept",
-    score: "2.9",
-    datum: "12-04-2026",
-  },
-];
-
-const initialStartCheck: StartCheck = {
-  afasLiveStatus: "Ja",
-  toelichting:
-    "De organisatie werkt langer dan één jaar operationeel met AFAS en de belangrijkste processen zijn in gebruik.",
-};
-
-const initialForm: ScanForm = {
-  organisatienaam: "LMJ BV",
-  sector: "Onderwijs",
-  medewerkers: "t/m 250",
-  administraties: "2-5",
-  klantSituatie: "We werken al samen",
-  consultant: "Sjoerd Koelman",
-  datum: "2026-04-26",
-  deelnemersGesprek: "Directie, proceseigenaar, key-user en consultant",
-  aanleidingScan: [
-    "AFAS beter gebruiken",
-    "Betere overzichten en rapportages",
-    "Een duidelijke verbeteragenda maken",
-  ],
-  context:
-    "De scan wordt gebruikt als gesprekstool tijdens een nulmeting en vormt de basis voor prioriteiten en een eerste roadmap.",
-};
-
-const initialCrmState: CrmState = {
-  relevantie: "Ja, vaak",
-  pijn: {
-    "CRM-L2-001": "Ja, vaak",
-    "CRM-L2-002": "Soms",
-    "CRM-L2-003": "Soms",
-    "CRM-L2-004": "Weet ik niet",
-  },
-  pijnVoorbeelden: {
-    "CRM-L2-001":
-      "Een collega moest in zijn mailbox zoeken naar de laatste afspraak met een stagebedrijf.",
-    "CRM-L2-002":
-      "Afspraken met relaties staan soms alleen in persoonlijke notities.",
-    "CRM-L2-003":
-      "Opvolging blijft soms liggen omdat niet duidelijk is wie eigenaar is.",
-    "CRM-L2-004": "",
-  },
-  routes: ["Relaties en afspraken centraal vastleggen"],
-  prioriteiten: [
-    "Relatiegegevens staan verspreid",
-    "Afspraken zijn niet goed terug te vinden",
-    "We gebruiken veel Excel of losse lijstjes",
-  ],
-  prioriteitToelichting:
-    "Eerst zorgen dat relatiegegevens, contactpersonen en afspraken centraal vindbaar zijn. Sales of portalfunctionaliteit kan later.",
-};
 
 export default function Home() {
-  const [activeView, setActiveView] = useState<ViewId>("dashboard");
-  const [startCheck, setStartCheck] = useState<StartCheck>(initialStartCheck);
-  const [form, setForm] = useState<ScanForm>(initialForm);
-  const [crmState, setCrmState] = useState<CrmState>(initialCrmState);
-  const [crmPainStep, setCrmPainStep] = useState(0);
-
-  const crmDiagnosis = useMemo(
-    () => calculateCrmDiagnosis(crmState),
-    [crmState]
+  const [view, setView] = useState<ViewId>("dashboard");
+  const [profile, setProfile] = useState<Profile>(profileInitial);
+  const [orgAnswers, setOrgAnswers] =
+    useState<Record<OrgKey, string>>(orgInitial);
+  const [topicAnswers, setTopicAnswers] =
+    useState<Record<TopicId, RadarAnswer>>(topicInitial);
+  const [crmStep, setCrmStep] = useState(0);
+  const [crmAnswers, setCrmAnswers] =
+    useState<Record<string, RadarAnswer>>(crmInitialAnswers);
+  const [crmRoute, setCrmRoute] = useState("Relaties en afspraken centraal vastleggen");
+  const [crmPriorities, setCrmPriorities] = useState<string[]>([
+    "Relatiegegevens staan verspreid",
+    "Afspraken zijn niet goed terug te vinden",
+  ]);
+  const [crmExample, setCrmExample] = useState(
+    "Afspraken met relaties staan nu verspreid in mail, Excel en persoonlijke notities."
   );
 
-  function goFromCrmLayer1() {
-    if (
-      crmState.relevantie === "Nee" ||
-      crmState.relevantie === "Niet van toepassing"
-    ) {
-      setActiveView("diagnose");
-      return;
-    }
+  const orgStrength = useMemo(
+    () => calculateOrgStrength(orgAnswers),
+    [orgAnswers]
+  );
 
-    setCrmPainStep(0);
-    setActiveView("crm-laag-2");
-  }
+  const topicStatuses = useMemo(() => {
+    return Object.fromEntries(
+      topics.map((topic) => [topic.id, getStatus(topicAnswers[topic.id])])
+    ) as Record<TopicId, Status>;
+  }, [topicAnswers]);
+
+  const crmStatus = useMemo(
+    () => calculateCrmStatus(topicAnswers.crm, crmAnswers, crmPriorities),
+    [topicAnswers.crm, crmAnswers, crmPriorities]
+  );
+
+  const roadmap = useMemo(
+    () => buildRoadmap(orgStrength, crmStatus, topicStatuses, crmPriorities),
+    [orgStrength, crmStatus, topicStatuses, crmPriorities]
+  );
 
   return (
-    <main
-      className="min-h-screen text-slate-950"
-      style={{ backgroundColor: brand.light }}
-    >
+    <main className="min-h-screen" style={{ backgroundColor: brand.light }}>
       <div className="flex min-h-screen">
         <aside className="hidden w-72 border-r border-slate-200 bg-white p-6 lg:block">
-          <div className="mb-10">
-            <img
-              src="/kweekers-logo.png"
-              alt="KWEEKERS"
-              className="h-10 w-auto"
-            />
+          <img src="/kweekers-logo.png" alt="KWEEKERS" className="h-10 w-auto" />
 
-            <h1
-              className="mt-5 text-2xl font-semibold tracking-tight"
-              style={{ color: brand.navy }}
-            >
-              Groeimodel
-            </h1>
+          <h1 className="mt-5 text-2xl font-semibold" style={{ color: brand.navy }}>
+            Groeimodel
+          </h1>
 
-            <p className="mt-3 text-sm leading-6 text-slate-600">
-              Praktische nulmeting voor klantteams.
-            </p>
-          </div>
+          <p className="mt-3 text-sm leading-6 text-slate-600">
+            Rustige gesprekstool voor klantteams.
+          </p>
 
-          <nav className="space-y-2">
-            {navigation.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setActiveView(item.id)}
-                className={`w-full rounded-xl px-4 py-3 text-left text-sm font-medium transition ${
-                  activeView === item.id
-                    ? "text-white"
-                    : "text-slate-700 hover:bg-slate-100"
-                }`}
-                style={
-                  activeView === item.id
-                    ? { backgroundColor: brand.navy }
-                    : undefined
-                }
-              >
-                {item.label}
-              </button>
-            ))}
+          <nav className="mt-10 space-y-2">
+            <NavButton active={view === "dashboard"} onClick={() => setView("dashboard")}>
+              Dashboard
+            </NavButton>
+            <NavButton active={view === "start"} onClick={() => setView("start")}>
+              Nieuwe scan
+            </NavButton>
+            <NavButton active={view === "diagnose"} onClick={() => setView("diagnose")}>
+              Diagnose
+            </NavButton>
+            <NavButton active={view === "roadmap"} onClick={() => setView("roadmap")}>
+              Roadmap
+            </NavButton>
           </nav>
 
-          <div
-            className="mt-10 rounded-2xl p-4"
-            style={{
-              backgroundColor: "#F9FAFC",
-              border: `1px solid ${brand.border}`,
-            }}
-          >
-            <div className="text-sm font-semibold" style={{ color: brand.navy }}>
-              Uitgangspunt
-            </div>
+          <div className="mt-10 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <p className="text-sm font-semibold" style={{ color: brand.navy }}>
+              Ontwerpprincipe
+            </p>
             <p className="mt-2 text-sm leading-6 text-slate-600">
-              Het groeimodel is bedoeld voor klanten die minimaal één jaar
-              operationeel werken met AFAS en de ingerichte processen.
+              Eén vraag tegelijk. Eerst organisatiekracht, daarna pas onderwerpen.
             </p>
           </div>
         </aside>
 
         <section className="flex-1">
           <header className="border-b border-slate-200 bg-white px-6 py-5">
-            <div className="mx-auto flex max-w-7xl items-center justify-between gap-6">
-              <div>
-                <p className="text-sm font-medium text-slate-500">
-                  MVP versie 1 · Startcheck + CRM-trechter
-                </p>
-                <h2
-                  className="text-2xl font-semibold tracking-tight"
-                  style={{ color: brand.navy }}
-                >
-                  KWEEKERS Groeimodel
-                </h2>
-              </div>
-
-              <div className="hidden items-center gap-3 md:flex">
-                <div
-                  className="h-3 w-3 rounded-full"
-                  style={{ backgroundColor: brand.orange }}
-                />
-                <span className="text-sm font-medium text-slate-500">
-                  Gesprekstool voor klantteams
-                </span>
-              </div>
+            <div className="mx-auto max-w-7xl">
+              <p className="text-sm font-medium text-slate-500">
+                MVP · rustige herbouw
+              </p>
+              <h2 className="text-2xl font-semibold" style={{ color: brand.navy }}>
+                KWEEKERS Groeimodel
+              </h2>
             </div>
           </header>
 
           <div className="mx-auto max-w-7xl px-6 py-8">
-            {activeView === "dashboard" && (
-              <Dashboard onNewScan={() => setActiveView("startcheck")} />
+            {view === "dashboard" && (
+              <Dashboard onStart={() => setView("start")} />
             )}
 
-            {activeView === "startcheck" && (
-              <StartCheckScreen
-                startCheck={startCheck}
-                setStartCheck={setStartCheck}
-                onBack={() => setActiveView("dashboard")}
-                onNext={() => setActiveView("nieuwe-scan")}
+            {view === "start" && (
+              <StartScreen
+                profile={profile}
+                setProfile={setProfile}
+                onNext={() => setView("organisatie")}
               />
             )}
 
-            {activeView === "nieuwe-scan" && (
-              <NewScan
-                form={form}
-                setForm={setForm}
-                startCheck={startCheck}
-                onBack={() => setActiveView("startcheck")}
-                onNext={() => setActiveView("crm-laag-1")}
+            {view === "organisatie" && (
+              <OrganizationScreen
+                answers={orgAnswers}
+                setAnswers={setOrgAnswers}
+                strength={orgStrength}
+                onBack={() => setView("start")}
+                onNext={() => setView("onderwerpen")}
               />
             )}
 
-            {activeView === "crm-laag-1" && (
-              <CrmLayer1Screen
-                sector={form.sector}
-                value={crmState.relevantie}
-                onChange={(value) =>
-                  setCrmState({ ...crmState, relevantie: value })
-                }
-                onBack={() => setActiveView("nieuwe-scan")}
-                onNext={goFromCrmLayer1}
+            {view === "onderwerpen" && (
+              <TopicsScreen
+                sector={profile.sector}
+                answers={topicAnswers}
+                setAnswers={setTopicAnswers}
+                statuses={topicStatuses}
+                onBack={() => setView("organisatie")}
+                onNext={() => setView("crm")}
               />
             )}
 
-            {activeView === "crm-laag-2" && (
-              <CrmLayer2Screen
-                sector={form.sector}
-                crmState={crmState}
-                setCrmState={setCrmState}
-                step={crmPainStep}
-                setStep={setCrmPainStep}
-                onBackToLayer1={() => setActiveView("crm-laag-1")}
-                onNextLayer={() => setActiveView("crm-laag-3")}
+            {view === "crm" && (
+              <CrmScreen
+                sector={profile.sector}
+                step={crmStep}
+                setStep={setCrmStep}
+                answers={crmAnswers}
+                setAnswers={setCrmAnswers}
+                route={crmRoute}
+                setRoute={setCrmRoute}
+                priorities={crmPriorities}
+                setPriorities={setCrmPriorities}
+                example={crmExample}
+                setExample={setCrmExample}
+                onBack={() => setView("onderwerpen")}
+                onNext={() => setView("diagnose")}
               />
             )}
 
-            {activeView === "crm-laag-3" && (
-              <CrmLayer3Screen
-                sector={form.sector}
-                routes={crmState.routes}
-                onChange={(routes) =>
-                  setCrmState({
-                    ...crmState,
-                    routes: normalizeNotApplicable(routes),
-                  })
-                }
-                onBack={() => setActiveView("crm-laag-2")}
-                onNext={() => setActiveView("crm-laag-4")}
+            {view === "diagnose" && (
+              <DiagnosisScreen
+                profile={profile}
+                orgStrength={orgStrength}
+                topicStatuses={topicStatuses}
+                crmStatus={crmStatus}
+                crmRoute={crmRoute}
+                crmPriorities={crmPriorities}
+                crmExample={crmExample}
+                onBack={() => setView("crm")}
+                onNext={() => setView("roadmap")}
               />
             )}
 
-            {activeView === "crm-laag-4" && (
-              <CrmLayer4Screen
-                prioriteiten={crmState.prioriteiten}
-                toelichting={crmState.prioriteitToelichting}
-                onPrioriteitenChange={(prioriteiten) =>
-                  setCrmState({
-                    ...crmState,
-                    prioriteiten: normalizeNotApplicable(prioriteiten),
-                  })
-                }
-                onToelichtingChange={(prioriteitToelichting) =>
-                  setCrmState({ ...crmState, prioriteitToelichting })
-                }
-                onBack={() => setActiveView("crm-laag-3")}
-                onNext={() => setActiveView("diagnose")}
-              />
-            )}
-
-            {activeView === "diagnose" && (
-              <CrmDiagnosisCard
-                form={form}
-                startCheck={startCheck}
-                crmState={crmState}
-                diagnosis={crmDiagnosis}
-                onBack={() => {
-                  if (
-                    crmState.relevantie === "Nee" ||
-                    crmState.relevantie === "Niet van toepassing"
-                  ) {
-                    setActiveView("crm-laag-1");
-                  } else {
-                    setActiveView("crm-laag-4");
-                  }
-                }}
-                onNext={() => setActiveView("verdieping")}
-              />
-            )}
-
-            {activeView === "verdieping" && (
-              <PlaceholderScreen
-                title="Verdiepende scan – CRM"
-                description="Hier komen straks de verdiepende CRM-vragen op basis van de gekozen route: relatiebeheer, sales, portal, cursussen of recruitment."
-              />
-            )}
-
-            {activeView === "resultaten" && (
-              <PlaceholderScreen
-                title="Resultaten"
-                description="Hier komen straks scores, signalen, prioriteiten en benchmarkinformatie."
-              />
-            )}
-
-            {activeView === "roadmap" && (
-              <PlaceholderScreen
-                title="Roadmap"
-                description="Hier komt straks de eerste 0-30-60-90 dagen roadmap."
-              />
-            )}
-
-            {activeView === "rapport" && (
-              <PlaceholderScreen
-                title="Rapport"
-                description="Hier komt straks de klantgerichte terugkoppeling."
+            {view === "roadmap" && (
+              <RoadmapScreen
+                roadmap={roadmap}
+                onBack={() => setView("diagnose")}
               />
             )}
           </div>
@@ -573,363 +504,145 @@ export default function Home() {
   );
 }
 
-function Dashboard({ onNewScan }: { onNewScan: () => void }) {
+function Dashboard({ onStart }: { onStart: () => void }) {
   return (
-    <div className="space-y-8">
-      <div
-        className="flex flex-col justify-between gap-6 rounded-3xl p-8 text-white lg:flex-row lg:items-end"
+    <div className="space-y-6">
+      <section
+        className="rounded-3xl p-8 text-white shadow-sm"
         style={{
           background: `linear-gradient(135deg, ${brand.navy}, ${brand.navyDark})`,
         }}
       >
-        <div>
-          <p className="text-sm font-medium uppercase tracking-[0.25em] text-slate-300">
-            Gesprekstool voor klantteams
-          </p>
-          <h3 className="mt-4 max-w-3xl text-4xl font-semibold tracking-tight">
-            Breng volwassenheid, knelpunten en prioriteiten snel in beeld.
-          </h3>
-          <p className="mt-4 max-w-2xl leading-7 text-slate-300">
-            Gebruik deze MVP tijdens intake, nulmeting, herijking of strategisch
-            klantgesprek.
-          </p>
-        </div>
+        <p className="text-sm font-semibold uppercase tracking-[0.25em] text-slate-300">
+          KWEEKERS Groeimodel
+        </p>
+        <h3 className="mt-4 max-w-3xl text-4xl font-semibold">
+          Van gesprek naar diagnose en roadmap.
+        </h3>
+        <p className="mt-4 max-w-2xl leading-7 text-slate-300">
+          Niet starten met AFAS-modules, maar met organisatiebeeld, relevante
+          onderwerpen en concrete vervolgstappen.
+        </p>
 
         <button
-          onClick={onNewScan}
-          className="rounded-xl px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+          onClick={onStart}
+          className="mt-8 rounded-xl px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90"
           style={{ backgroundColor: brand.orange }}
         >
           Nieuwe scan starten
         </button>
-      </div>
+      </section>
 
       <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
         <h3 className="text-xl font-semibold" style={{ color: brand.navy }}>
-          Uitgangspunt voor inzet
+          Uitgangspunt
         </h3>
-        <p className="mt-3 max-w-5xl leading-7 text-slate-600">
-          Het KWEEKERS Groeimodel is bedoeld voor organisaties die minimaal één
-          jaar volledig operationeel werken met AFAS en de ingerichte
-          bedrijfsprocessen. Dan is er voldoende praktijkervaring om de huidige
-          situatie betrouwbaar vast te stellen. Het groeimodel kijkt breder dan
-          AFAS alleen: ook processen, eigenaarschap, samenwerking, integraties,
-          datakwaliteit en rapportage worden meegenomen.
+        <p className="mt-3 max-w-4xl leading-7 text-slate-600">
+          Het groeimodel is bedoeld voor organisaties die minimaal één jaar
+          operationeel werken met AFAS en de ingerichte processen. De tool kijkt
+          breder dan AFAS alleen: ook processen, eigenaarschap, samenwerking,
+          integraties, data en rapportage tellen mee.
         </p>
-        <p className="mt-3 max-w-5xl leading-7 text-slate-600">
-          Daarmee bepalen we wat passend werkt, wat ontbreekt of verbetering
-          vraagt en welke gewenste situatie haalbaar en waardevol is.
-        </p>
-      </section>
-
-      <div className="grid gap-4 md:grid-cols-4">
-        <StatCard label="Aantal scans" value="3" />
-        <StatCard label="Gemiddelde volwassenheid" value="4.3" />
-        <StatCard label="Afgeronde scans" value="1" />
-        <StatCard label="Conceptscans" value="1" />
-      </div>
-
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="mb-6">
-          <h3 className="text-xl font-semibold" style={{ color: brand.navy }}>
-            Recente scans
-          </h3>
-          <p className="mt-1 text-sm text-slate-600">
-            Mockdata voor de eerste MVP-versie.
-          </p>
-        </div>
-
-        <div className="overflow-hidden rounded-2xl border border-slate-200">
-          <table className="w-full border-collapse text-left text-sm">
-            <thead className="bg-slate-100 text-slate-600">
-              <tr>
-                <th className="px-4 py-3 font-semibold">Klant</th>
-                <th className="px-4 py-3 font-semibold">Sector</th>
-                <th className="px-4 py-3 font-semibold">Status</th>
-                <th className="px-4 py-3 font-semibold">Score</th>
-                <th className="px-4 py-3 font-semibold">Laatste wijziging</th>
-              </tr>
-            </thead>
-            <tbody>
-              {mockScans.map((scan) => (
-                <tr key={scan.klant} className="border-t border-slate-200">
-                  <td className="px-4 py-4 font-medium">{scan.klant}</td>
-                  <td className="px-4 py-4 text-slate-600">{scan.sector}</td>
-                  <td className="px-4 py-4">
-                    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
-                      {scan.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-4 font-semibold">{scan.score}</td>
-                  <td className="px-4 py-4 text-slate-600">{scan.datum}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
       </section>
     </div>
   );
 }
 
-function StartCheckScreen({
-  startCheck,
-  setStartCheck,
-  onBack,
+function StartScreen({
+  profile,
+  setProfile,
   onNext,
 }: {
-  startCheck: StartCheck;
-  setStartCheck: (value: StartCheck) => void;
-  onBack: () => void;
+  profile: Profile;
+  setProfile: (profile: Profile) => void;
   onNext: () => void;
 }) {
-  const advice = getStartCheckAdvice(startCheck.afasLiveStatus);
+  const advice = getAfasAdvice(profile.afasStatus);
 
   return (
     <div className="space-y-6">
-      <LayerHeader
-        step="Startcheck"
-        title="Is het KWEEKERS Groeimodel het juiste instrument?"
-        description="Voordat we starten, bepalen we eerst of de klant voldoende praktijkervaring heeft om digitale volwassenheid betrouwbaar te beoordelen."
-        actionLabel={advice.buttonLabel}
+      <HeaderCard
+        step="Start gesprek"
+        title="Eerst de context scherp"
+        description="We leggen alleen vast waarom we dit gesprek voeren en hoe we de uitkomst moeten lezen."
+        action="Naar organisatiebeeld"
         onAction={onNext}
-        accent
       />
 
       <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h3 className="text-2xl font-semibold" style={{ color: brand.navy }}>
-          Uitgangspunt voor inzet van het KWEEKERS Groeimodel
-        </h3>
-
-        <div className="mt-5 max-w-5xl space-y-4 leading-7 text-slate-600">
-          <p>
-            Het KWEEKERS Groeimodel is bedoeld voor organisaties die minimaal
-            één jaar volledig operationeel werken met AFAS en de ingerichte
-            bedrijfsprocessen.
-          </p>
-          <p>
-            Na één jaar is er voldoende praktijkervaring om betrouwbaar vast te
-            stellen hoe de organisatie nu werkt. Dat noemen we de IST-situatie.
-          </p>
-          <p>
-            Het groeimodel kijkt breder dan AFAS alleen. We kijken ook naar
-            processen, eigenaarschap, samenwerking, koppelingen met andere
-            systemen, datakwaliteit en rapportage.
-          </p>
-          <p>
-            Zo ontstaat een compleet beeld van de digitale volwassenheid van de
-            organisatie. Daarmee bepalen we wat goed werkt, wat ontbreekt of
-            verbetering vraagt en welke gewenste situatie haalbaar en waardevol
-            is.
-          </p>
-        </div>
-      </section>
-
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <p
-          className="text-sm font-semibold uppercase tracking-[0.2em]"
-          style={{ color: brand.orange }}
-        >
-          Eerste check
-        </p>
-
-        <h3 className="mt-3 text-2xl font-semibold" style={{ color: brand.navy }}>
-          Werkt de organisatie minimaal één jaar volledig operationeel met AFAS
-          en de ingerichte bedrijfsprocessen?
-        </h3>
-
-        <div className="mt-8">
-          <StartCheckButtons
-            value={startCheck.afasLiveStatus}
-            onChange={(afasLiveStatus) =>
-              setStartCheck({ ...startCheck, afasLiveStatus })
-            }
-          />
-        </div>
-
-        <div
-          className="mt-8 rounded-2xl p-5"
-          style={{
-            backgroundColor: brand.light,
-            border: `1px solid ${brand.border}`,
-          }}
-        >
-          <div className="text-sm font-semibold" style={{ color: brand.navy }}>
-            Advies voor inzet
-          </div>
-          <h4 className="mt-2 text-xl font-semibold" style={{ color: brand.navy }}>
-            {advice.title}
-          </h4>
-          <p className="mt-2 leading-7 text-slate-600">{advice.description}</p>
-        </div>
-
-        <div className="mt-8">
-          <TextArea
-            label="Toelichting"
-            value={startCheck.toelichting}
-            onChange={(toelichting) =>
-              setStartCheck({ ...startCheck, toelichting })
-            }
-          />
-        </div>
-
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-between">
-          <SecondaryButton onClick={onBack}>Terug naar dashboard</SecondaryButton>
-          <PrimaryButton onClick={onNext} accent>
-            {advice.buttonLabel}
-          </PrimaryButton>
-        </div>
-      </section>
-    </div>
-  );
-}
-
-function NewScan({
-  form,
-  setForm,
-  startCheck,
-  onBack,
-  onNext,
-}: {
-  form: ScanForm;
-  setForm: (form: ScanForm) => void;
-  startCheck: StartCheck;
-  onBack: () => void;
-  onNext: () => void;
-}) {
-  const advice = getStartCheckAdvice(startCheck.afasLiveStatus);
-
-  return (
-    <div className="space-y-6">
-      <LayerHeader
-        step="Stap 1"
-        title="Nieuwe scan / Organisatieprofiel"
-        description="Leg eerst de basisgegevens en context vast. Daarna starten we met één trechter: CRM / relatiebeheer."
-        actionLabel="Naar CRM laag 1"
-        onAction={onNext}
-        accent
-      />
-
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h4 className="text-xl font-semibold" style={{ color: brand.navy }}>
-          Gebruik van de scan
-        </h4>
-        <div
-          className="mt-4 rounded-2xl p-5"
-          style={{
-            backgroundColor: brand.light,
-            border: `1px solid ${brand.border}`,
-          }}
-        >
-          <div className="text-sm font-semibold" style={{ color: brand.navy }}>
-            {advice.title}
-          </div>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
-            {advice.description}
-          </p>
-        </div>
-      </section>
-
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h4 className="text-xl font-semibold" style={{ color: brand.navy }}>
-          1. Organisatie
-        </h4>
-
-        <div className="mt-6 grid gap-5 md:grid-cols-2">
+        <div className="grid gap-5 md:grid-cols-2">
           <TextField
-            label="Organisatienaam"
-            value={form.organisatienaam}
-            onChange={(value) => setForm({ ...form, organisatienaam: value })}
+            label="Organisatie"
+            value={profile.organisatie}
+            onChange={(value) => setProfile({ ...profile, organisatie: value })}
           />
 
           <SelectField
             label="Sector"
-            value={form.sector}
+            value={profile.sector}
             options={sectorOptions}
-            onChange={(value) => setForm({ ...form, sector: value })}
+            onChange={(value) => setProfile({ ...profile, sector: value })}
           />
 
           <SelectField
-            label="Aantal medewerkers"
-            value={form.medewerkers}
-            options={employeeOptions}
-            onChange={(value) => setForm({ ...form, medewerkers: value })}
+            label="Type gesprek"
+            value={profile.gesprekstype}
+            options={[
+              "Eerste verkenning",
+              "Nulmeting",
+              "Periodieke check",
+              "Herijking bestaande klant",
+              "Verdieping op bekend knelpunt",
+            ]}
+            onChange={(value) => setProfile({ ...profile, gesprekstype: value })}
           />
 
           <SelectField
-            label="Aantal administraties"
-            value={form.administraties}
-            options={administrationOptions}
-            onChange={(value) => setForm({ ...form, administraties: value })}
-          />
-        </div>
-      </section>
-
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h4 className="text-xl font-semibold" style={{ color: brand.navy }}>
-          2. Gesprek
-        </h4>
-
-        <div className="mt-6 grid gap-5 md:grid-cols-2">
-          <SelectField
-            label="Wat voor klantgesprek is dit?"
-            value={form.klantSituatie}
-            options={customerSituationOptions}
-            onChange={(value) => setForm({ ...form, klantSituatie: value })}
+            label="Werkt minimaal 1 jaar met AFAS?"
+            value={profile.afasStatus}
+            options={["Ja", "Deels", "Nee", "Weet ik niet"]}
+            onChange={(value) =>
+              setProfile({ ...profile, afasStatus: value as AfasStatus })
+            }
           />
 
           <TextField
             label="Consultant"
-            value={form.consultant}
-            onChange={(value) => setForm({ ...form, consultant: value })}
+            value={profile.consultant}
+            onChange={(value) => setProfile({ ...profile, consultant: value })}
           />
 
           <TextField
-            label="Datum gesprek"
+            label="Datum"
             type="date"
-            value={form.datum}
-            onChange={(value) => setForm({ ...form, datum: value })}
+            value={profile.datum}
+            onChange={(value) => setProfile({ ...profile, datum: value })}
           />
-
-          <TextField
-            label="Wie zitten aan tafel?"
-            value={form.deelnemersGesprek}
-            onChange={(value) =>
-              setForm({ ...form, deelnemersGesprek: value })
-            }
-          />
-        </div>
-      </section>
-
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h4 className="text-xl font-semibold" style={{ color: brand.navy }}>
-          3. Context
-        </h4>
-
-        <div className="mt-6">
-          <MultiSelectField
-            label="Waarom doen we deze scan?"
-            options={scanReasonOptions}
-            values={form.aanleidingScan}
-            onChange={(values) => setForm({ ...form, aanleidingScan: values })}
-          />
-          <p className="mt-2 text-sm text-slate-600">
-            Kies wat het beste past. Meerdere antwoorden zijn mogelijk.
-          </p>
         </div>
 
         <div className="mt-6">
           <TextArea
-            label="Korte context"
-            value={form.context}
-            onChange={(value) => setForm({ ...form, context: value })}
+            label="Korte aanleiding"
+            value={profile.aanleiding}
+            onChange={(value) => setProfile({ ...profile, aanleiding: value })}
           />
         </div>
 
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-between">
-          <SecondaryButton onClick={onBack}>Terug naar startcheck</SecondaryButton>
+        <div
+          className="mt-6 rounded-2xl p-5"
+          style={{ backgroundColor: brand.light, border: `1px solid ${brand.border}` }}
+        >
+          <p className="font-semibold" style={{ color: brand.navy }}>
+            Gebruik van de scan: {advice.title}
+          </p>
+          <p className="mt-2 text-sm leading-6 text-slate-600">
+            {advice.description}
+          </p>
+        </div>
+
+        <div className="mt-8 flex justify-end">
           <PrimaryButton onClick={onNext} accent>
-            Naar CRM laag 1
+            Naar organisatiebeeld
           </PrimaryButton>
         </div>
       </section>
@@ -937,339 +650,250 @@ function NewScan({
   );
 }
 
-function CrmLayer1Screen({
-  sector,
-  value,
-  onChange,
+function OrganizationScreen({
+  answers,
+  setAnswers,
+  strength,
   onBack,
   onNext,
 }: {
-  sector: string;
-  value: TriageAnswer;
-  onChange: (value: TriageAnswer) => void;
+  answers: Record<OrgKey, string>;
+  setAnswers: (answers: Record<OrgKey, string>) => void;
+  strength: string;
   onBack: () => void;
   onNext: () => void;
 }) {
-  const examples = getSectorRelationExamples(sector);
-
   return (
     <div className="space-y-6">
-      <LayerHeader
-        step="CRM laag 1"
-        title="Relevantie"
-        description="We bepalen eerst of CRM / relatiebeheer überhaupt besproken moet worden."
-        actionLabel="Volgende"
+      <HeaderCard
+        step="Organisatiebeeld"
+        title="Kan de organisatie verbetering dragen?"
+        description="Eerst bepalen we hoe de organisatie werkt, verandert en eigenaarschap organiseert."
+        action="Naar onderwerpenradar"
         onAction={onNext}
       />
 
+      <section className="grid gap-4 lg:grid-cols-2">
+        {orgQuestions.map((item) => (
+          <QuestionCard key={item.key} title={item.title} question={item.question}>
+            <ChoiceGroup
+              options={item.options}
+              value={answers[item.key]}
+              onChange={(value) => setAnswers({ ...answers, [item.key]: value })}
+            />
+          </QuestionCard>
+        ))}
+      </section>
+
       <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <p
-          className="text-sm font-semibold uppercase tracking-[0.2em]"
-          style={{ color: brand.orange }}
-        >
-          De poortwachtervraag
+        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">
+          Tussenbeeld
         </p>
-        <h3 className="mt-3 text-2xl font-semibold" style={{ color: brand.navy }}>
-          Hebben jullie te maken met mensen of organisaties buiten jullie eigen
-          organisatie waar jullie vaker dan één keer contact mee hebben?
+        <h3 className="mt-2 text-2xl font-semibold" style={{ color: brand.navy }}>
+          Organisatiekracht: {strength}
         </h3>
-
-        <p className="mt-4 max-w-3xl leading-7 text-slate-600">
-          We vragen nog niet naar een module of systeem. Het gaat alleen om de
-          vraag of relaties, contactpersonen of afspraken in jullie werk een rol
-          spelen.
+        <p className="mt-3 max-w-3xl leading-7 text-slate-600">
+          Dit bepaalt straks hoe zwaar de roadmap moet worden begeleid. Een
+          inhoudelijk goed idee werkt alleen als eigenaarschap, capaciteit en
+          veranderkracht voldoende aanwezig zijn.
         </p>
 
-        <div
-          className="mt-6 rounded-2xl p-5"
-          style={{
-            backgroundColor: brand.light,
-            border: `1px solid ${brand.border}`,
-          }}
-        >
-          <div className="text-sm font-semibold" style={{ color: brand.navy }}>
-            Voorbeelden voor sector: {sector}
-          </div>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {examples.map((example) => (
-              <span
-                key={example}
-                className="rounded-full bg-white px-3 py-2 text-sm font-medium text-slate-700 ring-1 ring-slate-200"
-              >
-                {example}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-8">
-          <AnswerButtons value={value} onChange={onChange} />
-        </div>
-
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-between">
-          <SecondaryButton onClick={onBack}>Terug naar organisatieprofiel</SecondaryButton>
-          <PrimaryButton onClick={onNext}>Volgende</PrimaryButton>
+        <div className="mt-8 flex justify-between">
+          <SecondaryButton onClick={onBack}>Terug</SecondaryButton>
+          <PrimaryButton onClick={onNext}>Naar onderwerpenradar</PrimaryButton>
         </div>
       </section>
     </div>
   );
 }
 
-function CrmLayer2Screen({
+function TopicsScreen({
   sector,
-  crmState,
-  setCrmState,
-  step,
-  setStep,
-  onBackToLayer1,
-  onNextLayer,
+  answers,
+  setAnswers,
+  statuses,
+  onBack,
+  onNext,
 }: {
   sector: string;
-  crmState: CrmState;
-  setCrmState: (state: CrmState) => void;
+  answers: Record<TopicId, RadarAnswer>;
+  setAnswers: (answers: Record<TopicId, RadarAnswer>) => void;
+  statuses: Record<TopicId, Status>;
+  onBack: () => void;
+  onNext: () => void;
+}) {
+  return (
+    <div className="space-y-6">
+      <HeaderCard
+        step="Onderwerpenradar"
+        title="Wat moeten we verder bekijken?"
+        description="We openen onderwerpen alleen als ze herkenbaar zijn. Wat nu niet primair is, blijft zichtbaar maar wordt geparkeerd."
+        action="Naar CRM-verdieping"
+        onAction={onNext}
+      />
+
+      <section className="grid gap-4 lg:grid-cols-2">
+        {topics.map((topic) => {
+          const example =
+            topic.examples[sector] ??
+            "Gebruik deze vraag als snelle poortwachter. Bij twijfel: kort toetsen, niet meteen verdiepen.";
+
+          return (
+            <QuestionCard
+              key={topic.id}
+              title={topic.title}
+              question={topic.question}
+              footer={
+                <StatusPill status={statuses[topic.id]} />
+              }
+            >
+              <p className="mb-4 text-sm leading-6 text-slate-600">
+                {example}
+              </p>
+
+              <AnswerGroup
+                value={answers[topic.id]}
+                onChange={(value) => setAnswers({ ...answers, [topic.id]: value })}
+              />
+            </QuestionCard>
+          );
+        })}
+      </section>
+
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex justify-between">
+          <SecondaryButton onClick={onBack}>Terug</SecondaryButton>
+          <PrimaryButton onClick={onNext} accent>
+            CRM verdiepen
+          </PrimaryButton>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function CrmScreen({
+  sector,
+  step,
+  setStep,
+  answers,
+  setAnswers,
+  route,
+  setRoute,
+  priorities,
+  setPriorities,
+  example,
+  setExample,
+  onBack,
+  onNext,
+}: {
+  sector: string;
   step: number;
   setStep: (step: number) => void;
-  onBackToLayer1: () => void;
-  onNextLayer: () => void;
+  answers: Record<string, RadarAnswer>;
+  setAnswers: (answers: Record<string, RadarAnswer>) => void;
+  route: string;
+  setRoute: (route: string) => void;
+  priorities: string[];
+  setPriorities: (values: string[]) => void;
+  example: string;
+  setExample: (value: string) => void;
+  onBack: () => void;
+  onNext: () => void;
 }) {
-  const question = crmPainQuestions[step];
-  const currentAnswer = crmState.pijn[question.id] ?? "Weet ik niet";
-  const currentExample = crmState.pijnVoorbeelden[question.id] ?? "";
-  const sectorExample =
-    question.sectorExamples[sector] ??
-    "Bijvoorbeeld een afspraak, contactmoment of opvolgactie met een relatie die voor meerdere collega’s belangrijk is.";
+  const total = crmQuestions.length + 2;
+  const isPainQuestion = step < crmQuestions.length;
+  const question = crmQuestions[step];
 
-  function updateAnswer(value: TriageAnswer) {
-    setCrmState({
-      ...crmState,
-      pijn: {
-        ...crmState.pijn,
-        [question.id]: value,
-      },
-    });
-  }
-
-  function updateExample(value: string) {
-    setCrmState({
-      ...crmState,
-      pijnVoorbeelden: {
-        ...crmState.pijnVoorbeelden,
-        [question.id]: value,
-      },
-    });
+  function goNext() {
+    if (step >= total - 1) {
+      onNext();
+      return;
+    }
+    setStep(step + 1);
   }
 
   function goBack() {
     if (step === 0) {
-      onBackToLayer1();
+      onBack();
       return;
     }
-
     setStep(step - 1);
   }
 
-  function goNext() {
-    if (step === crmPainQuestions.length - 1) {
-      onNextLayer();
-      return;
-    }
-
-    setStep(step + 1);
-  }
-
   return (
     <div className="space-y-6">
-      <LayerHeader
-        step={`CRM laag 2 · Vraag ${step + 1} van ${crmPainQuestions.length}`}
-        title="De pijn"
-        description="We stellen de pijnvragen één voor één. Zo blijft het gesprek rustig en concreet."
-        actionLabel={
-          step === crmPainQuestions.length - 1
-            ? "Naar laag 3"
-            : "Volgende vraag"
-        }
+      <HeaderCard
+        step={`CRM-verdieping · ${step + 1} van ${total}`}
+        title="Klanten & relaties"
+        description="Nu verdiepen we alleen CRM, omdat dit onderwerp in de radar relevant lijkt."
+        action={step >= total - 1 ? "Naar diagnose" : "Volgende"}
         onAction={goNext}
       />
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <p
-          className="text-sm font-semibold uppercase tracking-[0.2em]"
-          style={{ color: brand.orange }}
-        >
-          {question.id}
-        </p>
-        <h3 className="mt-3 text-2xl font-semibold" style={{ color: brand.navy }}>
-          {question.question}
-        </h3>
-        <p className="mt-4 max-w-3xl leading-7 text-slate-600">
-          {question.helpText}
-        </p>
+      {isPainQuestion && (
+        <QuestionCard title="Vraag" question={question.question}>
+          <p className="mb-4 text-sm leading-6 text-slate-600">{question.help}</p>
 
-        <div
-          className="mt-6 rounded-2xl p-5"
-          style={{
-            backgroundColor: brand.light,
-            border: `1px solid ${brand.border}`,
-          }}
-        >
-          <div className="text-sm font-semibold" style={{ color: brand.navy }}>
-            Praktijkvoorbeeld voor {sector}
+          <div
+            className="mb-5 rounded-2xl p-4"
+            style={{ backgroundColor: brand.light, border: `1px solid ${brand.border}` }}
+          >
+            <p className="text-sm font-semibold" style={{ color: brand.navy }}>
+              Praktijkvoorbeeld
+            </p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              {question.examples[sector] ??
+                "Bijvoorbeeld een afspraak, contactmoment of opvolgactie die meerdere collega’s moeten kunnen terugvinden."}
+            </p>
           </div>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
-            {sectorExample}
-          </p>
-        </div>
 
-        <div className="mt-8">
-          <AnswerButtons value={currentAnswer} onChange={updateAnswer} />
-        </div>
-
-        <div className="mt-8">
-          <TextArea
-            label="Eigen praktijkvoorbeeld"
-            value={currentExample}
-            onChange={updateExample}
+          <AnswerGroup
+            value={answers[question.id] ?? "Weet ik niet"}
+            onChange={(value) => setAnswers({ ...answers, [question.id]: value })}
           />
-          <p className="mt-2 text-sm text-slate-600">
-            Bijvoorbeeld: “Laatst moesten we zoeken naar…”
-          </p>
-        </div>
 
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-between">
-          <SecondaryButton onClick={goBack}>Terug</SecondaryButton>
-
-          <PrimaryButton onClick={goNext}>
-            {step === crmPainQuestions.length - 1
-              ? "Naar laag 3"
-              : "Volgende vraag"}
-          </PrimaryButton>
-        </div>
-      </section>
-    </div>
-  );
-}
-
-function CrmLayer3Screen({
-  sector,
-  routes,
-  onChange,
-  onBack,
-  onNext,
-}: {
-  sector: string;
-  routes: string[];
-  onChange: (routes: string[]) => void;
-  onBack: () => void;
-  onNext: () => void;
-}) {
-  const routeHint = getSectorRouteHint(sector);
-
-  return (
-    <div className="space-y-6">
-      <LayerHeader
-        step="CRM laag 3"
-        title="De route"
-        description="Nu bepalen we welk soort CRM hier speelt. Niet elke klant heeft sales nodig."
-        actionLabel="Naar laag 4"
-        onAction={onNext}
-      />
-
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h3 className="text-2xl font-semibold" style={{ color: brand.navy }}>
-          Welke situatie past het beste?
-        </h3>
-        <p className="mt-4 max-w-3xl leading-7 text-slate-600">
-          Kies alleen wat herkenbaar is. Als je het nog niet weet, kies dan
-          “Weet ik nog niet”.
-        </p>
-
-        <div
-          className="mt-6 rounded-2xl p-5"
-          style={{
-            backgroundColor: brand.light,
-            border: `1px solid ${brand.border}`,
-          }}
-        >
-          <div className="text-sm font-semibold" style={{ color: brand.navy }}>
-            Denk bij {sector} bijvoorbeeld aan:
+          <div className="mt-6">
+            <TextArea
+              label="Voorbeeld uit gesprek"
+              value={example}
+              onChange={setExample}
+            />
           </div>
-          <p className="mt-2 text-sm leading-6 text-slate-600">{routeHint}</p>
-        </div>
+        </QuestionCard>
+      )}
 
-        <div className="mt-8">
-          <MultiSelectField
-            label="CRM-route"
+      {step === crmQuestions.length && (
+        <QuestionCard
+          title="Route"
+          question="Welk soort CRM lijkt hier het beste te passen?"
+        >
+          <ChoiceGroup
             options={crmRouteOptions}
-            values={routes}
-            onChange={onChange}
+            value={route}
+            onChange={setRoute}
           />
-        </div>
+        </QuestionCard>
+      )}
 
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-between">
-          <SecondaryButton onClick={onBack}>Terug naar laag 2</SecondaryButton>
-          <PrimaryButton onClick={onNext}>Naar laag 4</PrimaryButton>
-        </div>
-      </section>
-    </div>
-  );
-}
-
-function CrmLayer4Screen({
-  prioriteiten,
-  toelichting,
-  onPrioriteitenChange,
-  onToelichtingChange,
-  onBack,
-  onNext,
-}: {
-  prioriteiten: string[];
-  toelichting: string;
-  onPrioriteitenChange: (prioriteiten: string[]) => void;
-  onToelichtingChange: (value: string) => void;
-  onBack: () => void;
-  onNext: () => void;
-}) {
-  return (
-    <div className="space-y-6">
-      <LayerHeader
-        step="CRM laag 4"
-        title="De start"
-        description="We kiezen bewust één of enkele startpunten. Niet alles tegelijk."
-        actionLabel="Naar diagnosekaart"
-        onAction={onNext}
-        accent
-      />
+      {step === crmQuestions.length + 1 && (
+        <QuestionCard
+          title="Prioriteit"
+          question="Waar moeten we als eerste naar kijken?"
+        >
+          <MultiChoiceGroup
+            options={crmPriorityOptions}
+            values={priorities}
+            onChange={setPriorities}
+          />
+        </QuestionCard>
+      )}
 
       <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h3 className="text-2xl font-semibold" style={{ color: brand.navy }}>
-          Waar moeten we als eerste naar kijken?
-        </h3>
-        <p className="mt-4 max-w-3xl leading-7 text-slate-600">
-          Kies de grootste ergernis of het grootste risico. Dit bepaalt de eerste
-          verdieping.
-        </p>
-
-        <div className="mt-8">
-          <MultiSelectField
-            label="Eerste prioriteit"
-            options={crmPriorityOptions}
-            values={prioriteiten}
-            onChange={onPrioriteitenChange}
-          />
-        </div>
-
-        <div className="mt-8">
-          <TextArea
-            label="Toelichting op de prioriteit"
-            value={toelichting}
-            onChange={onToelichtingChange}
-          />
-        </div>
-
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-between">
-          <SecondaryButton onClick={onBack}>Terug naar laag 3</SecondaryButton>
-          <PrimaryButton onClick={onNext} accent>
-            Naar diagnosekaart
+        <div className="flex justify-between">
+          <SecondaryButton onClick={goBack}>Terug</SecondaryButton>
+          <PrimaryButton onClick={goNext} accent={step >= total - 1}>
+            {step >= total - 1 ? "Naar diagnose" : "Volgende"}
           </PrimaryButton>
         </div>
       </section>
@@ -1277,476 +901,285 @@ function CrmLayer4Screen({
   );
 }
 
-function CrmDiagnosisCard({
-  form,
-  startCheck,
-  crmState,
-  diagnosis,
+function DiagnosisScreen({
+  profile,
+  orgStrength,
+  topicStatuses,
+  crmStatus,
+  crmRoute,
+  crmPriorities,
+  crmExample,
   onBack,
   onNext,
 }: {
-  form: ScanForm;
-  startCheck: StartCheck;
-  crmState: CrmState;
-  diagnosis: CrmDiagnosis;
+  profile: Profile;
+  orgStrength: string;
+  topicStatuses: Record<TopicId, Status>;
+  crmStatus: Status;
+  crmRoute: string;
+  crmPriorities: string[];
+  crmExample: string;
   onBack: () => void;
   onNext: () => void;
 }) {
-  const startAdvice = getStartCheckAdvice(startCheck.afasLiveStatus);
+  const topTopics = topics.filter((topic) =>
+    ["Waarschijnlijk relevant", "Kort toetsen"].includes(topicStatuses[topic.id])
+  );
 
   return (
     <div className="space-y-6">
-      <LayerHeader
-        step="Diagnosekaart"
-        title="CRM / Relatiebeheer"
-        description="Dit is geen eindconclusie. Het is een voorstel: moeten we CRM verder bekijken, en zo ja, waar beginnen we?"
-        actionLabel="Naar verdiepende scan"
+      <HeaderCard
+        step="Diagnose"
+        title="Wat zien we?"
+        description="De diagnose combineert organisatiekracht, relevante onderwerpen en concrete gespreksstof."
+        action="Naar roadmap"
         onAction={onNext}
       />
 
-      <section className="grid gap-6 lg:grid-cols-3">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h4 className="text-lg font-semibold" style={{ color: brand.navy }}>
-            Klantcontext
-          </h4>
-          <div className="mt-5 space-y-3">
-            <MiniInfo label="Organisatie" value={form.organisatienaam} />
-            <MiniInfo label="Sector" value={form.sector} />
-            <MiniInfo label="Omvang" value={form.medewerkers} />
-            <MiniInfo label="Gesprek" value={form.klantSituatie} />
-          </div>
-        </div>
+      <section className="grid gap-4 lg:grid-cols-3">
+        <SummaryCard title="Organisatie" value={profile.organisatie} text={profile.sector} />
+        <SummaryCard title="Organisatiekracht" value={orgStrength} text="Bepaalt hoe zwaar de begeleiding moet zijn." />
+        <SummaryCard title="CRM-status" value={crmStatus} text={crmRoute} />
+      </section>
 
-        <div
-          className="rounded-3xl p-6 text-white shadow-sm"
-          style={{
-            background: `linear-gradient(135deg, ${brand.navy}, ${brand.navyDark})`,
-          }}
-        >
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-300">
-            CRM-status
-          </p>
-          <h4 className="mt-4 text-2xl font-semibold">{diagnosis.status}</h4>
-          <p className="mt-4 leading-7 text-slate-300">{diagnosis.reason}</p>
-        </div>
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h3 className="text-xl font-semibold" style={{ color: brand.navy }}>
+          Relevante onderwerpen
+        </h3>
 
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h4 className="text-lg font-semibold" style={{ color: brand.navy }}>
-            Gebruik scan
-          </h4>
-          <p className="mt-4 font-semibold" style={{ color: brand.navy }}>
-            {startAdvice.title}
-          </p>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
-            {startAdvice.reportNote}
-          </p>
+        <div className="mt-5 grid gap-4 lg:grid-cols-2">
+          {topTopics.map((topic) => (
+            <div
+              key={topic.id}
+              className="rounded-2xl p-4"
+              style={{ backgroundColor: brand.light, border: `1px solid ${brand.border}` }}
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="font-semibold" style={{ color: brand.navy }}>
+                    {topic.shortLabel}
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    {topic.question}
+                  </p>
+                </div>
+                <StatusPill status={topicStatuses[topic.id]} />
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
       <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h4 className="text-xl font-semibold" style={{ color: brand.navy }}>
-          Eerste focus
-        </h4>
-        <p className="mt-4 leading-7 text-slate-700">
-          {diagnosis.firstFocus}
-        </p>
-      </section>
+        <h3 className="text-xl font-semibold" style={{ color: brand.navy }}>
+          CRM: eerste aandachtspunten
+        </h3>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h4 className="text-xl font-semibold" style={{ color: brand.navy }}>
-          Gekozen route
-        </h4>
-        <div className="mt-5 flex flex-wrap gap-2">
-          {diagnosis.activeRoutes.map((route) => (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {crmPriorities.map((item) => (
             <span
-              key={route}
+              key={item}
               className="rounded-full px-4 py-2 text-sm font-semibold text-white"
               style={{ backgroundColor: brand.navy }}
             >
-              {route}
+              {item}
             </span>
           ))}
         </div>
+
+        <p className="mt-5 max-w-4xl leading-7 text-slate-600">
+          {crmExample}
+        </p>
       </section>
 
       <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h4 className="text-xl font-semibold" style={{ color: brand.navy }}>
-          Wat verder bekijken?
-        </h4>
-        <div className="mt-5 grid gap-4 lg:grid-cols-2">
-          {diagnosis.nextQuestions.map((question) => (
-            <div
-              key={question}
-              className="rounded-2xl p-4"
-              style={{
-                backgroundColor: brand.light,
-                border: `1px solid ${brand.border}`,
-              }}
-            >
-              <p className="text-sm leading-6 text-slate-700">{question}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h4 className="text-xl font-semibold" style={{ color: brand.navy }}>
-          Meegenomen praktijkvoorbeelden
-        </h4>
-        <div className="mt-5 space-y-4">
-          {crmPainQuestions.map((question) => {
-            const example = crmState.pijnVoorbeelden[question.id];
-            if (!example) return null;
-
-            return (
-              <div
-                key={question.id}
-                className="rounded-2xl p-4"
-                style={{
-                  backgroundColor: brand.light,
-                  border: `1px solid ${brand.border}`,
-                }}
-              >
-                <div className="text-sm font-semibold">{question.question}</div>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
-                  {example}
-                </p>
-              </div>
-            );
-          })}
-        </div>
-
-        {crmState.prioriteitToelichting && (
-          <div
-            className="mt-5 rounded-2xl p-4"
-            style={{
-              backgroundColor: brand.light,
-              border: `1px solid ${brand.border}`,
-            }}
-          >
-            <div className="text-sm font-semibold">
-              Toelichting op prioriteit
-            </div>
-            <p className="mt-2 text-sm leading-6 text-slate-600">
-              {crmState.prioriteitToelichting}
-            </p>
-          </div>
-        )}
-
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-between">
+        <div className="flex justify-between">
           <SecondaryButton onClick={onBack}>Terug</SecondaryButton>
-          <PrimaryButton onClick={onNext}>Naar verdiepende scan</PrimaryButton>
+          <PrimaryButton onClick={onNext} accent>
+            Naar roadmap
+          </PrimaryButton>
         </div>
       </section>
     </div>
   );
 }
 
-function getStartCheckAdvice(answer: StartCheckAnswer) {
-  if (answer === "Ja") {
+function RoadmapScreen({
+  roadmap,
+  onBack,
+}: {
+  roadmap: { title: string; items: string[] }[];
+  onBack: () => void;
+}) {
+  return (
+    <div className="space-y-6">
+      <HeaderCard
+        step="Roadmap"
+        title="Eerste roadmap-schets"
+        description="Geen definitief projectplan, maar gespreksstof voor keuzes, prioriteiten en vervolg."
+        action="Terug naar diagnose"
+        onAction={onBack}
+      />
+
+      <section className="grid gap-4 lg:grid-cols-3">
+        {roadmap.map((block) => (
+          <div
+            key={block.title}
+            className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
+          >
+            <h3 className="text-xl font-semibold" style={{ color: brand.navy }}>
+              {block.title}
+            </h3>
+            <ul className="mt-5 space-y-3 text-sm leading-6 text-slate-600">
+              {block.items.map((item) => (
+                <li key={item}>• {item}</li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </section>
+    </div>
+  );
+}
+
+function calculateOrgStrength(answers: Record<OrgKey, string>) {
+  let risk = 0;
+
+  if (answers.situatie.includes("onrust")) risk += 2;
+  if (answers.situatie.includes("veel tegelijk")) risk += 1;
+  if (answers.beheer.includes("één persoon")) risk += 2;
+  if (answers.beheer.includes("Niet duidelijk")) risk += 2;
+  if (answers.eigenaarschap.includes("onduidelijk")) risk += 2;
+  if (answers.eigenaarschap.includes("Besluiten")) risk += 2;
+  if (answers.verandering.includes("weerstand")) risk += 2;
+  if (answers.verandering.includes("blijft")) risk += 2;
+  if (answers.randvoorwaarden.includes("Beperkt")) risk += 2;
+  if (answers.randvoorwaarden === "Nee") risk += 3;
+
+  if (risk >= 7) return "Kwetsbaar";
+  if (risk >= 4) return "Begeleiding nodig";
+  return "Stevig genoeg";
+}
+
+function getStatus(answer: RadarAnswer): Status {
+  if (answer === "Ja") return "Waarschijnlijk relevant";
+  if (answer === "Soms") return "Kort toetsen";
+  if (answer === "Weet ik niet") return "Nader verkennen";
+  return "Nu niet primair";
+}
+
+function calculateCrmStatus(
+  radarAnswer: RadarAnswer,
+  answers: Record<string, RadarAnswer>,
+  priorities: string[]
+): Status {
+  if (radarAnswer === "Nee" || radarAnswer === "Niet van toepassing") {
+    return "Nu niet primair";
+  }
+
+  let score = radarAnswer === "Ja" ? 3 : radarAnswer === "Soms" ? 2 : 1;
+
+  Object.values(answers).forEach((answer) => {
+    if (answer === "Ja") score += 2;
+    if (answer === "Soms") score += 1;
+    if (answer === "Weet ik niet") score += 0.5;
+  });
+
+  score += priorities.length * 0.5;
+
+  if (score >= 7) return "Waarschijnlijk relevant";
+  if (score >= 4) return "Kort toetsen";
+  return "Nader verkennen";
+}
+
+function buildRoadmap(
+  orgStrength: string,
+  crmStatus: Status,
+  topicStatuses: Record<TopicId, Status>,
+  crmPriorities: string[]
+) {
+  const first: string[] = [
+    "Bevestig met het klantteam welke onderwerpen echt prioriteit hebben.",
+    "Maak expliciet wie eigenaar is van de gekozen verbeterpunten.",
+  ];
+
+  if (orgStrength !== "Stevig genoeg") {
+    first.push("Start met eigenaarschap, besluitvorming en beschikbare capaciteit.");
+  }
+
+  if (crmStatus === "Waarschijnlijk relevant") {
+    first.push("Bepaal welke relaties, contactpersonen en afspraken centraal beheerd moeten worden.");
+  }
+
+  const second: string[] = [
+    "Werk de gewenste werkwijze uit voor de gekozen onderwerpen.",
+    "Bepaal welke informatie nodig is voor rapportage en sturing.",
+  ];
+
+  if (topicStatuses.integraties !== "Nu niet primair") {
+    second.push("Breng betrokken systemen, dubbele invoer en leidende gegevensbronnen in kaart.");
+  }
+
+  const third: string[] = [
+    "Vertaal de gekozen verbeteringen naar een compacte klantteam-roadmap.",
+    "Bepaal welke punten de klant zelf kan oppakken en waar Kweekers moet begeleiden.",
+  ];
+
+  crmPriorities.forEach((priority) => {
+    third.push(`CRM-aandachtspunt meenemen: ${priority}.`);
+  });
+
+  return [
+    { title: "0-30 dagen", items: first },
+    { title: "30-60 dagen", items: second },
+    { title: "60-90 dagen", items: third },
+  ];
+}
+
+function getAfasAdvice(status: AfasStatus) {
+  if (status === "Ja") {
     return {
       title: "Volledig groeimodel",
-      buttonLabel: "Start groeimodel",
       description:
-        "De klant lijkt geschikt voor het volledige KWEEKERS Groeimodel. Er is voldoende praktijkervaring om de huidige situatie te beoordelen en gericht te kijken naar FIT, GAP en SOLL.",
-      reportNote:
-        "De scan kan worden gelezen als volwassenheidsmeting, omdat de organisatie minimaal één jaar operationeel werkt met AFAS en de ingerichte processen.",
+        "De uitkomsten kunnen worden gelezen als volwassenheidsmeting, omdat er voldoende praktijkervaring is.",
     };
   }
 
-  if (answer === "Deels") {
+  if (status === "Deels") {
     return {
       title: "Beperkte groeiscan",
-      buttonLabel: "Start beperkte groeiscan",
       description:
-        "Het groeimodel kan worden gebruikt, maar conclusies moeten voorzichtig worden gelezen. Niet alle processen zijn mogelijk al lang genoeg in gebruik.",
-      reportNote:
-        "De uitkomsten zijn indicatief. Gebruik de scan vooral om knelpunten, risico’s en eerste verbeterstappen scherp te krijgen.",
+        "De uitkomsten zijn bruikbaar, maar voorzichtig lezen. Niet alle processen zijn mogelijk al lang genoeg in gebruik.",
     };
   }
 
-  if (answer === "Nee") {
+  if (status === "Nee") {
     return {
-      title: "Implementatiecheck of stabilisatiecheck",
-      buttonLabel: "Start implementatiecheck",
+      title: "Implementatiecheck",
       description:
-        "De klant werkt nog niet lang genoeg met AFAS en de ingerichte processen om digitale volwassenheid betrouwbaar te meten. Gebruik het gesprek als implementatiecheck, stabilisatiecheck of adoptiecheck.",
-      reportNote:
-        "De scan is niet bedoeld als volwassenheidsmeting. De focus ligt op inrichting, gebruik, begeleiding en rust brengen in de eerste fase.",
+        "Gebruik dit gesprek niet als volwassenheidsmeting, maar als check op inrichting, adoptie en stabilisatie.",
     };
   }
 
   return {
     title: "Context eerst verduidelijken",
-    buttonLabel: "Eerst context vastleggen",
     description:
-      "De uitgangssituatie is nog niet duidelijk. Bespreek eerst hoe lang AFAS live is, welke processen volledig in gebruik zijn en waar nog sprake is van opstart, herstel of herinrichting.",
-    reportNote:
-      "De uitgangssituatie is nog onzeker. Conclusies moeten voorzichtig worden gelezen totdat duidelijk is welke processen al volledig operationeel zijn.",
+      "Bespreek eerst hoe lang AFAS live is en welke processen echt operationeel zijn.",
   };
 }
 
-function calculateCrmDiagnosis(crmState: CrmState): CrmDiagnosis {
-  let score = 0;
-
-  if (crmState.relevantie === "Niet van toepassing") {
-    return {
-      status: "Nu niet primair",
-      score: 0,
-      reason:
-        "CRM lijkt voor deze organisatie nu niet van toepassing. Het onderdeel wordt niet verwijderd, maar geparkeerd.",
-      activeRoutes: ["Niet van toepassing"],
-      firstFocus:
-        "CRM parkeren en later alleen kort toetsen als de context verandert.",
-      nextQuestions: [
-        "Is er een reden om CRM later alsnog kort te toetsen?",
-        "Zijn er uitzonderingen waarbij relatie-informatie toch belangrijk is?",
-      ],
-    };
-  }
-
-  if (crmState.relevantie === "Nee") {
-    return {
-      status: "Nu niet primair",
-      score: 0,
-      reason:
-        "Op basis van de relevantievraag lijkt CRM nu niet de eerste focus. Niet verwijderen, wel parkeren.",
-      activeRoutes: ["Nu niet primair"],
-      firstFocus: "CRM voorlopig parkeren.",
-      nextQuestions: [
-        "Zijn er specifieke relaties of partners die toch centraal gevolgd moeten worden?",
-        "Moet dit onderwerp later opnieuw worden getoetst?",
-      ],
-    };
-  }
-
-  if (crmState.relevantie === "Ja, vaak") score += 4;
-  if (crmState.relevantie === "Soms") score += 2;
-  if (crmState.relevantie === "Weet ik niet") score += 1;
-
-  Object.values(crmState.pijn).forEach((answer) => {
-    if (answer === "Ja, vaak") score += 2;
-    if (answer === "Soms") score += 1;
-    if (answer === "Weet ik niet") score += 0.5;
-  });
-
-  const meaningfulRoutes = crmState.routes.filter(
-    (route) => route !== "Weet ik nog niet" && route !== "Niet van toepassing"
-  );
-
-  const meaningfulPriorities = crmState.prioriteiten.filter(
-    (priority) => priority !== "Niet van toepassing"
-  );
-
-  score += meaningfulRoutes.length;
-  score += meaningfulPriorities.length * 0.75;
-
-  let status: DiagnosisStatus = "Nader verkennen";
-
-  if (score >= 8) status = "Waarschijnlijk relevant";
-  else if (score >= 4) status = "Kort toetsen";
-
-  const reason =
-    status === "Waarschijnlijk relevant"
-      ? "De antwoorden wijzen duidelijk op relatiebeheer, afspraken, opvolging of klantcontact. CRM hoort mee te gaan naar de verdiepende scan."
-      : status === "Kort toetsen"
-      ? "Er zijn signalen dat CRM relevant kan zijn. Toets kort of relatiebeheer, opvolging of afspraken echt knellen voordat je verdiept."
-      : "Er is nog onvoldoende duidelijkheid. Laat CRM zichtbaar en stel een paar extra vragen voordat je het parkeert.";
-
-  const activeRoutes =
-    meaningfulRoutes.length > 0 ? meaningfulRoutes : ["Nog geen route gekozen"];
-
-  const firstFocus =
-    meaningfulPriorities[0] ??
-    "Begin met het scherp maken van relatiegegevens, afspraken en opvolging.";
-
-  const nextQuestions = buildCrmNextQuestions(crmState);
-
-  return {
-    status,
-    score,
-    reason,
-    activeRoutes,
-    firstFocus,
-    nextQuestions,
-  };
-}
-
-function buildCrmNextQuestions(crmState: CrmState) {
-  const questions = new Set<string>();
-
-  questions.add("Welke relaties moeten centraal bekend zijn?");
-  questions.add(
-    "Welke contactpersonen en afspraken moeten meerdere collega’s kunnen zien?"
-  );
-  questions.add("Waar worden contactmomenten nu vastgelegd?");
-
-  if (crmState.routes.includes("Relaties en afspraken centraal vastleggen")) {
-    questions.add(
-      "Welke relatiegegevens zijn minimaal nodig om goed te kunnen werken?"
-    );
-    questions.add("Welke afspraken horen in een centraal dossier?");
-  }
-
-  if (crmState.routes.includes("Nieuwe klanten, kansen of offertes volgen")) {
-    questions.add(
-      "Willen jullie verkoopkansen, offertes of forecast kunnen volgen?"
-    );
-    questions.add("Wie is eigenaar van commerciële opvolging?");
-  }
-
-  if (
-    crmState.routes.includes("Klanten of partners digitaal laten communiceren")
-  ) {
-    questions.add(
-      "Welke informatie moeten klanten of partners digitaal kunnen aanleveren of terugvinden?"
-    );
-    questions.add("Is er behoefte aan een klantportal of digitale formulieren?");
-  }
-
-  if (
-    crmState.routes.includes("Cursussen, trainingen of inschrijvingen beheren")
-  ) {
-    questions.add(
-      "Welke cursussen, trainingen of bijeenkomsten worden georganiseerd?"
-    );
-    questions.add(
-      "Moeten inschrijving, deelname, evaluatie of facturatie worden gevolgd?"
-    );
-  }
-
-  if (crmState.routes.includes("Sollicitanten of kandidaten opvolgen")) {
-    questions.add("Gaat het om sollicitanten, kandidaten, vacatures of gesprekken?");
-    questions.add("Moet dit gekoppeld worden aan HRM of recruitment?");
-  }
-
-  if (crmState.prioriteiten.includes("We gebruiken veel Excel of losse lijstjes")) {
-    questions.add(
-      "Welke Excel-lijstjes gebruiken jullie nu voor relaties, afspraken of opvolging?"
-    );
-  }
-
-  if (
-    crmState.prioriteiten.includes(
-      "We zijn afhankelijk van kennis van één of enkele mensen"
-    )
-  ) {
-    questions.add("Welke kennis zit nu vooral bij één of enkele collega’s?");
-  }
-
-  return Array.from(questions);
-}
-
-function getSectorRelationExamples(sector: string) {
-  const map: Record<string, string[]> = {
-    Onderwijs: [
-      "stagebedrijven",
-      "studenten",
-      "ouders/verzorgers",
-      "gemeenten",
-      "samenwerkingspartners",
-    ],
-    "Zorg & welzijn": [
-      "cliënten",
-      "verwijzers",
-      "gemeenten",
-      "zorgpartners",
-      "leveranciers",
-    ],
-    "Zakelijke dienstverlening": [
-      "klanten",
-      "prospects",
-      "leveranciers",
-      "partners",
-      "contactpersonen",
-    ],
-    Ledenorganisatie: [
-      "leden",
-      "commissies",
-      "vrijwilligers",
-      "partners",
-      "leveranciers",
-    ],
-    "Handel / groothandel": [
-      "klanten",
-      "leveranciers",
-      "dealers",
-      "distributeurs",
-      "contactpersonen",
-    ],
-    Productie: [
-      "klanten",
-      "leveranciers",
-      "distributeurs",
-      "partners",
-      "contactpersonen",
-    ],
-    "Overheid / non-profit": [
-      "burgers",
-      "instellingen",
-      "ketenpartners",
-      "gemeenten",
-      "leveranciers",
-    ],
-    Anders: [
-      "klanten",
-      "partners",
-      "leveranciers",
-      "contactpersonen",
-      "andere relaties",
-    ],
-  };
-
-  return map[sector] ?? map.Anders;
-}
-
-function getSectorRouteHint(sector: string) {
-  const map: Record<string, string> = {
-    Onderwijs:
-      "stagebedrijven, studenten, ouders/verzorgers, samenwerkingspartners, trainingen, bijeenkomsten of inschrijvingen.",
-    "Zorg & welzijn":
-      "gemeenten, verwijzers, cliënten, zorgpartners, beschikkingen, afspraken of contactmomenten.",
-    "Zakelijke dienstverlening":
-      "prospects, klanten, offertes, verkoopkansen, klantafspraken, contactmomenten of klantteams.",
-    Ledenorganisatie:
-      "leden, vrijwilligers, commissies, partners, bijeenkomsten, inschrijvingen of contactmomenten.",
-    "Handel / groothandel":
-      "klanten, leveranciers, dealers, prijsafspraken, contactpersonen, offertes of opvolging.",
-    Productie:
-      "klanten, leveranciers, distributeurs, kwaliteitsafspraken, contactmomenten of opvolging.",
-    "Overheid / non-profit":
-      "burgers, instellingen, ketenpartners, gemeenten, dossiers, afspraken of contactmomenten.",
-    Anders:
-      "klanten, partners, leveranciers, afspraken, contactmomenten, opvolging of digitale communicatie.",
-  };
-
-  return map[sector] ?? map.Anders;
-}
-
-function normalizeNotApplicable(values: string[]) {
-  const last = values[values.length - 1];
-
-  if (last === "Niet van toepassing") {
-    return ["Niet van toepassing"];
-  }
-
-  return values.filter((value) => value !== "Niet van toepassing");
-}
-
-function LayerHeader({
+function HeaderCard({
   step,
   title,
   description,
-  actionLabel,
+  action,
   onAction,
-  accent = false,
 }: {
   step: string;
   title: string;
   description: string;
-  actionLabel: string;
+  action: string;
   onAction: () => void;
-  accent?: boolean;
 }) {
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -1754,106 +1187,206 @@ function LayerHeader({
         <div>
           <p
             className="text-sm font-semibold uppercase tracking-[0.25em]"
-            style={{ color: accent ? brand.orange : "#64748B" }}
+            style={{ color: brand.orange }}
           >
             {step}
           </p>
-          <h3
-            className="mt-2 text-2xl font-semibold"
-            style={{ color: brand.navy }}
-          >
+          <h3 className="mt-2 text-2xl font-semibold" style={{ color: brand.navy }}>
             {title}
           </h3>
           <p className="mt-2 max-w-3xl text-slate-600">{description}</p>
         </div>
 
-        <PrimaryButton onClick={onAction} accent={accent}>
-          {actionLabel}
-        </PrimaryButton>
+        <PrimaryButton onClick={onAction}>{action}</PrimaryButton>
       </div>
     </section>
   );
 }
 
-function StartCheckButtons({
+function QuestionCard({
+  title,
+  question,
+  children,
+  footer,
+}: {
+  title: string;
+  question: string;
+  children: ReactNode;
+  footer?: ReactNode;
+}) {
+  return (
+    <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-sm font-semibold text-slate-500">{title}</p>
+          <h3 className="mt-2 text-xl font-semibold" style={{ color: brand.navy }}>
+            {question}
+          </h3>
+        </div>
+        {footer}
+      </div>
+
+      <div className="mt-6">{children}</div>
+    </section>
+  );
+}
+
+function ChoiceGroup({
+  options,
   value,
   onChange,
 }: {
-  value: StartCheckAnswer;
-  onChange: (value: StartCheckAnswer) => void;
+  options: string[];
+  value: string;
+  onChange: (value: string) => void;
 }) {
-  const options: StartCheckAnswer[] = ["Ja", "Deels", "Nee", "Weet ik niet"];
-
   return (
     <div className="flex flex-wrap gap-2">
       {options.map((option) => (
-        <button
-          type="button"
+        <ChoiceButton
           key={option}
+          selected={value === option}
           onClick={() => onChange(option)}
-          className={`rounded-full px-4 py-2 text-sm font-semibold transition hover:opacity-90 ${
-            value === option
-              ? "text-white"
-              : "bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-100"
-          }`}
-          style={
-            value === option
-              ? {
-                  backgroundColor:
-                    option === "Ja" ? brand.navy : brand.orange,
-                }
-              : undefined
-          }
         >
           {option}
-        </button>
+        </ChoiceButton>
       ))}
     </div>
   );
 }
 
-function AnswerButtons({
+function MultiChoiceGroup({
+  options,
+  values,
+  onChange,
+}: {
+  options: string[];
+  values: string[];
+  onChange: (value: string[]) => void;
+}) {
+  function toggle(option: string) {
+    if (values.includes(option)) {
+      onChange(values.filter((item) => item !== option));
+    } else {
+      onChange([...values, option]);
+    }
+  }
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {options.map((option) => (
+        <ChoiceButton
+          key={option}
+          selected={values.includes(option)}
+          onClick={() => toggle(option)}
+        >
+          {option}
+        </ChoiceButton>
+      ))}
+    </div>
+  );
+}
+
+function AnswerGroup({
   value,
   onChange,
 }: {
-  value: TriageAnswer;
-  onChange: (value: TriageAnswer) => void;
+  value: RadarAnswer;
+  onChange: (value: RadarAnswer) => void;
 }) {
-  const options: TriageAnswer[] = [
-    "Ja, vaak",
+  const options: RadarAnswer[] = [
+    "Ja",
     "Soms",
     "Nee",
     "Weet ik niet",
     "Niet van toepassing",
   ];
 
+  return <ChoiceGroup options={options} value={value} onChange={(v) => onChange(v as RadarAnswer)} />;
+}
+
+function ChoiceButton({
+  children,
+  selected,
+  onClick,
+}: {
+  children: ReactNode;
+  selected: boolean;
+  onClick: () => void;
+}) {
   return (
-    <div className="flex flex-wrap gap-2">
-      {options.map((option) => (
-        <button
-          type="button"
-          key={option}
-          onClick={() => onChange(option)}
-          className={`rounded-full px-4 py-2 text-sm font-semibold transition hover:opacity-90 ${
-            value === option
-              ? "text-white"
-              : "bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-100"
-          }`}
-          style={
-            value === option
-              ? {
-                  backgroundColor:
-                    option === "Niet van toepassing"
-                      ? brand.orange
-                      : brand.navy,
-                }
-              : undefined
-          }
-        >
-          {option}
-        </button>
-      ))}
-    </div>
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-full px-4 py-2 text-sm font-semibold transition hover:opacity-90 ${
+        selected ? "text-white" : "bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-100"
+      }`}
+      style={selected ? { backgroundColor: brand.navy } : undefined}
+    >
+      {children}
+    </button>
+  );
+}
+
+function StatusPill({ status }: { status: Status }) {
+  const color =
+    status === "Waarschijnlijk relevant"
+      ? brand.navy
+      : status === "Kort toetsen"
+      ? brand.orange
+      : status === "Nader verkennen"
+      ? "#64748B"
+      : "#CBD5E1";
+
+  return (
+    <span
+      className="whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold text-white"
+      style={{ backgroundColor: color }}
+    >
+      {status}
+    </span>
+  );
+}
+
+function SummaryCard({
+  title,
+  value,
+  text,
+}: {
+  title: string;
+  value: string;
+  text: string;
+}) {
+  return (
+    <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <p className="text-sm font-semibold text-slate-500">{title}</p>
+      <h3 className="mt-2 text-2xl font-semibold" style={{ color: brand.navy }}>
+        {value}
+      </h3>
+      <p className="mt-3 text-sm leading-6 text-slate-600">{text}</p>
+    </section>
+  );
+}
+
+function NavButton({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`w-full rounded-xl px-4 py-3 text-left text-sm font-medium transition ${
+        active ? "text-white" : "text-slate-700 hover:bg-slate-100"
+      }`}
+      style={active ? { backgroundColor: brand.navy } : undefined}
+    >
+      {children}
+    </button>
   );
 }
 
@@ -1891,55 +1424,6 @@ function SecondaryButton({
     >
       {children}
     </button>
-  );
-}
-
-function PlaceholderScreen({
-  title,
-  description,
-}: {
-  title: string;
-  description: string;
-}) {
-  return (
-    <section className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-      <p
-        className="text-sm font-semibold uppercase tracking-[0.25em]"
-        style={{ color: brand.orange }}
-      >
-        Wordt in volgende stap opgebouwd
-      </p>
-      <h3 className="mt-3 text-2xl font-semibold" style={{ color: brand.navy }}>
-        {title}
-      </h3>
-      <p className="mt-3 max-w-3xl leading-7 text-slate-600">
-        {description}
-      </p>
-    </section>
-  );
-}
-
-function StatCard({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-      <p className="text-sm font-medium text-slate-500">{label}</p>
-      <div className="mt-3 text-3xl font-semibold" style={{ color: brand.navy }}>
-        {value}
-      </div>
-    </div>
-  );
-}
-
-function MiniInfo({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-2xl bg-white p-3 ring-1 ring-slate-200">
-      <div className="text-xs font-medium uppercase tracking-[0.15em] text-slate-500">
-        {label}
-      </div>
-      <div className="mt-1 font-semibold" style={{ color: brand.navy }}>
-        {value}
-      </div>
-    </div>
   );
 }
 
@@ -1993,63 +1477,6 @@ function SelectField({
         ))}
       </select>
     </label>
-  );
-}
-
-function MultiSelectField({
-  label,
-  options,
-  values,
-  onChange,
-}: {
-  label: string;
-  options: string[];
-  values: string[];
-  onChange: (values: string[]) => void;
-}) {
-  function toggle(option: string) {
-    if (values.includes(option)) {
-      onChange(values.filter((value) => value !== option));
-      return;
-    }
-
-    onChange([...values, option]);
-  }
-
-  return (
-    <div>
-      <div className="text-sm font-semibold text-slate-700">{label}</div>
-      <div className="mt-3 flex flex-wrap gap-2">
-        {options.map((option) => {
-          const selected = values.includes(option);
-
-          return (
-            <button
-              type="button"
-              key={option}
-              onClick={() => toggle(option)}
-              className={`rounded-full px-4 py-2 text-sm font-semibold transition hover:opacity-90 ${
-                selected
-                  ? "text-white"
-                  : "bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-100"
-              }`}
-              style={
-                selected
-                  ? {
-                      backgroundColor:
-                        option === "Niet van toepassing"
-                          ? brand.orange
-                          : brand.navy,
-                    }
-                  : undefined
-              }
-            >
-              {option}
-            </button>
-          );
-        })}
-      </div>
-    </div>
   );
 }
 
