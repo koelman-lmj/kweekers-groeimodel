@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 
 type ViewId =
   | "dashboard"
+  | "startcheck"
   | "nieuwe-scan"
   | "crm-laag-1"
   | "crm-laag-2"
@@ -14,6 +15,8 @@ type ViewId =
   | "resultaten"
   | "roadmap"
   | "rapport";
+
+type StartCheckAnswer = "Ja" | "Deels" | "Nee" | "Weet ik niet";
 
 type TriageAnswer =
   | "Ja, vaak"
@@ -27,6 +30,11 @@ type DiagnosisStatus =
   | "Kort toetsen"
   | "Nader verkennen"
   | "Nu niet primair";
+
+type StartCheck = {
+  afasLiveStatus: StartCheckAnswer;
+  toelichting: string;
+};
 
 type ScanForm = {
   organisatienaam: string;
@@ -77,6 +85,7 @@ const brand = {
 
 const navigation: { id: ViewId; label: string }[] = [
   { id: "dashboard", label: "Dashboard" },
+  { id: "startcheck", label: "Startcheck" },
   { id: "nieuwe-scan", label: "Nieuwe scan" },
   { id: "crm-laag-1", label: "CRM laag 1" },
   { id: "crm-laag-2", label: "CRM laag 2" },
@@ -262,6 +271,12 @@ const mockScans = [
   },
 ];
 
+const initialStartCheck: StartCheck = {
+  afasLiveStatus: "Ja",
+  toelichting:
+    "De organisatie werkt langer dan één jaar operationeel met AFAS en de belangrijkste processen zijn in gebruik.",
+};
+
 const initialForm: ScanForm = {
   organisatienaam: "LMJ BV",
   sector: "Onderwijs",
@@ -309,6 +324,7 @@ const initialCrmState: CrmState = {
 
 export default function Home() {
   const [activeView, setActiveView] = useState<ViewId>("dashboard");
+  const [startCheck, setStartCheck] = useState<StartCheck>(initialStartCheck);
   const [form, setForm] = useState<ScanForm>(initialForm);
   const [crmState, setCrmState] = useState<CrmState>(initialCrmState);
   const [crmPainStep, setCrmPainStep] = useState(0);
@@ -386,11 +402,11 @@ export default function Home() {
             }}
           >
             <div className="text-sm font-semibold" style={{ color: brand.navy }}>
-              CRM als eerste trechter
+              Uitgangspunt
             </div>
             <p className="mt-2 text-sm leading-6 text-slate-600">
-              Eerst relevantie, daarna pijn per vraag, daarna route en
-              prioriteit. Sectorvoorbeelden passen zich aan.
+              Het groeimodel is bedoeld voor klanten die minimaal één jaar
+              operationeel werken met AFAS en de ingerichte processen.
             </p>
           </div>
         </aside>
@@ -400,7 +416,7 @@ export default function Home() {
             <div className="mx-auto flex max-w-7xl items-center justify-between gap-6">
               <div>
                 <p className="text-sm font-medium text-slate-500">
-                  MVP versie 1 · CRM-trechter
+                  MVP versie 1 · Startcheck + CRM-trechter
                 </p>
                 <h2
                   className="text-2xl font-semibold tracking-tight"
@@ -424,13 +440,24 @@ export default function Home() {
 
           <div className="mx-auto max-w-7xl px-6 py-8">
             {activeView === "dashboard" && (
-              <Dashboard onNewScan={() => setActiveView("nieuwe-scan")} />
+              <Dashboard onNewScan={() => setActiveView("startcheck")} />
+            )}
+
+            {activeView === "startcheck" && (
+              <StartCheckScreen
+                startCheck={startCheck}
+                setStartCheck={setStartCheck}
+                onBack={() => setActiveView("dashboard")}
+                onNext={() => setActiveView("nieuwe-scan")}
+              />
             )}
 
             {activeView === "nieuwe-scan" && (
               <NewScan
                 form={form}
                 setForm={setForm}
+                startCheck={startCheck}
+                onBack={() => setActiveView("startcheck")}
                 onNext={() => setActiveView("crm-laag-1")}
               />
             )}
@@ -495,6 +522,7 @@ export default function Home() {
             {activeView === "diagnose" && (
               <CrmDiagnosisCard
                 form={form}
+                startCheck={startCheck}
                 crmState={crmState}
                 diagnosis={crmDiagnosis}
                 onBack={() => {
@@ -576,6 +604,24 @@ function Dashboard({ onNewScan }: { onNewScan: () => void }) {
         </button>
       </div>
 
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h3 className="text-xl font-semibold" style={{ color: brand.navy }}>
+          Uitgangspunt voor inzet
+        </h3>
+        <p className="mt-3 max-w-5xl leading-7 text-slate-600">
+          Het KWEEKERS Groeimodel is bedoeld voor organisaties die minimaal één
+          jaar volledig operationeel werken met AFAS en de ingerichte
+          bedrijfsprocessen. Dan is er voldoende praktijkervaring om de huidige
+          situatie betrouwbaar vast te stellen. Het groeimodel kijkt breder dan
+          AFAS alleen: ook processen, eigenaarschap, samenwerking, integraties,
+          datakwaliteit en rapportage worden meegenomen.
+        </p>
+        <p className="mt-3 max-w-5xl leading-7 text-slate-600">
+          Daarmee bepalen we wat passend werkt, wat ontbreekt of verbetering
+          vraagt en welke gewenste situatie haalbaar en waardevol is.
+        </p>
+      </section>
+
       <div className="grid gap-4 md:grid-cols-4">
         <StatCard label="Aantal scans" value="3" />
         <StatCard label="Gemiddelde volwassenheid" value="4.3" />
@@ -626,15 +672,133 @@ function Dashboard({ onNewScan }: { onNewScan: () => void }) {
   );
 }
 
+function StartCheckScreen({
+  startCheck,
+  setStartCheck,
+  onBack,
+  onNext,
+}: {
+  startCheck: StartCheck;
+  setStartCheck: (value: StartCheck) => void;
+  onBack: () => void;
+  onNext: () => void;
+}) {
+  const advice = getStartCheckAdvice(startCheck.afasLiveStatus);
+
+  return (
+    <div className="space-y-6">
+      <LayerHeader
+        step="Startcheck"
+        title="Is het KWEEKERS Groeimodel het juiste instrument?"
+        description="Voordat we starten, bepalen we eerst of de klant voldoende praktijkervaring heeft om digitale volwassenheid betrouwbaar te beoordelen."
+        actionLabel={advice.buttonLabel}
+        onAction={onNext}
+        accent
+      />
+
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h3 className="text-2xl font-semibold" style={{ color: brand.navy }}>
+          Uitgangspunt voor inzet van het KWEEKERS Groeimodel
+        </h3>
+
+        <div className="mt-5 max-w-5xl space-y-4 leading-7 text-slate-600">
+          <p>
+            Het KWEEKERS Groeimodel is bedoeld voor organisaties die minimaal
+            één jaar volledig operationeel werken met AFAS en de ingerichte
+            bedrijfsprocessen.
+          </p>
+          <p>
+            Na één jaar is er voldoende praktijkervaring om betrouwbaar vast te
+            stellen hoe de organisatie nu werkt. Dat noemen we de IST-situatie.
+          </p>
+          <p>
+            Het groeimodel kijkt breder dan AFAS alleen. We kijken ook naar
+            processen, eigenaarschap, samenwerking, koppelingen met andere
+            systemen, datakwaliteit en rapportage.
+          </p>
+          <p>
+            Zo ontstaat een compleet beeld van de digitale volwassenheid van de
+            organisatie. Daarmee bepalen we wat goed werkt, wat ontbreekt of
+            verbetering vraagt en welke gewenste situatie haalbaar en waardevol
+            is.
+          </p>
+        </div>
+      </section>
+
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <p
+          className="text-sm font-semibold uppercase tracking-[0.2em]"
+          style={{ color: brand.orange }}
+        >
+          Eerste check
+        </p>
+
+        <h3 className="mt-3 text-2xl font-semibold" style={{ color: brand.navy }}>
+          Werkt de organisatie minimaal één jaar volledig operationeel met AFAS
+          en de ingerichte bedrijfsprocessen?
+        </h3>
+
+        <div className="mt-8">
+          <StartCheckButtons
+            value={startCheck.afasLiveStatus}
+            onChange={(afasLiveStatus) =>
+              setStartCheck({ ...startCheck, afasLiveStatus })
+            }
+          />
+        </div>
+
+        <div
+          className="mt-8 rounded-2xl p-5"
+          style={{
+            backgroundColor: brand.light,
+            border: `1px solid ${brand.border}`,
+          }}
+        >
+          <div className="text-sm font-semibold" style={{ color: brand.navy }}>
+            Advies voor inzet
+          </div>
+          <h4 className="mt-2 text-xl font-semibold" style={{ color: brand.navy }}>
+            {advice.title}
+          </h4>
+          <p className="mt-2 leading-7 text-slate-600">{advice.description}</p>
+        </div>
+
+        <div className="mt-8">
+          <TextArea
+            label="Toelichting"
+            value={startCheck.toelichting}
+            onChange={(toelichting) =>
+              setStartCheck({ ...startCheck, toelichting })
+            }
+          />
+        </div>
+
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-between">
+          <SecondaryButton onClick={onBack}>Terug naar dashboard</SecondaryButton>
+          <PrimaryButton onClick={onNext} accent>
+            {advice.buttonLabel}
+          </PrimaryButton>
+        </div>
+      </section>
+    </div>
+  );
+}
+
 function NewScan({
   form,
   setForm,
+  startCheck,
+  onBack,
   onNext,
 }: {
   form: ScanForm;
   setForm: (form: ScanForm) => void;
+  startCheck: StartCheck;
+  onBack: () => void;
   onNext: () => void;
 }) {
+  const advice = getStartCheckAdvice(startCheck.afasLiveStatus);
+
   return (
     <div className="space-y-6">
       <LayerHeader
@@ -645,6 +809,26 @@ function NewScan({
         onAction={onNext}
         accent
       />
+
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h4 className="text-xl font-semibold" style={{ color: brand.navy }}>
+          Gebruik van de scan
+        </h4>
+        <div
+          className="mt-4 rounded-2xl p-5"
+          style={{
+            backgroundColor: brand.light,
+            border: `1px solid ${brand.border}`,
+          }}
+        >
+          <div className="text-sm font-semibold" style={{ color: brand.navy }}>
+            {advice.title}
+          </div>
+          <p className="mt-2 text-sm leading-6 text-slate-600">
+            {advice.description}
+          </p>
+        </div>
+      </section>
 
       <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
         <h4 className="text-xl font-semibold" style={{ color: brand.navy }}>
@@ -742,7 +926,8 @@ function NewScan({
           />
         </div>
 
-        <div className="mt-8 flex justify-end">
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-between">
+          <SecondaryButton onClick={onBack}>Terug naar startcheck</SecondaryButton>
           <PrimaryButton onClick={onNext} accent>
             Naar CRM laag 1
           </PrimaryButton>
@@ -1094,17 +1279,21 @@ function CrmLayer4Screen({
 
 function CrmDiagnosisCard({
   form,
+  startCheck,
   crmState,
   diagnosis,
   onBack,
   onNext,
 }: {
   form: ScanForm;
+  startCheck: StartCheck;
   crmState: CrmState;
   diagnosis: CrmDiagnosis;
   onBack: () => void;
   onNext: () => void;
 }) {
+  const startAdvice = getStartCheckAdvice(startCheck.afasLiveStatus);
+
   return (
     <div className="space-y-6">
       <LayerHeader
@@ -1143,12 +1332,24 @@ function CrmDiagnosisCard({
 
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <h4 className="text-lg font-semibold" style={{ color: brand.navy }}>
-            Eerste focus
+            Gebruik scan
           </h4>
-          <p className="mt-4 leading-7 text-slate-700">
-            {diagnosis.firstFocus}
+          <p className="mt-4 font-semibold" style={{ color: brand.navy }}>
+            {startAdvice.title}
+          </p>
+          <p className="mt-2 text-sm leading-6 text-slate-600">
+            {startAdvice.reportNote}
           </p>
         </div>
+      </section>
+
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h4 className="text-xl font-semibold" style={{ color: brand.navy }}>
+          Eerste focus
+        </h4>
+        <p className="mt-4 leading-7 text-slate-700">
+          {diagnosis.firstFocus}
+        </p>
       </section>
 
       <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -1241,6 +1442,50 @@ function CrmDiagnosisCard({
   );
 }
 
+function getStartCheckAdvice(answer: StartCheckAnswer) {
+  if (answer === "Ja") {
+    return {
+      title: "Volledig groeimodel",
+      buttonLabel: "Start groeimodel",
+      description:
+        "De klant lijkt geschikt voor het volledige KWEEKERS Groeimodel. Er is voldoende praktijkervaring om de huidige situatie te beoordelen en gericht te kijken naar FIT, GAP en SOLL.",
+      reportNote:
+        "De scan kan worden gelezen als volwassenheidsmeting, omdat de organisatie minimaal één jaar operationeel werkt met AFAS en de ingerichte processen.",
+    };
+  }
+
+  if (answer === "Deels") {
+    return {
+      title: "Beperkte groeiscan",
+      buttonLabel: "Start beperkte groeiscan",
+      description:
+        "Het groeimodel kan worden gebruikt, maar conclusies moeten voorzichtig worden gelezen. Niet alle processen zijn mogelijk al lang genoeg in gebruik.",
+      reportNote:
+        "De uitkomsten zijn indicatief. Gebruik de scan vooral om knelpunten, risico’s en eerste verbeterstappen scherp te krijgen.",
+    };
+  }
+
+  if (answer === "Nee") {
+    return {
+      title: "Implementatiecheck of stabilisatiecheck",
+      buttonLabel: "Start implementatiecheck",
+      description:
+        "De klant werkt nog niet lang genoeg met AFAS en de ingerichte processen om digitale volwassenheid betrouwbaar te meten. Gebruik het gesprek als implementatiecheck, stabilisatiecheck of adoptiecheck.",
+      reportNote:
+        "De scan is niet bedoeld als volwassenheidsmeting. De focus ligt op inrichting, gebruik, begeleiding en rust brengen in de eerste fase.",
+    };
+  }
+
+  return {
+    title: "Context eerst verduidelijken",
+    buttonLabel: "Eerst context vastleggen",
+    description:
+      "De uitgangssituatie is nog niet duidelijk. Bespreek eerst hoe lang AFAS live is, welke processen volledig in gebruik zijn en waar nog sprake is van opstart, herstel of herinrichting.",
+    reportNote:
+      "De uitgangssituatie is nog onzeker. Conclusies moeten voorzichtig worden gelezen totdat duidelijk is welke processen al volledig operationeel zijn.",
+  };
+}
+
 function calculateCrmDiagnosis(crmState: CrmState): CrmDiagnosis {
   let score = 0;
 
@@ -1251,7 +1496,8 @@ function calculateCrmDiagnosis(crmState: CrmState): CrmDiagnosis {
       reason:
         "CRM lijkt voor deze organisatie nu niet van toepassing. Het onderdeel wordt niet verwijderd, maar geparkeerd.",
       activeRoutes: ["Niet van toepassing"],
-      firstFocus: "CRM parkeren en later alleen kort toetsen als de context verandert.",
+      firstFocus:
+        "CRM parkeren en later alleen kort toetsen als de context verandert.",
       nextQuestions: [
         "Is er een reden om CRM later alsnog kort te toetsen?",
         "Zijn er uitzonderingen waarbij relatie-informatie toch belangrijk is?",
@@ -1330,27 +1576,43 @@ function buildCrmNextQuestions(crmState: CrmState) {
   const questions = new Set<string>();
 
   questions.add("Welke relaties moeten centraal bekend zijn?");
-  questions.add("Welke contactpersonen en afspraken moeten meerdere collega’s kunnen zien?");
+  questions.add(
+    "Welke contactpersonen en afspraken moeten meerdere collega’s kunnen zien?"
+  );
   questions.add("Waar worden contactmomenten nu vastgelegd?");
 
   if (crmState.routes.includes("Relaties en afspraken centraal vastleggen")) {
-    questions.add("Welke relatiegegevens zijn minimaal nodig om goed te kunnen werken?");
+    questions.add(
+      "Welke relatiegegevens zijn minimaal nodig om goed te kunnen werken?"
+    );
     questions.add("Welke afspraken horen in een centraal dossier?");
   }
 
   if (crmState.routes.includes("Nieuwe klanten, kansen of offertes volgen")) {
-    questions.add("Willen jullie verkoopkansen, offertes of forecast kunnen volgen?");
+    questions.add(
+      "Willen jullie verkoopkansen, offertes of forecast kunnen volgen?"
+    );
     questions.add("Wie is eigenaar van commerciële opvolging?");
   }
 
-  if (crmState.routes.includes("Klanten of partners digitaal laten communiceren")) {
-    questions.add("Welke informatie moeten klanten of partners digitaal kunnen aanleveren of terugvinden?");
+  if (
+    crmState.routes.includes("Klanten of partners digitaal laten communiceren")
+  ) {
+    questions.add(
+      "Welke informatie moeten klanten of partners digitaal kunnen aanleveren of terugvinden?"
+    );
     questions.add("Is er behoefte aan een klantportal of digitale formulieren?");
   }
 
-  if (crmState.routes.includes("Cursussen, trainingen of inschrijvingen beheren")) {
-    questions.add("Welke cursussen, trainingen of bijeenkomsten worden georganiseerd?");
-    questions.add("Moeten inschrijving, deelname, evaluatie of facturatie worden gevolgd?");
+  if (
+    crmState.routes.includes("Cursussen, trainingen of inschrijvingen beheren")
+  ) {
+    questions.add(
+      "Welke cursussen, trainingen of bijeenkomsten worden georganiseerd?"
+    );
+    questions.add(
+      "Moeten inschrijving, deelname, evaluatie of facturatie worden gevolgd?"
+    );
   }
 
   if (crmState.routes.includes("Sollicitanten of kandidaten opvolgen")) {
@@ -1359,7 +1621,9 @@ function buildCrmNextQuestions(crmState: CrmState) {
   }
 
   if (crmState.prioriteiten.includes("We gebruiken veel Excel of losse lijstjes")) {
-    questions.add("Welke Excel-lijstjes gebruiken jullie nu voor relaties, afspraken of opvolging?");
+    questions.add(
+      "Welke Excel-lijstjes gebruiken jullie nu voor relaties, afspraken of opvolging?"
+    );
   }
 
   if (
@@ -1494,7 +1758,10 @@ function LayerHeader({
           >
             {step}
           </p>
-          <h3 className="mt-2 text-2xl font-semibold" style={{ color: brand.navy }}>
+          <h3
+            className="mt-2 text-2xl font-semibold"
+            style={{ color: brand.navy }}
+          >
             {title}
           </h3>
           <p className="mt-2 max-w-3xl text-slate-600">{description}</p>
@@ -1505,6 +1772,43 @@ function LayerHeader({
         </PrimaryButton>
       </div>
     </section>
+  );
+}
+
+function StartCheckButtons({
+  value,
+  onChange,
+}: {
+  value: StartCheckAnswer;
+  onChange: (value: StartCheckAnswer) => void;
+}) {
+  const options: StartCheckAnswer[] = ["Ja", "Deels", "Nee", "Weet ik niet"];
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {options.map((option) => (
+        <button
+          type="button"
+          key={option}
+          onClick={() => onChange(option)}
+          className={`rounded-full px-4 py-2 text-sm font-semibold transition hover:opacity-90 ${
+            value === option
+              ? "text-white"
+              : "bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-100"
+          }`}
+          style={
+            value === option
+              ? {
+                  backgroundColor:
+                    option === "Ja" ? brand.navy : brand.orange,
+                }
+              : undefined
+          }
+        >
+          {option}
+        </button>
+      ))}
+    </div>
   );
 }
 
@@ -1531,13 +1835,17 @@ function AnswerButtons({
           key={option}
           onClick={() => onChange(option)}
           className={`rounded-full px-4 py-2 text-sm font-semibold transition hover:opacity-90 ${
-            value === option ? "text-white" : "bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-100"
+            value === option
+              ? "text-white"
+              : "bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-100"
           }`}
           style={
             value === option
               ? {
                   backgroundColor:
-                    option === "Niet van toepassing" ? brand.orange : brand.navy,
+                    option === "Niet van toepassing"
+                      ? brand.orange
+                      : brand.navy,
                 }
               : undefined
           }
@@ -1554,7 +1862,7 @@ function PrimaryButton({
   onClick,
   accent = false,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   onClick: () => void;
   accent?: boolean;
 }) {
@@ -1573,7 +1881,7 @@ function SecondaryButton({
   children,
   onClick,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   onClick: () => void;
 }) {
   return (
