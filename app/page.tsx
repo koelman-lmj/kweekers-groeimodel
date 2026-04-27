@@ -672,7 +672,7 @@ export default function Page() {
         {activeStep === "duiding" ? (
           <AdviceScreen scores={scores} advice={advice} goPrevious={goPrevious} goNext={goNext} />
         ) : activeStep === "roadmap" ? (
-          <RoadmapScreen roadmap={roadmap} scores={scores} goPrevious={goPrevious} goNext={goNext} />
+          <RoadmapScreen roadmap={roadmap} goPrevious={goPrevious} goNext={goNext} />
         ) : activeStep === "export" ? (
           <ExportScreen exportPayload={exportPayload} copyStatus={copyStatus} copyExport={copyExport} downloadExport={downloadExport} goPrevious={goPrevious} />
         ) : (
@@ -1028,7 +1028,7 @@ function Mini({ title, text }: { title: string; text: string }) {
   );
 }
 
-function RoadmapScreen({ roadmap, scores, goPrevious, goNext }: { roadmap: ReturnType<typeof buildRoadmap>; scores: Scores; goPrevious: () => void; goNext: () => void }) {
+function RoadmapScreen({ roadmap, goPrevious, goNext }: { roadmap: ReturnType<typeof buildRoadmap>; goPrevious: () => void; goNext: () => void }) {
   return (
     <section className="content-screen">
       <div className="screen-head">
@@ -1101,12 +1101,19 @@ function ScreenFooter({ goPrevious, goNext, nextLabel, hideNext = false }: { goP
   );
 }
 
-function getQuestionsForStep(step: StepId, diagnosisQuestions: Question[]) {
+function getQuestionsForStep(step: StepId, diagnosisQuestions: Question[]): Question[] {
   if (step === "startcheck") return STARTCHECK_QUESTIONS;
   if (step === "profiel") return PROFILE_QUESTIONS;
   if (step === "scope") return SCOPE_QUESTIONS;
   if (step === "diagnose") return diagnosisQuestions;
-  return [{ id: `${step}_screen`, type: "summary", label: step }];
+
+  return [
+    {
+      id: `${step}_screen`,
+      type: "summary",
+      label: step,
+    },
+  ];
 }
 
 function flattenDiagnosisQuestions(areas: GrowthArea[]) {
