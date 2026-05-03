@@ -55,12 +55,12 @@ export default function ScanIdLayout({
             <div className="rounded-3xl border bg-white p-6 shadow-sm">
               <div className="space-y-4">
 <div className="kweekers-badge">
-  <Image
-    src="/kweekers-logo.png"
-    alt="Kweekers logo"
-    width={24}
-    height={24}
-  />
+<Image
+  src="/kweekers-logo.png"
+  alt="Kweekers logo"
+  width={36}
+  height={36}
+/>
   <span>KWEEKERS Groeimodel</span>
 </div>
 
