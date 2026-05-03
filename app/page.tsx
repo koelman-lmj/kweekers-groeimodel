@@ -2,13 +2,13 @@ import Link from "next/link";
 
 export default function HomePage() {
   return (
-    <main className="mx-auto max-w-5xl space-y-8 p-8">
-      <section className="rounded-3xl border bg-background p-10 shadow-sm">
-        <div className="inline-flex rounded-full bg-muted px-3 py-1 text-xs font-medium">
+    <main className="min-h-screen bg-neutral-50 px-6 py-10">
+      <section className="mx-auto max-w-5xl rounded-3xl border bg-white p-10 shadow-sm sm:p-12">
+        <div className="inline-flex rounded-full border px-3 py-1 text-xs font-medium">
           KWEEKERS Groeimodel
         </div>
 
-        <h1 className="mt-6 max-w-3xl text-5xl font-semibold tracking-tight">
+        <h1 className="mt-6 max-w-4xl text-5xl font-semibold tracking-tight">
           Start hier de begeleide diagnose voor digitale volwassenheid.
         </h1>
 
@@ -18,28 +18,28 @@ export default function HomePage() {
           integraties, data, rapportage, beheer en veranderkracht.
         </p>
 
-        <div className="mt-6 grid gap-3 text-sm text-muted-foreground">
+        <div className="mt-8 grid gap-3 text-sm text-muted-foreground">
           <div>✓ Gezamenlijk invullen met klant en consultant</div>
           <div>✓ Output: advies en ontwikkelrichting</div>
           <div>✓ Geschikt als nulmeting en vervolgmeting</div>
         </div>
 
-<div className="mt-8 space-y-4">
-  <div className="inline-flex rounded-xl border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-900">
-    Stap 1: klik op de knop hieronder om de scan te starten
-  </div>
+        <div className="mt-10 max-w-xl rounded-2xl border bg-neutral-50 p-5">
+          <p className="text-sm font-medium">Stap 1</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Start met het invullen van het klantprofiel. Daarna doorloop je
+            scope, diagnose en advies.
+          </p>
 
-  <Link
-    href="/scan/nieuw/profile"
-    className="inline-flex items-center rounded-2xl bg-black px-8 py-4 text-base font-semibold text-white shadow-sm transition hover:scale-[1.01] hover:opacity-90"
-  >
-    Start hier met het groeimodel →
-  </Link>
-
-  <p className="text-sm text-muted-foreground">
-    Je gaat hierna direct naar stap 1: klantprofiel.
-  </p>
-</div>
+          <div className="mt-4">
+            <Link
+              href="/scan/nieuw/profile"
+              className="inline-flex items-center rounded-2xl bg-black px-8 py-4 text-base font-semibold text-white shadow-sm transition hover:scale-[1.01] hover:opacity-90"
+            >
+              Start groeimodel →
+            </Link>
+          </div>
+        </div>
       </section>
     </main>
   );
