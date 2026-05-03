@@ -11,6 +11,13 @@ import {
 type CustomerProfile = {
   customerName: string;
   sector: string;
+  organizationSize: string;
+  administrationCount: string;
+  scanReason: string;
+  scanGoal: string;
+  mainBottleneck: string;
+  afasModules: string[];
+  contextNote: string;
 };
 
 type DiagnosisState = {
@@ -29,6 +36,13 @@ type ScanContextValue = {
   scan: ScanState;
   setCustomerName: (value: string) => void;
   setSector: (value: string) => void;
+  setOrganizationSize: (value: string) => void;
+  setAdministrationCount: (value: string) => void;
+  setScanReason: (value: string) => void;
+  setScanGoal: (value: string) => void;
+  setMainBottleneck: (value: string) => void;
+  toggleAfasModule: (value: string) => void;
+  setContextNote: (value: string) => void;
   setScope: (value: string) => void;
   setOwnership: (value: string) => void;
   setAfasUsage: (value: string) => void;
@@ -43,8 +57,15 @@ function createInitialScanState(): ScanState {
     profile: {
       customerName: "",
       sector: "",
+      organizationSize: "",
+      administrationCount: "",
+      scanReason: "",
+      scanGoal: "",
+      mainBottleneck: "",
+      afasModules: [],
+      contextNote: "",
     },
-scope: "",
+    scope: "",
     diagnosis: {
       ownership: "",
       afasUsage: "",
@@ -76,6 +97,82 @@ export function ScanProvider({ children }: { children: ReactNode }) {
           profile: {
             ...previous.profile,
             sector: value,
+          },
+        }));
+      },
+
+      setOrganizationSize: (value: string) => {
+        setScan((previous) => ({
+          ...previous,
+          profile: {
+            ...previous.profile,
+            organizationSize: value,
+          },
+        }));
+      },
+
+      setAdministrationCount: (value: string) => {
+        setScan((previous) => ({
+          ...previous,
+          profile: {
+            ...previous.profile,
+            administrationCount: value,
+          },
+        }));
+      },
+
+      setScanReason: (value: string) => {
+        setScan((previous) => ({
+          ...previous,
+          profile: {
+            ...previous.profile,
+            scanReason: value,
+          },
+        }));
+      },
+
+      setScanGoal: (value: string) => {
+        setScan((previous) => ({
+          ...previous,
+          profile: {
+            ...previous.profile,
+            scanGoal: value,
+          },
+        }));
+      },
+
+      setMainBottleneck: (value: string) => {
+        setScan((previous) => ({
+          ...previous,
+          profile: {
+            ...previous.profile,
+            mainBottleneck: value,
+          },
+        }));
+      },
+
+      toggleAfasModule: (value: string) => {
+        setScan((previous) => {
+          const hasValue = previous.profile.afasModules.includes(value);
+
+          return {
+            ...previous,
+            profile: {
+              ...previous.profile,
+              afasModules: hasValue
+                ? previous.profile.afasModules.filter((item) => item !== value)
+                : [...previous.profile.afasModules, value],
+            },
+          };
+        });
+      },
+
+      setContextNote: (value: string) => {
+        setScan((previous) => ({
+          ...previous,
+          profile: {
+            ...previous.profile,
+            contextNote: value,
           },
         }));
       },
