@@ -127,11 +127,11 @@ export default function ProfileBasisPage() {
           <label className="text-sm font-medium">
             Sector <span className="kweekers-required">*</span>
           </label>
-          <ChoiceCards
-            options={SECTOR_OPTIONS}
-            value={scan.profile.sector}
-            onChange={setSector}
-          />
+<ChoiceCards
+  options={SIZE_OPTIONS}
+  value={scan.profile.organizationSize}
+  onChange={setOrganizationSize}
+/>
           {!hasSector && (
             <p className="text-sm text-amber-700">Kies een sector.</p>
           )}
