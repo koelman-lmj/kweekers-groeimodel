@@ -26,6 +26,14 @@ export default function ProfilePage() {
   const hasSector = scan.profile.sector !== "";
   const isProfileComplete = hasCustomerName && hasSector;
 
+  const customerNameFieldClass = hasCustomerName
+    ? "w-full rounded-2xl border px-4 py-3 outline-none"
+    : "w-full rounded-2xl border border-red-500 bg-red-50 px-4 py-3 outline-none";
+
+  const sectorFieldClass = hasSector
+    ? "w-full rounded-2xl border bg-white px-4 py-3 outline-none"
+    : "w-full rounded-2xl border border-red-500 bg-red-50 px-4 py-3 outline-none";
+
   return (
     <div className="space-y-8">
       <div className="space-y-2">
@@ -39,7 +47,7 @@ export default function ProfilePage() {
       <section className="space-y-4 rounded-2xl border p-5">
         <div className="space-y-2">
           <label htmlFor="customerName" className="text-sm font-medium">
-            Klantnaam
+            Klantnaam <span className="text-red-600">*</span>
           </label>
           <input
             id="customerName"
@@ -47,24 +55,24 @@ export default function ProfilePage() {
             value={scan.profile.customerName}
             onChange={(event) => setCustomerName(event.target.value)}
             placeholder="Bijvoorbeeld: Pieter BV"
-            className="w-full rounded-2xl border px-4 py-3 outline-none"
+            className={customerNameFieldClass}
           />
           {!hasCustomerName && (
-            <p className="text-sm text-muted-foreground">
-              Vul een klantnaam in om verder te gaan.
+            <p className="text-sm text-red-600">
+              Klantnaam is verplicht.
             </p>
           )}
         </div>
 
         <div className="space-y-2">
           <label htmlFor="sector" className="text-sm font-medium">
-            Sector
+            Sector <span className="text-red-600">*</span>
           </label>
           <select
             id="sector"
             value={scan.profile.sector}
             onChange={(event) => setSector(event.target.value)}
-            className="w-full rounded-2xl border bg-white px-4 py-3 outline-none"
+            className={sectorFieldClass}
           >
             {SECTOR_OPTIONS.map((option) => (
               <option key={option.value || "empty"} value={option.value}>
@@ -73,8 +81,8 @@ export default function ProfilePage() {
             ))}
           </select>
           {!hasSector && (
-            <p className="text-sm text-muted-foreground">
-              Kies een sector om verder te gaan.
+            <p className="text-sm text-red-600">
+              Sector is verplicht.
             </p>
           )}
         </div>
@@ -83,14 +91,16 @@ export default function ProfilePage() {
       <section className="space-y-3 rounded-2xl border p-5">
         <h2 className="text-lg font-medium">Controle</h2>
         <div className="text-sm text-muted-foreground">
-          <div>Klantnaam: {hasCustomerName ? scan.profile.customerName : "Nog leeg"}</div>
+          <div>
+            Klantnaam: {hasCustomerName ? scan.profile.customerName : "Nog leeg"}
+          </div>
           <div>Sector: {getSectorLabel(scan.profile.sector)}</div>
         </div>
       </section>
 
       {!isProfileComplete && (
-        <div className="rounded-2xl border p-4 text-sm text-muted-foreground">
-          Vul eerst klantnaam en sector in om verder te gaan naar scope.
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          Vul eerst alle verplichte velden in om verder te gaan naar scope.
         </div>
       )}
 
@@ -98,16 +108,16 @@ export default function ProfilePage() {
         {isProfileComplete ? (
           <Link
             href="/scan/nieuw/scope"
-            className="rounded-2xl border px-4 py-2 text-sm shadow-sm"
+            className="rounded-2xl bg-black px-5 py-3 text-sm font-medium text-white shadow-sm transition hover:opacity-90"
           >
-            Verder naar scope
+            Verder naar scope →
           </Link>
         ) : (
           <span
             aria-disabled="true"
-            className="cursor-not-allowed rounded-2xl border px-4 py-2 text-sm opacity-50 shadow-sm"
+            className="cursor-not-allowed rounded-2xl border px-5 py-3 text-sm font-medium opacity-50 shadow-sm"
           >
-            Verder naar scope
+            Verder naar scope →
           </span>
         )}
       </div>
