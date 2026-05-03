@@ -20,6 +20,8 @@ function getAnswerValue(
 ): string {
   if (questionKey === "customer_name") return scan.profile.customerName;
   if (questionKey === "sector") return scan.profile.sector;
+  if (questionKey === "organization_size") return scan.profile.organizationSize;
+  if (questionKey === "administration_count") return scan.profile.administrationCount;
   return "";
 }
 
