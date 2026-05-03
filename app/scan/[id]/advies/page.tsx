@@ -211,7 +211,7 @@ export default function AdviesPage() {
 
         <Link
           href="/"
-          className="rounded-2xl bg-black px-5 py-3 text-sm font-medium text-white shadow-sm transition hover:opacity-90"
+className="kweekers-primary-button"
         >
           Rapport afronden →
         </Link>
