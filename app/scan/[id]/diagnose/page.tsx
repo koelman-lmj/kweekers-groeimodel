@@ -45,18 +45,19 @@ function AnswerButtons({
             key={option.value}
             type="button"
             onClick={() => onChange(option.value)}
-            aria-pressed={isActive}
-            className={`w-full rounded-2xl border p-4 text-left transition ${
+            className={
               isActive
-                ? "border-black bg-black text-white"
-                : "bg-white hover:border-black"
-            }`}
+                ? "rounded-2xl border bg-black px-5 py-4 text-left text-white shadow-sm transition"
+                : "rounded-2xl border px-5 py-4 text-left shadow-sm transition hover:bg-neutral-50"
+            }
           >
-            <div className="font-medium">{option.label}</div>
+            <div className="text-lg font-medium">{option.label}</div>
             <div
-              className={`text-sm ${
-                isActive ? "text-white/80" : "text-muted-foreground"
-              }`}
+              className={
+                isActive
+                  ? "mt-1 text-sm text-white/85"
+                  : "mt-1 text-sm text-muted-foreground"
+              }
             >
               {option.description}
             </div>
@@ -87,7 +88,7 @@ export default function DiagnosePage() {
 
       <section className="space-y-6 rounded-2xl border p-5">
         <div className="space-y-3">
-          <div className="space-y-1">
+          <div>
             <h2 className="text-lg font-medium">
               1. Zijn proceseigenaarschap en verantwoordelijkheden duidelijk?
             </h2>
@@ -103,7 +104,7 @@ export default function DiagnosePage() {
         </div>
 
         <div className="space-y-3">
-          <div className="space-y-1">
+          <div>
             <h2 className="text-lg font-medium">
               2. Wordt AFAS gebruikt als de standaard werkwijze?
             </h2>
@@ -120,13 +121,13 @@ export default function DiagnosePage() {
         </div>
 
         <div className="space-y-3">
-          <div className="space-y-1">
+          <div>
             <h2 className="text-lg font-medium">
               3. Is rapportage al voldoende gestuurd en niet meer vooral
               handmatig?
             </h2>
             <p className="text-sm text-muted-foreground">
-              Denk aan KPI’s, definities, dashboards en afhankelijkheid van
+              Denk aan KPI&apos;s, definities, dashboards en afhankelijkheid van
               Excel.
             </p>
           </div>
@@ -141,7 +142,9 @@ export default function DiagnosePage() {
       <section className="space-y-3 rounded-2xl border p-5">
         <h2 className="text-lg font-medium">Controle</h2>
         <div className="space-y-1 text-sm text-muted-foreground">
-          <div>Klantnaam: {scan.profile.customerName || "Nog leeg"}</div>
+          <div>
+            Klantnaam: {scan.profile.customerName || "Nog leeg"}
+          </div>
           <div>Sector: {scan.profile.sector || "Nog leeg"}</div>
           <div>Scope: {scan.scope || "Nog leeg"}</div>
           <div>
@@ -153,34 +156,40 @@ export default function DiagnosePage() {
       </section>
 
       {!allAnswered && (
-        <div className="rounded-2xl border p-4 text-sm text-muted-foreground">
-          Vul eerst alle 3 diagnosevragen in om verder te gaan naar advies.
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+          Beantwoord eerst alle diagnosevragen om verder te gaan naar advies.
         </div>
       )}
 
-      <div className="flex items-center justify-between border-t pt-6">
-        <Link
-          href="/scan/nieuw/scope"
-          className="rounded-2xl border px-4 py-2 text-sm shadow-sm"
-        >
-          Vorige
-        </Link>
+      <div className="space-y-4 border-t pt-6">
+        <p className="text-sm text-muted-foreground">
+          Klaar met beantwoorden? Ga door naar het eerste adviesrapport.
+        </p>
 
-        {allAnswered ? (
+        <div className="flex items-center justify-between">
           <Link
-            href="/scan/nieuw/advies"
+            href="/scan/nieuw/scope"
             className="rounded-2xl border px-4 py-2 text-sm shadow-sm"
           >
-            Verder naar advies
+            Vorige
           </Link>
-        ) : (
-          <span
-            aria-disabled="true"
-            className="cursor-not-allowed rounded-2xl border px-4 py-2 text-sm opacity-50 shadow-sm"
-          >
-            Verder naar advies
-          </span>
-        )}
+
+          {allAnswered ? (
+            <Link
+              href="/scan/nieuw/advies"
+              className="inline-flex items-center rounded-2xl bg-black px-5 py-3 text-sm font-medium text-white shadow-sm transition hover:opacity-90"
+            >
+              Verder naar advies →
+            </Link>
+          ) : (
+            <span
+              aria-disabled="true"
+              className="inline-flex cursor-not-allowed items-center rounded-2xl border px-5 py-3 text-sm font-medium text-muted-foreground opacity-60"
+            >
+              Verder naar advies →
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );
