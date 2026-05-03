@@ -124,32 +124,32 @@ export default function ProfileBasisPage() {
         </div>
 
         <div className="space-y-3">
-          <label className="text-sm font-medium">
-            Sector <span className="kweekers-required">*</span>
-          </label>
-<ChoiceCards
-  options={SIZE_OPTIONS}
-  value={scan.profile.organizationSize}
-  onChange={setOrganizationSize}
-/>
-          {!hasSector && (
-            <p className="text-sm text-amber-700">Kies een sector.</p>
-          )}
-        </div>
+  <label className="text-sm font-medium">
+    Sector <span className="kweekers-required">*</span>
+  </label>
+  <ChoiceCards
+    options={SECTOR_OPTIONS}
+    value={scan.profile.sector}
+    onChange={setSector}
+  />
+  {!hasSector && (
+    <p className="text-sm text-amber-700">Kies een sector.</p>
+  )}
+</div>
 
-        <div className="space-y-3">
-          <label className="text-sm font-medium">
-            Organisatiegrootte <span className="kweekers-required">*</span>
-          </label>
-          <ChoiceCards
-            options={SIZE_OPTIONS}
-            value={scan_OPTIONS}
-            value={scan.profile.organizationSize}
-            onChange={setOrganizationSize}
-          />
-          {!hasOrganizationSize && (
-            <p className="text-sm text-amber-700">Kies een organisatiegrootte.</p>
-          )}
+<div className="space-y-3">
+  <label className="text-sm font-medium">
+    Organisatiegrootte <span className="kweekers-required">*</span>
+  </label>
+  <ChoiceCards
+    options={SIZE_OPTIONS}
+    value={scan.profile.organizationSize}
+    onChange={setOrganizationSize}
+  />
+  {!hasOrganizationSize && (
+    <p className="text-sm text-amber-700">Kies een organisatiegrootte.</p>
+  )}
+</div>
         </div>
 
         <div className="space-y-3">
