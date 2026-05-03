@@ -84,9 +84,9 @@ function buildAdvice(scan: {
     body =
       "Er is een basis, maar op meerdere onderdelen is nog aanscherping nodig om stabiel te kunnen sturen.";
   } else if (ownership === "ja" && afasUsage === "ja" && reporting === "ja") {
-    title = "Basis staat redelijk goed";
+    title = "Hoofdbevinding";
     body =
-      "De eerste diagnose laat geen groot basisprobleem zien. Daardoor is het logisch om gericht verder te bouwen.";
+      "De eerste diagnose laat geen direct groot basisprobleem zien. De organisatie lijkt voldoende basis te hebben om gericht door te ontwikkelen.";
   }
 
   const focusPoints: string[] = [];
@@ -152,16 +152,20 @@ export default function AdviesPage() {
 
   return (
     <div className="space-y-8">
-      <div className="space-y-2">
-        <p className="text-sm text-muted-foreground">Stap 4 van 4</p>
-        <h1 className="text-3xl font-semibold tracking-tight">Advies</h1>
-        <p className="text-sm text-muted-foreground">
-          Dit is de eerste inhoudelijke adviespagina van de app.
-        </p>
-      </div>
+<div className="space-y-3">
+  <div className="inline-flex rounded-full border px-3 py-1 text-xs font-medium">
+    Eerste adviesrapport
+  </div>
+  <p className="text-sm text-muted-foreground">Stap 4 van 4</p>
+  <h1 className="text-3xl font-semibold tracking-tight">Adviesrapport</h1>
+  <p className="text-sm text-muted-foreground">
+    Dit rapport geeft een eerste inhoudelijke duiding op basis van
+    klantprofiel, gekozen scope en diagnose-antwoorden.
+  </p>
+</div>
 
       <section className="space-y-3 rounded-2xl border p-5">
-        <h2 className="text-lg font-medium">Samenvatting</h2>
+        <h2 className="text-lg font-medium">Managementsamenvatting</h2>
         <div className="space-y-1 text-sm text-muted-foreground">
           <div>Klantnaam: {scan.profile.customerName || "Nog leeg"}</div>
           <div>Sector: {getSectorLabel(scan.profile.sector)}</div>
@@ -182,7 +186,7 @@ export default function AdviesPage() {
       </section>
 
       <section className="space-y-3 rounded-2xl border p-5">
-        <h2 className="text-lg font-medium">Eerste focuspunten</h2>
+        <h2 className="text-lg font-medium">Aanbevolen focuspunten</h2>
         <ul className="space-y-2 text-sm text-muted-foreground">
           {advice.focusPoints.map((point) => (
             <li key={point} className="list-disc ml-5">
@@ -193,7 +197,7 @@ export default function AdviesPage() {
       </section>
 
       <section className="space-y-3 rounded-2xl border p-5">
-        <h2 className="text-lg font-medium">Eerste duiding</h2>
+        <h2 className="text-lg font-medium">Conclusie</h2>
         <p className="text-sm text-muted-foreground">{advice.guidance}</p>
       </section>
 
@@ -209,7 +213,7 @@ export default function AdviesPage() {
           href="/"
           className="rounded-2xl bg-black px-5 py-3 text-sm font-medium text-white shadow-sm transition hover:opacity-90"
         >
-          Afronden →
+          Scan Scan afronden →
         </Link>
       </div>
     </div>
