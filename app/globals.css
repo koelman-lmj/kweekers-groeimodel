@@ -34,15 +34,14 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  border: 1px solid var(--kweekers-primary);
+  border: 1px solid rgba(53, 63, 99, 0.35);
   border-radius: 9999px;
   padding: 8px 14px;
   color: var(--kweekers-primary);
-  background: white;
+  background: linear-gradient(to right, var(--kweekers-accent-soft), white 28%);
   font-size: 12px;
   font-weight: 600;
 }
-
 .kweekers-primary-button {
   display: inline-flex;
   align-items: center;
