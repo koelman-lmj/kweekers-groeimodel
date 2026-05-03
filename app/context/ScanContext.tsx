@@ -13,9 +13,16 @@ type CustomerProfile = {
   sector: string;
 };
 
+type DiagnosisState = {
+  ownership: string;
+  afasUsage: string;
+  reporting: string;
+};
+
 type ScanState = {
   profile: CustomerProfile;
   scope: string;
+  diagnosis: DiagnosisState;
 };
 
 type ScanContextValue = {
@@ -23,58 +30,110 @@ type ScanContextValue = {
   setCustomerName: (value: string) => void;
   setSector: (value: string) => void;
   setScope: (value: string) => void;
+  setOwnership: (value: string) => void;
+  setAfasUsage: (value: string) => void;
+  setReporting: (value: string) => void;
   resetScan: () => void;
-};
-
-const initialScanState: ScanState = {
-  profile: {
-    customerName: "",
-    sector: "",
-  },
-  scope: "volledige_scan",
 };
 
 const ScanContext = createContext<ScanContextValue | null>(null);
 
-export function ScanProvider({ children }: { children: ReactNode }) {
-  const [scan, setScan] = useState<ScanState>(initialScanState);
+function createInitialScanState(): ScanState {
+  return {
+    profile: {
+      customerName: "",
+      sector: "",
+    },
+    scope: "volledige_scan",
+    diagnosis: {
+      ownership: "",
+      afasUsage: "",
+      reporting: "",
+    },
+  };
+}
 
-  const value = useMemo<ScanContextValue>(() => {
-    return {
+export function ScanProvider({ children }: { children: ReactNode }) {
+  const [scan, setScan] = useState<ScanState>(() => createInitialScanState());
+
+  const contextValue = useMemo<ScanContextValue>(
+    () => ({
       scan,
-      setCustomerName: (value: string) =>
+
+      setCustomerName: (value: string) => {
         setScan((previous) => ({
           ...previous,
           profile: {
             ...previous.profile,
             customerName: value,
           },
-        })),
-      setSector: (value: string) =>
+        }));
+      },
+
+      setSector: (value: string) => {
         setScan((previous) => ({
           ...previous,
           profile: {
             ...previous.profile,
             sector: value,
           },
-        })),
-      setScope: (value: string) =>
+        }));
+      },
+
+      setScope: (value: string) => {
         setScan((previous) => ({
           ...previous,
           scope: value,
-        })),
-      resetScan: () => setScan(initialScanState),
-    };
-  }, [scan]);
+        }));
+      },
 
-  return <ScanContext.Provider value={value}>{children}</ScanContext.Provider>;
+      setOwnership: (value: string) => {
+        setScan((previous) => ({
+          ...previous,
+          diagnosis: {
+            ...previous.diagnosis,
+            ownership: value,
+          },
+        }));
+      },
+
+      setAfasUsage: (value: string) => {
+        setScan((previous) => ({
+          ...previous,
+          diagnosis: {
+            ...previous.diagnosis,
+            afasUsage: value,
+          },
+        }));
+      },
+
+      setReporting: (value: string) => {
+        setScan((previous) => ({
+          ...previous,
+          diagnosis: {
+            ...previous.diagnosis,
+            reporting: value,
+          },
+        }));
+      },
+
+      resetScan: () => {
+        setScan(createInitialScanState());
+      },
+    }),
+    [scan]
+  );
+
+  return (
+    <ScanContext.Provider value={contextValue}>{children}</ScanContext.Provider>
+  );
 }
 
 export function useScanContext() {
   const context = useContext(ScanContext);
 
   if (!context) {
-    throw new Error("useScanContext must be used within a ScanProvider");
+    throw new Error("useScanContext must be used within ScanProvider");
   }
 
   return context;
