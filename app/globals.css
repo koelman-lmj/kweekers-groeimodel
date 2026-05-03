@@ -72,3 +72,17 @@ body {
 .kweekers-required {
   color: var(--kweekers-accent);
 }
+.kweekers-active-panel {
+  border-color: var(--kweekers-primary);
+  background: var(--kweekers-primary);
+  color: white;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.kweekers-active-panel-muted {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.kweekers-selectable-hover:hover {
+  background: rgba(53, 63, 99, 0.04);
+}
