@@ -89,7 +89,7 @@ export default function ProfilePage() {
         {isProfileComplete ? (
           <Link
             href="/scan/nieuw/scope"
-            className="inline-flex items-center rounded-2xl bg-black px-5 py-3 text-sm font-medium text-white shadow-sm transition hover:opacity-90"
+className="kweekers-primary-button"
           >
             Verder naar scope →
           </Link>
