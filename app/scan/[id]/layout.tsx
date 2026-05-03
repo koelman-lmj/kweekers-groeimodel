@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
+import Image from "next/image";
 import type { ReactNode } from "react";
 import { ScanProvider } from "@/app/context/ScanContext";
 
@@ -53,9 +54,15 @@ export default function ScanIdLayout({
           <aside className="lg:sticky lg:top-8 lg:self-start">
             <div className="rounded-3xl border bg-white p-6 shadow-sm">
               <div className="space-y-4">
-                <div className="inline-flex rounded-full border px-3 py-1 text-xs font-medium">
-                  KWEEKERS Groeimodel
-                </div>
+<div className="kweekers-badge">
+  <Image
+    src="/kweekers-logo.png"
+    alt="Kweekers logo"
+    width={24}
+    height={24}
+  />
+  <span>KWEEKERS Groeimodel</span>
+</div>
 
                 <div className="space-y-2">
                   <h2 className="text-2xl font-semibold tracking-tight">
