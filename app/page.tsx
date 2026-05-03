@@ -41,12 +41,10 @@ export default function HomePage() {
 </Link>
   </div>
 
-<div className="rounded-2xl bg-neutral-100/80 p-4">
-  <p className="text-sm font-semibold text-neutral-900">
-    Wat gebeurt hierna?
-  </p>
-  <p className="mt-1 text-sm leading-6 text-neutral-600">
-Je start met het klantprofiel. Daarna doorloop je scope, diagnose en advies.
+<div className="kweekers-accent-box">
+  <div className="text-sm font-semibold">Wat gebeurt hierna?</div>
+  <p className="mt-2 text-sm">
+    Je start met het klantprofiel. Daarna doorloop je scope, diagnose en advies.
   </p>
 </div>
 </div>
