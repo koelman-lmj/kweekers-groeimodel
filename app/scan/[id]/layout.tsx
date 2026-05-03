@@ -91,22 +91,21 @@ export default function ScanIdLayout({
 
                     const href = `/scan/${scanId}/${step.segment}`;
 
-                    const cardClass = isActive
-                      ? "border-black bg-black text-white"
-                      : isCompleted
-                      ? "border-black bg-white hover:bg-neutral-50"
-                      : "bg-white opacity-70";
+const cardClass = isActive
+  ? "kweekers-active-panel"
+  : isCompleted
+  ? "kweekers-selectable-hover border-black bg-white"
+  : "bg-white opacity-70";
 
-                    const numberClass = isActive
-                      ? "border-white text-white"
-                      : isCompleted
-                      ? "border-black text-black"
-                      : "border-black text-black";
+const numberClass = isActive
+  ? "border-white text-white"
+  : isCompleted
+  ? "border-black text-black"
+  : "border-black text-black";
 
-                    const textClass = isActive
-                      ? "text-white/80"
-                      : "text-muted-foreground";
-
+const textClass = isActive
+  ? "kweekers-active-panel-muted"
+  : "text-muted-foreground";
                     const content = (
                       <div
                         className={`flex items-start gap-3 rounded-2xl border p-3 transition ${cardClass}`}
