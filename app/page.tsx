@@ -33,12 +33,12 @@ export default function HomePage() {
 
 <div className="mt-10 max-w-xl space-y-4">
   <div>
-    <Link
-      href="/scan/nieuw/profile"
-Start met klantprofiel →
-    >
-      Start met klantprofiel →
-    </Link>
+<Link
+  href="/scan/nieuw/profile"
+  className="kweekers-primary-button"
+>
+  Start met klantprofiel →
+</Link>
   </div>
 
 <div className="rounded-2xl bg-neutral-100/80 p-4">
