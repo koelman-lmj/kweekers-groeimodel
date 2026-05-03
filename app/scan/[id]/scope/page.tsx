@@ -58,17 +58,17 @@ export default function ScopePage() {
               type="button"
               onClick={() => setScope(option.value)}
               aria-pressed={isActive}
-              className={`w-full rounded-2xl border p-5 text-left transition ${
-                isActive
-                  ? "border-black bg-black text-white"
-                  : "bg-white hover:border-black"
-              }`}
+className={`w-full rounded-2xl border p-5 text-left transition ${
+  isActive
+    ? "kweekers-active-panel"
+    : "kweekers-selectable-hover bg-white hover:border-black"
+}`}
             >
               <div className="text-lg font-medium">{option.label}</div>
               <div
-                className={`mt-2 text-sm ${
-                  isActive ? "text-white/80" : "text-muted-foreground"
-                }`}
+className={`mt-2 text-sm ${
+  isActive ? "kweekers-active-panel-muted" : "text-muted-foreground"
+}`}
               >
                 {option.description}
               </div>
