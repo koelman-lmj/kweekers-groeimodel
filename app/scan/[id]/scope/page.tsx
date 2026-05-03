@@ -26,8 +26,17 @@ const SCOPE_OPTIONS = [
   },
 ];
 
+function getScopeLabel(value: string) {
+  return (
+    SCOPE_OPTIONS.find((option) => option.value === value)?.label ||
+    "Nog niet gekozen"
+  );
+}
+
 export default function ScopePage() {
   const { scan, setScope } = useScanContext();
+
+  const hasSelectedScope = scan.scope !== "";
 
   return (
     <div className="space-y-8">
@@ -41,21 +50,28 @@ export default function ScopePage() {
 
       <section className="space-y-4">
         {SCOPE_OPTIONS.map((option) => {
-          const active = scan.scope === option.value;
+          const isActive = scan.scope === option.value;
 
           return (
             <button
               key={option.value}
               type="button"
               onClick={() => setScope(option.value)}
-              className={`block w-full rounded-2xl border p-5 text-left shadow-sm ${
-                active ? "bg-muted" : "bg-background"
+              aria-pressed={isActive}
+              className={`w-full rounded-2xl border p-5 text-left transition ${
+                isActive
+                  ? "border-black bg-black text-white"
+                  : "bg-white hover:border-black"
               }`}
             >
-              <div className="font-medium">{option.label}</div>
-              <p className="mt-2 text-sm text-muted-foreground">
+              <div className="text-lg font-medium">{option.label}</div>
+              <div
+                className={`mt-2 text-sm ${
+                  isActive ? "text-white/80" : "text-muted-foreground"
+                }`}
+              >
                 {option.description}
-              </p>
+              </div>
             </button>
           );
         })}
@@ -64,9 +80,15 @@ export default function ScopePage() {
       <section className="space-y-3 rounded-2xl border p-5">
         <h2 className="text-lg font-medium">Controle</h2>
         <div className="text-sm text-muted-foreground">
-          Gekozen scope: {scan.scope}
+          <div>Gekozen scope: {getScopeLabel(scan.scope)}</div>
         </div>
       </section>
+
+      {!hasSelectedScope && (
+        <div className="rounded-2xl border p-4 text-sm text-muted-foreground">
+          Kies eerst een scope om verder te gaan naar diagnose.
+        </div>
+      )}
 
       <div className="flex items-center justify-between border-t pt-6">
         <Link
@@ -76,12 +98,21 @@ export default function ScopePage() {
           Vorige
         </Link>
 
-        <Link
-          href="/scan/nieuw/diagnose"
-          className="rounded-2xl border px-4 py-2 text-sm shadow-sm"
-        >
-          Verder naar diagnose
-        </Link>
+        {hasSelectedScope ? (
+          <Link
+            href="/scan/nieuw/diagnose"
+            className="rounded-2xl border px-4 py-2 text-sm shadow-sm"
+          >
+            Verder naar diagnose
+          </Link>
+        ) : (
+          <span
+            aria-disabled="true"
+            className="cursor-not-allowed rounded-2xl border px-4 py-2 text-sm opacity-50 shadow-sm"
+          >
+            Verder naar diagnose
+          </span>
+        )}
       </div>
     </div>
   );
