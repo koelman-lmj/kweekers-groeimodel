@@ -99,12 +99,12 @@ export default function ScopePage() {
         </Link>
 
         {hasSelectedScope ? (
-          <Link
-            href="/scan/nieuw/diagnose"
-            className="rounded-2xl border px-4 py-2 text-sm shadow-sm"
-          >
-            Verder naar diagnose
-          </Link>
+<Link
+  href="/scan/nieuw/diagnose"
+  className="inline-flex items-center rounded-2xl bg-black px-5 py-3 text-sm font-medium text-white shadow-sm transition hover:opacity-90"
+>
+  Verder naar diagnose →
+</Link>
         ) : (
           <span
             aria-disabled="true"
