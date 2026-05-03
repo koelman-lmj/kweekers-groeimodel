@@ -34,13 +34,15 @@ export default function HomePage() {
     </Link>
   </div>
 
-  <div className="rounded-2xl border bg-neutral-50 p-5">
-    <p className="text-sm font-medium">Wat gebeurt hierna?</p>
-    <p className="mt-2 text-sm text-muted-foreground">
-      Je start met het invullen van het klantprofiel. Daarna doorloop je
-      stap voor stap scope, diagnose en advies.
-    </p>
-  </div>
+<div className="rounded-2xl bg-neutral-100/80 p-4">
+  <p className="text-sm font-semibold text-neutral-900">
+    Wat gebeurt hierna?
+  </p>
+  <p className="mt-1 text-sm leading-6 text-neutral-600">
+    Je start met het invullen van het klantprofiel. Daarna doorloop je stap
+    voor stap scope, diagnose en advies.
+  </p>
+</div>
 </div>
       </section>
     </main>
