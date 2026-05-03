@@ -15,12 +15,14 @@ type CustomerProfile = {
 
 type ScanState = {
   profile: CustomerProfile;
+  scope: string;
 };
 
 type ScanContextValue = {
   scan: ScanState;
   setCustomerName: (value: string) => void;
   setSector: (value: string) => void;
+  setScope: (value: string) => void;
   resetScan: () => void;
 };
 
@@ -32,6 +34,7 @@ function createInitialScanState(): ScanState {
       customerName: "",
       sector: "",
     },
+    scope: "volledige_scan",
   };
 }
 
@@ -57,6 +60,12 @@ export function ScanProvider({ children }: { children: ReactNode }) {
             ...prev.profile,
             sector: value,
           },
+        }));
+      },
+      setScope: (value) => {
+        setScan((prev) => ({
+          ...prev,
+          scope: value,
         }));
       },
       resetScan: () => {
