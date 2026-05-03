@@ -24,3 +24,51 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+:root {
+  --kweekers-primary: #353F63;
+  --kweekers-accent: #ED6E41;
+  --kweekers-accent-soft: #FCE7DE;
+}
+
+.kweekers-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--kweekers-primary);
+  border-radius: 9999px;
+  padding: 8px 14px;
+  color: var(--kweekers-primary);
+  background: white;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.kweekers-primary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+  background: var(--kweekers-primary);
+  color: white;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  transition: opacity 0.2s ease;
+}
+
+.kweekers-primary-button:hover {
+  opacity: 0.92;
+}
+
+.kweekers-accent-box {
+  border: 1px solid #f2c2ae;
+  background: var(--kweekers-accent-soft);
+  color: #8a4b2f;
+  border-radius: 1rem;
+  padding: 14px 16px;
+}
+
+.kweekers-required {
+  color: var(--kweekers-accent);
+}
