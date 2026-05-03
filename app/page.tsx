@@ -9,7 +9,7 @@ export default function HomePage() {
         </div>
 
         <h1 className="mt-6 max-w-3xl text-5xl font-semibold tracking-tight">
-          Begeleide diagnose voor digitale volwassenheid.
+          Start hier de begeleide diagnose voor digitale volwassenheid.
         </h1>
 
         <p className="mt-4 max-w-3xl text-base leading-7 text-muted-foreground">
