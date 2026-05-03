@@ -25,12 +25,12 @@ export default function HomePage() {
         </div>
 
         <div className="mt-8">
-          <Link
-            href="/scan/new"
-            className="inline-flex rounded-2xl border px-5 py-3 shadow-sm"
-          >
-            Start groeimodel →
-          </Link>
+<Link
+  href="/scan/nieuw/profile"
+  className="inline-flex rounded-2xl border px-5 py-3 shadow-sm"
+>
+  Start groeimodel →
+</Link>
         </div>
       </section>
     </main>
