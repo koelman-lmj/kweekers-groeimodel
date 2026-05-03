@@ -30,7 +30,7 @@ export default function HomePage() {
       href="/scan/nieuw/profile"
       className="inline-flex items-center rounded-2xl bg-black px-8 py-4 text-base font-semibold text-white shadow-sm transition hover:scale-[1.01] hover:opacity-90"
     >
-      Start groeimodel →
+      Start met klantprofiel →
     </Link>
   </div>
 
@@ -39,8 +39,7 @@ export default function HomePage() {
     Wat gebeurt hierna?
   </p>
   <p className="mt-1 text-sm leading-6 text-neutral-600">
-    Je start met het invullen van het klantprofiel. Daarna doorloop je stap
-    voor stap scope, diagnose en advies.
+Je start met het klantprofiel. Daarna doorloop je scope, diagnose en advies.
   </p>
 </div>
 </div>
