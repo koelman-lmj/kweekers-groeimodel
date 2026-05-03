@@ -34,13 +34,12 @@ export default function DiagnosePage() {
           Vorige
         </Link>
 
-        <Link
-          href="#"
-          className="pointer-events-none rounded-2xl border px-4 py-2 text-sm opacity-50 shadow-sm"
-          aria-disabled="true"
-        >
-          Advies volgt hierna
-        </Link>
+<Link
+  href="/scan/nieuw/advies"
+  className="rounded-2xl border px-4 py-2 text-sm shadow-sm"
+>
+  Verder naar advies
+</Link>
       </div>
     </div>
   );
