@@ -45,19 +45,19 @@ function AnswerButtons({
             key={option.value}
             type="button"
             onClick={() => onChange(option.value)}
-            className={
-              isActive
-                ? "rounded-2xl border bg-black px-5 py-4 text-left text-white shadow-sm transition"
-                : "rounded-2xl border px-5 py-4 text-left shadow-sm transition hover:bg-neutral-50"
-            }
+className={
+  isActive
+    ? "kweekers-active-panel rounded-2xl border px-5 py-4 text-left shadow-sm transition"
+    : "kweekers-selectable-hover rounded-2xl border px-5 py-4 text-left shadow-sm transition"
+}
           >
             <div className="text-lg font-medium">{option.label}</div>
             <div
-              className={
-                isActive
-                  ? "mt-1 text-sm text-white/85"
-                  : "mt-1 text-sm text-muted-foreground"
-              }
+className={
+  isActive
+    ? "kweekers-active-panel-muted mt-1 text-sm"
+    : "mt-1 text-sm text-muted-foreground"
+}
             >
               {option.description}
             </div>
