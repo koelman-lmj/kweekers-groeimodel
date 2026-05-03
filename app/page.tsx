@@ -24,18 +24,22 @@ export default function HomePage() {
           <div>✓ Geschikt als nulmeting en vervolgmeting</div>
         </div>
 
-        <div className="mt-8 space-y-3">
-          <Link
-            href="/scan/nieuw/profile"
-            className="inline-flex items-center rounded-2xl bg-black px-6 py-3 text-sm font-medium text-white shadow-sm transition hover:opacity-90"
-          >
-            Start groeimodel →
-          </Link>
+<div className="mt-8 space-y-4">
+  <div className="inline-flex rounded-xl border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-900">
+    Stap 1: klik op de knop hieronder om de scan te starten
+  </div>
 
-          <p className="text-sm text-muted-foreground">
-            Start hier met het invullen van het klantprofiel.
-          </p>
-        </div>
+  <Link
+    href="/scan/nieuw/profile"
+    className="inline-flex items-center rounded-2xl bg-black px-8 py-4 text-base font-semibold text-white shadow-sm transition hover:scale-[1.01] hover:opacity-90"
+  >
+    Start hier met het groeimodel →
+  </Link>
+
+  <p className="text-sm text-muted-foreground">
+    Je gaat hierna direct naar stap 1: klantprofiel.
+  </p>
+</div>
       </section>
     </main>
   );
