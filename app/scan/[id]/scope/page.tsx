@@ -101,7 +101,7 @@ className={`mt-2 text-sm ${
         {hasSelectedScope ? (
 <Link
   href="/scan/nieuw/diagnose"
-  className="inline-flex items-center rounded-2xl bg-black px-5 py-3 text-sm font-medium text-white shadow-sm transition hover:opacity-90"
+className="kweekers-primary-button"
 >
   Verder naar diagnose →
 </Link>
