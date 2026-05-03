@@ -213,7 +213,7 @@ export default function AdviesPage() {
           href="/"
           className="rounded-2xl bg-black px-5 py-3 text-sm font-medium text-white shadow-sm transition hover:opacity-90"
         >
-          Scan Scan afronden →
+          Scan afronden →
         </Link>
       </div>
     </div>
