@@ -32,7 +32,13 @@ export default function FlowQuestionPage() {
   const sectionCode = getParam(params.sectionCode);
   const questionKey = getParam(params.questionKey);
 
-  const { scan, setCustomerName, setSector } = useScanContext();
+const {
+  scan,
+  setCustomerName,
+  setSector,
+  setOrganizationSize,
+  setAdministrationCount,
+} = useScanContext();
 
   const section = getSection(sectionCode);
   const question = getQuestion(questionKey);
@@ -64,23 +70,37 @@ export default function FlowQuestionPage() {
     ? `/scan/${scanId}/flow/${sectionCode}/${nextQuestionKey}`
     : `/scan/${scanId}/summary/${sectionCode}`;
 
-  const answerValue =
-    questionKey === "customer_name"
-      ? scan.profile.customerName
-      : questionKey === "sector"
-      ? scan.profile.sector
-      : "";
+const answerValue =
+  questionKey === "customer_name"
+    ? scan.profile.customerName
+    : questionKey === "sector"
+    ? scan.profile.sector
+    : questionKey === "organization_size"
+    ? scan.profile.organizationSize
+    : questionKey === "administration_count"
+    ? scan.profile.administrationCount
+    : "";
 
-  const setAnswerValue = (value: string) => {
-    if (questionKey === "customer_name") {
-      setCustomerName(value);
-      return;
-    }
+const setAnswerValue = (value: string) => {
+  if (questionKey === "customer_name") {
+    setCustomerName(value);
+    return;
+  }
 
-    if (questionKey === "sector") {
-      setSector(value);
-    }
-  };
+  if (questionKey === "sector") {
+    setSector(value);
+    return;
+  }
+
+  if (questionKey === "organization_size") {
+    setOrganizationSize(value);
+    return;
+  }
+
+  if (questionKey === "administration_count") {
+    setAdministrationCount(value);
+  }
+};
 
   const canContinue = question.required ? isFilled(answerValue) : true;
 
