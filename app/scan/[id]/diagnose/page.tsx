@@ -70,6 +70,11 @@ function AnswerButtons({
 export default function DiagnosePage() {
   const { scan, setOwnership, setAfasUsage, setReporting } = useScanContext();
 
+  const allAnswered =
+    scan.diagnosis.ownership !== "" &&
+    scan.diagnosis.afasUsage !== "" &&
+    scan.diagnosis.reporting !== "";
+
   return (
     <div className="space-y-8">
       <div className="space-y-2">
@@ -135,7 +140,7 @@ export default function DiagnosePage() {
 
       <section className="space-y-3 rounded-2xl border p-5">
         <h2 className="text-lg font-medium">Controle</h2>
-        <div className="text-sm text-muted-foreground space-y-1">
+        <div className="space-y-1 text-sm text-muted-foreground">
           <div>Klantnaam: {scan.profile.customerName || "Nog leeg"}</div>
           <div>Sector: {scan.profile.sector || "Nog leeg"}</div>
           <div>Scope: {scan.scope || "Nog leeg"}</div>
@@ -147,6 +152,12 @@ export default function DiagnosePage() {
         </div>
       </section>
 
+      {!allAnswered && (
+        <div className="rounded-2xl border p-4 text-sm text-muted-foreground">
+          Vul eerst alle 3 diagnosevragen in om verder te gaan naar advies.
+        </div>
+      )}
+
       <div className="flex items-center justify-between border-t pt-6">
         <Link
           href="/scan/nieuw/scope"
@@ -155,12 +166,21 @@ export default function DiagnosePage() {
           Vorige
         </Link>
 
-        <Link
-          href="/scan/nieuw/advies"
-          className="rounded-2xl border px-4 py-2 text-sm shadow-sm"
-        >
-          Verder naar advies
-        </Link>
+        {allAnswered ? (
+          <Link
+            href="/scan/nieuw/advies"
+            className="rounded-2xl border px-4 py-2 text-sm shadow-sm"
+          >
+            Verder naar advies
+          </Link>
+        ) : (
+          <span
+            aria-disabled="true"
+            className="cursor-not-allowed rounded-2xl border px-4 py-2 text-sm opacity-50 shadow-sm"
+          >
+            Verder naar advies
+          </span>
+        )}
       </div>
     </div>
   );
