@@ -28,11 +28,11 @@ export default function ProfilePage() {
 
   const customerNameFieldClass = hasCustomerName
     ? "w-full rounded-2xl border px-4 py-3 outline-none"
-    : "w-full rounded-2xl border border-red-500 bg-red-50 px-4 py-3 outline-none";
+    : "w-full rounded-2xl border border-amber-400 bg-amber-50 px-4 py-3 outline-none";
 
   const sectorFieldClass = hasSector
     ? "w-full rounded-2xl border bg-white px-4 py-3 outline-none"
-    : "w-full rounded-2xl border border-red-500 bg-red-50 px-4 py-3 outline-none";
+    : "w-full rounded-2xl border border-amber-400 bg-amber-50 px-4 py-3 outline-none";
 
   return (
     <div className="space-y-8">
@@ -47,7 +47,7 @@ export default function ProfilePage() {
       <section className="space-y-4 rounded-2xl border p-5">
         <div className="space-y-2">
           <label htmlFor="customerName" className="text-sm font-medium">
-            Klantnaam <span className="text-red-600">*</span>
+            Klantnaam <span className="text-amber-700">*</span>
           </label>
           <input
             id="customerName"
@@ -58,7 +58,7 @@ export default function ProfilePage() {
             className={customerNameFieldClass}
           />
           {!hasCustomerName && (
-            <p className="text-sm text-red-600">
+            <p className="text-sm text-amber-500">*</span>">
               Klantnaam is verplicht.
             </p>
           )}
@@ -66,7 +66,7 @@ export default function ProfilePage() {
 
         <div className="space-y-2">
           <label htmlFor="sector" className="text-sm font-medium">
-            Sector <span className="text-red-600">*</span>
+            Sector <span className="text-amber-700">*</span>
           </label>
           <select
             id="sector"
@@ -81,7 +81,7 @@ export default function ProfilePage() {
             ))}
           </select>
           {!hasSector && (
-            <p className="text-sm text-red-600">
+            <p className="text-sm text-amber-700">
               Sector is verplicht.
             </p>
           )}
@@ -99,7 +99,7 @@ export default function ProfilePage() {
       </section>
 
       {!isProfileComplete && (
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
           Vul eerst alle verplichte velden in om verder te gaan naar scope.
         </div>
       )}
