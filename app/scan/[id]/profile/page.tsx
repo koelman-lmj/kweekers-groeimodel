@@ -146,13 +146,12 @@ export default function ProfileBasisPage() {
     value={scan.profile.organizationSize}
     onChange={setOrganizationSize}
   />
-  {!hasOrganizationSize && (
-    <p className="text-sm text-amber-700">Kies een organisatiegrootte.</p>
-  )}
+{!hasOrganizationSize && (
+  <p className="text-sm text-amber-700">Kies een organisatiegrootte.</p>
+)}
 </div>
-        </div>
 
-        <div className="space-y-3">
+<div className="space-y-3">
           <label className="text-sm font-medium">
             Aantal administraties / entiteiten{" "}
             <span className="kweekers-required">*</span>
