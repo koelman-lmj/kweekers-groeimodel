@@ -6,12 +6,12 @@ export default function HomePage() {
     <main className="min-h-screen bg-neutral-50 px-6 py-10">
       <section className="mx-auto max-w-5xl rounded-3xl border bg-white p-10 shadow-sm sm:p-12">
 <div className="kweekers-badge">
-  <Image
-    src="/kweekers-logo.png"
-    alt="Kweekers logo"
-    width={28}
-    height={28}
-  />
+<Image
+  src="/kweekers-logo.png"
+  alt="Kweekers logo"
+  width={40}
+  height={40}
+/>
   <span>KWEEKERS Groeimodel</span>
 </div>
 
