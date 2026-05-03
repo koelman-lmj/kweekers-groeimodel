@@ -44,7 +44,7 @@ function createInitialScanState(): ScanState {
       customerName: "",
       sector: "",
     },
-    scope: "volledige_scan",
+scope: "",
     diagnosis: {
       ownership: "",
       afasUsage: "",
