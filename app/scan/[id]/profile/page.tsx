@@ -22,6 +22,10 @@ function getSectorLabel(value: string) {
 export default function ProfilePage() {
   const { scan, setCustomerName, setSector } = useScanContext();
 
+  const hasCustomerName = scan.profile.customerName.trim() !== "";
+  const hasSector = scan.profile.sector !== "";
+  const isProfileComplete = hasCustomerName && hasSector;
+
   return (
     <div className="space-y-8">
       <div className="space-y-2">
@@ -45,6 +49,11 @@ export default function ProfilePage() {
             placeholder="Bijvoorbeeld: Pieter BV"
             className="w-full rounded-2xl border px-4 py-3 outline-none"
           />
+          {!hasCustomerName && (
+            <p className="text-sm text-muted-foreground">
+              Vul een klantnaam in om verder te gaan.
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -63,24 +72,44 @@ export default function ProfilePage() {
               </option>
             ))}
           </select>
+          {!hasSector && (
+            <p className="text-sm text-muted-foreground">
+              Kies een sector om verder te gaan.
+            </p>
+          )}
         </div>
       </section>
 
       <section className="space-y-3 rounded-2xl border p-5">
         <h2 className="text-lg font-medium">Controle</h2>
         <div className="text-sm text-muted-foreground">
-          <div>Klantnaam: {scan.profile.customerName || "Nog leeg"}</div>
+          <div>Klantnaam: {hasCustomerName ? scan.profile.customerName : "Nog leeg"}</div>
           <div>Sector: {getSectorLabel(scan.profile.sector)}</div>
         </div>
       </section>
 
+      {!isProfileComplete && (
+        <div className="rounded-2xl border p-4 text-sm text-muted-foreground">
+          Vul eerst klantnaam en sector in om verder te gaan naar scope.
+        </div>
+      )}
+
       <div className="flex items-center justify-end border-t pt-6">
-        <Link
-          href="/scan/nieuw/scope"
-          className="rounded-2xl border px-4 py-2 text-sm shadow-sm"
-        >
-          Verder naar scope
-        </Link>
+        {isProfileComplete ? (
+          <Link
+            href="/scan/nieuw/scope"
+            className="rounded-2xl border px-4 py-2 text-sm shadow-sm"
+          >
+            Verder naar scope
+          </Link>
+        ) : (
+          <span
+            aria-disabled="true"
+            className="cursor-not-allowed rounded-2xl border px-4 py-2 text-sm opacity-50 shadow-sm"
+          >
+            Verder naar scope
+          </span>
+        )}
       </div>
     </div>
   );
