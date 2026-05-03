@@ -45,12 +45,19 @@ function AnswerButtons({
             key={option.value}
             type="button"
             onClick={() => onChange(option.value)}
-            className={`rounded-2xl border p-4 text-left ${
-              isActive ? "border-black" : ""
+            aria-pressed={isActive}
+            className={`w-full rounded-2xl border p-4 text-left transition ${
+              isActive
+                ? "border-black bg-black text-white"
+                : "bg-white hover:border-black"
             }`}
           >
             <div className="font-medium">{option.label}</div>
-            <div className="text-sm text-muted-foreground">
+            <div
+              className={`text-sm ${
+                isActive ? "text-white/80" : "text-muted-foreground"
+              }`}
+            >
               {option.description}
             </div>
           </button>
