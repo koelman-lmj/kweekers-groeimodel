@@ -8,34 +8,11 @@ import {
   getQuestionsForSection,
   getSection,
 } from "@/lib/scan/engine/definition-helpers";
+import { getAnswerFromScan } from "@/lib/scan/engine/answer-mapping";
 
 function getParam(value: string | string[] | undefined): string {
   if (Array.isArray(value)) return value[0] ?? "";
   return value ?? "";
-}
-
-function getAnswerValue(
-  questionKey: string,
-  scan: ReturnType<typeof useScanContext>["scan"]
-): string {
-  if (questionKey === "customer_name") return scan.profile.customerName;
-  if (questionKey === "sector") return scan.profile.sector;
-  if (questionKey === "organization_size") return scan.profile.organizationSize;
-  if (questionKey === "administration_count") return scan.profile.administrationCount;
-
-  if (questionKey === "scan_reason") return scan.profile.scanReason;
-  if (questionKey === "primary_goal") return scan.profile.primaryGoal;
-  if (questionKey === "biggest_bottleneck") return scan.profile.biggestBottleneck;
-
-  if (questionKey === "scope") return scan.scope;
-
-  if (questionKey === "ownership") return scan.diagnosis.ownership;
-  if (questionKey === "afas_usage") return scan.diagnosis.afasUsage;
-  if (questionKey === "reporting") return scan.diagnosis.reporting;
-
-  if (questionKey === "advice_direction") return scan.advice.direction;
-
-  return "";
 }
 
 export default function SectionSummaryPage() {
@@ -82,7 +59,7 @@ export default function SectionSummaryPage() {
 
   const canContinue = questions.every((question) => {
     if (!question.required) return true;
-    return getAnswerValue(question.key, scan).trim() !== "";
+    return getAnswerFromScan(scan, question.key).trim() !== "";
   });
 
   const isFinalStep = !hasNextStep;
@@ -104,7 +81,7 @@ export default function SectionSummaryPage() {
 
         <div className="space-y-2 text-sm text-muted-foreground">
           {questions.map((question) => {
-            const rawValue = getAnswerValue(question.key, scan);
+            const rawValue = getAnswerFromScan(scan, question.key);
             const optionSet = getOptionSet(question.optionSetKey);
 
             let displayValue = rawValue || "Nog niet ingevuld";
