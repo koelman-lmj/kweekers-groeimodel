@@ -81,4 +81,14 @@ export const questions: QuestionDefinition[] = [
     required: true,
     optionSetKey: "scope_options",
   },
+{
+  key: "ownership",
+  sectionCode: "diagnose",
+  order: 10,
+  label: "Eigenaarschap en verantwoordelijkheid",
+  helpText: "Hoe duidelijk is het eigenaarschap van processen en inrichting?",
+  inputType: "single_select",
+  required: true,
+  optionSetKey: "diagnosis_ownership_options",
+},
 ];
