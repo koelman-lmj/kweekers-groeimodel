@@ -22,9 +22,12 @@ export type ScanState = {
   };
   scope: string;
   diagnosis: {
-    ownership: string;
-    afasUsage: string;
-    reporting: string;
+    ownershipClarity: string;
+    changeDecisionProcess: string;
+    improvementGovernance: string;
+    processStandardization: string;
+    exceptionControl: string;
+    issueResolution: string;
   };
   advice: {
     direction: string;
@@ -45,9 +48,12 @@ const INITIAL_SCAN: ScanState = {
   },
   scope: "",
   diagnosis: {
-    ownership: "",
-    afasUsage: "",
-    reporting: "",
+    ownershipClarity: "",
+    changeDecisionProcess: "",
+    improvementGovernance: "",
+    processStandardization: "",
+    exceptionControl: "",
+    issueResolution: "",
   },
   advice: {
     direction: "",
@@ -70,9 +76,12 @@ type ScanContextValue = {
 
   setScope: (value: string) => void;
 
-  setOwnership: (value: string) => void;
-  setAfasUsage: (value: string) => void;
-  setReporting: (value: string) => void;
+  setOwnershipClarity: (value: string) => void;
+  setChangeDecisionProcess: (value: string) => void;
+  setImprovementGovernance: (value: string) => void;
+  setProcessStandardization: (value: string) => void;
+  setExceptionControl: (value: string) => void;
+  setIssueResolution: (value: string) => void;
 
   setAdviceDirection: (value: string) => void;
 };
@@ -86,7 +95,31 @@ function loadInitialScan(): ScanState {
     const storedValue = window.localStorage.getItem(STORAGE_KEY);
     if (!storedValue) return INITIAL_SCAN;
 
-    return JSON.parse(storedValue) as ScanState;
+    const parsed = JSON.parse(storedValue) as Partial<ScanState>;
+
+    return {
+      profile: {
+        customerName: parsed.profile?.customerName ?? "",
+        sector: parsed.profile?.sector ?? "",
+        organizationSize: parsed.profile?.organizationSize ?? "",
+        administrationCount: parsed.profile?.administrationCount ?? "",
+        scanReason: parsed.profile?.scanReason ?? "",
+        primaryGoal: parsed.profile?.primaryGoal ?? "",
+        biggestBottleneck: parsed.profile?.biggestBottleneck ?? "",
+      },
+      scope: parsed.scope ?? "",
+      diagnosis: {
+        ownershipClarity: parsed.diagnosis?.ownershipClarity ?? "",
+        changeDecisionProcess: parsed.diagnosis?.changeDecisionProcess ?? "",
+        improvementGovernance: parsed.diagnosis?.improvementGovernance ?? "",
+        processStandardization: parsed.diagnosis?.processStandardization ?? "",
+        exceptionControl: parsed.diagnosis?.exceptionControl ?? "",
+        issueResolution: parsed.diagnosis?.issueResolution ?? "",
+      },
+      advice: {
+        direction: parsed.advice?.direction ?? "",
+      },
+    };
   } catch (error) {
     console.error("Kon scan-state niet laden uit localStorage", error);
     return INITIAL_SCAN;
@@ -132,16 +165,6 @@ export function ScanProvider({ children }: { children: ReactNode }) {
       ...current,
       diagnosis: {
         ...current.diagnosis,
-        [field]: value,
-      },
-    }));
-  };
-
-  const updateAdvice = (field: keyof ScanState["advice"], value: string) => {
-    setScan((current) => ({
-      ...current,
-      advice: {
-        ...current.advice,
         [field]: value,
       },
     }));
@@ -194,20 +217,38 @@ export function ScanProvider({ children }: { children: ReactNode }) {
     }));
   };
 
-  const setOwnership = (value: string) => {
-    updateDiagnosis("ownership", value);
+  const setOwnershipClarity = (value: string) => {
+    updateDiagnosis("ownershipClarity", value);
   };
 
-  const setAfasUsage = (value: string) => {
-    updateDiagnosis("afasUsage", value);
+  const setChangeDecisionProcess = (value: string) => {
+    updateDiagnosis("changeDecisionProcess", value);
   };
 
-  const setReporting = (value: string) => {
-    updateDiagnosis("reporting", value);
+  const setImprovementGovernance = (value: string) => {
+    updateDiagnosis("improvementGovernance", value);
+  };
+
+  const setProcessStandardization = (value: string) => {
+    updateDiagnosis("processStandardization", value);
+  };
+
+  const setExceptionControl = (value: string) => {
+    updateDiagnosis("exceptionControl", value);
+  };
+
+  const setIssueResolution = (value: string) => {
+    updateDiagnosis("issueResolution", value);
   };
 
   const setAdviceDirection = (value: string) => {
-    updateAdvice("direction", value);
+    setScan((current) => ({
+      ...current,
+      advice: {
+        ...current.advice,
+        direction: value,
+      },
+    }));
   };
 
   const value = useMemo<ScanContextValue>(
@@ -227,9 +268,12 @@ export function ScanProvider({ children }: { children: ReactNode }) {
 
       setScope,
 
-      setOwnership,
-      setAfasUsage,
-      setReporting,
+      setOwnershipClarity,
+      setChangeDecisionProcess,
+      setImprovementGovernance,
+      setProcessStandardization,
+      setExceptionControl,
+      setIssueResolution,
 
       setAdviceDirection,
     }),
