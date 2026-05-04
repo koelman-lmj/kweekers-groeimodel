@@ -28,4 +28,13 @@ export const sections: SectionDefinition[] = [
     summaryEnabled: true,
     nextSectionCode: "diagnose",
   },
+{
+  code: "diagnose",
+  title: "Diagnose",
+  shortTitle: "Diagnose",
+  phase: "diagnose",
+  order: 40,
+  summaryEnabled: true,
+  nextSectionCode: "advies",
+},
 ];
