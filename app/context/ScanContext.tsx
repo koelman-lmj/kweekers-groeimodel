@@ -19,11 +19,11 @@ export type ScanState = {
     scanReason: string;
     biggestBottleneck: string;
   };
-scope: {
-  width: string;
-  focus: string;
-  depth: string;
-};
+  scope: {
+    width: string;
+    focus: string;
+    depth: string;
+  };
   diagnosis: {
     ownershipClarity: string;
     changeDecisionProcess: string;
@@ -48,11 +48,11 @@ const INITIAL_SCAN: ScanState = {
     scanReason: "",
     biggestBottleneck: "",
   },
-scope: {
-  width: "",
-  focus: "",
-  depth: "",
-},
+  scope: {
+    width: "",
+    focus: "",
+    depth: "",
+  },
   diagnosis: {
     ownershipClarity: "",
     changeDecisionProcess: "",
@@ -79,9 +79,9 @@ type ScanContextValue = {
   setScanReason: (value: string) => void;
   setBiggestBottleneck: (value: string) => void;
 
-setScopeWidth: (value: string) => void;
-setScopeFocus: (value: string) => void;
-setScopeDepth: (value: string) => void;
+  setScopeWidth: (value: string) => void;
+  setScopeFocus: (value: string) => void;
+  setScopeDepth: (value: string) => void;
 
   setOwnershipClarity: (value: string) => void;
   setChangeDecisionProcess: (value: string) => void;
@@ -113,20 +113,20 @@ function loadInitialScan(): ScanState {
         scanReason: parsed.profile?.scanReason ?? "",
         biggestBottleneck: parsed.profile?.biggestBottleneck ?? "",
       },
-scope: {
-  width:
-    typeof parsed.scope === "object" && parsed.scope !== null
-      ? parsed.scope.width ?? ""
-      : "",
-  focus:
-    typeof parsed.scope === "object" && parsed.scope !== null
-      ? parsed.scope.focus ?? ""
-      : "",
-  depth:
-    typeof parsed.scope === "object" && parsed.scope !== null
-      ? parsed.scope.depth ?? ""
-      : "",
-},
+      scope: {
+        width:
+          typeof parsed.scope === "object" && parsed.scope !== null
+            ? parsed.scope.width ?? ""
+            : "",
+        focus:
+          typeof parsed.scope === "object" && parsed.scope !== null
+            ? parsed.scope.focus ?? ""
+            : "",
+        depth:
+          typeof parsed.scope === "object" && parsed.scope !== null
+            ? parsed.scope.depth ?? ""
+            : "",
+      },
       diagnosis: {
         ownershipClarity: parsed.diagnosis?.ownershipClarity ?? "",
         changeDecisionProcess: parsed.diagnosis?.changeDecisionProcess ?? "",
@@ -225,35 +225,35 @@ export function ScanProvider({ children }: { children: ReactNode }) {
     updateProfile("biggestBottleneck", value);
   };
 
-const setScopeWidth = (value: string) => {
-  setScan((current) => ({
-    ...current,
-    scope: {
-      ...current.scope,
-      width: value,
-    },
-  }));
-};
+  const setScopeWidth = (value: string) => {
+    setScan((current) => ({
+      ...current,
+      scope: {
+        ...current.scope,
+        width: value,
+      },
+    }));
+  };
 
-const setScopeFocus = (value: string) => {
-  setScan((current) => ({
-    ...current,
-    scope: {
-      ...current.scope,
-      focus: value,
-    },
-  }));
-};
+  const setScopeFocus = (value: string) => {
+    setScan((current) => ({
+      ...current,
+      scope: {
+        ...current.scope,
+        focus: value,
+      },
+    }));
+  };
 
-const setScopeDepth = (value: string) => {
-  setScan((current) => ({
-    ...current,
-    scope: {
-      ...current.scope,
-      depth: value,
-    },
-  }));
-};
+  const setScopeDepth = (value: string) => {
+    setScan((current) => ({
+      ...current,
+      scope: {
+        ...current.scope,
+        depth: value,
+      },
+    }));
+  };
 
   const setOwnershipClarity = (value: string) => {
     updateDiagnosis("ownershipClarity", value);
@@ -303,9 +303,9 @@ const setScopeDepth = (value: string) => {
       setScanReason,
       setBiggestBottleneck,
 
-setScopeWidth,
-setScopeFocus,
-setScopeDepth,
+      setScopeWidth,
+      setScopeFocus,
+      setScopeDepth,
 
       setOwnershipClarity,
       setChangeDecisionProcess,
