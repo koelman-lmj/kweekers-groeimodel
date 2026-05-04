@@ -93,4 +93,20 @@ export const optionSets: OptionSetDefinition[] = [
     { value: "duidelijk", label: "Duidelijk belegd", order: 30 },
   ],
 },
+{
+  key: "diagnosis_afas_usage_options",
+  options: [
+    { value: "beperkt", label: "Beperkt", order: 10 },
+    { value: "wisselend", label: "Wisselend", order: 20 },
+    { value: "goed", label: "Goed", order: 30 },
+  ],
+},
+{
+  key: "diagnosis_reporting_options",
+  options: [
+    { value: "onvoldoende", label: "Onvoldoende", order: 10 },
+    { value: "basis", label: "Basis op orde", order: 20 },
+    { value: "sterk", label: "Sterk ondersteunend", order: 30 },
+  ],
+},
 ];
