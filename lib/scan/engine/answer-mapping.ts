@@ -24,12 +24,18 @@ export function getAnswerFromScan(
     case "scope":
       return scan.scope;
 
-    case "ownership":
-      return scan.diagnosis.ownership;
-    case "afas_usage":
-      return scan.diagnosis.afasUsage;
-    case "reporting":
-      return scan.diagnosis.reporting;
+    case "ownership_clarity":
+      return scan.diagnosis.ownershipClarity;
+    case "change_decision_process":
+      return scan.diagnosis.changeDecisionProcess;
+    case "improvement_governance":
+      return scan.diagnosis.improvementGovernance;
+    case "process_standardization":
+      return scan.diagnosis.processStandardization;
+    case "exception_control":
+      return scan.diagnosis.exceptionControl;
+    case "issue_resolution":
+      return scan.diagnosis.issueResolution;
 
     case "advice_direction":
       return scan.advice.direction;
@@ -51,9 +57,12 @@ export type ScanActions = {
 
   setScope: (value: string) => void;
 
-  setOwnership: (value: string) => void;
-  setAfasUsage: (value: string) => void;
-  setReporting: (value: string) => void;
+  setOwnershipClarity: (value: string) => void;
+  setChangeDecisionProcess: (value: string) => void;
+  setImprovementGovernance: (value: string) => void;
+  setProcessStandardization: (value: string) => void;
+  setExceptionControl: (value: string) => void;
+  setIssueResolution: (value: string) => void;
 
   setAdviceDirection: (value: string) => void;
 };
@@ -91,14 +100,23 @@ export function setAnswerToScan(
       actions.setScope(value);
       return;
 
-    case "ownership":
-      actions.setOwnership(value);
+    case "ownership_clarity":
+      actions.setOwnershipClarity(value);
       return;
-    case "afas_usage":
-      actions.setAfasUsage(value);
+    case "change_decision_process":
+      actions.setChangeDecisionProcess(value);
       return;
-    case "reporting":
-      actions.setReporting(value);
+    case "improvement_governance":
+      actions.setImprovementGovernance(value);
+      return;
+    case "process_standardization":
+      actions.setProcessStandardization(value);
+      return;
+    case "exception_control":
+      actions.setExceptionControl(value);
+      return;
+    case "issue_resolution":
+      actions.setIssueResolution(value);
       return;
 
     case "advice_direction":
