@@ -29,6 +29,8 @@ function getAnswerValue(
 
   if (questionKey === "scope") return scan.scope;
 
+  if (questionKey === "ownership") return scan.diagnosis.ownership;
+
   return "";
 }
 
