@@ -32,18 +32,23 @@ export default function FlowQuestionPage() {
   const sectionCode = getParam(params.sectionCode);
   const questionKey = getParam(params.questionKey);
 
-const {
-  scan,
-  setCustomerName,
-  setSector,
-  setOrganizationSize,
-  setAdministrationCount,
-} = useScanContext();
+  const {
+    scan,
+    setCustomerName,
+    setSector,
+    setOrganizationSize,
+    setAdministrationCount,
+    setScanReason,
+    setPrimaryGoal,
+    setBiggestBottleneck,
+  } = useScanContext();
 
   const section = getSection(sectionCode);
   const question = getQuestion(questionKey);
   const sectionQuestions = getQuestionsForSection(sectionCode);
-  const optionSet = question ? getOptionSet(question.optionSetKey) : undefined;
+  const optionSet = question?.optionSetKey
+    ? getOptionSet(question.optionSetKey)
+    : undefined;
 
   if (!section || !question || question.sectionCode !== sectionCode) {
     return (
@@ -70,37 +75,58 @@ const {
     ? `/scan/${scanId}/flow/${sectionCode}/${nextQuestionKey}`
     : `/scan/${scanId}/summary/${sectionCode}`;
 
-const answerValue =
-  questionKey === "customer_name"
-    ? scan.profile.customerName
-    : questionKey === "sector"
-    ? scan.profile.sector
-    : questionKey === "organization_size"
-    ? scan.profile.organizationSize
-    : questionKey === "administration_count"
-    ? scan.profile.administrationCount
-    : "";
+  const answerValue =
+    questionKey === "customer_name"
+      ? scan.profile.customerName
+      : questionKey === "sector"
+      ? scan.profile.sector
+      : questionKey === "organization_size"
+      ? scan.profile.organizationSize
+      : questionKey === "administration_count"
+      ? scan.profile.administrationCount
+      : questionKey === "scan_reason"
+      ? scan.profile.scanReason
+      : questionKey === "primary_goal"
+      ? scan.profile.primaryGoal
+      : questionKey === "biggest_bottleneck"
+      ? scan.profile.biggestBottleneck
+      : "";
 
-const setAnswerValue = (value: string) => {
-  if (questionKey === "customer_name") {
-    setCustomerName(value);
-    return;
-  }
+  const setAnswerValue = (value: string) => {
+    if (questionKey === "customer_name") {
+      setCustomerName(value);
+      return;
+    }
 
-  if (questionKey === "sector") {
-    setSector(value);
-    return;
-  }
+    if (questionKey === "sector") {
+      setSector(value);
+      return;
+    }
 
-  if (questionKey === "organization_size") {
-    setOrganizationSize(value);
-    return;
-  }
+    if (questionKey === "organization_size") {
+      setOrganizationSize(value);
+      return;
+    }
 
-  if (questionKey === "administration_count") {
-    setAdministrationCount(value);
-  }
-};
+    if (questionKey === "administration_count") {
+      setAdministrationCount(value);
+      return;
+    }
+
+    if (questionKey === "scan_reason") {
+      setScanReason(value);
+      return;
+    }
+
+    if (questionKey === "primary_goal") {
+      setPrimaryGoal(value);
+      return;
+    }
+
+    if (questionKey === "biggest_bottleneck") {
+      setBiggestBottleneck(value);
+    }
+  };
 
   const canContinue = question.required ? isFilled(answerValue) : true;
 
