@@ -11,10 +11,24 @@ const SECTOR_LABELS: Record<string, string> = {
   overig: "Overig",
 };
 
-const SCOPE_LABELS: Record<string, string> = {
+const SCOPE_WIDTH_LABELS: Record<string, string> = {
   smal: "Smal",
   normaal: "Normaal",
   breed: "Breed",
+};
+
+const SCOPE_FOCUS_LABELS: Record<string, string> = {
+  organisatie_eigenaarschap: "Organisatie en eigenaarschap",
+  processen_werkwijze: "Processen en werkwijze",
+  afas_inrichting_gebruik: "AFAS-inrichting en gebruik",
+  rapportage_sturing: "Rapportage en sturing",
+  beheer_doorontwikkeling: "Beheer en doorontwikkeling",
+};
+
+const SCOPE_DEPTH_LABELS: Record<string, string> = {
+  eerste_beeld: "Snel eerste beeld",
+  gericht_verdiepen: "Gericht verdiepen",
+  verbeterplan: "Basis voor concreet verbeterplan",
 };
 
 const DIAGNOSIS_LABELS: Record<string, string> = {
@@ -47,8 +61,16 @@ function getSectorLabel(value: string) {
   return SECTOR_LABELS[value] || "Nog niet gekozen";
 }
 
-function getScopeLabel(value: string) {
-  return SCOPE_LABELS[value] || "Nog niet gekozen";
+function getScopeWidthLabel(value: string) {
+  return SCOPE_WIDTH_LABELS[value] || "Nog niet gekozen";
+}
+
+function getScopeFocusLabel(value: string) {
+  return SCOPE_FOCUS_LABELS[value] || "Nog niet gekozen";
+}
+
+function getScopeDepthLabel(value: string) {
+  return SCOPE_DEPTH_LABELS[value] || "Nog niet gekozen";
 }
 
 function getDiagnosisLabel(value: string) {
@@ -58,7 +80,9 @@ function getDiagnosisLabel(value: string) {
 function buildAdvice(scan: ScanState) {
   const customerName = scan.profile.customerName || "de klant";
   const sectorLabel = getSectorLabel(scan.profile.sector).toLowerCase();
-  const scopeLabel = getScopeLabel(scan.scope);
+  const scopeWidthLabel = getScopeWidthLabel(scan.scope.width);
+  const scopeFocusLabel = getScopeFocusLabel(scan.scope.focus);
+  const scopeDepthLabel = getScopeDepthLabel(scan.scope.depth);
 
   const {
     ownershipClarity,
@@ -78,21 +102,12 @@ function buildAdvice(scan: ScanState) {
     issueResolution === "handmatig_herstellen",
   ].filter(Boolean).length;
 
-  const midSignals = [
-    ownershipClarity === "gedeeltelijk_duidelijk",
-    changeDecisionProcess === "deels_afgestemd",
-    improvementGovernance === "af_en_toe",
-    processStandardization === "redelijk_eenduidig",
-    exceptionControl === "deels_beheersbaar",
-    issueResolution === "mix_ad_hoc_structureel",
-  ].filter(Boolean).length;
-
   let title = "Gericht doorontwikkelen";
   let body =
-    "De eerste diagnose laat zien dat er een basis aanwezig is. De volgende stap is gericht verbeteren en verder structureren.";
+    "De eerste diagnose laat zien dat er een bruikbare basis aanwezig is, maar dat nog niet overal op een vaste en beheersbare manier wordt gewerkt.";
 
   if (lowSignals >= 4) {
-    title = "Eerst stabiliseren";
+    title = "Stabiliseren";
     body =
       "Er zijn op meerdere onderdelen duidelijke basisproblemen zichtbaar. De eerste prioriteit ligt bij het stabieler maken van eigenaarschap, werkwijze en beheersing.";
   } else if (
@@ -109,17 +124,6 @@ function buildAdvice(scan: ScanState) {
     title = "Processen standaardiseren";
     body =
       "De organisatie lijkt nu te veel te leunen op verschillen in werkwijze en uitzonderingen. Meer standaardisatie is de logische eerste stap.";
-  } else if (
-    issueResolution === "handmatig_herstellen" ||
-    improvementGovernance === "nauwelijks"
-  ) {
-    title = "Verbetercyclus opbouwen";
-    body =
-      "De organisatie lijkt nog te weinig structureel te verbeteren. De eerste stap is een ritme opbouwen voor opvolging, analyse en doorontwikkeling.";
-  } else if (midSignals >= 3) {
-    title = "Gericht verbeteren";
-    body =
-      "De basis is aanwezig, maar op meerdere onderdelen is aanscherping nodig om stabieler en consistenter te kunnen werken.";
   }
 
   const focusPoints: string[] = [];
@@ -128,59 +132,68 @@ function buildAdvice(scan: ScanState) {
     ownershipClarity === "onvoldoende_duidelijk" ||
     ownershipClarity === "gedeeltelijk_duidelijk"
   ) {
-    focusPoints.push("Leg proceseigenaarschap en verantwoordelijkheden expliciet vast.");
+    focusPoints.push(
+      "Leg proceseigenaarschap en verantwoordelijkheden expliciet vast."
+    );
   }
 
   if (
     changeDecisionProcess === "ad_hoc" ||
     changeDecisionProcess === "deels_afgestemd"
   ) {
-    focusPoints.push("Maak wijzigingsverzoeken en besluitvorming voorspelbaar en eenduidig.");
+    focusPoints.push(
+      "Maak wijzigingsverzoeken en besluitvorming voorspelbaar en eenduidig."
+    );
   }
 
   if (
     processStandardization === "sterk_verschillend" ||
     processStandardization === "redelijk_eenduidig"
   ) {
-    focusPoints.push("Breng de belangrijkste processen terug naar één herkenbare standaard werkwijze.");
+    focusPoints.push(
+      "Breng de belangrijkste processen terug naar één herkenbare standaard werkwijze."
+    );
   }
 
   if (
     exceptionControl === "uitzondering_is_norm" ||
     exceptionControl === "deels_beheersbaar"
   ) {
-    focusPoints.push("Beperk uitzonderingen en maak afwijkingen expliciet beheersbaar.");
+    focusPoints.push(
+      "Beperk uitzonderingen en maak afwijkingen expliciet beheersbaar."
+    );
   }
 
   if (
     issueResolution === "handmatig_herstellen" ||
     issueResolution === "mix_ad_hoc_structureel"
   ) {
-    focusPoints.push("Los terugkerende knelpunten structureel op in plaats van handmatig te blijven herstellen.");
+    focusPoints.push(
+      "Los terugkerende knelpunten structureel op in plaats van handmatig te blijven herstellen."
+    );
   }
 
   if (
     improvementGovernance === "nauwelijks" ||
     improvementGovernance === "af_en_toe"
   ) {
-    focusPoints.push("Richt een vast verbeter- en evaluatieritme in voor processen en inrichting.");
+    focusPoints.push(
+      "Richt een vast verbeter- en evaluatieritme in voor processen en inrichting."
+    );
   }
 
   while (focusPoints.length > 3) {
     focusPoints.pop();
   }
 
-  let guidance = `Voor ${customerName} in de sector ${sectorLabel} past nu het best een vervolgstap die aansluit op de gekozen scope: ${scopeLabel}.`;
+  let guidance = `Voor ${customerName} in de sector ${sectorLabel} past nu het best een vervolgstap die aansluit op de gekozen scope: ${scopeWidthLabel}, focus op ${scopeFocusLabel}, met detailniveau ${scopeDepthLabel}.`;
 
   if (lowSignals >= 4) {
     guidance +=
       " De uitkomst wijst erop dat eerst de basis steviger moet worden gemaakt voordat verbreding of verdieping echt rendement geeft.";
-  } else if (midSignals >= 3) {
-    guidance +=
-      " De uitkomst laat zien dat er al een basis is, maar dat meer structuur en beheersing nodig zijn om door te groeien in volwassenheid.";
   } else {
     guidance +=
-      " De eerste diagnose geeft ruimte om gericht verder te verdiepen en door te ontwikkelen zonder eerst breed terug naar de basis te hoeven.";
+      " De uitkomst laat zien dat er een basis is, maar dat meer structuur en beheersing nodig zijn om door te groeien in volwassenheid.";
   }
 
   return {
@@ -188,13 +201,14 @@ function buildAdvice(scan: ScanState) {
     body,
     focusPoints,
     guidance,
-    scopeLabel,
+    scopeWidthLabel,
+    scopeFocusLabel,
+    scopeDepthLabel,
   };
 }
 
 export default function AdviesPage() {
   const { scan } = useScanContext();
-
   const advice = buildAdvice(scan);
 
   return (
@@ -216,7 +230,9 @@ export default function AdviesPage() {
         <div className="space-y-1 text-sm text-muted-foreground">
           <div>Klantnaam: {scan.profile.customerName || "Nog leeg"}</div>
           <div>Sector: {getSectorLabel(scan.profile.sector)}</div>
-          <div>Scope: {advice.scopeLabel}</div>
+          <div>Breedte van de scan: {advice.scopeWidthLabel}</div>
+          <div>Primair focusgebied: {advice.scopeFocusLabel}</div>
+          <div>Gewenst detailniveau: {advice.scopeDepthLabel}</div>
           <div>
             Eigenaarschap: {getDiagnosisLabel(scan.diagnosis.ownershipClarity)}
           </div>
