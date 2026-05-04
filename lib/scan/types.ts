@@ -12,9 +12,10 @@ export type SectionDefinition = {
   code: string;
   title: string;
   shortTitle: string;
-  phase: ScanPhase;
+  phase: string;
   order: number;
-  summaryEnabled: boolean;
+  summaryEnabled?: boolean;
+  nextSectionCode?: string;
 };
 
 export type OptionDefinition = {
