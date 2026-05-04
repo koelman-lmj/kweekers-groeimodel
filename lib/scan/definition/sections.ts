@@ -37,4 +37,12 @@ export const sections: SectionDefinition[] = [
   summaryEnabled: true,
   nextSectionCode: "advies",
 },
+{
+  code: "advies",
+  title: "Advies",
+  shortTitle: "Advies",
+  phase: "advies",
+  order: 50,
+  summaryEnabled: true,
+},
 ];
