@@ -39,8 +39,7 @@ export default function SectionSummaryPage() {
   const scanId = getParam(params.id);
   const sectionCode = getParam(params.sectionCode);
 
-  const scanContext = useScanContext();
-  const { scan } = scanContext;
+  const { scan } = useScanContext();
 
   const section = getSection(sectionCode);
   const questions = getQuestionsForSection(sectionCode);
@@ -61,6 +60,17 @@ export default function SectionSummaryPage() {
       ? `/scan/${scanId}/flow/${sectionCode}/${questions[questions.length - 1].key}`
       : `/scan/${scanId}`;
 
+  const nextSectionCode = section?.nextSectionCode ?? "";
+  const nextSectionQuestions = nextSectionCode
+    ? getQuestionsForSection(nextSectionCode)
+    : [];
+  const nextQuestionKey = nextSectionQuestions[0]?.key ?? "";
+
+  const nextHref =
+    nextSectionCode && nextQuestionKey
+      ? `/scan/${scanId}/flow/${nextSectionCode}/${nextQuestionKey}`
+      : `/scan/${scanId}`;
+
   const canContinue = questions.every((question) => {
     if (!question.required) return true;
     return getAnswerValue(question.key, scan).trim() !== "";
@@ -70,11 +80,9 @@ export default function SectionSummaryPage() {
     <div className="space-y-8">
       <div className="space-y-2">
         <p className="text-sm text-muted-foreground">{section.title} — samenvatting</p>
-        <h1 className="text-3xl font-semibold tracking-tight">
-          Samenvatting
-        </h1>
+        <h1 className="text-3xl font-semibold tracking-tight">Samenvatting</h1>
         <p className="text-sm text-muted-foreground">
-          Controleer of de basisgegevens goed zijn ingevuld.
+          Controleer of de ingevulde gegevens goed zijn ingevuld.
         </p>
       </div>
 
@@ -118,18 +126,15 @@ export default function SectionSummaryPage() {
         </Link>
 
         {canContinue ? (
-          <Link
-            href={`/scan/${scanId}/profile/aanleiding`}
-            className="kweekers-primary-button"
-          >
-            Verder naar aanleiding →
+          <Link href={nextHref} className="kweekers-primary-button">
+            Verder →
           </Link>
         ) : (
           <span
             aria-disabled="true"
             className="inline-flex cursor-not-allowed items-center rounded-2xl border px-5 py-3 text-sm font-medium text-muted-foreground opacity-60"
           >
-            Verder naar aanleiding →
+            Verder →
           </span>
         )}
       </div>
