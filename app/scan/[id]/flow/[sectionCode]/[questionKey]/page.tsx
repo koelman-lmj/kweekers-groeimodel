@@ -172,13 +172,13 @@ export default function FlowQuestionPage() {
                     aria-pressed={isActive}
                     className={
                       isActive
-                        ? "kweekers-active-panel min-h-[64px] w-full max-w-[260px] rounded-2xl border px-4 py-3 text-left transition"
-                        : "kweekers-selectable-hover min-h-[64px] w-full max-w-[260px] rounded-2xl border bg-white px-4 py-3 text-left transition"
+                        ? "kweekers-active-panel min-h-[64px] w-full max-w-[260px] rounded-2xl border px-4 py-3 text-center font-semibold transition"
+                        : "kweekers-selectable-hover min-h-[64px] w-full max-w-[260px] rounded-2xl border bg-white px-4 py-3 text-center font-semibold transition"
                     }
                   >
-                    <div className="text-sm font-medium">{option.label}</div>
+                    <div className="text-sm font-semibold">{option.label}</div>
                     {option.description && (
-                      <div className="mt-1 text-xs text-current/80">
+                      <div className="mt-1 text-center text-xs font-medium text-current/80">
                         {option.description}
                       </div>
                     )}
@@ -198,19 +198,19 @@ export default function FlowQuestionPage() {
       <div className="flex items-center justify-between border-t pt-6">
         <Link
           href={previousHref}
-          className="rounded-2xl border px-5 py-3 text-sm font-medium"
+          className="rounded-2xl border px-5 py-3 text-sm font-semibold"
         >
           Vorige
         </Link>
 
         {canContinue ? (
-          <Link href={nextHref} className="kweekers-primary-button">
+          <Link href={nextHref} className="kweekers-primary-button font-semibold">
             Verder →
           </Link>
         ) : (
           <span
             aria-disabled="true"
-            className="inline-flex cursor-not-allowed items-center rounded-2xl border px-5 py-3 text-sm font-medium text-muted-foreground opacity-60"
+            className="inline-flex cursor-not-allowed items-center rounded-2xl border px-5 py-3 text-sm font-semibold text-muted-foreground opacity-60"
           >
             Verder →
           </span>
