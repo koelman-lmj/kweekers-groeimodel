@@ -11,6 +11,10 @@ import {
   getQuestionsForSection,
   getSection,
 } from "@/lib/scan/engine/definition-helpers";
+import {
+  getAnswerFromScan,
+  setAnswerToScan,
+} from "@/lib/scan/engine/answer-mapping";
 
 function getParam(value: string | string[] | undefined): string {
   if (Array.isArray(value)) return value[0] ?? "";
@@ -93,93 +97,27 @@ export default function FlowQuestionPage() {
     ? `/scan/${scanId}/flow/${sectionCode}/${nextQuestionKey}`
     : `/scan/${scanId}/summary/${sectionCode}`;
 
-  const answerValue =
-    questionKey === "customer_name"
-      ? scan.profile.customerName
-      : questionKey === "sector"
-        ? scan.profile.sector
-        : questionKey === "organization_size"
-          ? scan.profile.organizationSize
-          : questionKey === "administration_count"
-            ? scan.profile.administrationCount
-            : questionKey === "scan_reason"
-              ? scan.profile.scanReason
-              : questionKey === "primary_goal"
-                ? scan.profile.primaryGoal
-                : questionKey === "biggest_bottleneck"
-                  ? scan.profile.biggestBottleneck
-                  : questionKey === "scope"
-                    ? scan.scope
-                    : questionKey === "ownership"
-                      ? scan.diagnosis.ownership
-                      : questionKey === "afas_usage"
-                        ? scan.diagnosis.afasUsage
-                        : questionKey === "reporting"
-                          ? scan.diagnosis.reporting
-                          : questionKey === "advice_direction"
-                            ? scan.advice.direction
-                            : "";
+  const answerValue = getAnswerFromScan(scan, questionKey);
 
   const setAnswerValue = (value: string) => {
-    if (questionKey === "customer_name") {
-      setCustomerName(value);
-      return;
-    }
-
-    if (questionKey === "sector") {
-      setSector(value);
-      return;
-    }
-
-    if (questionKey === "organization_size") {
-      setOrganizationSize(value);
-      return;
-    }
-
-    if (questionKey === "administration_count") {
-      setAdministrationCount(value);
-      return;
-    }
-
-    if (questionKey === "scan_reason") {
-      setScanReason(value);
-      return;
-    }
-
-    if (questionKey === "primary_goal") {
-      setPrimaryGoal(value);
-      return;
-    }
-
-    if (questionKey === "biggest_bottleneck") {
-      setBiggestBottleneck(value);
-      return;
-    }
-
-    if (questionKey === "scope") {
-      setScope(value);
-      return;
-    }
-
-    if (questionKey === "ownership") {
-      setOwnership(value);
-      return;
-    }
-
-    if (questionKey === "afas_usage") {
-      setAfasUsage(value);
-      return;
-    }
-
-    if (questionKey === "reporting") {
-      setReporting(value);
-      return;
-    }
-
-    if (questionKey === "advice_direction") {
-      setAdviceDirection(value);
-      return;
-    }
+    setAnswerToScan(
+      {
+        setCustomerName,
+        setSector,
+        setOrganizationSize,
+        setAdministrationCount,
+        setScanReason,
+        setPrimaryGoal,
+        setBiggestBottleneck,
+        setScope,
+        setOwnership,
+        setAfasUsage,
+        setReporting,
+        setAdviceDirection,
+      },
+      questionKey,
+      value
+    );
   };
 
   const canContinue = question.required ? isFilled(answerValue) : true;
