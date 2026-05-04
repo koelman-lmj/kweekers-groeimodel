@@ -3,11 +3,8 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useScanContext } from "@/app/context/ScanContext";
-import { sections } from "@/lib/scan/definition/sections";
 import {
-  getNextQuestionKey,
   getOptionSet,
-  getQuestion,
   getQuestionsForSection,
   getSection,
 } from "@/lib/scan/engine/definition-helpers";
@@ -17,208 +14,110 @@ function getParam(value: string | string[] | undefined): string {
   return value ?? "";
 }
 
-function isFilled(value: string): boolean {
-  return value.trim() !== "";
+function getAnswerValue(
+  questionKey: string,
+  scan: ReturnType<typeof useScanContext>["scan"]
+): string {
+  if (questionKey === "customer_name") return scan.profile.customerName;
+  if (questionKey === "sector") return scan.profile.sector;
+  if (questionKey === "organization_size") return scan.profile.organizationSize;
+  if (questionKey === "administration_count") return scan.profile.administrationCount;
+
+  if (questionKey === "scan_reason") return scan.profile.scanReason;
+  if (questionKey === "primary_goal") return scan.profile.primaryGoal;
+  if (questionKey === "biggest_bottleneck") return scan.profile.biggestBottleneck;
+
+  if (questionKey === "scope") return scan.scope;
+
+  return "";
 }
 
-export default function FlowQuestionPage() {
+export default function SectionSummaryPage() {
   const params = useParams<{
     id: string | string[];
     sectionCode: string | string[];
-    questionKey: string | string[];
   }>();
 
   const scanId = getParam(params.id);
   const sectionCode = getParam(params.sectionCode);
-  const questionKey = getParam(params.questionKey);
 
-  const {
-    scan,
-    setCustomerName,
-    setSector,
-    setOrganizationSize,
-    setAdministrationCount,
-    setScanReason,
-    setPrimaryGoal,
-    setBiggestBottleneck,
-    setScope,
-  } = useScanContext();
+  const { scan } = useScanContext();
 
   const section = getSection(sectionCode);
-  const question = getQuestion(questionKey);
-  const sectionQuestions = getQuestionsForSection(sectionCode);
-  const optionSet = question?.optionSetKey
-    ? getOptionSet(question.optionSetKey)
-    : undefined;
+  const questions = getQuestionsForSection(sectionCode);
 
-  if (!section || !question || question.sectionCode !== sectionCode) {
+  if (!section) {
     return (
       <div className="space-y-4">
-        <h1 className="text-2xl font-semibold">Vraag niet gevonden</h1>
+        <h1 className="text-2xl font-semibold">Samenvatting niet gevonden</h1>
         <p className="text-sm text-muted-foreground">
-          Deze flowroute bestaat nog niet of hoort niet bij deze sectie.
+          Deze samenvattingspagina bestaat nog niet.
         </p>
       </div>
     );
   }
 
-  const questionIndex =
-    sectionQuestions.findIndex((item) => item.key === question.key) + 1;
-
-  const currentQuestionIndex = sectionQuestions.findIndex(
-    (item) => item.key === question.key
-  );
-
-  const currentSectionIndex = sections.findIndex(
-    (item) => item.code === sectionCode
-  );
-
-  const previousSection =
-    currentSectionIndex > 0 ? sections[currentSectionIndex - 1] : null;
-
   const previousHref =
-    currentQuestionIndex > 0
-      ? `/scan/${scanId}/flow/${sectionCode}/${sectionQuestions[currentQuestionIndex - 1].key}`
-      : previousSection?.summaryEnabled
-        ? `/scan/${scanId}/summary/${previousSection.code}`
-        : `/scan/${scanId}/summary/profile_basis`;
+    questions.length > 0
+      ? `/scan/${scanId}/flow/${sectionCode}/${questions[questions.length - 1].key}`
+      : `/scan/${scanId}`;
 
-  const nextQuestionKey = getNextQuestionKey(sectionCode, questionKey);
+  const nextSectionCode = section?.nextSectionCode ?? "";
+  const nextSectionQuestions = nextSectionCode
+    ? getQuestionsForSection(nextSectionCode)
+    : [];
+  const nextQuestionKey = nextSectionQuestions[0]?.key ?? "";
 
-  const nextHref = nextQuestionKey
-    ? `/scan/${scanId}/flow/${sectionCode}/${nextQuestionKey}`
-    : `/scan/${scanId}/summary/${sectionCode}`;
+  const nextHref =
+    nextSectionCode && nextQuestionKey
+      ? `/scan/${scanId}/flow/${nextSectionCode}/${nextQuestionKey}`
+      : `/scan/${scanId}`;
 
-  const answerValue =
-    questionKey === "customer_name"
-      ? scan.profile.customerName
-      : questionKey === "sector"
-        ? scan.profile.sector
-        : questionKey === "organization_size"
-          ? scan.profile.organizationSize
-          : questionKey === "administration_count"
-            ? scan.profile.administrationCount
-            : questionKey === "scan_reason"
-              ? scan.profile.scanReason
-              : questionKey === "primary_goal"
-                ? scan.profile.primaryGoal
-                : questionKey === "biggest_bottleneck"
-                  ? scan.profile.biggestBottleneck
-                  : questionKey === "scope"
-                    ? scan.scope
-                    : "";
-
-  const setAnswerValue = (value: string) => {
-    if (questionKey === "customer_name") {
-      setCustomerName(value);
-      return;
-    }
-
-    if (questionKey === "sector") {
-      setSector(value);
-      return;
-    }
-
-    if (questionKey === "organization_size") {
-      setOrganizationSize(value);
-      return;
-    }
-
-    if (questionKey === "administration_count") {
-      setAdministrationCount(value);
-      return;
-    }
-
-    if (questionKey === "scan_reason") {
-      setScanReason(value);
-      return;
-    }
-
-    if (questionKey === "primary_goal") {
-      setPrimaryGoal(value);
-      return;
-    }
-
-    if (questionKey === "biggest_bottleneck") {
-      setBiggestBottleneck(value);
-      return;
-    }
-
-    if (questionKey === "scope") {
-      setScope(value);
-    }
-  };
-
-  const canContinue = question.required ? isFilled(answerValue) : true;
+  const canContinue = questions.every((question) => {
+    if (!question.required) return true;
+    return getAnswerValue(question.key, scan).trim() !== "";
+  });
 
   return (
     <div className="space-y-8">
       <div className="space-y-2">
+        <p className="text-sm text-muted-foreground">{section.title} — samenvatting</p>
+        <h1 className="text-3xl font-semibold tracking-tight">Samenvatting</h1>
         <p className="text-sm text-muted-foreground">
-          {section.title} — stap {questionIndex} van {sectionQuestions.length}
+          Controleer of de ingevulde gegevens goed zijn ingevuld.
         </p>
-        <h1 className="text-3xl font-semibold tracking-tight">
-          {question.label}
-        </h1>
-        {question.helpText && (
-          <p className="text-sm text-muted-foreground">{question.helpText}</p>
-        )}
       </div>
 
-      <section className="space-y-4 rounded-2xl border p-5">
-        {question.inputType === "text" && (
-          <div className="space-y-2">
-            <label htmlFor={question.key} className="text-sm font-medium">
-              {question.label}
-            </label>
-            <input
-              id={question.key}
-              type="text"
-              value={answerValue}
-              onChange={(event) => setAnswerValue(event.target.value)}
-              placeholder={question.placeholder}
-              className="w-full rounded-2xl border bg-white px-4 py-3 outline-none"
-            />
-          </div>
-        )}
+      <section className="space-y-3 rounded-2xl border p-5">
+        <h2 className="text-lg font-medium">Overzicht</h2>
 
-        {question.inputType === "single_select" && optionSet && (
-          <div className="grid gap-3 sm:grid-cols-2">
-            {[...optionSet.options]
-              .sort((a, b) => a.order - b.order)
-              .map((option) => {
-                const isActive = answerValue === option.value;
+        <div className="space-y-2 text-sm text-muted-foreground">
+          {questions.map((question) => {
+            const rawValue = getAnswerValue(question.key, scan);
+            const optionSet = getOptionSet(question.optionSetKey);
 
-                return (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => setAnswerValue(option.value)}
-                    aria-pressed={isActive}
-                    className={
-                      isActive
-                        ? "kweekers-active-panel rounded-2xl border px-4 py-4 text-left transition"
-                        : "kweekers-selectable-hover rounded-2xl border bg-white px-4 py-4 text-left transition"
-                    }
-                  >
-                    <div className="text-sm font-medium">{option.label}</div>
-                    {option.description && (
-                      <div className="mt-2 text-xs text-current/80">
-                        {option.description}
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
-          </div>
-        )}
+            let displayValue = rawValue || "Nog niet ingevuld";
 
-        {!canContinue && (
-          <div className="kweekers-accent-box text-sm">
-            Vul eerst deze vraag in om verder te gaan.
-          </div>
-        )}
+            if (optionSet && rawValue) {
+              displayValue =
+                optionSet.options.find((option) => option.value === rawValue)?.label ??
+                rawValue;
+            }
+
+            return (
+              <div key={question.key}>
+                {question.label}: {displayValue}
+              </div>
+            );
+          })}
+        </div>
       </section>
+
+      {!canContinue && (
+        <div className="kweekers-accent-box text-sm">
+          Nog niet alle verplichte vragen zijn ingevuld.
+        </div>
+      )}
 
       <div className="flex items-center justify-between border-t pt-6">
         <Link
