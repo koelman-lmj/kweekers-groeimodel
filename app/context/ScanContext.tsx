@@ -3,6 +3,7 @@
 import {
   createContext,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type Dispatch,
@@ -27,6 +28,8 @@ export type ScanState = {
     reporting: string;
   };
 };
+
+const STORAGE_KEY = "kweekers-groeimodel-scan";
 
 const INITIAL_SCAN: ScanState = {
   profile: {
@@ -71,6 +74,32 @@ const ScanContext = createContext<ScanContextValue | undefined>(undefined);
 
 export function ScanProvider({ children }: { children: ReactNode }) {
   const [scan, setScan] = useState<ScanState>(INITIAL_SCAN);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    try {
+      const storedValue = window.localStorage.getItem(STORAGE_KEY);
+
+      if (storedValue) {
+        const parsed = JSON.parse(storedValue) as ScanState;
+        setScan(parsed);
+      }
+    } catch (error) {
+      console.error("Kon scan-state niet laden uit localStorage", error);
+    } finally {
+      setIsHydrated(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isHydrated) return;
+
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(scan));
+    } catch (error) {
+      console.error("Kon scan-state niet opslaan in localStorage", error);
+    }
+  }, [scan, isHydrated]);
 
   const updateProfile = (field: keyof ScanState["profile"], value: string) => {
     setScan((current) => ({
@@ -97,6 +126,12 @@ export function ScanProvider({ children }: { children: ReactNode }) {
 
   const resetScan = () => {
     setScan(INITIAL_SCAN);
+
+    try {
+      window.localStorage.removeItem(STORAGE_KEY);
+    } catch (error) {
+      console.error("Kon scan-state niet verwijderen uit localStorage", error);
+    }
   };
 
   const setCustomerName = (value: string) => {
