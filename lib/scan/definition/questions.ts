@@ -71,4 +71,14 @@ export const questions: QuestionDefinition[] = [
     required: true,
     optionSetKey: "biggest_bottleneck_options",
   },
+  {
+    key: "scope",
+    sectionCode: "scope",
+    order: 10,
+    label: "Scope van de scan",
+    helpText: "Kies hoe breed je de scan wilt uitvoeren.",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "scope_options",
+  },
 ];
