@@ -17,7 +17,6 @@ export type ScanState = {
     organizationSize: string;
     administrationCount: string;
     scanReason: string;
-    primaryGoal: string;
     biggestBottleneck: string;
   };
   scope: string;
@@ -43,7 +42,6 @@ const INITIAL_SCAN: ScanState = {
     organizationSize: "",
     administrationCount: "",
     scanReason: "",
-    primaryGoal: "",
     biggestBottleneck: "",
   },
   scope: "",
@@ -71,7 +69,6 @@ type ScanContextValue = {
   setAdministrationCount: (value: string) => void;
 
   setScanReason: (value: string) => void;
-  setPrimaryGoal: (value: string) => void;
   setBiggestBottleneck: (value: string) => void;
 
   setScope: (value: string) => void;
@@ -104,7 +101,6 @@ function loadInitialScan(): ScanState {
         organizationSize: parsed.profile?.organizationSize ?? "",
         administrationCount: parsed.profile?.administrationCount ?? "",
         scanReason: parsed.profile?.scanReason ?? "",
-        primaryGoal: parsed.profile?.primaryGoal ?? "",
         biggestBottleneck: parsed.profile?.biggestBottleneck ?? "",
       },
       scope: parsed.scope ?? "",
@@ -202,10 +198,6 @@ export function ScanProvider({ children }: { children: ReactNode }) {
     updateProfile("scanReason", value);
   };
 
-  const setPrimaryGoal = (value: string) => {
-    updateProfile("primaryGoal", value);
-  };
-
   const setBiggestBottleneck = (value: string) => {
     updateProfile("biggestBottleneck", value);
   };
@@ -263,7 +255,6 @@ export function ScanProvider({ children }: { children: ReactNode }) {
       setAdministrationCount,
 
       setScanReason,
-      setPrimaryGoal,
       setBiggestBottleneck,
 
       setScope,
