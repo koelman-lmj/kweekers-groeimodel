@@ -3,7 +3,6 @@
 import {
   createContext,
   useContext,
-  useEffect,
   useMemo,
   useState,
   type Dispatch,
@@ -72,34 +71,40 @@ type ScanContextValue = {
 
 const ScanContext = createContext<ScanContextValue | undefined>(undefined);
 
+function loadInitialScan(): ScanState {
+  if (typeof window === "undefined") return INITIAL_SCAN;
+
+  try {
+    const storedValue = window.localStorage.getItem(STORAGE_KEY);
+    if (!storedValue) return INITIAL_SCAN;
+
+    return JSON.parse(storedValue) as ScanState;
+  } catch (error) {
+    console.error("Kon scan-state niet laden uit localStorage", error);
+    return INITIAL_SCAN;
+  }
+}
+
+function persistScan(nextScan: ScanState) {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextScan));
+  } catch (error) {
+    console.error("Kon scan-state niet opslaan in localStorage", error);
+  }
+}
+
 export function ScanProvider({ children }: { children: ReactNode }) {
-  const [scan, setScan] = useState<ScanState>(INITIAL_SCAN);
-  const [isHydrated, setIsHydrated] = useState(false);
+  const [scanState, setScanState] = useState<ScanState>(() => loadInitialScan());
 
-  useEffect(() => {
-    try {
-      const storedValue = window.localStorage.getItem(STORAGE_KEY);
-
-      if (storedValue) {
-        const parsed = JSON.parse(storedValue) as ScanState;
-        setScan(parsed);
-      }
-    } catch (error) {
-      console.error("Kon scan-state niet laden uit localStorage", error);
-    } finally {
-      setIsHydrated(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!isHydrated) return;
-
-    try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(scan));
-    } catch (error) {
-      console.error("Kon scan-state niet opslaan in localStorage", error);
-    }
-  }, [scan, isHydrated]);
+  const setScan: Dispatch<SetStateAction<ScanState>> = (value) => {
+    setScanState((current) => {
+      const next = typeof value === "function" ? value(current) : value;
+      persistScan(next);
+      return next;
+    });
+  };
 
   const updateProfile = (field: keyof ScanState["profile"], value: string) => {
     setScan((current) => ({
@@ -127,10 +132,12 @@ export function ScanProvider({ children }: { children: ReactNode }) {
   const resetScan = () => {
     setScan(INITIAL_SCAN);
 
-    try {
-      window.localStorage.removeItem(STORAGE_KEY);
-    } catch (error) {
-      console.error("Kon scan-state niet verwijderen uit localStorage", error);
+    if (typeof window !== "undefined") {
+      try {
+        window.localStorage.removeItem(STORAGE_KEY);
+      } catch (error) {
+        console.error("Kon scan-state niet verwijderen uit localStorage", error);
+      }
     }
   };
 
@@ -183,7 +190,7 @@ export function ScanProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<ScanContextValue>(
     () => ({
-      scan,
+      scan: scanState,
       setScan,
       resetScan,
 
@@ -202,12 +209,8 @@ export function ScanProvider({ children }: { children: ReactNode }) {
       setAfasUsage,
       setReporting,
     }),
-    [scan]
+    [scanState]
   );
-
-  if (!isHydrated) {
-    return null;
-  }
 
   return <ScanContext.Provider value={value}>{children}</ScanContext.Provider>;
 }
