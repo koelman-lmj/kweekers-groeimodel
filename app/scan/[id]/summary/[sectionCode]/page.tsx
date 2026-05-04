@@ -22,6 +22,11 @@ function getAnswerValue(
   if (questionKey === "sector") return scan.profile.sector;
   if (questionKey === "organization_size") return scan.profile.organizationSize;
   if (questionKey === "administration_count") return scan.profile.administrationCount;
+
+  if (questionKey === "scan_reason") return scan.profile.scanReason;
+  if (questionKey === "primary_goal") return scan.profile.primaryGoal;
+  if (questionKey === "biggest_bottleneck") return scan.profile.biggestBottleneck;
+
   return "";
 }
 
