@@ -126,7 +126,7 @@ export default function SectionSummaryPage() {
             </button>
 
             <Link
-              href={`/scan/nieuw/flow/profile_basis/customer_name`}
+              href="/scan/nieuw/flow/profile_basis/customer_name"
               className="kweekers-primary-button"
               onClick={() => resetScan()}
             >
