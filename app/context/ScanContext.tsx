@@ -26,6 +26,9 @@ export type ScanState = {
     afasUsage: string;
     reporting: string;
   };
+  advice: {
+    direction: string;
+  };
 };
 
 const STORAGE_KEY = "kweekers-groeimodel-scan";
@@ -45,6 +48,9 @@ const INITIAL_SCAN: ScanState = {
     ownership: "",
     afasUsage: "",
     reporting: "",
+  },
+  advice: {
+    direction: "",
   },
 };
 
@@ -67,6 +73,8 @@ type ScanContextValue = {
   setOwnership: (value: string) => void;
   setAfasUsage: (value: string) => void;
   setReporting: (value: string) => void;
+
+  setAdviceDirection: (value: string) => void;
 };
 
 const ScanContext = createContext<ScanContextValue | undefined>(undefined);
@@ -124,6 +132,16 @@ export function ScanProvider({ children }: { children: ReactNode }) {
       ...current,
       diagnosis: {
         ...current.diagnosis,
+        [field]: value,
+      },
+    }));
+  };
+
+  const updateAdvice = (field: keyof ScanState["advice"], value: string) => {
+    setScan((current) => ({
+      ...current,
+      advice: {
+        ...current.advice,
         [field]: value,
       },
     }));
@@ -188,6 +206,10 @@ export function ScanProvider({ children }: { children: ReactNode }) {
     updateDiagnosis("reporting", value);
   };
 
+  const setAdviceDirection = (value: string) => {
+    updateAdvice("direction", value);
+  };
+
   const value = useMemo<ScanContextValue>(
     () => ({
       scan: scanState,
@@ -208,6 +230,8 @@ export function ScanProvider({ children }: { children: ReactNode }) {
       setOwnership,
       setAfasUsage,
       setReporting,
+
+      setAdviceDirection,
     }),
     [scanState]
   );
