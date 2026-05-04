@@ -47,7 +47,7 @@ export default function SectionSummaryPage() {
   const scanId = getParam(params.id);
   const sectionCode = getParam(params.sectionCode);
 
-  const { scan } = useScanContext();
+  const { scan, resetScan } = useScanContext();
 
   const section = getSection(sectionCode);
   const questions = getQuestionsForSection(sectionCode);
@@ -84,6 +84,8 @@ export default function SectionSummaryPage() {
     if (!question.required) return true;
     return getAnswerValue(question.key, scan).trim() !== "";
   });
+
+  const isFinalStep = !hasNextStep;
 
   return (
     <div className="space-y-8">
@@ -126,6 +128,35 @@ export default function SectionSummaryPage() {
         <div className="kweekers-accent-box text-sm">
           Nog niet alle verplichte vragen zijn ingevuld.
         </div>
+      )}
+
+      {isFinalStep && canContinue && (
+        <section className="rounded-2xl border p-5">
+          <div className="space-y-2">
+            <h2 className="text-lg font-medium">Scan afgerond</h2>
+            <p className="text-sm text-muted-foreground">
+              De begeleide scan is compleet ingevuld. Je kunt nu een nieuwe scan starten.
+            </p>
+          </div>
+
+          <div className="mt-5 flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={() => resetScan()}
+              className="rounded-2xl border px-5 py-3 text-sm font-medium"
+            >
+              Reset scan
+            </button>
+
+            <Link
+              href={`/scan/nieuw/flow/profile_basis/customer_name`}
+              className="kweekers-primary-button"
+              onClick={() => resetScan()}
+            >
+              Nieuwe scan starten
+            </Link>
+          </div>
+        </section>
       )}
 
       <div className="flex items-center justify-between border-t pt-6">
