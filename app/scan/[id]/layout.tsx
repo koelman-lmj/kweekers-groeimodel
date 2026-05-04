@@ -59,7 +59,6 @@ function getCurrentSectionCode(pathname: string | null): string {
 function ScanShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const params = useParams();
-
   const { scan } = useScanContext();
 
   const scanId = Array.isArray(params.id) ? params.id[0] : params.id;
@@ -106,28 +105,47 @@ function ScanShell({ children }: { children: ReactNode }) {
                   const status = statuses[step.sectionCode] ?? "locked";
 
                   const href =
-                    status === "completed" || status === "current" || status === "available"
+                    status === "completed" ||
+                    status === "current" ||
+                    status === "available"
                       ? `/scan/${scanId}/summary/${step.sectionCode}`
                       : "";
 
                   const cardClass =
                     status === "current"
-                      ? "kweekers-active-panel"
+                      ? "border-transparent bg-[#33406f] text-white shadow-sm"
                       : status === "completed"
-                        ? "kweekers-selectable-hover border-black bg-white"
+                        ? "border-[#b7dfc2] bg-[#eef8f1] text-[#1f5130]"
                         : status === "available"
-                          ? "kweekers-selectable-hover bg-white"
-                          : "bg-white opacity-60";
+                          ? "border-black bg-white hover:bg-neutral-50"
+                          : "border-neutral-300 bg-white text-neutral-400 opacity-70";
 
                   const numberClass =
                     status === "current"
                       ? "border-white text-white"
-                      : "border-black text-black";
+                      : status === "completed"
+                        ? "border-[#56a26a] bg-[#56a26a] text-white"
+                        : status === "available"
+                          ? "border-black text-black"
+                          : "border-neutral-400 text-neutral-400";
 
-                  const textClass =
+                  const titleClass =
                     status === "current"
-                      ? "kweekers-active-panel-muted"
-                      : "text-muted-foreground";
+                      ? "text-white"
+                      : status === "completed"
+                        ? "text-[#1f5130]"
+                        : status === "locked"
+                          ? "text-neutral-400"
+                          : "text-black";
+
+                  const descriptionClass =
+                    status === "current"
+                      ? "text-white/85"
+                      : status === "completed"
+                        ? "text-[#356946]"
+                        : status === "locked"
+                          ? "text-neutral-400"
+                          : "text-muted-foreground";
 
                   const displayNumber = status === "completed" ? "✓" : step.number;
 
@@ -142,8 +160,10 @@ function ScanShell({ children }: { children: ReactNode }) {
                       </div>
 
                       <div className="min-w-0">
-                        <div className="text-sm font-medium">{step.title}</div>
-                        <div className={`text-sm ${textClass}`}>
+                        <div className={`text-sm font-medium ${titleClass}`}>
+                          {step.title}
+                        </div>
+                        <div className={`text-sm ${descriptionClass}`}>
                           {step.description}
                         </div>
                       </div>
