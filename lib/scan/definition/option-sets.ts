@@ -62,4 +62,27 @@ export const optionSets: OptionSetDefinition[] = [
       { value: "adoptie", label: "Adoptie en gebruik", order: 60 },
     ],
   },
+  {
+    key: "scope_options",
+    options: [
+      {
+        value: "smal",
+        label: "Smal",
+        description: "Gericht op een beperkt aantal onderdelen.",
+        order: 10,
+      },
+      {
+        value: "normaal",
+        label: "Normaal",
+        description: "Een gebalanceerde scan van de belangrijkste onderdelen.",
+        order: 20,
+      },
+      {
+        value: "breed",
+        label: "Breed",
+        description: "Een brede scan over meerdere domeinen en processen.",
+        order: 30,
+      },
+    ],
+  },
 ];
