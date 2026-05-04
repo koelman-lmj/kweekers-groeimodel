@@ -165,14 +165,13 @@ export const optionSets: OptionSetDefinition[] = [
       },
     ],
   },
-  {
-    key: "advice_direction_options",
-    options: [
-      { value: "optimaliseren", label: "Optimaliseren", order: 10 },
-      { value: "standaardiseren", label: "Standaardiseren", order: 20 },
-      { value: "governance_versterken", label: "Governance versterken", order: 30 },
-      { value: "inzicht_verbeteren", label: "Inzicht en sturing verbeteren", order: 40 },
-      { value: "beheer_versterken", label: "Beheer en adoptie versterken", order: 50 },
-    ],
-  },
+{
+  key: "advice_direction_options",
+  options: [
+    { value: "stabiliseren", label: "Stabiliseren", order: 10 },
+    { value: "governance_versterken", label: "Governance versterken", order: 20 },
+    { value: "processen_standaardiseren", label: "Processen standaardiseren", order: 30 },
+    { value: "gericht_doorontwikkelen", label: "Gericht doorontwikkelen", order: 40 },
+  ],
+},
 ];
