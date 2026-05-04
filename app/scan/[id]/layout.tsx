@@ -10,25 +10,29 @@ import { getSectionStatuses } from "@/lib/scan/engine/section-status";
 const STEPS = [
   {
     number: "1",
-    sectionCode: "profile_basis",
+    sectionCodes: ["profile_basis", "profile_reason"],
+    primarySectionCode: "profile_basis",
     title: "Klantprofiel",
     description: "Basisgegevens van de klant en sector.",
   },
   {
     number: "2",
-    sectionCode: "scope",
+    sectionCodes: ["scope"],
+    primarySectionCode: "scope",
     title: "Scope",
     description: "Kies hoe breed je de scan uitvoert.",
   },
   {
     number: "3",
-    sectionCode: "diagnose",
+    sectionCodes: ["diagnose"],
+    primarySectionCode: "diagnose",
     title: "Diagnose",
     description: "Beantwoord de belangrijkste diagnosevragen.",
   },
   {
     number: "4",
-    sectionCode: "advies",
+    sectionCodes: ["advies"],
+    primarySectionCode: "advies",
     title: "Advies",
     description: "Bekijk de eerste richting en focuspunten.",
   },
@@ -49,11 +53,27 @@ function getCurrentSectionCode(pathname: string | null): string {
     return parts[summaryIndex + 1] ?? "profile_basis";
   }
 
+  if (pathname.includes("/profile_reason")) return "profile_reason";
+  if (pathname.includes("/profile_basis")) return "profile_basis";
   if (pathname.includes("/scope")) return "scope";
   if (pathname.includes("/diagnose")) return "diagnose";
   if (pathname.includes("/advies")) return "advies";
 
   return "profile_basis";
+}
+
+function getStepStatus(
+  step: (typeof STEPS)[number],
+  sectionStatuses: Record<string, "completed" | "current" | "available" | "locked">
+): "completed" | "current" | "available" | "locked" {
+  const statuses = step.sectionCodes.map(
+    (sectionCode) => sectionStatuses[sectionCode] ?? "locked"
+  );
+
+  if (statuses.some((status) => status === "current")) return "current";
+  if (statuses.every((status) => status === "completed")) return "completed";
+  if (statuses.some((status) => status === "available")) return "available";
+  return "locked";
 }
 
 function ScanShell({ children }: { children: ReactNode }) {
@@ -63,7 +83,7 @@ function ScanShell({ children }: { children: ReactNode }) {
 
   const scanId = Array.isArray(params.id) ? params.id[0] : params.id;
   const currentSectionCode = getCurrentSectionCode(pathname);
-  const statuses = getSectionStatuses(currentSectionCode, scan);
+  const sectionStatuses = getSectionStatuses(currentSectionCode, scan);
 
   return (
     <div className="min-h-screen bg-neutral-50">
@@ -102,18 +122,18 @@ function ScanShell({ children }: { children: ReactNode }) {
 
               <div className="space-y-3 pt-2">
                 {STEPS.map((step) => {
-                  const status = statuses[step.sectionCode] ?? "locked";
+                  const status = getStepStatus(step, sectionStatuses);
 
                   const href =
                     status === "completed" ||
                     status === "current" ||
                     status === "available"
-                      ? `/scan/${scanId}/summary/${step.sectionCode}`
+                      ? `/scan/${scanId}/summary/${step.primarySectionCode}`
                       : "";
 
                   const cardClass =
                     status === "current"
-                      ? "border-transparent bg-[#33406f] text-white shadow-sm"
+                      ? "border-[#c7d2e8] bg-[#eef3fb] text-[#2f426a]"
                       : status === "completed"
                         ? "border-[#b7dfc2] bg-[#eef8f1] text-[#1f5130]"
                         : status === "available"
@@ -122,7 +142,7 @@ function ScanShell({ children }: { children: ReactNode }) {
 
                   const numberClass =
                     status === "current"
-                      ? "border-white text-white"
+                      ? "border-[#8fa4cc] bg-[#8fa4cc] text-white"
                       : status === "completed"
                         ? "border-[#56a26a] bg-[#56a26a] text-white"
                         : status === "available"
@@ -131,7 +151,7 @@ function ScanShell({ children }: { children: ReactNode }) {
 
                   const titleClass =
                     status === "current"
-                      ? "text-white"
+                      ? "text-[#2f426a]"
                       : status === "completed"
                         ? "text-[#1f5130]"
                         : status === "locked"
@@ -140,7 +160,7 @@ function ScanShell({ children }: { children: ReactNode }) {
 
                   const descriptionClass =
                     status === "current"
-                      ? "text-white/85"
+                      ? "text-[#4b5f86]"
                       : status === "completed"
                         ? "text-[#356946]"
                         : status === "locked"
@@ -172,13 +192,13 @@ function ScanShell({ children }: { children: ReactNode }) {
 
                   if (href) {
                     return (
-                      <Link key={step.sectionCode} href={href} className="block">
+                      <Link key={step.primarySectionCode} href={href} className="block">
                         {content}
                       </Link>
                     );
                   }
 
-                  return <div key={step.sectionCode}>{content}</div>;
+                  return <div key={step.primarySectionCode}>{content}</div>;
                 })}
               </div>
             </div>
