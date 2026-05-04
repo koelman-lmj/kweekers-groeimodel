@@ -134,34 +134,28 @@ if (lowSignals >= 4) {
           "De scan laat geen direct zwaar knelpunt zien, maar verdere aanscherping blijft wenselijk.",
         ];
 
-  let firstStep =
-    "Begin met het expliciet maken van eigenaarschap, besluitvorming en standaard werkwijzen voor de belangrijkste processen. Vanuit die basis kan daarna gerichter worden gewerkt aan verbetering, beheersing en verdere doorontwikkeling.";
+let firstStep =
+  "Breng de belangrijkste verbeterkansen terug naar een beperkt en concreet verbeterplan, zodat de organisatie gericht kan doorontwikkelen.";
 
-  if (lowSignals >= 4) {
-    firstStep =
-      "Start met het stabiliseren van de basis. Breng eerst verantwoordelijkheden, werkwijze en uitzonderingen terug naar een beheersbaar niveau voordat je verder verbreedt of verdiept.";
-  } else if (
-    ownershipClarity === "onvoldoende_duidelijk" ||
-    changeDecisionProcess === "ad_hoc"
-  ) {
-    firstStep =
-      "Start met het expliciet beleggen van proceseigenaarschap en het vastleggen van besluitvorming over wijzigingen. Zonder die basis blijft verbetering afhankelijk van personen.";
-  } else if (
-    processStandardization === "sterk_verschillend" ||
-    exceptionControl === "uitzondering_is_norm"
-  ) {
-    firstStep =
-      "Breng eerst de belangrijkste processen en uitzonderingen terug naar één herkenbare standaard werkwijze. Dat maakt de organisatie direct beter beheersbaar.";
-  } else if (
-    issueResolution === "handmatig_herstellen" ||
-    improvementGovernance === "nauwelijks"
-  ) {
-    firstStep =
-      "Richt een vast ritme in voor evaluatie, opvolging en verbetering. Daarmee verschuift de organisatie van reageren op incidenten naar gericht doorontwikkelen.";
-  } else if (midSignals <= 2 && lowSignals <= 1) {
-    firstStep =
-      "De organisatie lijkt voldoende basis te hebben om gericht door te ontwikkelen. De eerste stap is nu om de belangrijkste verbeterkansen te prioriteren en om te zetten in een concreet verbeterplan.";
-  }
+if (lowSignals >= 4) {
+  firstStep =
+    "Start met het stabiliseren van de basis. Breng eerst verantwoordelijkheden, werkwijze en uitzonderingen terug naar een beheersbaar niveau voordat je verder verbreedt of verdiept.";
+} else if (
+  ownershipClarity === "onvoldoende_duidelijk" ||
+  changeDecisionProcess === "ad_hoc"
+) {
+  firstStep =
+    "Start met het expliciet beleggen van proceseigenaarschap en het vastleggen van besluitvorming over wijzigingen. Zonder die basis blijft verbetering afhankelijk van personen.";
+} else if (
+  processStandardization === "sterk_verschillend" ||
+  exceptionControl === "uitzondering_is_norm"
+) {
+  firstStep =
+    "Breng eerst de belangrijkste processen en uitzonderingen terug naar één herkenbare standaard werkwijze. Dat maakt de organisatie direct beter beheersbaar.";
+} else {
+  firstStep =
+    "De organisatie lijkt voldoende basis te hebben om gericht door te ontwikkelen. De eerste stap is nu om de belangrijkste verbeterkansen te prioriteren en om te zetten in een concreet verbeterplan.";
+}
 
   return {
     headline,
