@@ -85,37 +85,94 @@ export const optionSets: OptionSetDefinition[] = [
       },
     ],
   },
-{
-  key: "diagnosis_ownership_options",
-  options: [
-    { value: "onduidelijk", label: "Onvoldoende duidelijk", order: 10 },
-    { value: "gedeeltelijk", label: "Gedeeltelijk duidelijk", order: 20 },
-    { value: "duidelijk", label: "Duidelijk belegd", order: 30 },
-  ],
-},
-{
-  key: "diagnosis_afas_usage_options",
-  options: [
-    { value: "beperkt", label: "Beperkt", order: 10 },
-    { value: "wisselend", label: "Wisselend", order: 20 },
-    { value: "goed", label: "Goed", order: 30 },
-  ],
-},
-{
-  key: "diagnosis_reporting_options",
-  options: [
-    { value: "onvoldoende", label: "Onvoldoende", order: 10 },
-    { value: "basis", label: "Basis op orde", order: 20 },
-    { value: "sterk", label: "Sterk ondersteunend", order: 30 },
-  ],
-},
-{
-  key: "advice_direction_options",
-  options: [
-    { value: "optimaliseren", label: "Optimaliseren", order: 10 },
-    { value: "standaardiseren", label: "Standaardiseren", order: 20 },
-    { value: "governance", label: "Governance versterken", order: 30 },
-    { value: "rapportage", label: "Rapportage verbeteren", order: 40 },
-  ],
-},
+  {
+    key: "maturity_3level_clarity_options",
+    options: [
+      { value: "onvoldoende_duidelijk", label: "Onvoldoende duidelijk", order: 10 },
+      { value: "gedeeltelijk_duidelijk", label: "Gedeeltelijk duidelijk", order: 20 },
+      { value: "duidelijk_belegd", label: "Duidelijk belegd", order: 30 },
+    ],
+  },
+  {
+    key: "maturity_3level_change_governance_options",
+    options: [
+      { value: "ad_hoc", label: "Ad hoc", order: 10 },
+      { value: "deels_afgestemd", label: "Deels afgestemd", order: 20 },
+      {
+        value: "vast_proces",
+        label: "Vast proces met duidelijke besluitvorming",
+        order: 30,
+      },
+    ],
+  },
+  {
+    key: "maturity_3level_improvement_options",
+    options: [
+      { value: "nauwelijks", label: "Nauwelijks", order: 10 },
+      { value: "af_en_toe", label: "Af en toe", order: 20 },
+      { value: "structureel", label: "Structureel", order: 30 },
+    ],
+  },
+  {
+    key: "maturity_3level_standardization_options",
+    options: [
+      {
+        value: "sterk_verschillend",
+        label: "Sterk verschillend per persoon of team",
+        order: 10,
+      },
+      { value: "redelijk_eenduidig", label: "Redelijk eenduidig", order: 20 },
+      { value: "gestandaardiseerd", label: "Overwegend gestandaardiseerd", order: 30 },
+    ],
+  },
+  {
+    key: "maturity_3level_exception_control_options",
+    options: [
+      {
+        value: "uitzondering_is_norm",
+        label: "Uitzonderingen zijn vaak de norm",
+        order: 10,
+      },
+      {
+        value: "deels_beheersbaar",
+        label: "Regelmatig uitzonderingen, maar deels beheersbaar",
+        order: 20,
+      },
+      {
+        value: "beperkt_en_beheerst",
+        label: "Uitzonderingen zijn beperkt en beheerst",
+        order: 30,
+      },
+    ],
+  },
+  {
+    key: "maturity_3level_issue_resolution_options",
+    options: [
+      {
+        value: "handmatig_herstellen",
+        label: "Vooral handmatig herstellen",
+        order: 10,
+      },
+      {
+        value: "mix_ad_hoc_structureel",
+        label: "Soms structureel, soms ad hoc",
+        order: 20,
+      },
+      {
+        value: "meestal_structureel",
+        label: "Meestal structureel opgelost",
+        order: 30,
+      },
+    ],
+  },
+  {
+    key: "advice_direction_options",
+    options: [
+      { value: "optimaliseren", label: "Optimaliseren", order: 10 },
+      { value: "standaardiseren", label: "Standaardiseren", order: 20 },
+      { value: "governance_versterken", label: "Governance versterken", order: 30 },
+      { value: "inzicht_verbeteren", label: "Inzicht en sturing verbeteren", order: 40 },
+      { value: "beheer_versterken", label: "Beheer en adoptie versterken", order: 50 },
+    ],
+  },
 ];
