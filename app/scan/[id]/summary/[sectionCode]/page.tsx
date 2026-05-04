@@ -33,6 +33,8 @@ function getAnswerValue(
   if (questionKey === "afas_usage") return scan.diagnosis.afasUsage;
   if (questionKey === "reporting") return scan.diagnosis.reporting;
 
+  if (questionKey === "advice_direction") return scan.advice.direction;
+
   return "";
 }
 
