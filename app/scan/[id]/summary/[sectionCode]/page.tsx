@@ -43,40 +43,33 @@ function buildAdviceSummary(scan: ScanState) {
     issueResolution === "mix_ad_hoc_structureel",
   ].filter(Boolean).length;
 
-  let headline = "Gericht doorontwikkelen";
-  let mainView =
-    "De scan laat zien dat er een bruikbare basis aanwezig is, maar dat de organisatie nog niet overal op een vaste en beheersbare manier werkt. Vooral in eigenaarschap, standaardisatie en structurele verbetering is nog winst te halen.";
+let headline = "Gericht doorontwikkelen";
+let mainView =
+  "De scan laat zien dat er een bruikbare basis aanwezig is, maar dat de organisatie nog niet overal op een vaste en beheersbare manier werkt. Vooral in eigenaarschap, standaardisatie en structurele verbetering is nog winst te halen.";
 
-  if (lowSignals >= 4) {
-    headline = "Eerst stabiliseren";
-    mainView =
-      "De scan laat zien dat op meerdere onderdelen nog basisproblemen aanwezig zijn. Werkwijze, besluitvorming en beheersing zijn nog onvoldoende stevig om duurzaam te verbeteren. De eerste stap is daarom niet verbreden, maar stabiliseren.";
-  } else if (
-    ownershipClarity === "onvoldoende_duidelijk" ||
-    changeDecisionProcess === "ad_hoc"
-  ) {
-    headline = "Governance versterken";
-    mainView =
-      "De scan laat zien dat de grootste eerste winst zit in het scherper beleggen van eigenaarschap en besluitvorming. Zonder die basis blijft verbetering te veel afhankelijk van personen in plaats van van een vaste werkwijze.";
-  } else if (
-    processStandardization === "sterk_verschillend" ||
-    exceptionControl === "uitzondering_is_norm"
-  ) {
-    headline = "Processen standaardiseren";
-    mainView =
-      "De scan laat zien dat de organisatie nog te veel leunt op verschillen in werkwijze en uitzonderingen. Meer standaardisatie is de logische eerste stap om de uitvoering beter beheersbaar te maken.";
-  } else if (
-    issueResolution === "handmatig_herstellen" ||
-    improvementGovernance === "nauwelijks"
-  ) {
-    headline = "Verbetercyclus opbouwen";
-    mainView =
-      "De scan laat zien dat knelpunten nog te weinig structureel worden opgelost. De volgende stap is het opbouwen van een vast ritme voor opvolging, evaluatie en doorontwikkeling.";
-  } else if (midSignals <= 2 && lowSignals <= 1) {
-    headline = "Gericht verdiepen";
-    mainView =
-      "De scan laat zien dat de organisatie op hoofdlijnen een redelijke basis heeft. Er zijn aandachtspunten, maar geen direct groot fundamentprobleem. De volgende stap ligt vooral in gericht doorontwikkelen en verder aanscherpen.";
-  }
+if (lowSignals >= 4) {
+  headline = "Stabiliseren";
+  mainView =
+    "De scan laat zien dat op meerdere onderdelen nog basisproblemen aanwezig zijn. Werkwijze, besluitvorming en beheersing zijn nog onvoldoende stevig om duurzaam te verbeteren. De eerste stap is daarom niet verbreden, maar stabiliseren.";
+} else if (
+  ownershipClarity === "onvoldoende_duidelijk" ||
+  changeDecisionProcess === "ad_hoc"
+) {
+  headline = "Governance versterken";
+  mainView =
+    "De scan laat zien dat de grootste eerste winst zit in het scherper beleggen van eigenaarschap en besluitvorming. Zonder die basis blijft verbetering te veel afhankelijk van personen in plaats van van een vaste werkwijze.";
+} else if (
+  processStandardization === "sterk_verschillend" ||
+  exceptionControl === "uitzondering_is_norm"
+) {
+  headline = "Processen standaardiseren";
+  mainView =
+    "De scan laat zien dat de organisatie nog te veel leunt op verschillen in werkwijze en uitzonderingen. Meer standaardisatie is de logische eerste stap om de uitvoering beter beheersbaar te maken.";
+} else {
+  headline = "Gericht doorontwikkelen";
+  mainView =
+    "De scan laat zien dat de organisatie op hoofdlijnen een bruikbare basis heeft. Er zijn aandachtspunten, maar geen direct zwaar fundamentprobleem. De volgende stap ligt vooral in gericht verbeteren en verder aanscherpen.";
+}
 
   const attentionPoints: string[] = [];
 
