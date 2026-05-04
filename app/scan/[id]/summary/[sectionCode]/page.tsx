@@ -43,33 +43,33 @@ function buildAdviceSummary(scan: ScanState) {
     issueResolution === "mix_ad_hoc_structureel",
   ].filter(Boolean).length;
 
-let headline = "Gericht doorontwikkelen";
-let mainView =
-  "De scan laat zien dat er een bruikbare basis aanwezig is, maar dat de organisatie nog niet overal op een vaste en beheersbare manier werkt. Vooral in eigenaarschap, standaardisatie en structurele verbetering is nog winst te halen.";
+  let headline = "Gericht doorontwikkelen";
+  let mainView =
+    "De scan laat zien dat er een bruikbare basis aanwezig is, maar dat de organisatie nog niet overal op een vaste en beheersbare manier werkt. Vooral in eigenaarschap, standaardisatie en structurele verbetering is nog winst te halen.";
 
-if (lowSignals >= 4) {
-  headline = "Stabiliseren";
-  mainView =
-    "De scan laat zien dat op meerdere onderdelen nog basisproblemen aanwezig zijn. Werkwijze, besluitvorming en beheersing zijn nog onvoldoende stevig om duurzaam te verbeteren. De eerste stap is daarom niet verbreden, maar stabiliseren.";
-} else if (
-  ownershipClarity === "onvoldoende_duidelijk" ||
-  changeDecisionProcess === "ad_hoc"
-) {
-  headline = "Governance versterken";
-  mainView =
-    "De scan laat zien dat de grootste eerste winst zit in het scherper beleggen van eigenaarschap en besluitvorming. Zonder die basis blijft verbetering te veel afhankelijk van personen in plaats van van een vaste werkwijze.";
-} else if (
-  processStandardization === "sterk_verschillend" ||
-  exceptionControl === "uitzondering_is_norm"
-) {
-  headline = "Processen standaardiseren";
-  mainView =
-    "De scan laat zien dat de organisatie nog te veel leunt op verschillen in werkwijze en uitzonderingen. Meer standaardisatie is de logische eerste stap om de uitvoering beter beheersbaar te maken.";
-} else {
-  headline = "Gericht doorontwikkelen";
-  mainView =
-    "De scan laat zien dat de organisatie op hoofdlijnen een bruikbare basis heeft. Er zijn aandachtspunten, maar geen direct zwaar fundamentprobleem. De volgende stap ligt vooral in gericht verbeteren en verder aanscherpen.";
-}
+  if (lowSignals >= 4) {
+    headline = "Stabiliseren";
+    mainView =
+      "De scan laat zien dat op meerdere onderdelen nog basisproblemen aanwezig zijn. Werkwijze, besluitvorming en beheersing zijn nog onvoldoende stevig om duurzaam te verbeteren. De eerste stap is daarom niet verbreden, maar stabiliseren.";
+  } else if (
+    ownershipClarity === "onvoldoende_duidelijk" ||
+    changeDecisionProcess === "ad_hoc"
+  ) {
+    headline = "Governance versterken";
+    mainView =
+      "De scan laat zien dat de grootste eerste winst zit in het scherper beleggen van eigenaarschap en besluitvorming. Zonder die basis blijft verbetering te veel afhankelijk van personen in plaats van van een vaste werkwijze.";
+  } else if (
+    processStandardization === "sterk_verschillend" ||
+    exceptionControl === "uitzondering_is_norm"
+  ) {
+    headline = "Processen standaardiseren";
+    mainView =
+      "De scan laat zien dat de organisatie nog te veel leunt op verschillen in werkwijze en uitzonderingen. Meer standaardisatie is de logische eerste stap om de uitvoering beter beheersbaar te maken.";
+  } else {
+    headline = "Gericht doorontwikkelen";
+    mainView =
+      "De scan laat zien dat de organisatie op hoofdlijnen een bruikbare basis heeft. Er zijn aandachtspunten, maar geen direct zwaar fundamentprobleem. De volgende stap ligt vooral in gericht verbeteren en verder aanscherpen.";
+  }
 
   const attentionPoints: string[] = [];
 
@@ -134,28 +134,28 @@ if (lowSignals >= 4) {
           "De scan laat geen direct zwaar knelpunt zien, maar verdere aanscherping blijft wenselijk.",
         ];
 
-let firstStep =
-  "Breng de belangrijkste verbeterkansen terug naar een beperkt en concreet verbeterplan, zodat de organisatie gericht kan doorontwikkelen.";
+  let firstStep =
+    "Breng de belangrijkste verbeterkansen terug naar een beperkt en concreet verbeterplan, zodat de organisatie gericht kan doorontwikkelen.";
 
-if (lowSignals >= 4) {
-  firstStep =
-    "Start met het stabiliseren van de basis. Breng eerst verantwoordelijkheden, werkwijze en uitzonderingen terug naar een beheersbaar niveau voordat je verder verbreedt of verdiept.";
-} else if (
-  ownershipClarity === "onvoldoende_duidelijk" ||
-  changeDecisionProcess === "ad_hoc"
-) {
-  firstStep =
-    "Start met het expliciet beleggen van proceseigenaarschap en het vastleggen van besluitvorming over wijzigingen. Zonder die basis blijft verbetering afhankelijk van personen.";
-} else if (
-  processStandardization === "sterk_verschillend" ||
-  exceptionControl === "uitzondering_is_norm"
-) {
-  firstStep =
-    "Breng eerst de belangrijkste processen en uitzonderingen terug naar één herkenbare standaard werkwijze. Dat maakt de organisatie direct beter beheersbaar.";
-} else {
-  firstStep =
-    "De organisatie lijkt voldoende basis te hebben om gericht door te ontwikkelen. De eerste stap is nu om de belangrijkste verbeterkansen te prioriteren en om te zetten in een concreet verbeterplan.";
-}
+  if (lowSignals >= 4) {
+    firstStep =
+      "Start met het stabiliseren van de basis. Breng eerst verantwoordelijkheden, werkwijze en uitzonderingen terug naar een beheersbaar niveau voordat je verder verbreedt of verdiept.";
+  } else if (
+    ownershipClarity === "onvoldoende_duidelijk" ||
+    changeDecisionProcess === "ad_hoc"
+  ) {
+    firstStep =
+      "Start met het expliciet beleggen van proceseigenaarschap en het vastleggen van besluitvorming over wijzigingen. Zonder die basis blijft verbetering afhankelijk van personen.";
+  } else if (
+    processStandardization === "sterk_verschillend" ||
+    exceptionControl === "uitzondering_is_norm"
+  ) {
+    firstStep =
+      "Breng eerst de belangrijkste processen en uitzonderingen terug naar één herkenbare standaard werkwijze. Dat maakt de organisatie direct beter beheersbaar.";
+  } else {
+    firstStep =
+      "De organisatie lijkt voldoende basis te hebben om gericht door te ontwikkelen. De eerste stap is nu om de belangrijkste verbeterkansen te prioriteren en om te zetten in een concreet verbeterplan.";
+  }
 
   return {
     headline,
