@@ -45,6 +45,7 @@ export default function FlowQuestionPage() {
     setOwnership,
     setAfasUsage,
     setReporting,
+    setAdviceDirection,
   } = useScanContext();
 
   const section = getSection(sectionCode);
@@ -115,7 +116,9 @@ export default function FlowQuestionPage() {
                         ? scan.diagnosis.afasUsage
                         : questionKey === "reporting"
                           ? scan.diagnosis.reporting
-                          : "";
+                          : questionKey === "advice_direction"
+                            ? scan.advice.direction
+                            : "";
 
   const setAnswerValue = (value: string) => {
     if (questionKey === "customer_name") {
@@ -170,6 +173,11 @@ export default function FlowQuestionPage() {
 
     if (questionKey === "reporting") {
       setReporting(value);
+      return;
+    }
+
+    if (questionKey === "advice_direction") {
+      setAdviceDirection(value);
       return;
     }
   };
