@@ -42,6 +42,7 @@ export default function FlowQuestionPage() {
     setPrimaryGoal,
     setBiggestBottleneck,
     setScope,
+    setOwnership,
   } = useScanContext();
 
   const section = getSection(sectionCode);
@@ -106,7 +107,9 @@ export default function FlowQuestionPage() {
                   ? scan.profile.biggestBottleneck
                   : questionKey === "scope"
                     ? scan.scope
-                    : "";
+                    : questionKey === "ownership"
+                      ? scan.diagnosis.ownership
+                      : "";
 
   const setAnswerValue = (value: string) => {
     if (questionKey === "customer_name") {
@@ -146,6 +149,11 @@ export default function FlowQuestionPage() {
 
     if (questionKey === "scope") {
       setScope(value);
+      return;
+    }
+
+    if (questionKey === "ownership") {
+      setOwnership(value);
       return;
     }
   };
