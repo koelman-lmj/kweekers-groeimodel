@@ -43,6 +43,8 @@ export default function FlowQuestionPage() {
     setBiggestBottleneck,
     setScope,
     setOwnership,
+    setAfasUsage,
+    setReporting,
   } = useScanContext();
 
   const section = getSection(sectionCode);
@@ -109,7 +111,11 @@ export default function FlowQuestionPage() {
                     ? scan.scope
                     : questionKey === "ownership"
                       ? scan.diagnosis.ownership
-                      : "";
+                      : questionKey === "afas_usage"
+                        ? scan.diagnosis.afasUsage
+                        : questionKey === "reporting"
+                          ? scan.diagnosis.reporting
+                          : "";
 
   const setAnswerValue = (value: string) => {
     if (questionKey === "customer_name") {
@@ -154,6 +160,16 @@ export default function FlowQuestionPage() {
 
     if (questionKey === "ownership") {
       setOwnership(value);
+      return;
+    }
+
+    if (questionKey === "afas_usage") {
+      setAfasUsage(value);
+      return;
+    }
+
+    if (questionKey === "reporting") {
+      setReporting(value);
       return;
     }
   };
