@@ -30,6 +30,8 @@ function getAnswerValue(
   if (questionKey === "scope") return scan.scope;
 
   if (questionKey === "ownership") return scan.diagnosis.ownership;
+  if (questionKey === "afas_usage") return scan.diagnosis.afasUsage;
+  if (questionKey === "reporting") return scan.diagnosis.reporting;
 
   return "";
 }
