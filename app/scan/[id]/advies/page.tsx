@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useScanContext } from "@/app/context/ScanContext";
+import { useScanContext, type ScanState } from "@/app/context/ScanContext";
 
 const SECTOR_LABELS: Record<string, string> = {
   zorg: "Zorg",
@@ -12,16 +12,35 @@ const SECTOR_LABELS: Record<string, string> = {
 };
 
 const SCOPE_LABELS: Record<string, string> = {
-  volledige_scan: "Volledige scan",
-  quickscan: "Quickscan",
-  afas_optimalisatie: "AFAS-optimalisatie",
-  data_rapportage: "Data & rapportage",
+  smal: "Smal",
+  normaal: "Normaal",
+  breed: "Breed",
 };
 
-const ANSWER_LABELS: Record<string, string> = {
-  ja: "Ja",
-  deels: "Deels",
-  nee: "Nee",
+const DIAGNOSIS_LABELS: Record<string, string> = {
+  onvoldoende_duidelijk: "Onvoldoende duidelijk",
+  gedeeltelijk_duidelijk: "Gedeeltelijk duidelijk",
+  duidelijk_belegd: "Duidelijk belegd",
+
+  ad_hoc: "Ad hoc",
+  deels_afgestemd: "Deels afgestemd",
+  vast_proces: "Vast proces met duidelijke besluitvorming",
+
+  nauwelijks: "Nauwelijks",
+  af_en_toe: "Af en toe",
+  structureel: "Structureel",
+
+  sterk_verschillend: "Sterk verschillend per persoon of team",
+  redelijk_eenduidig: "Redelijk eenduidig",
+  gestandaardiseerd: "Overwegend gestandaardiseerd",
+
+  uitzondering_is_norm: "Uitzonderingen zijn vaak de norm",
+  deels_beheersbaar: "Regelmatig uitzonderingen, maar deels beheersbaar",
+  beperkt_en_beheerst: "Uitzonderingen zijn beperkt en beheerst",
+
+  handmatig_herstellen: "Vooral handmatig herstellen",
+  mix_ad_hoc_structureel: "Soms structureel, soms ad hoc",
+  meestal_structureel: "Meestal structureel opgelost",
 };
 
 function getSectorLabel(value: string) {
@@ -32,91 +51,119 @@ function getScopeLabel(value: string) {
   return SCOPE_LABELS[value] || "Nog niet gekozen";
 }
 
-function getAnswerLabel(value: string) {
-  return ANSWER_LABELS[value] || "Nog niet gekozen";
+function getDiagnosisLabel(value: string) {
+  return DIAGNOSIS_LABELS[value] || "Nog niet gekozen";
 }
 
-function buildAdvice(scan: {
-  profile: { customerName: string; sector: string };
-  scope: string;
-  diagnosis: {
-    ownership: string;
-    afasUsage: string;
-    reporting: string;
-  };
-}) {
+function buildAdvice(scan: ScanState) {
   const customerName = scan.profile.customerName || "de klant";
   const sectorLabel = getSectorLabel(scan.profile.sector).toLowerCase();
   const scopeLabel = getScopeLabel(scan.scope);
 
-  const { ownership, afasUsage, reporting } = scan.diagnosis;
+  const {
+    ownershipClarity,
+    changeDecisionProcess,
+    improvementGovernance,
+    processStandardization,
+    exceptionControl,
+    issueResolution,
+  } = scan.diagnosis;
 
-  const noCount = [ownership, afasUsage, reporting].filter(
-    (value) => value === "nee"
-  ).length;
+  const lowSignals = [
+    ownershipClarity === "onvoldoende_duidelijk",
+    changeDecisionProcess === "ad_hoc",
+    improvementGovernance === "nauwelijks",
+    processStandardization === "sterk_verschillend",
+    exceptionControl === "uitzondering_is_norm",
+    issueResolution === "handmatig_herstellen",
+  ].filter(Boolean).length;
 
-  const partialCount = [ownership, afasUsage, reporting].filter(
-    (value) => value === "deels"
-  ).length;
+  const midSignals = [
+    ownershipClarity === "gedeeltelijk_duidelijk",
+    changeDecisionProcess === "deels_afgestemd",
+    improvementGovernance === "af_en_toe",
+    processStandardization === "redelijk_eenduidig",
+    exceptionControl === "deels_beheersbaar",
+    issueResolution === "mix_ad_hoc_structureel",
+  ].filter(Boolean).length;
 
   let title = "Gericht doorontwikkelen";
   let body =
-    "De basis oogt redelijk stevig. De volgende stap is selectief doorontwikkelen.";
+    "De eerste diagnose laat zien dat er een basis aanwezig is. De volgende stap is gericht verbeteren en verder structureren.";
 
-  if (reporting === "nee") {
-    title = "Eerst grip op data";
-    body =
-      "Rapportage en stuurinformatie lijken nu de belangrijkste bron van frictie.";
-  } else if (afasUsage === "nee") {
-    title = "Eerst standaardiseren";
-    body =
-      "AFAS lijkt nog niet overal de duidelijke standaardroute te zijn.";
-  } else if (ownership === "nee") {
-    title = "Eerst eigenaarschap aanscherpen";
-    body =
-      "Procesverantwoordelijkheden en besluitvorming lijken nog te weinig helder belegd.";
-  } else if (noCount >= 2) {
+  if (lowSignals >= 4) {
     title = "Eerst stabiliseren";
     body =
-      "Er zijn op meerdere onderdelen duidelijke basisproblemen zichtbaar die eerst gestabiliseerd moeten worden.";
-  } else if (partialCount >= 2) {
+      "Er zijn op meerdere onderdelen duidelijke basisproblemen zichtbaar. De eerste prioriteit ligt bij het stabieler maken van eigenaarschap, werkwijze en beheersing.";
+  } else if (
+    ownershipClarity === "onvoldoende_duidelijk" ||
+    changeDecisionProcess === "ad_hoc"
+  ) {
+    title = "Governance versterken";
+    body =
+      "De grootste eerste winst zit in het scherper beleggen van eigenaarschap en besluitvorming rond processen en inrichting.";
+  } else if (
+    processStandardization === "sterk_verschillend" ||
+    exceptionControl === "uitzondering_is_norm"
+  ) {
+    title = "Processen standaardiseren";
+    body =
+      "De organisatie lijkt nu te veel te leunen op verschillen in werkwijze en uitzonderingen. Meer standaardisatie is de logische eerste stap.";
+  } else if (
+    issueResolution === "handmatig_herstellen" ||
+    improvementGovernance === "nauwelijks"
+  ) {
+    title = "Verbetercyclus opbouwen";
+    body =
+      "De organisatie lijkt nog te weinig structureel te verbeteren. De eerste stap is een ritme opbouwen voor opvolging, analyse en doorontwikkeling.";
+  } else if (midSignals >= 3) {
     title = "Gericht verbeteren";
     body =
-      "Er is een basis, maar op meerdere onderdelen is nog aanscherping nodig om stabiel te kunnen sturen.";
-  } else if (ownership === "ja" && afasUsage === "ja" && reporting === "ja") {
-    title = "Hoofdbevinding";
-    body =
-      "De eerste diagnose laat geen direct groot basisprobleem zien. De organisatie lijkt voldoende basis te hebben om gericht door te ontwikkelen.";
+      "De basis is aanwezig, maar op meerdere onderdelen is aanscherping nodig om stabieler en consistenter te kunnen werken.";
   }
 
   const focusPoints: string[] = [];
 
-  if (scan.scope === "quickscan") {
-    focusPoints.push("Breng eerst de 3 belangrijkste knelpunten per onderwerp in beeld.");
+  if (
+    ownershipClarity === "onvoldoende_duidelijk" ||
+    ownershipClarity === "gedeeltelijk_duidelijk"
+  ) {
+    focusPoints.push("Leg proceseigenaarschap en verantwoordelijkheden expliciet vast.");
   }
 
-  if (scan.scope === "volledige_scan") {
-    focusPoints.push("Werk per domein toe naar een concreet verbeterplan met prioriteiten.");
+  if (
+    changeDecisionProcess === "ad_hoc" ||
+    changeDecisionProcess === "deels_afgestemd"
+  ) {
+    focusPoints.push("Maak wijzigingsverzoeken en besluitvorming voorspelbaar en eenduidig.");
   }
 
-  if (scan.scope === "afas_optimalisatie") {
-    focusPoints.push("Bepaal waar AFAS nog niet de standaardroute is en waarom dat gebeurt.");
+  if (
+    processStandardization === "sterk_verschillend" ||
+    processStandardization === "redelijk_eenduidig"
+  ) {
+    focusPoints.push("Breng de belangrijkste processen terug naar één herkenbare standaard werkwijze.");
   }
 
-  if (scan.scope === "data_rapportage") {
-    focusPoints.push("Maak KPI-definities, databronnen en rapportageverantwoordelijkheid expliciet.");
+  if (
+    exceptionControl === "uitzondering_is_norm" ||
+    exceptionControl === "deels_beheersbaar"
+  ) {
+    focusPoints.push("Beperk uitzonderingen en maak afwijkingen expliciet beheersbaar.");
   }
 
-  if (ownership === "nee" || ownership === "deels") {
-    focusPoints.push("Leg proceseigenaarschap en besluitvorming duidelijker vast.");
+  if (
+    issueResolution === "handmatig_herstellen" ||
+    issueResolution === "mix_ad_hoc_structureel"
+  ) {
+    focusPoints.push("Los terugkerende knelpunten structureel op in plaats van handmatig te blijven herstellen.");
   }
 
-  if (afasUsage === "nee" || afasUsage === "deels") {
-    focusPoints.push("Breng workarounds en nevenlijstjes in kaart en vervang die stap voor stap.");
-  }
-
-  if (reporting === "nee" || reporting === "deels") {
-    focusPoints.push("Verminder afhankelijkheid van handmatig werk in rapportages en stuurinformatie.");
+  if (
+    improvementGovernance === "nauwelijks" ||
+    improvementGovernance === "af_en_toe"
+  ) {
+    focusPoints.push("Richt een vast verbeter- en evaluatieritme in voor processen en inrichting.");
   }
 
   while (focusPoints.length > 3) {
@@ -125,15 +172,15 @@ function buildAdvice(scan: {
 
   let guidance = `Voor ${customerName} in de sector ${sectorLabel} past nu het best een vervolgstap die aansluit op de gekozen scope: ${scopeLabel}.`;
 
-  if (noCount >= 2) {
+  if (lowSignals >= 4) {
     guidance +=
-      " De uitkomst wijst erop dat eerst de basis stabieler moet worden gemaakt voordat verbreding echt waarde toevoegt.";
-  } else if (partialCount >= 2) {
+      " De uitkomst wijst erop dat eerst de basis steviger moet worden gemaakt voordat verbreding of verdieping echt rendement geeft.";
+  } else if (midSignals >= 3) {
     guidance +=
-      " De uitkomst laat zien dat er al een basis aanwezig is, maar dat meer scherpte nodig is op proces, gebruik of sturing.";
+      " De uitkomst laat zien dat er al een basis is, maar dat meer structuur en beheersing nodig zijn om door te groeien in volwassenheid.";
   } else {
     guidance +=
-      " De eerste diagnose geeft ruimte om gericht te verdiepen in plaats van breed opnieuw te beginnen.";
+      " De eerste diagnose geeft ruimte om gericht verder te verdiepen en door te ontwikkelen zonder eerst breed terug naar de basis te hoeven.";
   }
 
   return {
@@ -152,17 +199,17 @@ export default function AdviesPage() {
 
   return (
     <div className="space-y-8">
-<div className="space-y-3">
-  <div className="inline-flex rounded-full border px-3 py-1 text-xs font-medium">
-    Eerste adviesrapport
-  </div>
-  <p className="text-sm text-muted-foreground">Stap 4 van 4</p>
-  <h1 className="text-3xl font-semibold tracking-tight">Adviesrapport</h1>
-  <p className="text-sm text-muted-foreground">
-    Dit rapport geeft een eerste inhoudelijke duiding op basis van
-    klantprofiel, gekozen scope en diagnose-antwoorden.
-  </p>
-</div>
+      <div className="space-y-3">
+        <div className="inline-flex rounded-full border px-3 py-1 text-xs font-medium">
+          Eerste adviesrapport
+        </div>
+        <p className="text-sm text-muted-foreground">Stap 4 van 4</p>
+        <h1 className="text-3xl font-semibold tracking-tight">Adviesrapport</h1>
+        <p className="text-sm text-muted-foreground">
+          Dit rapport geeft een eerste inhoudelijke duiding op basis van
+          klantprofiel, gekozen scope en diagnose-antwoorden.
+        </p>
+      </div>
 
       <section className="space-y-3 rounded-2xl border p-5">
         <h2 className="text-lg font-medium">Managementsamenvatting</h2>
@@ -171,12 +218,27 @@ export default function AdviesPage() {
           <div>Sector: {getSectorLabel(scan.profile.sector)}</div>
           <div>Scope: {advice.scopeLabel}</div>
           <div>
-            Proceseigenaarschap: {getAnswerLabel(scan.diagnosis.ownership)}
+            Eigenaarschap: {getDiagnosisLabel(scan.diagnosis.ownershipClarity)}
           </div>
           <div>
-            AFAS als standaard: {getAnswerLabel(scan.diagnosis.afasUsage)}
+            Besluitvorming wijzigingen:{" "}
+            {getDiagnosisLabel(scan.diagnosis.changeDecisionProcess)}
           </div>
-          <div>Rapportage: {getAnswerLabel(scan.diagnosis.reporting)}</div>
+          <div>
+            Sturing op verbetering:{" "}
+            {getDiagnosisLabel(scan.diagnosis.improvementGovernance)}
+          </div>
+          <div>
+            Eenduidigheid werkwijze:{" "}
+            {getDiagnosisLabel(scan.diagnosis.processStandardization)}
+          </div>
+          <div>
+            Uitzonderingen: {getDiagnosisLabel(scan.diagnosis.exceptionControl)}
+          </div>
+          <div>
+            Oplossen van knelpunten:{" "}
+            {getDiagnosisLabel(scan.diagnosis.issueResolution)}
+          </div>
         </div>
       </section>
 
@@ -189,7 +251,7 @@ export default function AdviesPage() {
         <h2 className="text-lg font-medium">Aanbevolen focuspunten</h2>
         <ul className="space-y-2 text-sm text-muted-foreground">
           {advice.focusPoints.map((point) => (
-            <li key={point} className="list-disc ml-5">
+            <li key={point} className="ml-5 list-disc">
               {point}
             </li>
           ))}
@@ -203,16 +265,13 @@ export default function AdviesPage() {
 
       <div className="flex items-center justify-between border-t pt-6">
         <Link
-          href="/scan/nieuw/diagnose"
+          href="/scan/nieuw/summary/diagnose"
           className="rounded-2xl border px-4 py-2 text-sm shadow-sm"
         >
           Vorige
         </Link>
 
-        <Link
-          href="/"
-className="kweekers-primary-button"
-        >
+        <Link href="/scan/nieuw/summary/advies" className="kweekers-primary-button">
           Rapport afronden →
         </Link>
       </div>
