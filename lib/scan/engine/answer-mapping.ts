@@ -16,8 +16,6 @@ export function getAnswerFromScan(
 
     case "scan_reason":
       return scan.profile.scanReason;
-    case "primary_goal":
-      return scan.profile.primaryGoal;
     case "biggest_bottleneck":
       return scan.profile.biggestBottleneck;
 
@@ -52,7 +50,6 @@ export type ScanActions = {
   setAdministrationCount: (value: string) => void;
 
   setScanReason: (value: string) => void;
-  setPrimaryGoal: (value: string) => void;
   setBiggestBottleneck: (value: string) => void;
 
   setScope: (value: string) => void;
@@ -88,9 +85,6 @@ export function setAnswerToScan(
 
     case "scan_reason":
       actions.setScanReason(value);
-      return;
-    case "primary_goal":
-      actions.setPrimaryGoal(value);
       return;
     case "biggest_bottleneck":
       actions.setBiggestBottleneck(value);
