@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useScanContext } from "@/app/context/ScanContext";
-import { sections } from "@/lib/scan/definition";
+import { sections } from "@/lib/scan/definition/sections";
 import {
   getNextQuestionKey,
   getOptionSet,
