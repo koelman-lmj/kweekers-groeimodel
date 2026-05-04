@@ -19,7 +19,11 @@ export type ScanState = {
     scanReason: string;
     biggestBottleneck: string;
   };
-  scope: string;
+scope: {
+  width: string;
+  focus: string;
+  depth: string;
+};
   diagnosis: {
     ownershipClarity: string;
     changeDecisionProcess: string;
