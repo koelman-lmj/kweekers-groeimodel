@@ -67,9 +67,23 @@ export default function FlowQuestionPage() {
   const previousQuestionKey = getPreviousQuestionKey(sectionCode, questionKey);
   const nextQuestionKey = getNextQuestionKey(sectionCode, questionKey);
 
-  const previousHref = previousQuestionKey
-    ? `/scan/${scanId}/flow/${sectionCode}/${previousQuestionKey}`
-    : `/scan/${scanId}`;
+const currentQuestionIndex = questions.findIndex(
+  (question) => question.key === questionKey
+);
+
+const currentSectionIndex = sections.findIndex(
+  (section) => section.code === sectionCode
+);
+
+const previousSection =
+  currentSectionIndex > 0 ? sections[currentSectionIndex - 1] : null;
+
+const previousHref =
+  currentQuestionIndex > 0
+    ? `/scan/${scanId}/flow/${sectionCode}/${questions[currentQuestionIndex - 1].key}`
+    : previousSection?.summaryEnabled
+      ? `/scan/${scanId}/summary/${previousSection.code}`
+      : `/scan/${scanId}/summary/profile_basis`;
 
   const nextHref = nextQuestionKey
     ? `/scan/${scanId}/flow/${sectionCode}/${nextQuestionKey}`
