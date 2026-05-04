@@ -137,7 +137,7 @@ function ScanShell({ children }: { children: ReactNode }) {
                       : status === "completed"
                         ? "border-[#b7dfc2] bg-[#eef8f1] text-[#1f5130]"
                         : status === "available"
-                          ? "border-black bg-white hover:bg-neutral-50"
+                          ? "border-[#eadfcb] bg-[#fcf8f2] text-[#4d4031] hover:bg-[#faf3e8]"
                           : "border-neutral-300 bg-white text-neutral-400 opacity-70";
 
                   const numberClass =
@@ -146,26 +146,26 @@ function ScanShell({ children }: { children: ReactNode }) {
                       : status === "completed"
                         ? "border-[#56a26a] bg-[#56a26a] text-white"
                         : status === "available"
-                          ? "border-black text-black"
+                          ? "border-[#8e7a5c] text-[#4d4031]"
                           : "border-neutral-400 text-neutral-400";
 
                   const titleClass =
                     status === "current"
-                      ? "text-[#2f426a]"
+                      ? "text-[#2f426a] font-semibold"
                       : status === "completed"
-                        ? "text-[#1f5130]"
-                        : status === "locked"
-                          ? "text-neutral-400"
-                          : "text-black";
+                        ? "text-[#1f5130] font-semibold"
+                        : status === "available"
+                          ? "text-[#2d241a] font-semibold"
+                          : "text-neutral-400 font-medium";
 
                   const descriptionClass =
                     status === "current"
                       ? "text-[#4b5f86]"
                       : status === "completed"
                         ? "text-[#356946]"
-                        : status === "locked"
-                          ? "text-neutral-400"
-                          : "text-muted-foreground";
+                        : status === "available"
+                          ? "text-[#6b5a46]"
+                          : "text-neutral-400";
 
                   const displayNumber = status === "completed" ? "✓" : step.number;
 
@@ -180,9 +180,7 @@ function ScanShell({ children }: { children: ReactNode }) {
                       </div>
 
                       <div className="min-w-0">
-                        <div className={`text-sm font-medium ${titleClass}`}>
-                          {step.title}
-                        </div>
+                        <div className={`text-sm ${titleClass}`}>{step.title}</div>
                         <div className={`text-sm ${descriptionClass}`}>
                           {step.description}
                         </div>
