@@ -30,4 +30,36 @@ export const optionSets: OptionSetDefinition[] = [
       { value: "10+", label: "10+ administraties", order: 40 },
     ],
   },
+  {
+    key: "scan_reason_options",
+    options: [
+      { value: "nulmeting", label: "Nulmeting", order: 10 },
+      { value: "optimalisatie", label: "Optimalisatie", order: 20 },
+      { value: "herinrichting", label: "Herinrichting", order: 30 },
+      { value: "rapportage", label: "Rapportage & sturing", order: 40 },
+      { value: "groei", label: "Voorbereiding op groei", order: 50 },
+      { value: "overig", label: "Overig", order: 60 },
+    ],
+  },
+  {
+    key: "primary_goal_options",
+    options: [
+      { value: "inzicht", label: "Inzicht in huidige situatie", order: 10 },
+      { value: "verbeterkansen", label: "Verbeterkansen bepalen", order: 20 },
+      { value: "roadmap", label: "Roadmap en prioriteiten bepalen", order: 30 },
+      { value: "standaardiseren", label: "Meer standaardiseren", order: 40 },
+      { value: "sturing", label: "Betere sturing en rapportage", order: 50 },
+    ],
+  },
+  {
+    key: "biggest_bottleneck_options",
+    options: [
+      { value: "processen", label: "Processen", order: 10 },
+      { value: "afas", label: "AFAS-inrichting", order: 20 },
+      { value: "rapportage", label: "Rapportage en stuurinformatie", order: 30 },
+      { value: "eigenaarschap", label: "Eigenaarschap", order: 40 },
+      { value: "data_integraties", label: "Data / integraties", order: 50 },
+      { value: "adoptie", label: "Adoptie en gebruik", order: 60 },
+    ],
+  },
 ];
