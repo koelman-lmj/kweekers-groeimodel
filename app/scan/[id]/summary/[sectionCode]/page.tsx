@@ -27,6 +27,8 @@ function getAnswerValue(
   if (questionKey === "primary_goal") return scan.profile.primaryGoal;
   if (questionKey === "biggest_bottleneck") return scan.profile.biggestBottleneck;
 
+  if (questionKey === "scope") return scan.scope;
+
   return "";
 }
 
@@ -79,7 +81,9 @@ export default function SectionSummaryPage() {
   return (
     <div className="space-y-8">
       <div className="space-y-2">
-        <p className="text-sm text-muted-foreground">{section.title} — samenvatting</p>
+        <p className="text-sm text-muted-foreground">
+          {section.title} — samenvatting
+        </p>
         <h1 className="text-3xl font-semibold tracking-tight">Samenvatting</h1>
         <p className="text-sm text-muted-foreground">
           Controleer of de ingevulde gegevens goed zijn ingevuld.
