@@ -174,4 +174,54 @@ export const optionSets: OptionSetDefinition[] = [
     { value: "gericht_doorontwikkelen", label: "Gericht doorontwikkelen", order: 40 },
   ],
 },
+{
+  key: "scope_focus_options",
+  options: [
+    {
+      value: "organisatie_eigenaarschap",
+      label: "Organisatie en eigenaarschap",
+      order: 10,
+    },
+    {
+      value: "processen_werkwijze",
+      label: "Processen en werkwijze",
+      order: 20,
+    },
+    {
+      value: "afas_inrichting_gebruik",
+      label: "AFAS-inrichting en gebruik",
+      order: 30,
+    },
+    {
+      value: "rapportage_sturing",
+      label: "Rapportage en sturing",
+      order: 40,
+    },
+    {
+      value: "beheer_doorontwikkeling",
+      label: "Beheer en doorontwikkeling",
+      order: 50,
+    },
+  ],
+},
+{
+  key: "scope_depth_options",
+  options: [
+    {
+      value: "eerste_beeld",
+      label: "Snel eerste beeld",
+      order: 10,
+    },
+    {
+      value: "gericht_verdiepen",
+      label: "Gericht verdiepen",
+      order: 20,
+    },
+    {
+      value: "verbeterplan",
+      label: "Basis voor concreet verbeterplan",
+      order: 30,
+    },
+  ],
+},
 ];
