@@ -41,6 +41,7 @@ export default function FlowQuestionPage() {
     setScanReason,
     setPrimaryGoal,
     setBiggestBottleneck,
+    setScope,
   } = useScanContext();
 
   const section = getSection(sectionCode);
@@ -103,7 +104,9 @@ export default function FlowQuestionPage() {
                 ? scan.profile.primaryGoal
                 : questionKey === "biggest_bottleneck"
                   ? scan.profile.biggestBottleneck
-                  : "";
+                  : questionKey === "scope"
+                    ? scan.scope
+                    : "";
 
   const setAnswerValue = (value: string) => {
     if (questionKey === "customer_name") {
@@ -138,6 +141,11 @@ export default function FlowQuestionPage() {
 
     if (questionKey === "biggest_bottleneck") {
       setBiggestBottleneck(value);
+      return;
+    }
+
+    if (questionKey === "scope") {
+      setScope(value);
     }
   };
 
