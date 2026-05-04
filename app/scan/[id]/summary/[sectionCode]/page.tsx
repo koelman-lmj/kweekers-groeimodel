@@ -66,18 +66,19 @@ export default function SectionSummaryPage() {
   const previousHref =
     questions.length > 0
       ? `/scan/${scanId}/flow/${sectionCode}/${questions[questions.length - 1].key}`
-      : `/scan/${scanId}`;
+      : `/scan/${scanId}/summary/profile_basis`;
 
-  const nextSectionCode = section?.nextSectionCode ?? "";
+  const nextSectionCode = section.nextSectionCode ?? "";
   const nextSectionQuestions = nextSectionCode
     ? getQuestionsForSection(nextSectionCode)
     : [];
   const nextQuestionKey = nextSectionQuestions[0]?.key ?? "";
 
-  const nextHref =
-    nextSectionCode && nextQuestionKey
-      ? `/scan/${scanId}/flow/${nextSectionCode}/${nextQuestionKey}`
-      : `/scan/${scanId}`;
+  const hasNextStep = Boolean(nextSectionCode && nextQuestionKey);
+
+  const nextHref = hasNextStep
+    ? `/scan/${scanId}/flow/${nextSectionCode}/${nextQuestionKey}`
+    : "";
 
   const canContinue = questions.every((question) => {
     if (!question.required) return true;
@@ -135,16 +136,25 @@ export default function SectionSummaryPage() {
           Vorige
         </Link>
 
-        {canContinue ? (
-          <Link href={nextHref} className="kweekers-primary-button">
-            Verder →
-          </Link>
+        {hasNextStep ? (
+          canContinue ? (
+            <Link href={nextHref} className="kweekers-primary-button">
+              Verder →
+            </Link>
+          ) : (
+            <span
+              aria-disabled="true"
+              className="inline-flex cursor-not-allowed items-center rounded-2xl border px-5 py-3 text-sm font-medium text-muted-foreground opacity-60"
+            >
+              Verder →
+            </span>
+          )
         ) : (
           <span
             aria-disabled="true"
             className="inline-flex cursor-not-allowed items-center rounded-2xl border px-5 py-3 text-sm font-medium text-muted-foreground opacity-60"
           >
-            Verder →
+            Einde van de scan
           </span>
         )}
       </div>
