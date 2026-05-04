@@ -85,4 +85,12 @@ export const optionSets: OptionSetDefinition[] = [
       },
     ],
   },
+{
+  key: "diagnosis_ownership_options",
+  options: [
+    { value: "onduidelijk", label: "Onvoldoende duidelijk", order: 10 },
+    { value: "gedeeltelijk", label: "Gedeeltelijk duidelijk", order: 20 },
+    { value: "duidelijk", label: "Duidelijk belegd", order: 30 },
+  ],
+},
 ];
