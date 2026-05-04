@@ -20,7 +20,11 @@ export function getAnswerFromScan(
       return scan.profile.biggestBottleneck;
 
     case "scope":
-      return scan.scope;
+      return scan.scope.width;
+    case "scope_focus":
+      return scan.scope.focus;
+    case "scope_depth":
+      return scan.scope.depth;
 
     case "ownership_clarity":
       return scan.diagnosis.ownershipClarity;
@@ -52,7 +56,9 @@ export type ScanActions = {
   setScanReason: (value: string) => void;
   setBiggestBottleneck: (value: string) => void;
 
-  setScope: (value: string) => void;
+  setScopeWidth: (value: string) => void;
+  setScopeFocus: (value: string) => void;
+  setScopeDepth: (value: string) => void;
 
   setOwnershipClarity: (value: string) => void;
   setChangeDecisionProcess: (value: string) => void;
@@ -91,7 +97,13 @@ export function setAnswerToScan(
       return;
 
     case "scope":
-      actions.setScope(value);
+      actions.setScopeWidth(value);
+      return;
+    case "scope_focus":
+      actions.setScopeFocus(value);
+      return;
+    case "scope_depth":
+      actions.setScopeDepth(value);
       return;
 
     case "ownership_clarity":
