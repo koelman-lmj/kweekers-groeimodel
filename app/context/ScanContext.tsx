@@ -205,6 +205,10 @@ export function ScanProvider({ children }: { children: ReactNode }) {
     [scan]
   );
 
+  if (!isHydrated) {
+    return null;
+  }
+
   return <ScanContext.Provider value={value}>{children}</ScanContext.Provider>;
 }
 
