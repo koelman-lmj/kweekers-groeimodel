@@ -158,7 +158,7 @@ export default function FlowQuestionPage() {
         )}
 
         {question.inputType === "single_select" && optionSet && (
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="flex flex-wrap justify-center gap-3">
             {[...optionSet.options]
               .sort((a, b) => a.order - b.order)
               .map((option) => {
@@ -172,13 +172,13 @@ export default function FlowQuestionPage() {
                     aria-pressed={isActive}
                     className={
                       isActive
-                        ? "kweekers-active-panel rounded-2xl border px-4 py-4 text-left transition"
-                        : "kweekers-selectable-hover rounded-2xl border bg-white px-4 py-4 text-left transition"
+                        ? "kweekers-active-panel min-h-[64px] w-full max-w-[260px] rounded-2xl border px-4 py-3 text-left transition"
+                        : "kweekers-selectable-hover min-h-[64px] w-full max-w-[260px] rounded-2xl border bg-white px-4 py-3 text-left transition"
                     }
                   >
                     <div className="text-sm font-medium">{option.label}</div>
                     {option.description && (
-                      <div className="mt-2 text-xs text-current/80">
+                      <div className="mt-1 text-xs text-current/80">
                         {option.description}
                       </div>
                     )}
