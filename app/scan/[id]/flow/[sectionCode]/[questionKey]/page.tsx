@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useScanContext } from "@/app/context/ScanContext";
+import { sections } from "@/lib/scan/definition";
 import {
   getNextQuestionKey,
   getOptionSet,
-  getPreviousQuestionKey,
   getQuestion,
   getQuestionsForSection,
   getSection,
@@ -64,26 +64,25 @@ export default function FlowQuestionPage() {
   const questionIndex =
     sectionQuestions.findIndex((item) => item.key === question.key) + 1;
 
-  const previousQuestionKey = getPreviousQuestionKey(sectionCode, questionKey);
+  const currentQuestionIndex = sectionQuestions.findIndex(
+    (item) => item.key === question.key
+  );
+
+  const currentSectionIndex = sections.findIndex(
+    (item) => item.code === sectionCode
+  );
+
+  const previousSection =
+    currentSectionIndex > 0 ? sections[currentSectionIndex - 1] : null;
+
+  const previousHref =
+    currentQuestionIndex > 0
+      ? `/scan/${scanId}/flow/${sectionCode}/${sectionQuestions[currentQuestionIndex - 1].key}`
+      : previousSection?.summaryEnabled
+        ? `/scan/${scanId}/summary/${previousSection.code}`
+        : `/scan/${scanId}/summary/profile_basis`;
+
   const nextQuestionKey = getNextQuestionKey(sectionCode, questionKey);
-
-const currentQuestionIndex = questions.findIndex(
-  (question) => question.key === questionKey
-);
-
-const currentSectionIndex = sections.findIndex(
-  (section) => section.code === sectionCode
-);
-
-const previousSection =
-  currentSectionIndex > 0 ? sections[currentSectionIndex - 1] : null;
-
-const previousHref =
-  currentQuestionIndex > 0
-    ? `/scan/${scanId}/flow/${sectionCode}/${questions[currentQuestionIndex - 1].key}`
-    : previousSection?.summaryEnabled
-      ? `/scan/${scanId}/summary/${previousSection.code}`
-      : `/scan/${scanId}/summary/profile_basis`;
 
   const nextHref = nextQuestionKey
     ? `/scan/${scanId}/flow/${sectionCode}/${nextQuestionKey}`
@@ -93,18 +92,18 @@ const previousHref =
     questionKey === "customer_name"
       ? scan.profile.customerName
       : questionKey === "sector"
-      ? scan.profile.sector
-      : questionKey === "organization_size"
-      ? scan.profile.organizationSize
-      : questionKey === "administration_count"
-      ? scan.profile.administrationCount
-      : questionKey === "scan_reason"
-      ? scan.profile.scanReason
-      : questionKey === "primary_goal"
-      ? scan.profile.primaryGoal
-      : questionKey === "biggest_bottleneck"
-      ? scan.profile.biggestBottleneck
-      : "";
+        ? scan.profile.sector
+        : questionKey === "organization_size"
+          ? scan.profile.organizationSize
+          : questionKey === "administration_count"
+            ? scan.profile.administrationCount
+            : questionKey === "scan_reason"
+              ? scan.profile.scanReason
+              : questionKey === "primary_goal"
+                ? scan.profile.primaryGoal
+                : questionKey === "biggest_bottleneck"
+                  ? scan.profile.biggestBottleneck
+                  : "";
 
   const setAnswerValue = (value: string) => {
     if (questionKey === "customer_name") {
@@ -177,7 +176,7 @@ const previousHref =
 
         {question.inputType === "single_select" && optionSet && (
           <div className="grid gap-3 sm:grid-cols-2">
-            {optionSet.options
+            {[...optionSet.options]
               .sort((a, b) => a.order - b.order)
               .map((option) => {
                 const isActive = answerValue === option.value;
