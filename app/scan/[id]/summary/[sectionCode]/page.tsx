@@ -34,15 +34,6 @@ function buildAdviceSummary(scan: ScanState) {
     issueResolution === "handmatig_herstellen",
   ].filter(Boolean).length;
 
-  const midSignals = [
-    ownershipClarity === "gedeeltelijk_duidelijk",
-    changeDecisionProcess === "deels_afgestemd",
-    improvementGovernance === "af_en_toe",
-    processStandardization === "redelijk_eenduidig",
-    exceptionControl === "deels_beheersbaar",
-    issueResolution === "mix_ad_hoc_structureel",
-  ].filter(Boolean).length;
-
   let headline = "Gericht doorontwikkelen";
   let mainView =
     "De scan laat zien dat er een bruikbare basis aanwezig is, maar dat de organisatie nog niet overal op een vaste en beheersbare manier werkt. Vooral in eigenaarschap, standaardisatie en structurele verbetering is nog winst te halen.";
@@ -202,7 +193,6 @@ export default function SectionSummaryPage() {
   const nextQuestionKey = nextSectionQuestions[0]?.key ?? "";
 
   const hasNextStep = Boolean(nextSectionCode && nextQuestionKey);
-
   const nextHref = hasNextStep
     ? `/scan/${scanId}/flow/${nextSectionCode}/${nextQuestionKey}`
     : "";
@@ -227,30 +217,32 @@ export default function SectionSummaryPage() {
         </p>
       </div>
 
-      <section className="space-y-3 rounded-2xl border p-5">
-        <h2 className="text-lg font-medium">Overzicht</h2>
+      {!isFinalStep && (
+        <section className="space-y-3 rounded-2xl border p-5">
+          <h2 className="text-lg font-medium">Overzicht</h2>
 
-        <div className="space-y-2 text-sm text-muted-foreground">
-          {questions.map((question) => {
-            const rawValue = getAnswerFromScan(scan, question.key);
-            const optionSet = getOptionSet(question.optionSetKey);
+          <div className="space-y-2 text-sm text-muted-foreground">
+            {questions.map((question) => {
+              const rawValue = getAnswerFromScan(scan, question.key);
+              const optionSet = getOptionSet(question.optionSetKey);
 
-            let displayValue = rawValue || "Nog niet ingevuld";
+              let displayValue = rawValue || "Nog niet ingevuld";
 
-            if (optionSet && rawValue) {
-              displayValue =
-                optionSet.options.find((option) => option.value === rawValue)?.label ??
-                rawValue;
-            }
+              if (optionSet && rawValue) {
+                displayValue =
+                  optionSet.options.find((option) => option.value === rawValue)?.label ??
+                  rawValue;
+              }
 
-            return (
-              <div key={question.key}>
-                {question.label}: {displayValue}
-              </div>
-            );
-          })}
-        </div>
-      </section>
+              return (
+                <div key={question.key}>
+                  {question.label}: {displayValue}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {!canContinue && (
         <div className="kweekers-accent-box text-sm">
