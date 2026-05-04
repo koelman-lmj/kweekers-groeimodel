@@ -109,4 +109,13 @@ export const optionSets: OptionSetDefinition[] = [
     { value: "sterk", label: "Sterk ondersteunend", order: 30 },
   ],
 },
+{
+  key: "advice_direction_options",
+  options: [
+    { value: "optimaliseren", label: "Optimaliseren", order: 10 },
+    { value: "standaardiseren", label: "Standaardiseren", order: 20 },
+    { value: "governance", label: "Governance versterken", order: 30 },
+    { value: "rapportage", label: "Rapportage verbeteren", order: 40 },
+  ],
+},
 ];
