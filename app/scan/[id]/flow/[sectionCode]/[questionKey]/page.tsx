@@ -172,8 +172,8 @@ export default function FlowQuestionPage() {
                     aria-pressed={isActive}
                     className={
                       isActive
-                        ? "kweekers-active-panel min-h-[64px] w-full max-w-[260px] rounded-2xl border px-4 py-3 text-center font-semibold transition"
-                        : "kweekers-selectable-hover min-h-[64px] w-full max-w-[260px] rounded-2xl border bg-white px-4 py-3 text-center font-semibold transition"
+                        ? "kweekers-active-panel min-h-[64px] w-full max-w-[220px] rounded-2xl border px-4 py-3 text-center font-semibold transition"
+                        : "kweekers-selectable-hover min-h-[64px] w-full max-w-[220px] rounded-2xl border bg-white px-4 py-3 text-center font-semibold transition"
                     }
                   >
                     <div className="text-sm font-semibold">{option.label}</div>
