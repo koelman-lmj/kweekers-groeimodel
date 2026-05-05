@@ -53,7 +53,6 @@ export default function FlowQuestionPage() {
     setProcessStandardization,
     setExceptionControl,
     setIssueResolution,
-    setAdviceDirection,
   } = useScanContext();
 
   const section = getSection(sectionCode);
@@ -121,7 +120,6 @@ export default function FlowQuestionPage() {
         setProcessStandardization,
         setExceptionControl,
         setIssueResolution,
-        setAdviceDirection,
       },
       questionKey,
       value
