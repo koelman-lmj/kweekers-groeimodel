@@ -33,22 +33,46 @@ export const optionSets: OptionSetDefinition[] = [
   {
     key: "scan_reason_options",
     options: [
-      { value: "nulmeting", label: "Nulmeting", order: 10 },
-      { value: "optimalisatie", label: "Optimalisatie", order: 20 },
-      { value: "herinrichting", label: "Herinrichting", order: 30 },
-      { value: "rapportage", label: "Rapportage & sturing", order: 40 },
-      { value: "groei", label: "Voorbereiding op groei", order: 50 },
-      { value: "overig", label: "Overig", order: 60 },
-    ],
-  },
-  {
-    key: "primary_goal_options",
-    options: [
-      { value: "inzicht", label: "Inzicht in huidige situatie", order: 10 },
-      { value: "verbeterkansen", label: "Verbeterkansen bepalen", order: 20 },
-      { value: "roadmap", label: "Roadmap en prioriteiten bepalen", order: 30 },
-      { value: "standaardiseren", label: "Meer standaardiseren", order: 40 },
-      { value: "sturing", label: "Betere sturing en rapportage", order: 50 },
+      {
+        value: "nulmeting",
+        label: "Nulmeting en huidig beeld bepalen",
+        order: 10,
+      },
+      {
+        value: "optimalisatie",
+        label: "Verbeterkansen en optimalisatie bepalen",
+        order: 20,
+      },
+      {
+        value: "herinrichting",
+        label: "Herinrichting voorbereiden",
+        order: 30,
+      },
+      {
+        value: "standaardiseren",
+        label: "Meer standaardiseren",
+        order: 40,
+      },
+      {
+        value: "sturing",
+        label: "Betere sturing en rapportage",
+        order: 50,
+      },
+      {
+        value: "groei",
+        label: "Voorbereiden op groei",
+        order: 60,
+      },
+      {
+        value: "roadmap",
+        label: "Roadmap en prioriteiten bepalen",
+        order: 70,
+      },
+      {
+        value: "overig",
+        label: "Overig",
+        order: 80,
+      },
     ],
   },
   {
@@ -81,6 +105,56 @@ export const optionSets: OptionSetDefinition[] = [
         value: "breed",
         label: "Breed",
         description: "Een brede scan over meerdere domeinen en processen.",
+        order: 30,
+      },
+    ],
+  },
+  {
+    key: "scope_focus_options",
+    options: [
+      {
+        value: "organisatie_eigenaarschap",
+        label: "Organisatie en eigenaarschap",
+        order: 10,
+      },
+      {
+        value: "processen_werkwijze",
+        label: "Processen en werkwijze",
+        order: 20,
+      },
+      {
+        value: "afas_inrichting_gebruik",
+        label: "AFAS-inrichting en gebruik",
+        order: 30,
+      },
+      {
+        value: "rapportage_sturing",
+        label: "Rapportage en sturing",
+        order: 40,
+      },
+      {
+        value: "beheer_doorontwikkeling",
+        label: "Beheer en doorontwikkeling",
+        order: 50,
+      },
+    ],
+  },
+  {
+    key: "scope_depth_options",
+    options: [
+      {
+        value: "eerste_beeld",
+        label: "Snel eerste beeld",
+        order: 10,
+      },
+      {
+        value: "gericht_verdiepen",
+        label: "Gericht verdiepen",
+        order: 20,
+      },
+      {
+        value: "verbeterplan",
+        label: "Basis voor concreet verbeterplan",
         order: 30,
       },
     ],
@@ -165,63 +239,13 @@ export const optionSets: OptionSetDefinition[] = [
       },
     ],
   },
-{
-  key: "advice_direction_options",
-  options: [
-    { value: "stabiliseren", label: "Stabiliseren", order: 10 },
-    { value: "governance_versterken", label: "Governance versterken", order: 20 },
-    { value: "processen_standaardiseren", label: "Processen standaardiseren", order: 30 },
-    { value: "gericht_doorontwikkelen", label: "Gericht doorontwikkelen", order: 40 },
-  ],
-},
-{
-  key: "scope_focus_options",
-  options: [
-    {
-      value: "organisatie_eigenaarschap",
-      label: "Organisatie en eigenaarschap",
-      order: 10,
-    },
-    {
-      value: "processen_werkwijze",
-      label: "Processen en werkwijze",
-      order: 20,
-    },
-    {
-      value: "afas_inrichting_gebruik",
-      label: "AFAS-inrichting en gebruik",
-      order: 30,
-    },
-    {
-      value: "rapportage_sturing",
-      label: "Rapportage en sturing",
-      order: 40,
-    },
-    {
-      value: "beheer_doorontwikkeling",
-      label: "Beheer en doorontwikkeling",
-      order: 50,
-    },
-  ],
-},
-{
-  key: "scope_depth_options",
-  options: [
-    {
-      value: "eerste_beeld",
-      label: "Snel eerste beeld",
-      order: 10,
-    },
-    {
-      value: "gericht_verdiepen",
-      label: "Gericht verdiepen",
-      order: 20,
-    },
-    {
-      value: "verbeterplan",
-      label: "Basis voor concreet verbeterplan",
-      order: 30,
-    },
-  ],
-},
+  {
+    key: "advice_direction_options",
+    options: [
+      { value: "stabiliseren", label: "Stabiliseren", order: 10 },
+      { value: "governance_versterken", label: "Governance versterken", order: 20 },
+      { value: "processen_standaardiseren", label: "Processen standaardiseren", order: 30 },
+      { value: "gericht_doorontwikkelen", label: "Gericht doorontwikkelen", order: 40 },
+    ],
+  },
 ];
