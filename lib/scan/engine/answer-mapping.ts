@@ -39,9 +39,6 @@ export function getAnswerFromScan(
     case "issue_resolution":
       return scan.diagnosis.issueResolution;
 
-    case "advice_direction":
-      return scan.advice.direction;
-
     default:
       return "";
   }
@@ -66,8 +63,6 @@ export type ScanActions = {
   setProcessStandardization: (value: string) => void;
   setExceptionControl: (value: string) => void;
   setIssueResolution: (value: string) => void;
-
-  setAdviceDirection: (value: string) => void;
 };
 
 export function setAnswerToScan(
@@ -123,10 +118,6 @@ export function setAnswerToScan(
       return;
     case "issue_resolution":
       actions.setIssueResolution(value);
-      return;
-
-    case "advice_direction":
-      actions.setAdviceDirection(value);
       return;
 
     default:
