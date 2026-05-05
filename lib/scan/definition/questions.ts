@@ -155,14 +155,4 @@ export const questions: QuestionDefinition[] = [
     optionSetKey: "maturity_3level_issue_resolution_options",
   },
   {
-    key: "advice_direction",
-    sectionCode: "advies",
-    order: 10,
-    label: "Eerste adviesrichting",
-    helpText:
-      "Welke richting past op basis van de scan het beste als eerste stap?",
-    inputType: "single_select",
-    required: true,
-    optionSetKey: "advice_direction_options",
-  },
 ];
