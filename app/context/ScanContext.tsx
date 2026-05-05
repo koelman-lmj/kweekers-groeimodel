@@ -32,9 +32,6 @@ export type ScanState = {
     exceptionControl: string;
     issueResolution: string;
   };
-  advice: {
-    direction: string;
-  };
 };
 
 const STORAGE_KEY = "kweekers-groeimodel-scan";
@@ -61,9 +58,6 @@ const INITIAL_SCAN: ScanState = {
     exceptionControl: "",
     issueResolution: "",
   },
-  advice: {
-    direction: "",
-  },
 };
 
 type ScanContextValue = {
@@ -89,8 +83,6 @@ type ScanContextValue = {
   setProcessStandardization: (value: string) => void;
   setExceptionControl: (value: string) => void;
   setIssueResolution: (value: string) => void;
-
-  setAdviceDirection: (value: string) => void;
 };
 
 const ScanContext = createContext<ScanContextValue | undefined>(undefined);
@@ -134,9 +126,6 @@ function loadInitialScan(): ScanState {
         processStandardization: parsed.diagnosis?.processStandardization ?? "",
         exceptionControl: parsed.diagnosis?.exceptionControl ?? "",
         issueResolution: parsed.diagnosis?.issueResolution ?? "",
-      },
-      advice: {
-        direction: parsed.advice?.direction ?? "",
       },
     };
   } catch (error) {
@@ -279,16 +268,6 @@ export function ScanProvider({ children }: { children: ReactNode }) {
     updateDiagnosis("issueResolution", value);
   };
 
-  const setAdviceDirection = (value: string) => {
-    setScan((current) => ({
-      ...current,
-      advice: {
-        ...current.advice,
-        direction: value,
-      },
-    }));
-  };
-
   const value = useMemo<ScanContextValue>(
     () => ({
       scan: scanState,
@@ -313,8 +292,6 @@ export function ScanProvider({ children }: { children: ReactNode }) {
       setProcessStandardization,
       setExceptionControl,
       setIssueResolution,
-
-      setAdviceDirection,
     }),
     [scanState]
   );
