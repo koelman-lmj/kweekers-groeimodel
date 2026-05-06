@@ -32,6 +32,9 @@ export type ScanState = {
     exceptionControl: string;
     issueResolution: string;
   };
+
+  // Nieuwe generieke laag voor opmerkingen per vraag
+  comments: Record<string, string>;
 };
 
 const STORAGE_KEY = "kweekers-groeimodel-scan";
@@ -58,6 +61,7 @@ const INITIAL_SCAN: ScanState = {
     exceptionControl: "",
     issueResolution: "",
   },
+  comments: {},
 };
 
 type ScanContextValue = {
@@ -83,6 +87,8 @@ type ScanContextValue = {
   setProcessStandardization: (value: string) => void;
   setExceptionControl: (value: string) => void;
   setIssueResolution: (value: string) => void;
+
+  setComment: (questionKey: string, value: string) => void;
 };
 
 const ScanContext = createContext<ScanContextValue | undefined>(undefined);
@@ -127,6 +133,10 @@ function loadInitialScan(): ScanState {
         exceptionControl: parsed.diagnosis?.exceptionControl ?? "",
         issueResolution: parsed.diagnosis?.issueResolution ?? "",
       },
+      comments:
+        typeof parsed.comments === "object" && parsed.comments !== null
+          ? parsed.comments
+          : {},
     };
   } catch (error) {
     console.error("Kon scan-state niet laden uit localStorage", error);
@@ -268,6 +278,16 @@ export function ScanProvider({ children }: { children: ReactNode }) {
     updateDiagnosis("issueResolution", value);
   };
 
+  const setComment = (questionKey: string, value: string) => {
+    setScan((current) => ({
+      ...current,
+      comments: {
+        ...current.comments,
+        [questionKey]: value,
+      },
+    }));
+  };
+
   const value = useMemo<ScanContextValue>(
     () => ({
       scan: scanState,
@@ -292,6 +312,8 @@ export function ScanProvider({ children }: { children: ReactNode }) {
       setProcessStandardization,
       setExceptionControl,
       setIssueResolution,
+
+      setComment,
     }),
     [scanState]
   );
