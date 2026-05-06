@@ -9,6 +9,7 @@ import {
   getSection,
 } from "@/lib/scan/engine/definition-helpers";
 import { getAnswerFromScan } from "@/lib/scan/engine/answer-mapping";
+import { buildDomainScores } from "@/lib/scan/engine/build-domain-scores";
 
 function getParam(value: string | string[] | undefined): string {
   if (Array.isArray(value)) return value[0] ?? "";
@@ -204,6 +205,7 @@ export default function SectionSummaryPage() {
 
   const isFinalStep = !hasNextStep;
   const adviceSummary = isFinalStep ? buildAdviceSummary(scan) : null;
+  const domainScores = isFinalStep ? buildDomainScores(scan) : [];
 
   return (
     <div className="space-y-8">
@@ -230,8 +232,8 @@ export default function SectionSummaryPage() {
 
               if (optionSet && rawValue) {
                 displayValue =
-                  optionSet.options.find((option) => option.value === rawValue)?.label ??
-                  rawValue;
+                  optionSet.options.find((option) => option.value === rawValue)
+                    ?.label ?? rawValue;
               }
 
               return (
@@ -261,7 +263,39 @@ export default function SectionSummaryPage() {
           </section>
 
           <section className="space-y-3 rounded-2xl border p-5">
-            <h2 className="text-lg font-medium">Belangrijkste aandachtspunten</h2>
+            <h2 className="text-lg font-medium">Domeinscorekaart</h2>
+
+            <div className="grid gap-3">
+              {domainScores.map((domain) => (
+                <div key={domain.code} className="rounded-2xl border p-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <div className="text-sm font-semibold">
+                        {domain.title}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {domain.summary}
+                      </div>
+                    </div>
+
+                    <div className="shrink-0 text-right">
+                      <div className="text-sm font-semibold">
+                        {domain.score.toFixed(1)}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {domain.label}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="space-y-3 rounded-2xl border p-5">
+            <h2 className="text-lg font-medium">
+              Belangrijkste aandachtspunten
+            </h2>
             <ul className="space-y-2 text-sm text-muted-foreground">
               {adviceSummary.topAttentionPoints.map((point) => (
                 <li key={point} className="ml-5 list-disc">
@@ -282,8 +316,8 @@ export default function SectionSummaryPage() {
             <div className="space-y-2">
               <h2 className="text-lg font-medium">Scan afgerond</h2>
               <p className="text-sm text-muted-foreground">
-                De begeleide scan is compleet ingevuld. Je kunt nu een nieuwe scan
-                starten.
+                De begeleide scan is compleet ingevuld. Je kunt nu een nieuwe
+                scan starten.
               </p>
             </div>
 
