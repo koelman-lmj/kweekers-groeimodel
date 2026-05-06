@@ -53,6 +53,7 @@ export default function FlowQuestionPage() {
     setProcessStandardization,
     setExceptionControl,
     setIssueResolution,
+    setComment,
   } = useScanContext();
 
   const section = getSection(sectionCode);
@@ -101,6 +102,7 @@ export default function FlowQuestionPage() {
     : `/scan/${scanId}/summary/${sectionCode}`;
 
   const answerValue = getAnswerFromScan(scan, questionKey);
+  const commentValue = scan.comments[questionKey] ?? "";
 
   const setAnswerValue = (value: string) => {
     setAnswerToScan(
@@ -126,6 +128,10 @@ export default function FlowQuestionPage() {
     );
   };
 
+  const setCommentValue = (value: string) => {
+    setComment(questionKey, value);
+  };
+
   const canContinue = question.required ? isFilled(answerValue) : true;
 
   return (
@@ -137,8 +143,22 @@ export default function FlowQuestionPage() {
         <h1 className="text-3xl font-semibold tracking-tight">
           {question.label}
         </h1>
+
         {question.helpText && (
           <p className="text-sm text-muted-foreground">{question.helpText}</p>
+        )}
+
+        {question.examples && question.examples.length > 0 && (
+          <div className="rounded-2xl border bg-white/60 p-4">
+            <div className="text-sm font-medium">Voorbeelden</div>
+            <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
+              {question.examples.map((example) => (
+                <li key={example} className="ml-5 list-disc">
+                  {example}
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
       </div>
 
@@ -187,6 +207,29 @@ export default function FlowQuestionPage() {
                   </button>
                 );
               })}
+          </div>
+        )}
+
+        {question.allowsComment && (
+          <div className="space-y-2 border-t pt-4">
+            <label
+              htmlFor={`${question.key}-comment`}
+              className="text-sm font-medium"
+            >
+              Opmerking
+            </label>
+            <textarea
+              id={`${question.key}-comment`}
+              value={commentValue}
+              onChange={(event) => setCommentValue(event.target.value)}
+              placeholder="Bijvoorbeeld: dit verschilt per team of is nog niet formeel belegd."
+              rows={4}
+              className="w-full rounded-2xl border bg-white px-4 py-3 outline-none"
+            />
+            <p className="text-xs text-muted-foreground">
+              Deze opmerking kan later worden meegenomen in samenvatting of
+              rapportage.
+            </p>
           </div>
         )}
 
