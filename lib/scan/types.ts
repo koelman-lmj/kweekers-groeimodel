@@ -1,28 +1,10 @@
-export type ScanPhase = "profile" | "scope" | "diagnose" | "advice";
-
-export type InputType =
-  | "text"
-  | "single_select"
-  | "multi_select"
-  | "textarea";
-
-export type AnswerValue = string | string[] | null;
-
-export type SectionDefinition = {
-  code: string;
-  title: string;
-  shortTitle: string;
-  phase: string;
-  order: number;
-  summaryEnabled?: boolean;
-  nextSectionCode?: string;
-};
+export type InputType = "text" | "single_select" | "multi_select";
 
 export type OptionDefinition = {
   value: string;
   label: string;
-  description?: string;
   order: number;
+  description?: string;
 };
 
 export type OptionSetDefinition = {
@@ -30,15 +12,14 @@ export type OptionSetDefinition = {
   options: OptionDefinition[];
 };
 
-export type Condition = {
-  questionKey: string;
-  comparator: "equals" | "not_equals" | "includes" | "not_empty";
-  value?: string | string[];
-};
-
-export type ConditionGroup = {
-  operator: "and" | "or";
-  conditions: Condition[];
+export type SectionDefinition = {
+  code: string;
+  title: string;
+  shortTitle: string;
+  phase: string;
+  order: number;
+  summaryEnabled: boolean;
+  nextSectionCode?: string;
 };
 
 export type QuestionDefinition = {
@@ -49,24 +30,18 @@ export type QuestionDefinition = {
   helpText?: string;
   inputType: InputType;
   required: boolean;
-  optionSetKey?: string;
   placeholder?: string;
-  visibleWhen?: ConditionGroup;
-};
+  optionSetKey?: string;
 
-export type RuleDefinition = {
-  id: string;
-  when: ConditionGroup;
-  effect:
-    | { type: "show_question"; questionKey: string }
-    | { type: "hide_question"; questionKey: string }
-    | { type: "add_signal"; signal: string; value: string };
+  // Nieuwe velden voor volgende fase
+  examples?: string[];
+  allowsComment?: boolean;
+  domain?: string;
+  category?: string;
 };
 
 export type ScanDefinition = {
-  version: string;
   sections: SectionDefinition[];
-  optionSets: OptionSetDefinition[];
   questions: QuestionDefinition[];
-  rules: RuleDefinition[];
+  optionSets: OptionSetDefinition[];
 };
