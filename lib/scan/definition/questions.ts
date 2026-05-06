@@ -101,6 +101,7 @@ export const questions: QuestionDefinition[] = [
     inputType: "single_select",
     required: true,
     optionSetKey: "maturity_3level_clarity_options",
+    allowsComment: true,
   },
   {
     key: "change_decision_process",
@@ -112,6 +113,7 @@ export const questions: QuestionDefinition[] = [
     inputType: "single_select",
     required: true,
     optionSetKey: "maturity_3level_change_governance_options",
+    allowsComment: true,
   },
   {
     key: "improvement_governance",
@@ -123,6 +125,7 @@ export const questions: QuestionDefinition[] = [
     inputType: "single_select",
     required: true,
     optionSetKey: "maturity_3level_improvement_options",
+    allowsComment: true,
   },
   {
     key: "process_standardization",
@@ -133,6 +136,7 @@ export const questions: QuestionDefinition[] = [
     inputType: "single_select",
     required: true,
     optionSetKey: "maturity_3level_standardization_options",
+    allowsComment: true,
   },
   {
     key: "exception_control",
@@ -143,6 +147,7 @@ export const questions: QuestionDefinition[] = [
     inputType: "single_select",
     required: true,
     optionSetKey: "maturity_3level_exception_control_options",
+    allowsComment: true,
   },
   {
     key: "issue_resolution",
@@ -153,5 +158,6 @@ export const questions: QuestionDefinition[] = [
     inputType: "single_select",
     required: true,
     optionSetKey: "maturity_3level_issue_resolution_options",
+    allowsComment: true,
   },
 ];
