@@ -56,7 +56,11 @@ export default function FlowQuestionPage() {
     setSector,
     setOrganizationSize,
     setAdministrationCount,
+    setOrganizationType,
     setAfasProducts,
+    setOwnershipModel,
+    setStandardizationContext,
+    setPrimaryProcessChains,
     setScanReason,
     setBiggestBottleneck,
     setScopeWidth,
@@ -73,7 +77,7 @@ export default function FlowQuestionPage() {
 
   const section = getSection(sectionCode);
   const question = getQuestion(questionKey);
-  const sectionQuestions = getQuestionsForSection(sectionCode);
+  const sectionQuestions = getQuestionsForSection(sectionCode, scan);
   const optionSet = question?.optionSetKey
     ? getOptionSet(question.optionSetKey)
     : undefined;
@@ -89,12 +93,22 @@ export default function FlowQuestionPage() {
     );
   }
 
-  const questionIndex =
-    sectionQuestions.findIndex((item) => item.key === question.key) + 1;
-
   const currentQuestionIndex = sectionQuestions.findIndex(
     (item) => item.key === question.key
   );
+
+  if (currentQuestionIndex === -1) {
+    return (
+      <div className="space-y-4">
+        <h1 className="text-2xl font-semibold">Vraag niet beschikbaar</h1>
+        <p className="text-sm text-muted-foreground">
+          Deze vraag is op basis van de huidige keuzes niet zichtbaar in de flow.
+        </p>
+      </div>
+    );
+  }
+
+  const questionIndex = currentQuestionIndex + 1;
 
   const currentSectionIndex = sections.findIndex(
     (item) => item.code === sectionCode
@@ -103,11 +117,15 @@ export default function FlowQuestionPage() {
   const previousSection =
     currentSectionIndex > 0 ? sections[currentSectionIndex - 1] : null;
 
+  const previousSectionQuestions = previousSection
+    ? getQuestionsForSection(previousSection.code, scan)
+    : [];
+
   const previousHref =
     currentQuestionIndex > 0
       ? `/scan/${scanId}/flow/${sectionCode}/${sectionQuestions[currentQuestionIndex - 1].key}`
-      : previousSection
-        ? `/scan/${scanId}/flow/${previousSection.code}/${getQuestionsForSection(previousSection.code)[getQuestionsForSection(previousSection.code).length - 1]?.key}`
+      : previousSection && previousSectionQuestions.length > 0
+        ? `/scan/${scanId}/flow/${previousSection.code}/${previousSectionQuestions[previousSectionQuestions.length - 1].key}`
         : `/scan/${scanId}/flow/profile_basis/customer_name`;
 
   const nextQuestion = sectionQuestions[currentQuestionIndex + 1];
@@ -115,7 +133,7 @@ export default function FlowQuestionPage() {
     ? getSection(section.nextSectionCode)
     : undefined;
   const nextSectionQuestions = nextSection
-    ? getQuestionsForSection(nextSection.code)
+    ? getQuestionsForSection(nextSection.code, scan)
     : [];
 
   let nextHref = `/scan/${scanId}/summary/advies`;
@@ -141,7 +159,11 @@ export default function FlowQuestionPage() {
         setSector,
         setOrganizationSize,
         setAdministrationCount,
+        setOrganizationType,
         setAfasProducts,
+        setOwnershipModel,
+        setStandardizationContext,
+        setPrimaryProcessChains,
         setScanReason,
         setBiggestBottleneck,
         setScopeWidth,
@@ -285,10 +307,10 @@ export default function FlowQuestionPage() {
                 .sort((a, b) => a.order - b.order)
                 .map((option) => {
                   const isActive = answerArray.includes(option.value);
-                  const maxSelections = question.maxSelections ?? Number.POSITIVE_INFINITY;
+                  const maxSelections =
+                    question.maxSelections ?? Number.POSITIVE_INFINITY;
                   const disableNewSelection =
-                    !isActive &&
-                    answerArray.length >= maxSelections;
+                    !isActive && answerArray.length >= maxSelections;
 
                   return (
                     <button
