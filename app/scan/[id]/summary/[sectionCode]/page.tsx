@@ -8,12 +8,48 @@ import {
   getQuestionsForSection,
   getSection,
 } from "@/lib/scan/engine/definition-helpers";
-import { getAnswerFromScan } from "@/lib/scan/engine/answer-mapping";
+import {
+  getAnswerFromScan,
+  type AnswerValue,
+} from "@/lib/scan/engine/answer-mapping";
 import { buildDomainScores } from "@/lib/scan/engine/build-domain-scores";
 
 function getParam(value: string | string[] | undefined): string {
   if (Array.isArray(value)) return value[0] ?? "";
   return value ?? "";
+}
+
+function asArray(value: AnswerValue): string[] {
+  return Array.isArray(value) ? value : [];
+}
+
+function asString(value: AnswerValue): string {
+  return typeof value === "string" ? value : "";
+}
+
+function getDisplayValue(
+  rawValue: AnswerValue,
+  optionSet?: ReturnType<typeof getOptionSet>
+): string | string[] {
+  if (Array.isArray(rawValue)) {
+    if (rawValue.length === 0) return "Nog niet ingevuld";
+
+    if (!optionSet) {
+      return rawValue;
+    }
+
+    return rawValue.map((value) => {
+      return (
+        optionSet.options.find((option) => option.value === value)?.label ?? value
+      );
+    });
+  }
+
+  if (!rawValue) return "Nog niet ingevuld";
+
+  if (!optionSet) return rawValue;
+
+  return optionSet.options.find((option) => option.value === rawValue)?.label ?? rawValue;
 }
 
 function buildAdviceSummary(scan: ScanState) {
@@ -200,7 +236,14 @@ export default function SectionSummaryPage() {
 
   const canContinue = questions.every((question) => {
     if (!question.required) return true;
-    return getAnswerFromScan(scan, question.key).trim() !== "";
+
+    const answer = getAnswerFromScan(scan, question.key);
+
+    if (Array.isArray(answer)) {
+      return answer.length > 0;
+    }
+
+    return answer.trim() !== "";
   });
 
   const isFinalStep = !hasNextStep;
@@ -228,14 +271,7 @@ export default function SectionSummaryPage() {
               const rawValue = getAnswerFromScan(scan, question.key);
               const optionSet = getOptionSet(question.optionSetKey);
               const comment = scan.comments[question.key]?.trim() ?? "";
-
-              let displayValue = rawValue || "Nog niet ingevuld";
-
-              if (optionSet && rawValue) {
-                displayValue =
-                  optionSet.options.find((option) => option.value === rawValue)
-                    ?.label ?? rawValue;
-              }
+              const displayValue = getDisplayValue(rawValue, optionSet);
 
               return (
                 <div
@@ -243,9 +279,20 @@ export default function SectionSummaryPage() {
                   className="rounded-2xl border border-black/10 p-4"
                 >
                   <div className="text-sm font-medium">{question.label}</div>
-                  <div className="mt-1 text-sm text-muted-foreground">
-                    {displayValue}
-                  </div>
+
+                  {Array.isArray(displayValue) ? (
+                    <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
+                      {displayValue.map((value) => (
+                        <li key={value} className="ml-5 list-disc">
+                          {value}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div className="mt-1 text-sm text-muted-foreground">
+                      {displayValue}
+                    </div>
+                  )}
 
                   {comment && (
                     <div className="mt-3 rounded-xl border bg-black/5 p-3">
@@ -330,7 +377,12 @@ export default function SectionSummaryPage() {
               <h2 className="text-lg font-medium">Opmerkingen uit de scan</h2>
 
               <div className="space-y-3">
-                {questions
+                {[
+                  ...getQuestionsForSection("profile_basis"),
+                  ...getQuestionsForSection("profile_reason"),
+                  ...getQuestionsForSection("scope"),
+                  ...getQuestionsForSection("diagnose"),
+                ]
                   .filter((question) => {
                     const comment = scan.comments[question.key]?.trim() ?? "";
                     return comment !== "";
