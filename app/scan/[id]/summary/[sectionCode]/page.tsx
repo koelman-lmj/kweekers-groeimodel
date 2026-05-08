@@ -56,6 +56,7 @@ function buildAdviceContextAdditions(scan: ScanState) {
   const bottlenecks = scan.profile.biggestBottleneck;
   const focusAreas = scan.scope.focus;
   const afasProducts = scan.profile.afasProducts;
+  const processChains = scan.profile.primaryProcessChains;
 
   if (bottlenecks.includes("eigenaarschap")) {
     mainViewAdditions.push(
@@ -198,6 +199,69 @@ function buildAdviceContextAdditions(scan: ScanState) {
   if (afasProducts.includes("integraties")) {
     mainViewAdditions.push(
       "De scan raakt ook de samenwerking tussen AFAS en andere systemen, waardoor ketenafhankelijkheden extra belangrijk worden."
+    );
+  }
+
+  if (processChains.includes("order_to_cash")) {
+    mainViewAdditions.push(
+      "De verbeteropgave lijkt vooral te landen in de keten van orderverwerking, uitvoering en facturatie."
+    );
+    firstStepAdditions.push(
+      "Richt de eerste stap daarom op standaardroutes, eigenaarschap en uitzonderingen in order-to-cash."
+    );
+  }
+
+  if (processChains.includes("procure_to_pay")) {
+    mainViewAdditions.push(
+      "De scan raakt nadrukkelijk de keten van bestellen, goedkeuren en betalen."
+    );
+    firstStepAdditions.push(
+      "Richt de eerste stap daarom op beheersing van inkoopproces, workflow en factuurafhandeling."
+    );
+  }
+
+  if (processChains.includes("hr_to_payroll")) {
+    mainViewAdditions.push(
+      "De relevante verbeteropgave ligt mede in de keten van HR-mutatie tot salarisverwerking."
+    );
+    firstStepAdditions.push(
+      "Richt je eerste stap dan op mutatiestromen, workflow en duidelijke verantwoordelijkheden."
+    );
+  }
+
+  if (processChains.includes("reporting_control")) {
+    mainViewAdditions.push(
+      "Rapportage en bestuurlijke sturing vormen een belangrijk deel van de context van deze scan."
+    );
+    firstStepAdditions.push(
+      "Werk daarom snel toe naar eenduidige definities, eigenaarschap en een beperkte set stuurinformatie."
+    );
+  }
+
+  if (processChains.includes("integration_chain")) {
+    mainViewAdditions.push(
+      "De scan raakt ook de keten tussen AFAS en andere systemen."
+    );
+    firstStepAdditions.push(
+      "Dat vraagt in de eerste stap expliciet aandacht voor overdrachtsmomenten, definities en foutgevoelige schakels."
+    );
+  }
+
+  if (processChains.includes("lead_to_order")) {
+    mainViewAdditions.push(
+      "De scan raakt mede de keten van commerciële opvolging naar ordervorming."
+    );
+  }
+
+  if (processChains.includes("project_to_invoice")) {
+    mainViewAdditions.push(
+      "Projectregistratie, voortgang en financiële opvolging lijken een relevante keten in deze verbeteropgave."
+    );
+  }
+
+  if (processChains.includes("masterdata_governance")) {
+    mainViewAdditions.push(
+      "Stamdata en beheer vormen een belangrijke basis onder de kwaliteit van processen en sturing."
     );
   }
 
@@ -527,7 +591,8 @@ export default function SectionSummaryPage() {
 
           {(contextSummary.bottleneckLines.length > 0 ||
             contextSummary.focusLines.length > 0 ||
-            contextSummary.productLines.length > 0) && (
+            contextSummary.productLines.length > 0 ||
+            contextSummary.processChainLines.length > 0) && (
             <section className="space-y-4 rounded-2xl border p-5">
               <h2 className="text-lg font-medium">Context uit de scan</h2>
 
@@ -568,6 +633,21 @@ export default function SectionSummaryPage() {
                   </h3>
                   <ul className="space-y-1 text-sm text-muted-foreground">
                     {contextSummary.productLines.map((line) => (
+                      <li key={line} className="ml-5 list-disc">
+                        {line}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {contextSummary.processChainLines.length > 0 && (
+                <div className="space-y-2">
+                  <h3 className="text-sm font-semibold">
+                    Belangrijkste procesketens
+                  </h3>
+                  <ul className="space-y-1 text-sm text-muted-foreground">
+                    {contextSummary.processChainLines.map((line) => (
                       <li key={line} className="ml-5 list-disc">
                         {line}
                       </li>
