@@ -216,6 +216,7 @@ export default function FlowQuestionPage() {
   };
 
   const canContinue = question.required ? isFilled(answerValue) : true;
+  const shortHelpText = getShortHelpText(question.label, question.helpText);
 
   const handleNext = () => {
     if (!canContinue) {
@@ -225,8 +226,6 @@ export default function FlowQuestionPage() {
 
     router.push(nextHref);
   };
-
-  const shortHelpText = getShortHelpText(question.label, question.helpText);
 
   return (
     <div className="space-y-8">
@@ -248,7 +247,7 @@ export default function FlowQuestionPage() {
         </div>
       )}
 
-      <section className="space-y-5 rounded-2xl border p-6">
+      <section className="space-y-4 rounded-2xl border p-5">
         {question.inputType === "text" && (
           <div className="space-y-2">
             <label htmlFor={question.key} className="text-sm font-medium">
@@ -280,13 +279,13 @@ export default function FlowQuestionPage() {
                     aria-pressed={isActive}
                     className={
                       isActive
-                        ? "kweekers-active-panel min-h-[84px] rounded-2xl border px-4 py-4 text-center transition"
-                        : "kweekers-selectable-hover min-h-[84px] rounded-2xl border bg-white px-4 py-4 text-center transition"
+                        ? "kweekers-active-panel min-h-[72px] rounded-2xl border px-4 py-3 text-center transition"
+                        : "kweekers-selectable-hover min-h-[72px] rounded-2xl border bg-white px-4 py-3 text-center transition"
                     }
                   >
-                    <div className="text-base font-semibold">{option.label}</div>
+                    <div className="text-sm font-semibold">{option.label}</div>
                     {option.description && (
-                      <div className="mt-1 text-sm text-current/80">
+                      <div className="mt-1 text-xs text-current/80">
                         {option.description}
                       </div>
                     )}
@@ -317,15 +316,15 @@ export default function FlowQuestionPage() {
                       disabled={disableNewSelection}
                       className={
                         isActive
-                          ? "kweekers-active-panel min-h-[84px] rounded-2xl border px-4 py-4 text-center transition"
+                          ? "kweekers-active-panel min-h-[72px] rounded-2xl border px-4 py-3 text-center transition"
                           : disableNewSelection
-                            ? "min-h-[84px] rounded-2xl border bg-white px-4 py-4 text-center opacity-40"
-                            : "kweekers-selectable-hover min-h-[84px] rounded-2xl border bg-white px-4 py-4 text-center transition"
+                            ? "min-h-[72px] rounded-2xl border bg-white px-4 py-3 text-center opacity-40"
+                            : "kweekers-selectable-hover min-h-[72px] rounded-2xl border bg-white px-4 py-3 text-center transition"
                       }
                     >
-                      <div className="text-base font-semibold">{option.label}</div>
+                      <div className="text-sm font-semibold">{option.label}</div>
                       {option.description && (
-                        <div className="mt-1 text-sm text-current/80">
+                        <div className="mt-1 text-xs text-current/80">
                           {option.description}
                         </div>
                       )}
@@ -343,9 +342,11 @@ export default function FlowQuestionPage() {
         )}
 
         {question.examples && question.examples.length > 0 && (
-          <div className="rounded-xl border bg-black/[0.02] p-4">
-            <div className="text-sm font-medium">Hulp bij deze vraag</div>
-            <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
+          <div className="rounded-xl border border-black/10 bg-black/[0.015] p-3">
+            <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Hulp bij deze vraag
+            </div>
+            <ul className="mt-1.5 space-y-1 text-xs text-muted-foreground">
               {question.examples.map((example) => (
                 <li key={example} className="ml-5 list-disc">
                   {example}
