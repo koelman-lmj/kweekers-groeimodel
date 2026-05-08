@@ -295,4 +295,245 @@ export const questions: QuestionDefinition[] = [
       "Denk aan terugkerende fouten, handwerk, uitzonderingen of afhankelijkheid van bepaalde personen.",
     ],
   },
+
+  // Conditioneel - Financieel
+  {
+    key: "finance_foundation_reliability",
+    sectionCode: "diagnose",
+    order: 110,
+    label: "Betrouwbaarheid van de financiële basis",
+    helpText:
+      "Hoe betrouwbaar en eenduidig is de financiële basisinrichting waarop processen en rapportages steunen?",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "maturity_3level_strength_options",
+    allowsComment: true,
+    examples: [
+      "Denk aan administratie, grootboek, dagboeken en basisinrichting.",
+      "Zijn financiële gegevens stabiel genoeg voor rapportage en sturing?",
+    ],
+    visibleWhen: [
+      { field: "afas_products", operator: "includes", value: "financieel" },
+      {
+        field: "scope_depth",
+        operator: "one_of",
+        value: ["gericht_verdiepen", "verbeterplan"],
+      },
+    ],
+  },
+  {
+    key: "finance_exception_handling",
+    sectionCode: "diagnose",
+    order: 120,
+    label: "Uitzonderingen in financiële verwerking",
+    helpText:
+      "Hoe beheersbaar zijn uitzonderingen in boekingen, facturen of financiële correcties?",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "maturity_3level_exception_practical_options",
+    allowsComment: true,
+    examples: [
+      "Denk aan memoriaalboekingen, afwijkende facturen of correcties.",
+      "Worden afwijkingen vast opgevangen of telkens opnieuw opgelost?",
+    ],
+    visibleWhen: [
+      { field: "afas_products", operator: "includes", value: "financieel" },
+    ],
+  },
+  {
+    key: "finance_reporting_maturity",
+    sectionCode: "diagnose",
+    order: 130,
+    label: "Financiële stuurinformatie",
+    helpText:
+      "In welke mate ondersteunt financiële rapportage de dagelijkse en bestuurlijke sturing?",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "maturity_3level_usefulness_options",
+    allowsComment: true,
+    examples: [
+      "Denk aan tijdigheid, betrouwbaarheid en eenduidige definities.",
+      "Kun je op basis van de cijfers echt sturen?",
+    ],
+    visibleWhen: [
+      { field: "afas_products", operator: "includes", value: "financieel" },
+      {
+        field: "scope_focus",
+        operator: "includes",
+        value: "rapportage_sturing",
+      },
+    ],
+  },
+
+  // Conditioneel - Ordermanagement
+  {
+    key: "order_flow_standardization",
+    sectionCode: "diagnose",
+    order: 210,
+    label: "Eenduidigheid van de orderroute",
+    helpText:
+      "Hoe eenduidig verloopt het proces van orderinvoer naar levering en facturatie?",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "maturity_3level_standardization_options",
+    allowsComment: true,
+    examples: [
+      "Denk aan orderinvoer, blokkades, levering en facturatie.",
+      "Werkt iedereen vanuit dezelfde standaardroute?",
+    ],
+    visibleWhen: [
+      { field: "afas_products", operator: "includes", value: "ordermanagement" },
+    ],
+  },
+  {
+    key: "order_exception_complexity",
+    sectionCode: "diagnose",
+    order: 220,
+    label: "Afwijkingen in orderafhandeling",
+    helpText:
+      "Hoe vaak wijkt het orderproces af van de standaardroute en hoe beheersbaar is dat?",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "maturity_3level_exception_control_options",
+    allowsComment: true,
+    examples: [
+      "Denk aan speciale prijsafspraken, uitzonderlijke leveringen of handmatige ingrepen.",
+      "Zijn afwijkingen onderdeel van het ontwerp of steeds een noodoplossing?",
+    ],
+    visibleWhen: [
+      { field: "afas_products", operator: "includes", value: "ordermanagement" },
+      {
+        field: "primary_process_chains",
+        operator: "includes",
+        value: "order_to_cash",
+      },
+    ],
+  },
+  {
+    key: "order_system_fit",
+    sectionCode: "diagnose",
+    order: 230,
+    label: "Aansluiting tussen orderproces en AFAS-inrichting",
+    helpText:
+      "In welke mate ondersteunt AFAS de gewenste orderwerkwijze zonder veel omwegen of workarounds?",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "maturity_3level_fit_options",
+    allowsComment: true,
+    examples: [
+      "Denk aan orderstatussen, blokkades, workflows en facturatiemomenten.",
+      "Is de gewenste route in AFAS goed ondersteund?",
+    ],
+    visibleWhen: [
+      { field: "afas_products", operator: "includes", value: "ordermanagement" },
+      {
+        field: "scope_focus",
+        operator: "includes",
+        value: "afas_inrichting_gebruik",
+      },
+    ],
+  },
+
+  // Conditioneel - Zorg
+  {
+    key: "care_registration_exceptions",
+    sectionCode: "diagnose",
+    order: 310,
+    label: "Uitzonderingen in registratie of declaratie",
+    helpText:
+      "Hoe beheersbaar zijn uitzonderingen in registratie, declaratie of administratieve verwerking?",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "maturity_3level_exception_control_options",
+    allowsComment: true,
+    examples: [
+      "Denk aan afwijkende registraties, correcties of uitzonderlijke declaraties.",
+      "Moeten mensen vaak handmatig herstellen?",
+    ],
+    visibleWhen: [{ field: "sector", operator: "equals", value: "zorg" }],
+  },
+  {
+    key: "care_accountability_pressure",
+    sectionCode: "diagnose",
+    order: 320,
+    label: "Ondersteuning van verantwoording en controle",
+    helpText:
+      "In welke mate ondersteunen processen en inrichting tijdige en betrouwbare verantwoording?",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "maturity_3level_usefulness_options",
+    allowsComment: true,
+    examples: [
+      "Denk aan controle, dossiervorming, rapportage en onderbouwing.",
+      "Is de informatie snel en betrouwbaar beschikbaar?",
+    ],
+    visibleWhen: [
+      { field: "sector", operator: "equals", value: "zorg" },
+      {
+        field: "scope_focus",
+        operator: "includes",
+        value: "rapportage_sturing",
+      },
+    ],
+  },
+
+  // Conditioneel - Onderwijs
+  {
+    key: "education_intake_planning_consistency",
+    sectionCode: "diagnose",
+    order: 410,
+    label: "Eenduidigheid van intake en planning",
+    helpText:
+      "Hoe eenduidig verlopen intake, planning en administratieve verwerking van trajecten of opleidingen?",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "maturity_3level_standardization_options",
+    allowsComment: true,
+    examples: [
+      "Denk aan intake, inschrijving, planning en administratieve verwerking.",
+      "Werkt iedereen vanuit dezelfde route?",
+    ],
+    visibleWhen: [{ field: "sector", operator: "equals", value: "onderwijs" }],
+  },
+  {
+    key: "education_process_admin_alignment",
+    sectionCode: "diagnose",
+    order: 420,
+    label: "Aansluiting tussen onderwijsproces en administratie",
+    helpText:
+      "Hoe goed sluiten uitvoering, planning en administratieve afhandeling op elkaar aan?",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "maturity_3level_fit_options",
+    allowsComment: true,
+    examples: [
+      "Denk aan wijzigingen in planning, deelnemers, trajecten of facturatie.",
+      "Ontstaan fouten vooral bij de overdracht tussen uitvoering en administratie?",
+    ],
+    visibleWhen: [
+      { field: "sector", operator: "equals", value: "onderwijs" },
+      {
+        field: "primary_process_chains",
+        operator: "one_of",
+        value: ["project_to_invoice", "order_to_cash"],
+      },
+    ],
+  },
+  {
+    key: "education_exception_handling",
+    sectionCode: "diagnose",
+    order: 430,
+    label: "Uitzonderingen in traject- of cursusadministratie",
+    helpText:
+      "Hoe beheersbaar zijn uitzonderingen in trajecten, planning of administratieve verwerking?",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "maturity_3level_exception_control_options",
+    allowsComment: true,
+    examples: [
+      "Denk aan last-minute wijzigingen, afwijkende trajecten of handmatige correcties.",
+      "Zijn afwijkingen onderdeel van het ontwerp of vooral ad hoc opgelost?",
+    ],
+    visibleWhen: [{ field: "sector", operator: "equals", value: "onderwijs" }],
+  },
 ];
