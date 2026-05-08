@@ -54,6 +54,21 @@ export const questions: QuestionDefinition[] = [
     ],
   },
   {
+    key: "organization_type",
+    sectionCode: "profile_basis",
+    order: 45,
+    label: "Type organisatie en operatie",
+    helpText:
+      "Welke omschrijving past het best bij de manier waarop de organisatie werkt?",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "organization_type_options",
+    examples: [
+      "Bijvoorbeeld: één centraal team met vaste processen.",
+      "Of: meerdere locaties, entiteiten of een projectmatige werkwijze.",
+    ],
+  },
+  {
     key: "afas_products",
     sectionCode: "profile_basis",
     order: 50,
@@ -66,6 +81,52 @@ export const questions: QuestionDefinition[] = [
     examples: [
       "Bijvoorbeeld: Financieel, HRM, Inkoop, Ordermanagement of Workflow.",
       "Kies ook onderdelen die al wel relevant zijn voor de scan, ook als ze nog niet volledig worden benut.",
+    ],
+  },
+  {
+    key: "ownership_model",
+    sectionCode: "profile_basis",
+    order: 60,
+    label: "Beheer van AFAS en processen",
+    helpText:
+      "Hoe is het beheer van AFAS en de belangrijkste processen nu georganiseerd?",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "ownership_model_options",
+    examples: [
+      "Bijvoorbeeld: één beheerder, een klein centraal team of verdeeld over afdelingen.",
+      "Denk ook aan de rol van externe ondersteuning of formeel belegd beheer.",
+    ],
+  },
+  {
+    key: "standardization_context",
+    sectionCode: "profile_basis",
+    order: 70,
+    label: "Mate van standaardisatie",
+    helpText:
+      "Hoe zou je de huidige inrichting en werkwijze het best omschrijven?",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "standardization_context_options",
+    examples: [
+      "Bijvoorbeeld: vooral standaard en eenduidig.",
+      "Of: veel afwijkingen, uitzonderingen of afhankelijkheid van specifieke inrichting.",
+    ],
+  },
+  {
+    key: "primary_process_chains",
+    sectionCode: "profile_basis",
+    order: 80,
+    label: "Belangrijkste procesketens",
+    helpText:
+      "Welke procesketens zijn voor deze scan het belangrijkst? Kies maximaal 3.",
+    inputType: "multi_select",
+    required: true,
+    optionSetKey: "primary_process_chains_options",
+    maxSelections: 3,
+    examples: [
+      "Bijvoorbeeld: order tot factuur, inkoop tot betaling of HR-mutatie tot salaris.",
+      "Kies alleen de ketens die nu het belangrijkst zijn voor de scan.",
     ],
   },
   {
@@ -155,6 +216,68 @@ export const questions: QuestionDefinition[] = [
     examples: [
       "Bijvoorbeeld: is duidelijk wie beslist over wijzigingen in processen of AFAS?",
       "Denk aan: wie is eigenaar van orderverwerking, facturatie, inkoop of HR-processen?",
+    ],
+  },
+  {
+    key: "change_decision_process",
+    sectionCode: "diagnose",
+    order: 20,
+    label: "Besluitvorming over wijzigingen",
+    helpText:
+      "Hoe gestructureerd worden wijzigingen in processen of AFAS besloten?",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "maturity_3level_change_governance_options",
+    allowsComment: true,
+    examples: [
+      "Bijvoorbeeld: worden wijzigingen besproken in een vast overleg of vooral ad hoc doorgevoerd?",
+      "Denk aan: is er een duidelijke route voor wijzigingsverzoeken en besluiten?",
+    ],
+  },
+  {
+    key: "improvement_governance",
+    sectionCode: "diagnose",
+    order: 30,
+    label: "Sturing op verbetering",
+    helpText:
+      "In welke mate wordt actief gestuurd op verbetering van processen en inrichting?",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "maturity_3level_improvement_options",
+    allowsComment: true,
+    examples: [
+      "Bijvoorbeeld: worden knelpunten structureel opgevolgd of alleen opgelost als het misgaat?",
+      "Denk aan: is er een vast ritme om processen en inrichting te evalueren en verbeteren?",
+    ],
+  },
+  {
+    key: "process_standardization",
+    sectionCode: "diagnose",
+    order: 40,
+    label: "Eenduidigheid van werkwijze",
+    helpText: "Hoe eenduidig worden de belangrijkste processen uitgevoerd?",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "maturity_3level_standardization_options",
+    allowsComment: true,
+    examples: [
+      "Bijvoorbeeld: werken teams of medewerkers op dezelfde manier, of verschilt dit sterk per persoon?",
+      "Denk aan: orderverwerking, inkoop, mutaties of goedkeuringen.",
+    ],
+  },
+  {
+    key: "exception_control",
+    sectionCode: "diagnose",
+    order: 50,
+    label: "Omgaan met uitzonderingen",
+    helpText: "Hoe beheersbaar zijn uitzonderingen binnen de processen?",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "maturity_3level_exception_control_options",
+    allowsComment: true,
+    examples: [
+      "Bijvoorbeeld: zijn afwijkingen vastgelegd en beheersbaar, of lossen mensen ze vooral handmatig op?",
+      "Denk aan spoedroutes, uitzonderlijke facturen, afwijkende orders of speciale klantafspraken.",
     ],
   },
   {
