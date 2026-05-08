@@ -13,28 +13,28 @@ const STEPS = [
     sectionCodes: ["profile_basis", "profile_reason"],
     primarySectionCode: "profile_basis",
     title: "Klantprofiel",
-    description: "Basisgegevens van de klant en sector.",
+    description: "Context en uitgangssituatie",
   },
   {
     number: "2",
     sectionCodes: ["scope"],
     primarySectionCode: "scope",
     title: "Scope",
-    description: "Kies hoe breed je de scan uitvoert.",
+    description: "Richting en diepgang",
   },
   {
     number: "3",
     sectionCodes: ["diagnose"],
     primarySectionCode: "diagnose",
     title: "Diagnose",
-    description: "Beantwoord de belangrijkste diagnosevragen.",
+    description: "Kernvragen en verdieping",
   },
   {
     number: "4",
     sectionCodes: ["advies"],
     primarySectionCode: "advies",
     title: "Advies",
-    description: "Bekijk de eerste richting en focuspunten.",
+    description: "Eerste duiding",
   },
 ] as const;
 
@@ -156,40 +156,30 @@ function ScanShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-neutral-50">
-      <div className="mx-auto grid max-w-7xl gap-8 px-6 py-8 lg:grid-cols-[320px_minmax(0,1fr)] lg:px-8">
+      <div className="mx-auto grid max-w-7xl gap-6 px-6 py-8 lg:grid-cols-[280px_minmax(0,1fr)] lg:px-8">
         <aside className="lg:sticky lg:top-8 lg:self-start">
-          <div className="rounded-3xl border bg-white p-6 shadow-sm">
-            <div className="space-y-4">
+          <div className="rounded-3xl border bg-white p-5 shadow-sm">
+            <div className="space-y-5">
               <div className="kweekers-badge">
                 <Image
                   src="/kweekers-logo.png"
                   alt="Kweekers logo"
-                  width={36}
-                  height={36}
+                  width={32}
+                  height={32}
                 />
                 <span>KWEEKERS Groeimodel</span>
               </div>
 
-              <div className="space-y-2">
-                <h2 className="text-2xl font-semibold tracking-tight">
+              <div className="space-y-1">
+                <h2 className="text-xl font-semibold tracking-tight">
                   Begeleide scan
                 </h2>
                 <p className="text-sm text-muted-foreground">
-                  Doorloop stap voor stap de basis van het groeimodel en bouw
-                  van profiel naar advies.
+                  Van profiel naar eerste advies.
                 </p>
               </div>
 
-              <div className="rounded-2xl border p-4">
-                <div className="text-sm font-medium">Wat je hier doet</div>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Je vult eerst de context in, kiest daarna de juiste scope,
-                  beantwoordt diagnosevragen en eindigt met een eerste
-                  adviesrichting.
-                </p>
-              </div>
-
-              <div className="space-y-3 pt-2">
+              <div className="space-y-2 pt-1">
                 {STEPS.map((step) => {
                   const status = getStepStatus(
                     step,
@@ -197,18 +187,16 @@ function ScanShell({ children }: { children: ReactNode }) {
                     currentSectionCode
                   );
 
-                  const href = scanId
-                    ? getStepHref(scanId, step, status)
-                    : "";
+                  const href = scanId ? getStepHref(scanId, step, status) : "";
 
                   const cardClass =
                     status === "current"
-                      ? "border-[#c7d2e8] bg-[#eef3fb] text-[#2f426a]"
+                      ? "border-[#c7d2e8] bg-[#eef3fb]"
                       : status === "completed"
-                        ? "border-[#b7dfc2] bg-[#eef8f1] text-[#1f5130]"
+                        ? "border-[#b7dfc2] bg-[#eef8f1]"
                         : status === "available"
-                          ? "border-[#eadfcb] bg-[#fcf8f2] text-[#4d4031] hover:bg-[#faf3e8]"
-                          : "border-neutral-300 bg-white text-neutral-400 opacity-70";
+                          ? "border-[#e6dfd4] bg-[#fcfaf7] hover:bg-[#f8f3ec]"
+                          : "border-neutral-200 bg-white opacity-70";
 
                   const numberClass =
                     status === "current"
@@ -216,42 +204,44 @@ function ScanShell({ children }: { children: ReactNode }) {
                       : status === "completed"
                         ? "border-[#56a26a] bg-[#56a26a] text-white"
                         : status === "available"
-                          ? "border-[#8e7a5c] text-[#4d4031]"
-                          : "border-neutral-400 text-neutral-400";
+                          ? "border-[#b8ab97] text-[#6a5b49]"
+                          : "border-neutral-300 text-neutral-400";
 
                   const titleClass =
                     status === "current"
-                      ? "text-[#2f426a] font-semibold"
+                      ? "text-[#2f426a]"
                       : status === "completed"
-                        ? "text-[#1f5130] font-semibold"
+                        ? "text-[#1f5130]"
                         : status === "available"
-                          ? "text-[#2d241a] font-semibold"
-                          : "text-neutral-400 font-medium";
+                          ? "text-[#2d241a]"
+                          : "text-neutral-400";
 
                   const descriptionClass =
                     status === "current"
-                      ? "text-[#4b5f86]"
+                      ? "text-[#5b6f94]"
                       : status === "completed"
-                        ? "text-[#356946]"
+                        ? "text-[#4a7356]"
                         : status === "available"
-                          ? "text-[#6b5a46]"
+                          ? "text-[#7a6a57]"
                           : "text-neutral-400";
 
                   const displayNumber = status === "completed" ? "✓" : step.number;
 
                   const content = (
                     <div
-                      className={`flex items-start gap-3 rounded-2xl border p-3 transition ${cardClass}`}
+                      className={`flex items-start gap-3 rounded-2xl border px-3 py-3 transition ${cardClass}`}
                     >
                       <div
-                        className={`flex h-8 w-8 items-center justify-center rounded-full border text-sm font-medium ${numberClass}`}
+                        className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-sm font-medium ${numberClass}`}
                       >
                         {displayNumber}
                       </div>
 
                       <div className="min-w-0">
-                        <div className={`text-sm ${titleClass}`}>{step.title}</div>
-                        <div className={`text-sm ${descriptionClass}`}>
+                        <div className={`text-sm font-semibold ${titleClass}`}>
+                          {step.title}
+                        </div>
+                        <div className={`text-xs ${descriptionClass}`}>
                           {step.description}
                         </div>
                       </div>
