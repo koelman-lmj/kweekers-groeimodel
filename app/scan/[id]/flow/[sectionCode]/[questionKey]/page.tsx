@@ -251,7 +251,7 @@ export default function FlowQuestionPage() {
         </div>
       )}
 
-      <section className="space-y-4 rounded-2xl border border-black/10 p-5">
+      <section className="space-y-4 rounded-3xl border border-black/8 bg-black/[0.01] p-5">
         {question.inputType === "text" && (
           <div className="space-y-2">
             <label htmlFor={question.key} className="text-sm font-medium">
@@ -263,7 +263,7 @@ export default function FlowQuestionPage() {
               value={answerString}
               onChange={(event) => setAnswerValue(event.target.value)}
               placeholder={question.placeholder}
-              className="w-full rounded-2xl border bg-white px-4 py-3 outline-none"
+              className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 outline-none"
             />
           </div>
         )}
@@ -284,7 +284,7 @@ export default function FlowQuestionPage() {
                     className={
                       isActive
                         ? "kweekers-active-panel min-h-[72px] rounded-2xl border px-4 py-3 text-center transition"
-                        : "kweekers-selectable-hover min-h-[72px] rounded-2xl border bg-white px-4 py-3 text-center transition"
+                        : "kweekers-selectable-hover min-h-[72px] rounded-2xl border border-black/12 bg-white px-4 py-3 text-center transition"
                     }
                   >
                     <div className="text-sm font-semibold">{option.label}</div>
@@ -322,8 +322,8 @@ export default function FlowQuestionPage() {
                         isActive
                           ? "kweekers-active-panel min-h-[72px] rounded-2xl border px-4 py-3 text-center transition"
                           : disableNewSelection
-                            ? "min-h-[72px] rounded-2xl border bg-white px-4 py-3 text-center opacity-40"
-                            : "kweekers-selectable-hover min-h-[72px] rounded-2xl border bg-white px-4 py-3 text-center transition"
+                            ? "min-h-[72px] rounded-2xl border border-black/12 bg-white px-4 py-3 text-center opacity-40"
+                            : "kweekers-selectable-hover min-h-[72px] rounded-2xl border border-black/12 bg-white px-4 py-3 text-center transition"
                       }
                     >
                       <div className="text-sm font-semibold">{option.label}</div>
@@ -346,8 +346,8 @@ export default function FlowQuestionPage() {
         )}
 
         {question.examples && question.examples.length > 0 && (
-          <div className="rounded-xl border border-black/10 bg-black/[0.015] p-3">
-            <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          <div className="rounded-2xl border border-black/8 bg-white/70 p-3">
+            <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
               Hulp bij deze vraag
             </div>
             <ul className="mt-1.5 space-y-1 text-xs text-muted-foreground">
@@ -361,7 +361,7 @@ export default function FlowQuestionPage() {
         )}
 
         {question.allowsComment && (
-          <div className="space-y-2 border-t pt-4">
+          <div className="space-y-2 border-t border-black/8 pt-4">
             <label
               htmlFor={`${question.key}-comment`}
               className="text-sm font-medium"
@@ -374,7 +374,7 @@ export default function FlowQuestionPage() {
               onChange={(event) => setCommentValue(event.target.value)}
               placeholder="Bijvoorbeeld: dit verschilt per team of is nog niet formeel belegd."
               rows={4}
-              className="w-full rounded-2xl border bg-white px-4 py-3 outline-none"
+              className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 outline-none"
             />
             <p className="text-xs text-muted-foreground">
               Deze opmerking kan later worden meegenomen in samenvatting of
@@ -387,7 +387,7 @@ export default function FlowQuestionPage() {
       <div className="flex items-center justify-between border-t pt-6">
         <Link
           href={previousHref}
-          className="rounded-2xl border px-5 py-3 text-sm font-semibold"
+          className="rounded-2xl border border-black/12 px-5 py-3 text-sm font-semibold"
         >
           Vorige
         </Link>
@@ -398,7 +398,7 @@ export default function FlowQuestionPage() {
           className={
             canContinue
               ? "kweekers-primary-button font-semibold"
-              : "inline-flex items-center rounded-2xl border px-5 py-3 text-sm font-semibold text-muted-foreground opacity-60"
+              : "inline-flex items-center rounded-2xl border border-black/12 px-5 py-3 text-sm font-semibold text-muted-foreground opacity-60"
           }
         >
           Verder →
