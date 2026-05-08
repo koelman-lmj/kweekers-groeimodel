@@ -436,7 +436,7 @@ export default function SectionSummaryPage() {
   const { scan, resetScan } = useScanContext();
 
   const section = getSection(sectionCode);
-  const questions = getQuestionsForSection(sectionCode);
+  const questions = getQuestionsForSection(sectionCode, scan);
 
   if (!section) {
     return (
@@ -456,7 +456,7 @@ export default function SectionSummaryPage() {
 
   const nextSectionCode = section.nextSectionCode ?? "";
   const nextSectionQuestions = nextSectionCode
-    ? getQuestionsForSection(nextSectionCode)
+    ? getQuestionsForSection(nextSectionCode, scan)
     : [];
   const nextQuestionKey = nextSectionQuestions[0]?.key ?? "";
 
@@ -679,10 +679,10 @@ export default function SectionSummaryPage() {
 
               <div className="space-y-3">
                 {[
-                  ...getQuestionsForSection("profile_basis"),
-                  ...getQuestionsForSection("profile_reason"),
-                  ...getQuestionsForSection("scope"),
-                  ...getQuestionsForSection("diagnose"),
+                  ...getQuestionsForSection("profile_basis", scan),
+                  ...getQuestionsForSection("profile_reason", scan),
+                  ...getQuestionsForSection("scope", scan),
+                  ...getQuestionsForSection("diagnose", scan),
                 ]
                   .filter((question) => {
                     const comment = scan.comments[question.key]?.trim() ?? "";
