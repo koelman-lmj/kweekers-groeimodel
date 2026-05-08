@@ -7,7 +7,7 @@ export const sections: SectionDefinition[] = [
     shortTitle: "Profiel",
     phase: "profile",
     order: 10,
-    summaryEnabled: true,
+    summaryEnabled: false,
     nextSectionCode: "profile_reason",
   },
   {
@@ -16,7 +16,7 @@ export const sections: SectionDefinition[] = [
     shortTitle: "Profiel",
     phase: "profile",
     order: 20,
-    summaryEnabled: true,
+    summaryEnabled: false,
     nextSectionCode: "scope",
   },
   {
@@ -25,7 +25,7 @@ export const sections: SectionDefinition[] = [
     shortTitle: "Scope",
     phase: "scope",
     order: 30,
-    summaryEnabled: true,
+    summaryEnabled: false,
     nextSectionCode: "diagnose",
   },
   {
@@ -34,7 +34,7 @@ export const sections: SectionDefinition[] = [
     shortTitle: "Diagnose",
     phase: "diagnose",
     order: 40,
-    summaryEnabled: true,
+    summaryEnabled: false,
     nextSectionCode: "advies",
   },
   {
