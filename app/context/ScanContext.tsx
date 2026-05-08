@@ -16,7 +16,11 @@ export type ScanState = {
     sector: string;
     organizationSize: string;
     administrationCount: string;
+    organizationType: string;
     afasProducts: string[];
+    ownershipModel: string;
+    standardizationContext: string;
+    primaryProcessChains: string[];
     scanReason: string;
     biggestBottleneck: string[];
   };
@@ -44,7 +48,11 @@ const INITIAL_SCAN: ScanState = {
     sector: "",
     organizationSize: "",
     administrationCount: "",
+    organizationType: "",
     afasProducts: [],
+    ownershipModel: "",
+    standardizationContext: "",
+    primaryProcessChains: [],
     scanReason: "",
     biggestBottleneck: [],
   },
@@ -73,7 +81,11 @@ type ScanContextValue = {
   setSector: (value: string) => void;
   setOrganizationSize: (value: string) => void;
   setAdministrationCount: (value: string) => void;
+  setOrganizationType: (value: string) => void;
   setAfasProducts: (value: string[]) => void;
+  setOwnershipModel: (value: string) => void;
+  setStandardizationContext: (value: string) => void;
+  setPrimaryProcessChains: (value: string[]) => void;
 
   setScanReason: (value: string) => void;
   setBiggestBottleneck: (value: string[]) => void;
@@ -121,7 +133,11 @@ function loadInitialScan(): ScanState {
         sector: parsed.profile?.sector ?? "",
         organizationSize: parsed.profile?.organizationSize ?? "",
         administrationCount: parsed.profile?.administrationCount ?? "",
+        organizationType: parsed.profile?.organizationType ?? "",
         afasProducts: toStringArray(parsed.profile?.afasProducts),
+        ownershipModel: parsed.profile?.ownershipModel ?? "",
+        standardizationContext: parsed.profile?.standardizationContext ?? "",
+        primaryProcessChains: toStringArray(parsed.profile?.primaryProcessChains),
         scanReason: parsed.profile?.scanReason ?? "",
         biggestBottleneck: toStringArray(parsed.profile?.biggestBottleneck),
       },
@@ -180,7 +196,10 @@ export function ScanProvider({ children }: { children: ReactNode }) {
   };
 
   const updateProfile = (
-    field: keyof Omit<ScanState["profile"], "afasProducts" | "biggestBottleneck">,
+    field: keyof Omit<
+      ScanState["profile"],
+      "afasProducts" | "primaryProcessChains" | "biggestBottleneck"
+    >,
     value: string
   ) => {
     setScan((current) => ({
@@ -233,12 +252,34 @@ export function ScanProvider({ children }: { children: ReactNode }) {
     updateProfile("administrationCount", value);
   };
 
+  const setOrganizationType = (value: string) => {
+    updateProfile("organizationType", value);
+  };
+
   const setAfasProducts = (value: string[]) => {
     setScan((current) => ({
       ...current,
       profile: {
         ...current.profile,
         afasProducts: value,
+      },
+    }));
+  };
+
+  const setOwnershipModel = (value: string) => {
+    updateProfile("ownershipModel", value);
+  };
+
+  const setStandardizationContext = (value: string) => {
+    updateProfile("standardizationContext", value);
+  };
+
+  const setPrimaryProcessChains = (value: string[]) => {
+    setScan((current) => ({
+      ...current,
+      profile: {
+        ...current.profile,
+        primaryProcessChains: value,
       },
     }));
   };
@@ -331,7 +372,11 @@ export function ScanProvider({ children }: { children: ReactNode }) {
       setSector,
       setOrganizationSize,
       setAdministrationCount,
+      setOrganizationType,
       setAfasProducts,
+      setOwnershipModel,
+      setStandardizationContext,
+      setPrimaryProcessChains,
 
       setScanReason,
       setBiggestBottleneck,
