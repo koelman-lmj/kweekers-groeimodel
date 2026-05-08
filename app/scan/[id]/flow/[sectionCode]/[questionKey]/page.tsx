@@ -80,6 +80,18 @@ const AFAS_PRODUCT_GROUPS: OptionGroup[] = [
   },
 ];
 
+function getBaseOptionButtonClass(disabled: boolean) {
+  if (disabled) {
+    return "min-h-[72px] rounded-2xl border border-black/15 bg-white px-4 py-3 text-center opacity-40";
+  }
+
+  return "min-h-[72px] rounded-2xl border border-black/15 bg-white px-4 py-3 text-center transition hover:bg-black/[0.02]";
+}
+
+function getActiveOptionButtonClass() {
+  return "min-h-[72px] rounded-2xl border border-[#2f426a] bg-[#3d4a78] px-4 py-3 text-center text-white shadow-sm transition";
+}
+
 export default function FlowQuestionPage() {
   const params = useParams<{
     id: string | string[];
@@ -114,22 +126,17 @@ export default function FlowQuestionPage() {
     setProcessStandardization,
     setExceptionControl,
     setIssueResolution,
-
     setFinanceFoundationReliability,
     setFinanceExceptionHandling,
     setFinanceReportingMaturity,
-
     setOrderFlowStandardization,
     setOrderExceptionComplexity,
     setOrderSystemFit,
-
     setCareRegistrationExceptions,
     setCareAccountabilityPressure,
-
     setEducationIntakePlanningConsistency,
     setEducationProcessAdminAlignment,
     setEducationExceptionHandling,
-
     setComment,
   } = useScanContext();
 
@@ -233,18 +240,14 @@ export default function FlowQuestionPage() {
         setProcessStandardization,
         setExceptionControl,
         setIssueResolution,
-
         setFinanceFoundationReliability,
         setFinanceExceptionHandling,
         setFinanceReportingMaturity,
-
         setOrderFlowStandardization,
         setOrderExceptionComplexity,
         setOrderSystemFit,
-
         setCareRegistrationExceptions,
         setCareAccountabilityPressure,
-
         setEducationIntakePlanningConsistency,
         setEducationProcessAdminAlignment,
         setEducationExceptionHandling,
@@ -328,7 +331,7 @@ export default function FlowQuestionPage() {
         </div>
       )}
 
-      <section className="space-y-4 rounded-3xl border border-black/10 bg-black/[0.01] p-5">
+      <section className="space-y-5 rounded-3xl border border-black/10 bg-[#fafafa] p-5">
         {question.inputType === "text" && (
           <div className="space-y-2">
             <label htmlFor={question.key} className="text-sm font-medium">
@@ -340,7 +343,7 @@ export default function FlowQuestionPage() {
               value={answerString}
               onChange={(event) => setAnswerValue(event.target.value)}
               placeholder={question.placeholder}
-              className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 outline-none"
+              className="w-full rounded-2xl border border-black/15 bg-white px-4 py-3 outline-none"
             />
           </div>
         )}
@@ -360,8 +363,8 @@ export default function FlowQuestionPage() {
                     aria-pressed={isActive}
                     className={
                       isActive
-                        ? "kweekers-active-panel min-h-[72px] rounded-2xl border px-4 py-3 text-center transition"
-                        : "kweekers-selectable-hover min-h-[72px] rounded-2xl border border-black/10 bg-white px-4 py-3 text-center transition"
+                        ? getActiveOptionButtonClass()
+                        : getBaseOptionButtonClass(false)
                     }
                   >
                     <div className="text-sm font-semibold">{option.label}</div>
@@ -399,10 +402,8 @@ export default function FlowQuestionPage() {
                         disabled={disableNewSelection}
                         className={
                           isActive
-                            ? "kweekers-active-panel min-h-[72px] rounded-2xl border px-4 py-3 text-center transition"
-                            : disableNewSelection
-                              ? "min-h-[72px] rounded-2xl border border-black/10 bg-white px-4 py-3 text-center opacity-40"
-                              : "kweekers-selectable-hover min-h-[72px] rounded-2xl border border-black/10 bg-white px-4 py-3 text-center transition"
+                            ? getActiveOptionButtonClass()
+                            : getBaseOptionButtonClass(disableNewSelection)
                         }
                       >
                         <div className="text-sm font-semibold">{option.label}</div>
@@ -427,10 +428,12 @@ export default function FlowQuestionPage() {
         {question.inputType === "multi_select" &&
           optionSet &&
           question.key === "afas_products" && (
-            <div className="space-y-5">
+            <div className="space-y-6">
               {groupedOptions.map((group) => (
                 <div key={group.title} className="space-y-3">
-                  <div className="text-sm font-semibold">{group.title}</div>
+                  <div className="border-b border-black/10 pb-1 text-sm font-semibold text-black">
+                    {group.title}
+                  </div>
 
                   <div className="grid gap-3 sm:grid-cols-2">
                     {group.options.map((option) => {
@@ -449,10 +452,8 @@ export default function FlowQuestionPage() {
                           disabled={disableNewSelection}
                           className={
                             isActive
-                              ? "kweekers-active-panel min-h-[72px] rounded-2xl border px-4 py-3 text-center transition"
-                              : disableNewSelection
-                                ? "min-h-[72px] rounded-2xl border border-black/10 bg-white px-4 py-3 text-center opacity-40"
-                                : "kweekers-selectable-hover min-h-[72px] rounded-2xl border border-black/10 bg-white px-4 py-3 text-center transition"
+                              ? getActiveOptionButtonClass()
+                              : getBaseOptionButtonClass(disableNewSelection)
                           }
                         >
                           <div className="text-sm font-semibold">{option.label}</div>
@@ -477,7 +478,7 @@ export default function FlowQuestionPage() {
           )}
 
         {question.examples && question.examples.length > 0 && (
-          <div className="rounded-2xl border border-black/10 bg-white/70 p-3">
+          <div className="rounded-2xl border border-black/10 bg-white/80 p-3">
             <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
               Hulp bij deze vraag
             </div>
@@ -505,7 +506,7 @@ export default function FlowQuestionPage() {
               onChange={(event) => setCommentValue(event.target.value)}
               placeholder="Bijvoorbeeld: dit verschilt per team of is nog niet formeel belegd."
               rows={4}
-              className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 outline-none"
+              className="w-full rounded-2xl border border-black/15 bg-white px-4 py-3 outline-none"
             />
             <p className="text-xs text-muted-foreground">
               Deze opmerking kan later worden meegenomen in samenvatting of
