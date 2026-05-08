@@ -223,10 +223,11 @@ export default function SectionSummaryPage() {
         <section className="space-y-3 rounded-2xl border p-5">
           <h2 className="text-lg font-medium">Overzicht</h2>
 
-          <div className="space-y-2 text-sm text-muted-foreground">
+          <div className="space-y-3">
             {questions.map((question) => {
               const rawValue = getAnswerFromScan(scan, question.key);
               const optionSet = getOptionSet(question.optionSetKey);
+              const comment = scan.comments[question.key]?.trim() ?? "";
 
               let displayValue = rawValue || "Nog niet ingevuld";
 
@@ -237,8 +238,25 @@ export default function SectionSummaryPage() {
               }
 
               return (
-                <div key={question.key}>
-                  {question.label}: {displayValue}
+                <div
+                  key={question.key}
+                  className="rounded-2xl border border-black/10 p-4"
+                >
+                  <div className="text-sm font-medium">{question.label}</div>
+                  <div className="mt-1 text-sm text-muted-foreground">
+                    {displayValue}
+                  </div>
+
+                  {comment && (
+                    <div className="mt-3 rounded-xl border bg-black/5 p-3">
+                      <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Opmerking
+                      </div>
+                      <div className="mt-1 text-sm text-muted-foreground">
+                        {comment}
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -304,6 +322,35 @@ export default function SectionSummaryPage() {
               ))}
             </ul>
           </section>
+
+          {Object.entries(scan.comments)
+            .filter(([, value]) => value.trim() !== "")
+            .length > 0 && (
+            <section className="space-y-3 rounded-2xl border p-5">
+              <h2 className="text-lg font-medium">Opmerkingen uit de scan</h2>
+
+              <div className="space-y-3">
+                {questions
+                  .filter((question) => {
+                    const comment = scan.comments[question.key]?.trim() ?? "";
+                    return comment !== "";
+                  })
+                  .map((question) => (
+                    <div
+                      key={question.key}
+                      className="rounded-2xl border border-black/10 p-4"
+                    >
+                      <div className="text-sm font-semibold">
+                        {question.label}
+                      </div>
+                      <div className="mt-1 text-sm text-muted-foreground">
+                        {scan.comments[question.key]}
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </section>
+          )}
 
           <section className="space-y-3 rounded-2xl border p-5">
             <h2 className="text-lg font-medium">Aanbevolen eerste stap</h2>
