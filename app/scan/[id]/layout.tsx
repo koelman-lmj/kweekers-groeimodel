@@ -83,7 +83,7 @@ function ScanShell({ children }: { children: ReactNode }) {
 
   const scanId = Array.isArray(params.id) ? params.id[0] : params.id;
   const currentSectionCode = getCurrentSectionCode(pathname);
-  const sectionStatuses = getSectionStatuses(currentSectionCode, scan);
+  const sectionStatuses = getSectionStatuses(scan);
 
   return (
     <div className="min-h-screen bg-neutral-50">
