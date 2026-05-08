@@ -27,9 +27,7 @@ function getDisplayValue(
   if (Array.isArray(rawValue)) {
     if (rawValue.length === 0) return "Nog niet ingevuld";
 
-    if (!optionSet) {
-      return rawValue;
-    }
+    if (!optionSet) return rawValue;
 
     return rawValue.map((value) => {
       return (
@@ -39,7 +37,6 @@ function getDisplayValue(
   }
 
   if (!rawValue) return "Nog niet ingevuld";
-
   if (!optionSet) return rawValue;
 
   return optionSet.options.find((option) => option.value === rawValue)?.label ?? rawValue;
@@ -60,43 +57,43 @@ function buildAdviceContextAdditions(scan: ScanState) {
 
   if (bottlenecks.includes("eigenaarschap")) {
     mainViewAdditions.push(
-      "Daarnaast laat de scan zien dat verantwoordelijkheden en besluitvorming extra aandacht vragen."
+      "Verantwoordelijkheden en besluitvorming vragen extra aandacht."
     );
     firstStepAdditions.push(
-      "Leg daarbij expliciet vast wie proceseigenaar is en wie beslist over wijzigingen."
+      "Leg expliciet vast wie proceseigenaar is en wie beslist over wijzigingen."
     );
   }
 
   if (bottlenecks.includes("processen")) {
     mainViewAdditions.push(
-      "De uitkomst wijst ook op duidelijke frictie in de procesuitvoering en de manier waarop werk in de praktijk verloopt."
+      "Er is duidelijke frictie in de procesuitvoering en de dagelijkse werkwijze."
     );
     firstStepAdditions.push(
-      "Breng de belangrijkste procesvarianten terug naar één herkenbare standaard werkwijze."
+      "Breng de belangrijkste procesvarianten terug naar één herkenbare standaard."
     );
   }
 
   if (bottlenecks.includes("rapportage")) {
     mainViewAdditions.push(
-      "Ook stuurinformatie en rapportage lijken nu onvoldoende te ondersteunen in dagelijkse of bestuurlijke sturing."
+      "Stuurinformatie en rapportage ondersteunen nog niet genoeg in dagelijkse en bestuurlijke sturing."
     );
     firstStepAdditions.push(
-      "Werk tegelijk toe naar duidelijke KPI-definities, eigenaarschap op rapportage en een beperkte set managementinzichten."
+      "Werk toe naar duidelijke KPI-definities, rapportage-eigenaarschap en een beperkte set managementinzichten."
     );
   }
 
   if (bottlenecks.includes("afas")) {
     mainViewAdditions.push(
-      "De inrichting en het gebruik van AFAS lijken niet overal goed aan te sluiten op de gewenste werkwijze."
+      "De inrichting en het gebruik van AFAS sluiten nog niet overal goed aan op de gewenste werkwijze."
     );
     firstStepAdditions.push(
-      "Kijk daarom ook gericht naar standaardinrichting, workflow en de aansluiting tussen proces en systeemondersteuning."
+      "Kijk gericht naar standaardinrichting, workflow en de aansluiting tussen proces en systeem."
     );
   }
 
   if (bottlenecks.includes("data_integraties")) {
     mainViewAdditions.push(
-      "Een deel van de frictie lijkt ook te zitten in gegevenskwaliteit of in de samenwerking tussen systemen."
+      "Een deel van de frictie zit ook in gegevenskwaliteit of in de samenwerking tussen systemen."
     );
     firstStepAdditions.push(
       "Maak datastromen, definities en integratie-afspraken expliciet onderdeel van de eerste verbeterstap."
@@ -105,64 +102,64 @@ function buildAdviceContextAdditions(scan: ScanState) {
 
   if (bottlenecks.includes("adoptie")) {
     mainViewAdditions.push(
-      "De uitdaging zit niet alleen in proces of systeem, maar ook in gebruik, discipline en borging."
+      "De uitdaging zit niet alleen in proces of systeem, maar ook in gebruik en borging."
     );
     firstStepAdditions.push(
-      "Combineer procesverbetering daarom met duidelijke werkafspraken, adoptie en borging in het team."
+      "Combineer procesverbetering met duidelijke werkafspraken en adoptie in het team."
     );
   }
 
   if (focusAreas.includes("organisatie_eigenaarschap")) {
     mainViewAdditions.push(
-      "Omdat de scan nadrukkelijk ook kijkt naar governance en eigenaarschap, wegen rolverdeling en besluitvorming extra zwaar mee in de duiding."
+      "Governance en eigenaarschap wegen extra zwaar mee in deze scan."
     );
   }
 
   if (focusAreas.includes("processen_werkwijze")) {
     mainViewAdditions.push(
-      "De scan is bovendien expliciet gericht op processen en werkwijze, waardoor standaardisatie en uitvoerbaarheid extra zwaar meewegen."
+      "Standaardisatie en uitvoerbaarheid wegen extra zwaar mee in deze scan."
     );
   }
 
   if (focusAreas.includes("afas_inrichting_gebruik")) {
     mainViewAdditions.push(
-      "Omdat ook AFAS-inrichting en gebruik centraal staan, telt de aansluiting tussen proces en systeemondersteuning zwaarder mee."
+      "De aansluiting tussen proces en systeemondersteuning telt extra zwaar mee."
     );
   }
 
   if (focusAreas.includes("rapportage_sturing")) {
     mainViewAdditions.push(
-      "De scan richt zich mede op stuurinformatie, inzicht en bestuurlijke grip."
+      "De scan richt zich mede op inzicht en bestuurlijke grip."
     );
   }
 
   if (focusAreas.includes("beheer_doorontwikkeling")) {
     mainViewAdditions.push(
-      "Daarnaast kijkt de scan ook naar het vermogen om inrichting en processen structureel te beheren en door te ontwikkelen."
+      "De scan kijkt ook naar het vermogen om processen en inrichting structureel door te ontwikkelen."
     );
   }
 
   if (afasProducts.includes("financieel")) {
     mainViewAdditions.push(
-      "Binnen AFAS zijn financiële processen en sturing relevant voor de verbeteropgave."
+      "Financiële processen en sturing zijn relevant voor de verbeteropgave."
     );
     firstStepAdditions.push(
-      "Neem daarbij administratie, uitzonderingen, autorisatie en rapportage expliciet mee."
+      "Neem administratie, uitzonderingen, autorisatie en rapportage expliciet mee."
     );
   }
 
   if (afasProducts.includes("ordermanagement")) {
     mainViewAdditions.push(
-      "Ook orderprocessen en de aansluiting op uitvoering of facturatie spelen een rol."
+      "Orderprocessen en de aansluiting op uitvoering of facturatie spelen een rol."
     );
     firstStepAdditions.push(
-      "Richt je eerste verbeterstap dan ook op standaardroutes, uitzonderingen en beheersing in het orderproces."
+      "Richt de eerste stap op standaardroutes, uitzonderingen en beheersing in het orderproces."
     );
   }
 
   if (afasProducts.includes("inkoop")) {
     mainViewAdditions.push(
-      "Inkoopstromen zijn eveneens relevant binnen deze scan."
+      "Inkoopstromen zijn relevant binnen deze scan."
     );
     firstStepAdditions.push(
       "Neem bestelproces, goedkeuring en factuurverwerking mee in de eerste verbeterslag."
@@ -180,25 +177,25 @@ function buildAdviceContextAdditions(scan: ScanState) {
       "HR-processen en mutatiestromen zijn relevant in deze scan."
     );
     firstStepAdditions.push(
-      "Richt je eerste verbeterstap dan ook op workflow, verantwoordelijkheden en borging binnen HR-processen."
+      "Richt de eerste stap op workflow, verantwoordelijkheden en borging binnen HR-processen."
     );
   }
 
   if (afasProducts.includes("workflow")) {
     mainViewAdditions.push(
-      "De inzet van workflow is relevant voor de mate van standaardisatie en beheersing."
+      "Workflow is relevant voor standaardisatie en beheersing."
     );
   }
 
   if (afasProducts.includes("rapportage_dashboards")) {
     mainViewAdditions.push(
-      "De behoefte aan stuurinformatie en dashboards is expliciet relevant binnen deze scan."
+      "De behoefte aan stuurinformatie en dashboards is expliciet relevant."
     );
   }
 
   if (afasProducts.includes("integraties")) {
     mainViewAdditions.push(
-      "De scan raakt ook de samenwerking tussen AFAS en andere systemen, waardoor ketenafhankelijkheden extra belangrijk worden."
+      "De scan raakt ook de samenwerking tussen AFAS en andere systemen."
     );
   }
 
@@ -207,7 +204,7 @@ function buildAdviceContextAdditions(scan: ScanState) {
       "De verbeteropgave lijkt vooral te landen in de keten van orderverwerking, uitvoering en facturatie."
     );
     firstStepAdditions.push(
-      "Richt de eerste stap daarom op standaardroutes, eigenaarschap en uitzonderingen in order-to-cash."
+      "Richt de eerste stap op standaardroutes, eigenaarschap en uitzonderingen in order-to-cash."
     );
   }
 
@@ -216,25 +213,25 @@ function buildAdviceContextAdditions(scan: ScanState) {
       "De scan raakt nadrukkelijk de keten van bestellen, goedkeuren en betalen."
     );
     firstStepAdditions.push(
-      "Richt de eerste stap daarom op beheersing van inkoopproces, workflow en factuurafhandeling."
+      "Richt de eerste stap op beheersing van inkoopproces, workflow en factuurafhandeling."
     );
   }
 
   if (processChains.includes("hr_to_payroll")) {
     mainViewAdditions.push(
-      "De relevante verbeteropgave ligt mede in de keten van HR-mutatie tot salarisverwerking."
+      "De verbeteropgave ligt mede in de keten van HR-mutatie tot salarisverwerking."
     );
     firstStepAdditions.push(
-      "Richt je eerste stap dan op mutatiestromen, workflow en duidelijke verantwoordelijkheden."
+      "Richt de eerste stap op mutatiestromen, workflow en duidelijke verantwoordelijkheden."
     );
   }
 
   if (processChains.includes("reporting_control")) {
     mainViewAdditions.push(
-      "Rapportage en bestuurlijke sturing vormen een belangrijk deel van de context van deze scan."
+      "Rapportage en bestuurlijke sturing vormen een belangrijk deel van de context."
     );
     firstStepAdditions.push(
-      "Werk daarom snel toe naar eenduidige definities, eigenaarschap en een beperkte set stuurinformatie."
+      "Werk toe naar eenduidige definities, eigenaarschap en een beperkte set stuurinformatie."
     );
   }
 
@@ -243,7 +240,7 @@ function buildAdviceContextAdditions(scan: ScanState) {
       "De scan raakt ook de keten tussen AFAS en andere systemen."
     );
     firstStepAdditions.push(
-      "Dat vraagt in de eerste stap expliciet aandacht voor overdrachtsmomenten, definities en foutgevoelige schakels."
+      "Besteed direct aandacht aan overdrachtsmomenten, definities en foutgevoelige schakels."
     );
   }
 
@@ -292,30 +289,30 @@ function buildAdviceSummary(scan: ScanState) {
 
   let headline = "Gericht doorontwikkelen";
   let baseMainView =
-    "De scan laat zien dat er een bruikbare basis aanwezig is, maar dat de organisatie nog niet overal op een vaste en beheersbare manier werkt. Vooral in eigenaarschap, standaardisatie en structurele verbetering is nog winst te halen.";
+    "De scan laat zien dat er een bruikbare basis aanwezig is, maar dat de organisatie nog niet overal op een vaste en beheersbare manier werkt.";
 
   if (lowSignals >= 4) {
     headline = "Stabiliseren";
     baseMainView =
-      "De scan laat zien dat op meerdere onderdelen nog basisproblemen aanwezig zijn. Werkwijze, besluitvorming en beheersing zijn nog onvoldoende stevig om duurzaam te verbeteren. De eerste stap is daarom niet verbreden, maar stabiliseren.";
+      "De scan laat zien dat op meerdere onderdelen nog basisproblemen aanwezig zijn. Werkwijze, besluitvorming en beheersing zijn nog onvoldoende stevig om duurzaam te verbeteren.";
   } else if (
     ownershipClarity === "onvoldoende_duidelijk" ||
     changeDecisionProcess === "ad_hoc"
   ) {
     headline = "Governance versterken";
     baseMainView =
-      "De scan laat zien dat de grootste eerste winst zit in het scherper beleggen van eigenaarschap en besluitvorming. Zonder die basis blijft verbetering te veel afhankelijk van personen in plaats van van een vaste werkwijze.";
+      "De grootste eerste winst zit in het scherper beleggen van eigenaarschap en besluitvorming. Zonder die basis blijft verbetering te afhankelijk van personen.";
   } else if (
     processStandardization === "sterk_verschillend" ||
     exceptionControl === "uitzondering_is_norm"
   ) {
     headline = "Processen standaardiseren";
     baseMainView =
-      "De scan laat zien dat de organisatie nog te veel leunt op verschillen in werkwijze en uitzonderingen. Meer standaardisatie is de logische eerste stap om de uitvoering beter beheersbaar te maken.";
+      "De organisatie leunt nog te veel op verschillen in werkwijze en uitzonderingen. Meer standaardisatie is de logische eerste stap.";
   } else {
     headline = "Gericht doorontwikkelen";
     baseMainView =
-      "De scan laat zien dat de organisatie op hoofdlijnen een bruikbare basis heeft. Er zijn aandachtspunten, maar geen direct zwaar fundamentprobleem. De volgende stap ligt vooral in gericht verbeteren en verder aanscherpen.";
+      "De organisatie heeft op hoofdlijnen een bruikbare basis. De volgende stap ligt vooral in gericht verbeteren en verder aanscherpen.";
   }
 
   const attentionPoints: string[] = [];
@@ -382,26 +379,26 @@ function buildAdviceSummary(scan: ScanState) {
         ];
 
   let baseFirstStep =
-    "Breng de belangrijkste verbeterkansen terug naar een beperkt en concreet verbeterplan, zodat de organisatie gericht kan doorontwikkelen.";
+    "Breng de belangrijkste verbeterkansen terug naar een beperkt en concreet verbeterplan.";
 
   if (lowSignals >= 4) {
     baseFirstStep =
-      "Start met het stabiliseren van de basis. Breng eerst verantwoordelijkheden, werkwijze en uitzonderingen terug naar een beheersbaar niveau voordat je verder verbreedt of verdiept.";
+      "Start met het stabiliseren van de basis. Breng eerst verantwoordelijkheden, werkwijze en uitzonderingen terug naar een beheersbaar niveau.";
   } else if (
     ownershipClarity === "onvoldoende_duidelijk" ||
     changeDecisionProcess === "ad_hoc"
   ) {
     baseFirstStep =
-      "Start met het expliciet beleggen van proceseigenaarschap en het vastleggen van besluitvorming over wijzigingen. Zonder die basis blijft verbetering afhankelijk van personen.";
+      "Start met het expliciet beleggen van proceseigenaarschap en het vastleggen van besluitvorming over wijzigingen.";
   } else if (
     processStandardization === "sterk_verschillend" ||
     exceptionControl === "uitzondering_is_norm"
   ) {
     baseFirstStep =
-      "Breng eerst de belangrijkste processen en uitzonderingen terug naar één herkenbare standaard werkwijze. Dat maakt de organisatie direct beter beheersbaar.";
+      "Breng eerst de belangrijkste processen en uitzonderingen terug naar één herkenbare standaard werkwijze.";
   } else {
     baseFirstStep =
-      "De organisatie lijkt voldoende basis te hebben om gericht door te ontwikkelen. De eerste stap is nu om de belangrijkste verbeterkansen te prioriteren en om te zetten in een concreet verbeterplan.";
+      "Prioriteer de belangrijkste verbeterkansen en zet die om in een concreet verbeterplan.";
   }
 
   const contextAdditions = buildAdviceContextAdditions(scan);
@@ -470,10 +467,7 @@ export default function SectionSummaryPage() {
 
     const answer = getAnswerFromScan(scan, question.key);
 
-    if (Array.isArray(answer)) {
-      return answer.length > 0;
-    }
-
+    if (Array.isArray(answer)) return answer.length > 0;
     return answer.trim() !== "";
   });
 
@@ -485,17 +479,17 @@ export default function SectionSummaryPage() {
   return (
     <div className="space-y-8">
       <div className="space-y-2">
-        <p className="text-sm text-muted-foreground">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           {section.title} — samenvatting
         </p>
-        <h1 className="text-3xl font-semibold tracking-tight">Samenvatting</h1>
+        <h1 className="text-4xl font-semibold tracking-tight">Samenvatting</h1>
         <p className="text-sm text-muted-foreground">
           Controleer of de ingevulde gegevens goed zijn ingevuld.
         </p>
       </div>
 
       {!isFinalStep && (
-        <section className="space-y-3 rounded-2xl border p-5">
+        <section className="space-y-3 rounded-3xl border border-black/10 bg-black/[0.01] p-5">
           <h2 className="text-lg font-medium">Overzicht</h2>
 
           <div className="space-y-3">
@@ -508,7 +502,7 @@ export default function SectionSummaryPage() {
               return (
                 <div
                   key={question.key}
-                  className="rounded-2xl border border-black/10 p-4"
+                  className="rounded-2xl border border-black/10 bg-white/80 p-4"
                 >
                   <div className="text-sm font-medium">{question.label}</div>
 
@@ -527,8 +521,8 @@ export default function SectionSummaryPage() {
                   )}
 
                   {comment && (
-                    <div className="mt-3 rounded-xl border bg-black/5 p-3">
-                      <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    <div className="mt-3 rounded-xl border border-black/8 bg-black/[0.025] p-3">
+                      <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
                         Opmerking
                       </div>
                       <div className="mt-1 text-sm text-muted-foreground">
@@ -551,25 +545,26 @@ export default function SectionSummaryPage() {
 
       {isFinalStep && canContinue && adviceSummary && contextSummary && (
         <>
-          <section className="space-y-3 rounded-2xl border p-5">
+          <section className="space-y-3 rounded-3xl border border-black/10 bg-black/[0.01] p-5">
             <h2 className="text-lg font-medium">Hoofdbeeld</h2>
-            <div className="text-sm font-medium">{adviceSummary.headline}</div>
+            <div className="text-sm font-semibold">{adviceSummary.headline}</div>
             <p className="text-sm text-muted-foreground">
               {adviceSummary.mainView}
             </p>
           </section>
 
-          <section className="space-y-3 rounded-2xl border p-5">
+          <section className="space-y-3 rounded-3xl border border-black/10 bg-black/[0.01] p-5">
             <h2 className="text-lg font-medium">Domeinscorekaart</h2>
 
             <div className="grid gap-3">
               {domainScores.map((domain) => (
-                <div key={domain.code} className="rounded-2xl border p-4">
+                <div
+                  key={domain.code}
+                  className="rounded-2xl border border-black/10 bg-white/80 p-4"
+                >
                   <div className="flex items-center justify-between gap-4">
                     <div>
-                      <div className="text-sm font-semibold">
-                        {domain.title}
-                      </div>
+                      <div className="text-sm font-semibold">{domain.title}</div>
                       <div className="text-sm text-muted-foreground">
                         {domain.summary}
                       </div>
@@ -593,7 +588,7 @@ export default function SectionSummaryPage() {
             contextSummary.focusLines.length > 0 ||
             contextSummary.productLines.length > 0 ||
             contextSummary.processChainLines.length > 0) && (
-            <section className="space-y-4 rounded-2xl border p-5">
+            <section className="space-y-4 rounded-3xl border border-black/10 bg-black/[0.01] p-5">
               <h2 className="text-lg font-medium">Context uit de scan</h2>
 
               {contextSummary.bottleneckLines.length > 0 && (
@@ -628,9 +623,7 @@ export default function SectionSummaryPage() {
 
               {contextSummary.productLines.length > 0 && (
                 <div className="space-y-2">
-                  <h3 className="text-sm font-semibold">
-                    Relevante AFAS-context
-                  </h3>
+                  <h3 className="text-sm font-semibold">Relevante AFAS-context</h3>
                   <ul className="space-y-1 text-sm text-muted-foreground">
                     {contextSummary.productLines.map((line) => (
                       <li key={line} className="ml-5 list-disc">
@@ -658,10 +651,8 @@ export default function SectionSummaryPage() {
             </section>
           )}
 
-          <section className="space-y-3 rounded-2xl border p-5">
-            <h2 className="text-lg font-medium">
-              Belangrijkste aandachtspunten
-            </h2>
+          <section className="space-y-3 rounded-3xl border border-black/10 bg-black/[0.01] p-5">
+            <h2 className="text-lg font-medium">Belangrijkste aandachtspunten</h2>
             <ul className="space-y-2 text-sm text-muted-foreground">
               {adviceSummary.topAttentionPoints.map((point) => (
                 <li key={point} className="ml-5 list-disc">
@@ -671,10 +662,9 @@ export default function SectionSummaryPage() {
             </ul>
           </section>
 
-          {Object.entries(scan.comments)
-            .filter(([, value]) => value.trim() !== "")
+          {Object.entries(scan.comments).filter(([, value]) => value.trim() !== "")
             .length > 0 && (
-            <section className="space-y-3 rounded-2xl border p-5">
+            <section className="space-y-3 rounded-3xl border border-black/10 bg-black/[0.01] p-5">
               <h2 className="text-lg font-medium">Opmerkingen uit de scan</h2>
 
               <div className="space-y-3">
@@ -691,11 +681,9 @@ export default function SectionSummaryPage() {
                   .map((question) => (
                     <div
                       key={question.key}
-                      className="rounded-2xl border border-black/10 p-4"
+                      className="rounded-2xl border border-black/10 bg-white/80 p-4"
                     >
-                      <div className="text-sm font-semibold">
-                        {question.label}
-                      </div>
+                      <div className="text-sm font-semibold">{question.label}</div>
                       <div className="mt-1 text-sm text-muted-foreground">
                         {scan.comments[question.key]}
                       </div>
@@ -705,19 +693,19 @@ export default function SectionSummaryPage() {
             </section>
           )}
 
-          <section className="space-y-3 rounded-2xl border p-5">
+          <section className="space-y-3 rounded-3xl border border-black/10 bg-black/[0.01] p-5">
             <h2 className="text-lg font-medium">Aanbevolen eerste stap</h2>
             <p className="text-sm text-muted-foreground">
               {adviceSummary.firstStep}
             </p>
           </section>
 
-          <section className="rounded-2xl border p-5">
+          <section className="rounded-3xl border border-black/10 bg-black/[0.01] p-5">
             <div className="space-y-2">
               <h2 className="text-lg font-medium">Scan afgerond</h2>
               <p className="text-sm text-muted-foreground">
-                De begeleide scan is compleet ingevuld. Je kunt nu een nieuwe
-                scan starten.
+                De begeleide scan is compleet ingevuld. Je kunt nu een nieuwe scan
+                starten.
               </p>
             </div>
 
@@ -725,7 +713,7 @@ export default function SectionSummaryPage() {
               <button
                 type="button"
                 onClick={() => resetScan()}
-                className="rounded-2xl border px-5 py-3 text-sm font-medium"
+                className="rounded-2xl border border-black/10 px-5 py-3 text-sm font-medium"
               >
                 Reset scan
               </button>
@@ -745,7 +733,7 @@ export default function SectionSummaryPage() {
       <div className="flex items-center justify-between border-t pt-6">
         <Link
           href={previousHref}
-          className="rounded-2xl border px-5 py-3 text-sm font-medium"
+          className="rounded-2xl border border-black/10 px-5 py-3 text-sm font-medium"
         >
           Vorige
         </Link>
@@ -758,7 +746,7 @@ export default function SectionSummaryPage() {
           ) : (
             <span
               aria-disabled="true"
-              className="inline-flex cursor-not-allowed items-center rounded-2xl border px-5 py-3 text-sm font-medium text-muted-foreground opacity-60"
+              className="inline-flex cursor-not-allowed items-center rounded-2xl border border-black/10 px-5 py-3 text-sm font-medium text-muted-foreground opacity-60"
             >
               Verder →
             </span>
@@ -766,7 +754,7 @@ export default function SectionSummaryPage() {
         ) : (
           <span
             aria-disabled="true"
-            className="inline-flex cursor-not-allowed items-center rounded-2xl border px-5 py-3 text-sm font-medium text-muted-foreground opacity-60"
+            className="inline-flex cursor-not-allowed items-center rounded-2xl border border-black/10 px-5 py-3 text-sm font-medium text-muted-foreground opacity-60"
           >
             Einde van de scan
           </span>
