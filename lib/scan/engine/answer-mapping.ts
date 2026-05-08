@@ -51,6 +51,32 @@ export function getAnswerFromScan(
     case "issue_resolution":
       return scan.diagnosis.issueResolution;
 
+    case "finance_foundation_reliability":
+      return scan.diagnosis.financeFoundationReliability;
+    case "finance_exception_handling":
+      return scan.diagnosis.financeExceptionHandling;
+    case "finance_reporting_maturity":
+      return scan.diagnosis.financeReportingMaturity;
+
+    case "order_flow_standardization":
+      return scan.diagnosis.orderFlowStandardization;
+    case "order_exception_complexity":
+      return scan.diagnosis.orderExceptionComplexity;
+    case "order_system_fit":
+      return scan.diagnosis.orderSystemFit;
+
+    case "care_registration_exceptions":
+      return scan.diagnosis.careRegistrationExceptions;
+    case "care_accountability_pressure":
+      return scan.diagnosis.careAccountabilityPressure;
+
+    case "education_intake_planning_consistency":
+      return scan.diagnosis.educationIntakePlanningConsistency;
+    case "education_process_admin_alignment":
+      return scan.diagnosis.educationProcessAdminAlignment;
+    case "education_exception_handling":
+      return scan.diagnosis.educationExceptionHandling;
+
     default:
       return "";
   }
@@ -80,6 +106,21 @@ export type ScanActions = {
   setProcessStandardization: (value: string) => void;
   setExceptionControl: (value: string) => void;
   setIssueResolution: (value: string) => void;
+
+  setFinanceFoundationReliability: (value: string) => void;
+  setFinanceExceptionHandling: (value: string) => void;
+  setFinanceReportingMaturity: (value: string) => void;
+
+  setOrderFlowStandardization: (value: string) => void;
+  setOrderExceptionComplexity: (value: string) => void;
+  setOrderSystemFit: (value: string) => void;
+
+  setCareRegistrationExceptions: (value: string) => void;
+  setCareAccountabilityPressure: (value: string) => void;
+
+  setEducationIntakePlanningConsistency: (value: string) => void;
+  setEducationProcessAdminAlignment: (value: string) => void;
+  setEducationExceptionHandling: (value: string) => void;
 };
 
 function ensureStringArray(value: AnswerValue): string[] {
@@ -170,6 +211,43 @@ export function setAnswerToScan(
       return;
     case "issue_resolution":
       actions.setIssueResolution(ensureString(value));
+      return;
+
+    case "finance_foundation_reliability":
+      actions.setFinanceFoundationReliability(ensureString(value));
+      return;
+    case "finance_exception_handling":
+      actions.setFinanceExceptionHandling(ensureString(value));
+      return;
+    case "finance_reporting_maturity":
+      actions.setFinanceReportingMaturity(ensureString(value));
+      return;
+
+    case "order_flow_standardization":
+      actions.setOrderFlowStandardization(ensureString(value));
+      return;
+    case "order_exception_complexity":
+      actions.setOrderExceptionComplexity(ensureString(value));
+      return;
+    case "order_system_fit":
+      actions.setOrderSystemFit(ensureString(value));
+      return;
+
+    case "care_registration_exceptions":
+      actions.setCareRegistrationExceptions(ensureString(value));
+      return;
+    case "care_accountability_pressure":
+      actions.setCareAccountabilityPressure(ensureString(value));
+      return;
+
+    case "education_intake_planning_consistency":
+      actions.setEducationIntakePlanningConsistency(ensureString(value));
+      return;
+    case "education_process_admin_alignment":
+      actions.setEducationProcessAdminAlignment(ensureString(value));
+      return;
+    case "education_exception_handling":
+      actions.setEducationExceptionHandling(ensureString(value));
       return;
 
     default:
