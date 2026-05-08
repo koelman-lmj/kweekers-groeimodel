@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { useScanContext } from "@/app/context/ScanContext";
 import { sections } from "@/lib/scan/definition/sections";
 import {
@@ -30,6 +31,7 @@ export default function FlowQuestionPage() {
     sectionCode: string | string[];
     questionKey: string | string[];
   }>();
+  const router = useRouter();
 
   const scanId = getParam(params.id);
   const sectionCode = getParam(params.sectionCode);
@@ -114,6 +116,7 @@ export default function FlowQuestionPage() {
 
   const answerValue = getAnswerFromScan(scan, questionKey);
   const commentValue = scan.comments[questionKey] ?? "";
+  const [showValidation, setShowValidation] = useState(false);
 
   const setAnswerValue = (value: string) => {
     setAnswerToScan(
@@ -137,6 +140,8 @@ export default function FlowQuestionPage() {
       questionKey,
       value
     );
+
+    setShowValidation(false);
   };
 
   const setCommentValue = (value: string) => {
@@ -144,6 +149,15 @@ export default function FlowQuestionPage() {
   };
 
   const canContinue = question.required ? isFilled(answerValue) : true;
+
+  const handleNext = () => {
+    if (!canContinue) {
+      setShowValidation(true);
+      return;
+    }
+
+    router.push(nextHref);
+  };
 
   return (
     <div className="space-y-8">
@@ -172,6 +186,12 @@ export default function FlowQuestionPage() {
           </div>
         )}
       </div>
+
+      {showValidation && !canContinue && (
+        <div className="kweekers-accent-box text-sm">
+          Vul eerst deze vraag in om verder te gaan.
+        </div>
+      )}
 
       <section className="space-y-4 rounded-2xl border p-5">
         {question.inputType === "text" && (
@@ -243,12 +263,6 @@ export default function FlowQuestionPage() {
             </p>
           </div>
         )}
-
-        {!canContinue && (
-          <div className="kweekers-accent-box text-sm">
-            Vul eerst deze vraag in om verder te gaan.
-          </div>
-        )}
       </section>
 
       <div className="flex items-center justify-between border-t pt-6">
@@ -259,18 +273,17 @@ export default function FlowQuestionPage() {
           Vorige
         </Link>
 
-        {canContinue ? (
-          <Link href={nextHref} className="kweekers-primary-button font-semibold">
-            Verder →
-          </Link>
-        ) : (
-          <span
-            aria-disabled="true"
-            className="inline-flex cursor-not-allowed items-center rounded-2xl border px-5 py-3 text-sm font-semibold text-muted-foreground opacity-60"
-          >
-            Verder →
-          </span>
-        )}
+        <button
+          type="button"
+          onClick={handleNext}
+          className={
+            canContinue
+              ? "kweekers-primary-button font-semibold"
+              : "inline-flex items-center rounded-2xl border px-5 py-3 text-sm font-semibold text-muted-foreground opacity-60"
+          }
+        >
+          Verder →
+        </button>
       </div>
     </div>
   );
