@@ -1,4 +1,5 @@
 import type { ScanState } from "@/app/context/ScanContext";
+import { sections } from "@/lib/scan/definition/sections";
 import { getQuestionsForSection } from "./definition-helpers";
 import { getAnswerFromScan } from "./answer-mapping";
 
@@ -19,4 +20,11 @@ export function isSectionComplete(
 
     return answer.trim() !== "";
   });
+}
+
+export function getSectionStatuses(scan: ScanState): Record<string, boolean> {
+  return sections.reduce<Record<string, boolean>>((result, section) => {
+    result[section.code] = isSectionComplete(scan, section.code);
+    return result;
+  }, {});
 }
