@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useScanContext, type ScanState } from "@/app/context/ScanContext";
+import { useScanContext } from "@/app/context/ScanContext";
 import {
   getOptionSet,
   getQuestionsForSection,
@@ -13,7 +13,7 @@ import {
   type AnswerValue,
 } from "@/lib/scan/engine/answer-mapping";
 import { buildDomainScores } from "@/lib/scan/engine/build-domain-scores";
-import { buildScanContextSummary } from "@/lib/scan/engine/build-scan-context-summary";
+import { buildPriorityAdvice, getRootCauseLabel } from "@/lib/scan/engine/build-priority-advice";
 
 function getParam(value: string | string[] | undefined): string {
   if (Array.isArray(value)) return value[0] ?? "";
@@ -42,28 +42,22 @@ function getDisplayValue(
   return optionSet.options.find((option) => option.value === rawValue)?.label ?? rawValue;
 }
 
-function unique(values: string[]): string[] {
-  return [...new Set(values)];
-}
-
-function getStatusMeta(headline: string) {
-  if (headline === "Stabiliseren") {
+function getStatusMeta(priorityType: string) {
+  if (priorityType === "finance") {
     return {
       tone: "border-red-200 bg-red-50 text-red-900",
       badge: "bg-red-100 text-red-700",
       chipTone: "border-red-200 bg-white text-red-700",
-      icon: "●",
-      compactLabel: "Stabiliseren",
+      compactLabel: "Eerst stabiliseren",
     };
   }
 
-  if (headline === "Governance versterken" || headline === "Aanscherpen") {
+  if (priorityType === "governance" || priorityType === "process" || priorityType === "system") {
     return {
       tone: "border-amber-200 bg-amber-50 text-amber-900",
       badge: "bg-amber-100 text-amber-700",
       chipTone: "border-amber-200 bg-white text-amber-700",
-      icon: "●",
-      compactLabel: "Aanscherpen",
+      compactLabel: "Eerst aanscherpen",
     };
   }
 
@@ -71,8 +65,7 @@ function getStatusMeta(headline: string) {
     tone: "border-emerald-200 bg-emerald-50 text-emerald-900",
     badge: "bg-emerald-100 text-emerald-700",
     chipTone: "border-emerald-200 bg-white text-emerald-700",
-    icon: "●",
-    compactLabel: "Doorontwikkelen",
+    compactLabel: "Gericht doorpakken",
   };
 }
 
@@ -85,297 +78,6 @@ function getScoreLabel(score: number) {
 
 function getFilledBlocks(score: number) {
   return Math.max(0, Math.min(10, Math.round(score * 1.25)));
-}
-
-function buildAttentionCards(scan: ScanState) {
-  const cards: { title: string; text: string }[] = [];
-  const d = scan.diagnosis;
-
-  if (
-    d.ownershipClarity === "onvoldoende_duidelijk" ||
-    d.ownershipClarity === "gedeeltelijk_duidelijk"
-  ) {
-    cards.push({
-      title: "Eigenaarschap",
-      text: "Niet overal duidelijk belegd.",
-    });
-  }
-
-  if (
-    d.changeDecisionProcess === "ad_hoc" ||
-    d.changeDecisionProcess === "deels_afgestemd"
-  ) {
-    cards.push({
-      title: "Besluitvorming",
-      text: "Wijzigingen verlopen nog te weinig via een vaste route.",
-    });
-  }
-
-  if (
-    d.processStandardization === "sterk_verschillend" ||
-    d.processStandardization === "redelijk_eenduidig"
-  ) {
-    cards.push({
-      title: "Processtandaard",
-      text: "Werkwijze verschilt nog te veel tussen mensen of teams.",
-    });
-  }
-
-  if (
-    d.exceptionControl === "uitzondering_is_norm" ||
-    d.exceptionControl === "deels_beheersbaar"
-  ) {
-    cards.push({
-      title: "Uitzonderingen",
-      text: "Afwijkingen zijn nog te vaak de norm.",
-    });
-  }
-
-  if (
-    d.issueResolution === "handmatig_herstellen" ||
-    d.issueResolution === "mix_ad_hoc_structureel"
-  ) {
-    cards.push({
-      title: "Knelpunten oplossen",
-      text: "Terugkerende problemen worden nog niet altijd structureel opgelost.",
-    });
-  }
-
-  if (
-    d.improvementGovernance === "nauwelijks" ||
-    d.improvementGovernance === "af_en_toe"
-  ) {
-    cards.push({
-      title: "Verbetersturing",
-      text: "Verbetering wordt nog niet structureel aangestuurd.",
-    });
-  }
-
-  return cards.slice(0, 3);
-}
-
-function buildAdviceContextAdditions(scan: ScanState) {
-  const mainViewAdditions: string[] = [];
-  const firstStepAdditions: string[] = [];
-
-  const bottlenecks = scan.profile.biggestBottleneck;
-  const focusAreas = scan.scope.focus;
-  const afasProducts = scan.profile.afasProducts;
-  const processChains = scan.profile.primaryProcessChains;
-
-  if (bottlenecks.includes("eigenaarschap")) {
-    mainViewAdditions.push(
-      "Verantwoordelijkheden en besluitvorming vragen extra aandacht."
-    );
-    firstStepAdditions.push(
-      "Leg vast wie proceseigenaar is en wie beslist over wijzigingen."
-    );
-  }
-
-  if (bottlenecks.includes("processen")) {
-    mainViewAdditions.push(
-      "Er is duidelijke frictie in de procesuitvoering en de dagelijkse werkwijze."
-    );
-    firstStepAdditions.push(
-      "Breng procesvarianten terug naar één herkenbare standaard."
-    );
-  }
-
-  if (bottlenecks.includes("rapportage")) {
-    mainViewAdditions.push(
-      "Stuurinformatie ondersteunt nog niet genoeg in dagelijkse en bestuurlijke sturing."
-    );
-    firstStepAdditions.push(
-      "Werk toe naar duidelijke KPI-definities en een beperkte set managementinzichten."
-    );
-  }
-
-  if (bottlenecks.includes("afas")) {
-    mainViewAdditions.push(
-      "AFAS sluit nog niet overal goed aan op de gewenste werkwijze."
-    );
-    firstStepAdditions.push(
-      "Kijk gericht naar standaardinrichting, workflow en de aansluiting tussen proces en systeem."
-    );
-  }
-
-  if (focusAreas.includes("processen_werkwijze")) {
-    mainViewAdditions.push(
-      "Standaardisatie en uitvoerbaarheid wegen extra zwaar mee in deze scan."
-    );
-  }
-
-  if (focusAreas.includes("rapportage_sturing")) {
-    mainViewAdditions.push(
-      "De scan richt zich mede op inzicht en bestuurlijke grip."
-    );
-  }
-
-  if (afasProducts.includes("financieel")) {
-    mainViewAdditions.push(
-      "Financiële processen en sturing zijn relevant voor de verbeteropgave."
-    );
-  }
-
-  if (afasProducts.includes("ordermanagement")) {
-    mainViewAdditions.push(
-      "Orderprocessen en de aansluiting op uitvoering of facturatie spelen een rol."
-    );
-  }
-
-  if (afasProducts.includes("workflow")) {
-    mainViewAdditions.push(
-      "Workflow is relevant voor standaardisatie en beheersing."
-    );
-  }
-
-  if (processChains.includes("order_to_cash")) {
-    mainViewAdditions.push(
-      "De verbeteropgave ligt vooral in de keten van orderverwerking, uitvoering en facturatie."
-    );
-    firstStepAdditions.push(
-      "Richt de eerste stap op standaardroutes, eigenaarschap en uitzonderingen in order-to-cash."
-    );
-  }
-
-  if (processChains.includes("procure_to_pay")) {
-    mainViewAdditions.push(
-      "De scan raakt nadrukkelijk de keten van bestellen, goedkeuren en betalen."
-    );
-    firstStepAdditions.push(
-      "Richt de eerste stap op beheersing van inkoopproces, workflow en factuurafhandeling."
-    );
-  }
-
-  if (processChains.includes("reporting_control")) {
-    mainViewAdditions.push(
-      "Rapportage en bestuurlijke sturing vormen een belangrijk deel van de context."
-    );
-    firstStepAdditions.push(
-      "Werk toe naar eenduidige definities, eigenaarschap en een beperkte set stuurinformatie."
-    );
-  }
-
-  return {
-    mainViewAdditions: unique(mainViewAdditions),
-    firstStepAdditions: unique(firstStepAdditions),
-  };
-}
-
-function buildAdviceSummary(scan: ScanState) {
-  const {
-    ownershipClarity,
-    changeDecisionProcess,
-    improvementGovernance,
-    processStandardization,
-    exceptionControl,
-    issueResolution,
-  } = scan.diagnosis;
-
-  const lowSignals = [
-    ownershipClarity === "onvoldoende_duidelijk",
-    changeDecisionProcess === "ad_hoc",
-    improvementGovernance === "nauwelijks",
-    processStandardization === "sterk_verschillend",
-    exceptionControl === "uitzondering_is_norm",
-    issueResolution === "handmatig_herstellen",
-  ].filter(Boolean).length;
-
-  let headline = "Gericht doorontwikkelen";
-  let baseMainView =
-    "De organisatie heeft op hoofdlijnen een bruikbare basis. De volgende stap ligt vooral in gericht verbeteren en verder aanscherpen.";
-
-  if (lowSignals >= 4) {
-    headline = "Stabiliseren";
-    baseMainView =
-      "De basis is nog niet stevig genoeg voor bredere doorontwikkeling. Werkwijze, besluitvorming en beheersing vragen eerst rust en duidelijkheid.";
-  } else if (
-    ownershipClarity === "onvoldoende_duidelijk" ||
-    changeDecisionProcess === "ad_hoc"
-  ) {
-    headline = "Aanscherpen";
-    baseMainView =
-      "Er is een bruikbare basis, maar eerst moeten een paar kernpunten strakker. De grootste winst zit in eigenaarschap en besluitvorming.";
-  } else if (
-    processStandardization === "sterk_verschillend" ||
-    exceptionControl === "uitzondering_is_norm"
-  ) {
-    headline = "Aanscherpen";
-    baseMainView =
-      "De basis is aanwezig, maar processen leunen nog te veel op verschillen en uitzonderingen. Meer standaardisatie is de logische eerste stap.";
-  }
-
-  const contextAdditions = buildAdviceContextAdditions(scan);
-
-  const mainView = [
-    baseMainView,
-    ...contextAdditions.mainViewAdditions.slice(0, 1),
-  ].join(" ");
-
-  let firstStep =
-    "Prioriteer de belangrijkste verbeterkansen en zet die om in een concreet verbeterplan.";
-
-  if (headline === "Stabiliseren") {
-    firstStep =
-      "Breng eerst verantwoordelijkheden, werkwijze en uitzonderingen terug naar een beheersbaar niveau.";
-  } else if (headline === "Aanscherpen") {
-    firstStep =
-      "Scherp de basis aan zodat gerichte verbetering mogelijk wordt.";
-  }
-
-  const firstStepFull = [
-    firstStep,
-    ...contextAdditions.firstStepAdditions.slice(0, 1),
-  ].join(" ");
-
-  return {
-    headline,
-    mainView,
-    firstStep: firstStepFull,
-  };
-}
-
-function buildNextActions(scan: ScanState, headline: string) {
-  const actions: string[] = [];
-
-  if (headline === "Stabiliseren") {
-    actions.push("Benoem eigenaar per kernproces");
-    actions.push("Werk met één standaardroute per kernproces");
-    actions.push("Beperk de grootste uitzonderingen");
-    return actions;
-  }
-
-  if (scan.profile.biggestBottleneck.includes("eigenaarschap")) {
-    actions.push("Benoem proceseigenaren");
-  }
-
-  if (scan.profile.biggestBottleneck.includes("processen")) {
-    actions.push("Kies 3 grootste procesafwijkingen");
-  }
-
-  if (scan.profile.biggestBottleneck.includes("rapportage")) {
-    actions.push("Maak KPI-definities eenduidig");
-  }
-
-  if (scan.profile.afasProducts.includes("workflow")) {
-    actions.push("Leg de route voor wijzigingen vast");
-  }
-
-  if (scan.profile.primaryProcessChains.includes("order_to_cash")) {
-    actions.push("Breng order-to-cash terug naar één standaardroute");
-  }
-
-  if (actions.length < 3) {
-    actions.push("Benoem eigenaar per kernproces");
-  }
-  if (actions.length < 3) {
-    actions.push("Leg besluitvorming over wijzigingen vast");
-  }
-  if (actions.length < 3) {
-    actions.push("Prioriteer de grootste uitzonderingen");
-  }
-
-  return unique(actions).slice(0, 3);
 }
 
 export default function SectionSummaryPage() {
@@ -428,20 +130,15 @@ export default function SectionSummaryPage() {
   });
 
   const isFinalStep = !hasNextStep;
-  const adviceSummary = isFinalStep ? buildAdviceSummary(scan) : null;
-  const domainScores = isFinalStep ? buildDomainScores(scan) : [];
-  const contextSummary = isFinalStep ? buildScanContextSummary(scan) : null;
-  const attentionCards = isFinalStep ? buildAttentionCards(scan) : [];
-  const nextActions =
-    isFinalStep && adviceSummary
-      ? buildNextActions(scan, adviceSummary.headline)
-      : [];
 
-  const statusMeta = adviceSummary
-    ? getStatusMeta(adviceSummary.headline)
+  const domainScores = isFinalStep ? buildDomainScores(scan) : [];
+  const priorityAdvice = isFinalStep ? buildPriorityAdvice(scan) : null;
+
+  const statusMeta = priorityAdvice
+    ? getStatusMeta(priorityAdvice.priorityType)
     : null;
 
-  const compactContext = contextSummary
+  const compactContext = isFinalStep
     ? {
         bottlenecks: scan.profile.biggestBottleneck.map((item) => {
           const optionSet = getOptionSet("biggest_bottleneck_options");
@@ -535,7 +232,7 @@ export default function SectionSummaryPage() {
         </div>
       )}
 
-      {isFinalStep && canContinue && adviceSummary && statusMeta && (
+      {isFinalStep && canContinue && priorityAdvice && statusMeta && (
         <>
           <section className={`rounded-3xl border p-4 ${statusMeta.tone}`}>
             <div className="space-y-3">
@@ -543,35 +240,31 @@ export default function SectionSummaryPage() {
                 <div
                   className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold ${statusMeta.badge}`}
                 >
-                  {statusMeta.icon}
+                  ●
                 </div>
 
                 <div className="text-xl font-semibold tracking-tight">
-                  {adviceSummary.headline}
+                  {priorityAdvice.mainBottleneckTitle}
                 </div>
               </div>
 
-              <p className="text-sm leading-6">{adviceSummary.mainView}</p>
+              <p className="text-sm leading-6">{priorityAdvice.mainBottleneckText}</p>
 
               <div className="space-y-1">
                 <div className="text-[11px] font-medium uppercase tracking-wide opacity-70">
-                  Focus nu op
+                  Onderliggende oorzaak
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <span
                     className={`rounded-full border px-3 py-1 text-xs ${statusMeta.chipTone}`}
                   >
-                    Eigenaarschap
+                    {getRootCauseLabel(priorityAdvice.rootCauseCategory)}
                   </span>
+
                   <span
                     className={`rounded-full border px-3 py-1 text-xs ${statusMeta.chipTone}`}
                   >
-                    Standaardisatie
-                  </span>
-                  <span
-                    className={`rounded-full border px-3 py-1 text-xs ${statusMeta.chipTone}`}
-                  >
-                    Uitzonderingen
+                    {statusMeta.compactLabel}
                   </span>
                 </div>
               </div>
@@ -618,22 +311,51 @@ export default function SectionSummaryPage() {
             </div>
           </section>
 
-          {attentionCards.length > 0 && (
-            <section className="space-y-4">
-              <h2 className="text-lg font-medium">Belangrijkste aandachtspunten</h2>
-              <div className="grid gap-3 md:grid-cols-3">
-                {attentionCards.map((card) => (
-                  <div
-                    key={card.title}
-                    className="rounded-2xl border border-black/10 bg-white p-4"
-                  >
-                    <div className="text-sm font-semibold">{card.title}</div>
-                    <div className="mt-1 text-sm text-muted-foreground">
-                      {card.text}
-                    </div>
-                  </div>
+          <section className="space-y-3 rounded-3xl border border-black/10 bg-black/[0.01] p-5">
+            <div className="space-y-1">
+              <h2 className="text-lg font-medium">{priorityAdvice.firstStepTitle}</h2>
+              <p className="text-sm text-muted-foreground">
+                {priorityAdvice.firstStepText}
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-black/10 bg-white p-4">
+              <div className="text-sm font-semibold">Doe dit eerst</div>
+              <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
+                {priorityAdvice.actions.map((action) => (
+                  <li key={action} className="ml-5 list-disc">
+                    {action}
+                  </li>
                 ))}
-              </div>
+              </ul>
+            </div>
+          </section>
+
+          <section className="space-y-3 rounded-3xl border border-black/10 bg-black/[0.01] p-5">
+            <div className="space-y-1">
+              <h2 className="text-lg font-medium">{priorityAdvice.notFirstTitle}</h2>
+              <p className="text-sm text-muted-foreground">
+                {priorityAdvice.notFirstText}
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-black/10 bg-white p-4">
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                {priorityAdvice.notFirst.map((item) => (
+                  <li key={item} className="ml-5 list-disc">
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </section>
+
+          {priorityAdvice.nextLikelyFocus && (
+            <section className="space-y-2 rounded-3xl border border-black/10 bg-black/[0.01] p-5">
+              <h2 className="text-lg font-medium">Daarna waarschijnlijk relevant</h2>
+              <p className="text-sm text-muted-foreground">
+                {priorityAdvice.nextLikelyFocus}
+              </p>
             </section>
           )}
 
@@ -680,26 +402,6 @@ export default function SectionSummaryPage() {
               </div>
             </section>
           )}
-
-          <section className="space-y-3 rounded-3xl border border-black/10 bg-black/[0.01] p-5">
-            <div className="space-y-1">
-              <h2 className="text-lg font-medium">Volgende stap</h2>
-              <p className="text-sm text-muted-foreground">
-                {adviceSummary.firstStep}
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-black/10 bg-white p-4">
-              <div className="text-sm font-semibold">Doe dit eerst</div>
-              <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
-                {nextActions.map((action) => (
-                  <li key={action} className="ml-5 list-disc">
-                    {action}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </section>
 
           {Object.entries(scan.comments).filter(([, value]) => value.trim() !== "")
             .length > 0 && (
