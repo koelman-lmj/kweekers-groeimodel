@@ -31,6 +31,41 @@ export const optionSets: OptionSetDefinition[] = [
     ],
   },
   {
+    key: "organization_type_options",
+    options: [
+      {
+        value: "centraal_operationeel",
+        label: "Centraal aangestuurde operatie",
+        order: 10,
+      },
+      {
+        value: "meerdere_teams_locaties",
+        label: "Meerdere teams of locaties",
+        order: 20,
+      },
+      {
+        value: "meerdere_entiteiten",
+        label: "Meerdere bedrijven of entiteiten",
+        order: 30,
+      },
+      {
+        value: "projectmatig",
+        label: "Overwegend projectmatig georganiseerd",
+        order: 40,
+      },
+      {
+        value: "transactiegedreven",
+        label: "Overwegend transactiegedreven",
+        order: 50,
+      },
+      {
+        value: "hybride",
+        label: "Hybride of gemengde organisatievorm",
+        order: 60,
+      },
+    ],
+  },
+  {
     key: "afas_products_options",
     options: [
       { value: "crm", label: "CRM", order: 10 },
@@ -44,13 +79,141 @@ export const optionSets: OptionSetDefinition[] = [
       { value: "outsite", label: "OutSite", order: 90 },
       { value: "workflow", label: "Workflow", order: 100 },
       { value: "autorisatie", label: "Autorisatie", order: 110 },
-      { value: "rapportage_dashboards", label: "Rapportage / dashboards", order: 120 },
+      {
+        value: "rapportage_dashboards",
+        label: "Rapportage / dashboards",
+        order: 120,
+      },
       { value: "integraties", label: "Integraties", order: 130 },
       { value: "abonnementen", label: "Abonnementen", order: 140 },
       { value: "declaraties", label: "Declaraties", order: 150 },
       { value: "verlof_verzuim", label: "Verlof / verzuim", order: 160 },
-      { value: "dossier_documentbeheer", label: "Dossier / documentbeheer", order: 170 },
+      {
+        value: "dossier_documentbeheer",
+        label: "Dossier / documentbeheer",
+        order: 170,
+      },
       { value: "overig", label: "Overig", order: 180 },
+    ],
+  },
+  {
+    key: "ownership_model_options",
+    options: [
+      {
+        value: "een_beheerder",
+        label: "Vooral één beheerder of sleutelpersoon",
+        order: 10,
+      },
+      {
+        value: "klein_centraal_team",
+        label: "Klein centraal beheerteam",
+        order: 20,
+      },
+      {
+        value: "verdeeld_over_afdelingen",
+        label: "Verdeeld over meerdere afdelingen",
+        order: 30,
+      },
+      {
+        value: "management_en_beheer_gemengd",
+        label: "Beheer en besluitvorming lopen door elkaar",
+        order: 40,
+      },
+      {
+        value: "extern_ondersteund",
+        label: "Sterk afhankelijk van externe ondersteuning",
+        order: 50,
+      },
+      {
+        value: "formeel_belegd",
+        label: "Formeel belegd met duidelijke rollen",
+        order: 60,
+      },
+    ],
+  },
+  {
+    key: "standardization_context_options",
+    options: [
+      {
+        value: "vooral_standaard",
+        label: "Vooral standaard en eenduidig",
+        order: 10,
+      },
+      {
+        value: "standaard_met_beperkte_afwijkingen",
+        label: "Standaard met beperkte afwijkingen",
+        order: 20,
+      },
+      {
+        value: "mix_standaard_specifiek",
+        label: "Mix van standaard en specifieke inrichting",
+        order: 30,
+      },
+      {
+        value: "veel_afwijkingen",
+        label: "Veel afwijkingen of uitzonderingen",
+        order: 40,
+      },
+      {
+        value: "maatwerk_zwaar",
+        label: "Zware afhankelijkheid van specifieke inrichting of maatwerk",
+        order: 50,
+      },
+      {
+        value: "onduidelijk",
+        label: "Moeilijk goed te beoordelen",
+        order: 60,
+      },
+    ],
+  },
+  {
+    key: "primary_process_chains_options",
+    options: [
+      {
+        value: "lead_to_order",
+        label: "Lead tot order",
+        order: 10,
+      },
+      {
+        value: "order_to_cash",
+        label: "Order tot factuur / order-to-cash",
+        order: 20,
+      },
+      {
+        value: "procure_to_pay",
+        label: "Inkoop tot betaling",
+        order: 30,
+      },
+      {
+        value: "project_to_invoice",
+        label: "Project tot factuur / nacalculatie",
+        order: 40,
+      },
+      {
+        value: "hr_to_payroll",
+        label: "HR-mutatie tot salaris",
+        order: 50,
+      },
+      {
+        value: "service_support",
+        label: "Service, support of opvolging",
+        order: 60,
+      },
+      {
+        value: "reporting_control",
+        label: "Rapportage en sturing",
+        order: 70,
+      },
+      {
+        value: "masterdata_governance",
+        label: "Stamdata en beheer",
+        order: 80,
+      },
+      {
+        value: "integration_chain",
+        label: "Keten van koppelingen en gegevensuitwisseling",
+        order: 90,
+      },
     ],
   },
   {
@@ -69,7 +232,11 @@ export const optionSets: OptionSetDefinition[] = [
     options: [
       { value: "processen", label: "Processen", order: 10 },
       { value: "afas", label: "AFAS-inrichting", order: 20 },
-      { value: "rapportage", label: "Rapportage en stuurinformatie", order: 30 },
+      {
+        value: "rapportage",
+        label: "Rapportage en stuurinformatie",
+        order: 30,
+      },
       { value: "eigenaarschap", label: "Eigenaarschap", order: 40 },
       { value: "data_integraties", label: "Data / integraties", order: 50 },
       { value: "adoptie", label: "Adoptie en gebruik", order: 60 },
@@ -151,9 +318,21 @@ export const optionSets: OptionSetDefinition[] = [
   {
     key: "maturity_3level_clarity_options",
     options: [
-      { value: "onvoldoende_duidelijk", label: "Onvoldoende duidelijk", order: 10 },
-      { value: "gedeeltelijk_duidelijk", label: "Gedeeltelijk duidelijk", order: 20 },
-      { value: "duidelijk_belegd", label: "Duidelijk belegd", order: 30 },
+      {
+        value: "onvoldoende_duidelijk",
+        label: "Onvoldoende duidelijk",
+        order: 10,
+      },
+      {
+        value: "gedeeltelijk_duidelijk",
+        label: "Gedeeltelijk duidelijk",
+        order: 20,
+      },
+      {
+        value: "duidelijk_belegd",
+        label: "Duidelijk belegd",
+        order: 30,
+      },
     ],
   },
   {
@@ -184,8 +363,16 @@ export const optionSets: OptionSetDefinition[] = [
         label: "Sterk verschillend per persoon of team",
         order: 10,
       },
-      { value: "redelijk_eenduidig", label: "Redelijk eenduidig", order: 20 },
-      { value: "gestandaardiseerd", label: "Overwegend gestandaardiseerd", order: 30 },
+      {
+        value: "redelijk_eenduidig",
+        label: "Redelijk eenduidig",
+        order: 20,
+      },
+      {
+        value: "gestandaardiseerd",
+        label: "Overwegend gestandaardiseerd",
+        order: 30,
+      },
     ],
   },
   {
