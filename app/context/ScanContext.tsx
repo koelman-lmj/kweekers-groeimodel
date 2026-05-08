@@ -36,6 +36,21 @@ export type ScanState = {
     processStandardization: string;
     exceptionControl: string;
     issueResolution: string;
+
+    financeFoundationReliability: string;
+    financeExceptionHandling: string;
+    financeReportingMaturity: string;
+
+    orderFlowStandardization: string;
+    orderExceptionComplexity: string;
+    orderSystemFit: string;
+
+    careRegistrationExceptions: string;
+    careAccountabilityPressure: string;
+
+    educationIntakePlanningConsistency: string;
+    educationProcessAdminAlignment: string;
+    educationExceptionHandling: string;
   };
   comments: Record<string, string>;
 };
@@ -68,6 +83,21 @@ const INITIAL_SCAN: ScanState = {
     processStandardization: "",
     exceptionControl: "",
     issueResolution: "",
+
+    financeFoundationReliability: "",
+    financeExceptionHandling: "",
+    financeReportingMaturity: "",
+
+    orderFlowStandardization: "",
+    orderExceptionComplexity: "",
+    orderSystemFit: "",
+
+    careRegistrationExceptions: "",
+    careAccountabilityPressure: "",
+
+    educationIntakePlanningConsistency: "",
+    educationProcessAdminAlignment: "",
+    educationExceptionHandling: "",
   },
   comments: {},
 };
@@ -100,6 +130,21 @@ type ScanContextValue = {
   setProcessStandardization: (value: string) => void;
   setExceptionControl: (value: string) => void;
   setIssueResolution: (value: string) => void;
+
+  setFinanceFoundationReliability: (value: string) => void;
+  setFinanceExceptionHandling: (value: string) => void;
+  setFinanceReportingMaturity: (value: string) => void;
+
+  setOrderFlowStandardization: (value: string) => void;
+  setOrderExceptionComplexity: (value: string) => void;
+  setOrderSystemFit: (value: string) => void;
+
+  setCareRegistrationExceptions: (value: string) => void;
+  setCareAccountabilityPressure: (value: string) => void;
+
+  setEducationIntakePlanningConsistency: (value: string) => void;
+  setEducationProcessAdminAlignment: (value: string) => void;
+  setEducationExceptionHandling: (value: string) => void;
 
   setComment: (questionKey: string, value: string) => void;
 };
@@ -162,6 +207,31 @@ function loadInitialScan(): ScanState {
         processStandardization: parsed.diagnosis?.processStandardization ?? "",
         exceptionControl: parsed.diagnosis?.exceptionControl ?? "",
         issueResolution: parsed.diagnosis?.issueResolution ?? "",
+
+        financeFoundationReliability:
+          parsed.diagnosis?.financeFoundationReliability ?? "",
+        financeExceptionHandling:
+          parsed.diagnosis?.financeExceptionHandling ?? "",
+        financeReportingMaturity:
+          parsed.diagnosis?.financeReportingMaturity ?? "",
+
+        orderFlowStandardization:
+          parsed.diagnosis?.orderFlowStandardization ?? "",
+        orderExceptionComplexity:
+          parsed.diagnosis?.orderExceptionComplexity ?? "",
+        orderSystemFit: parsed.diagnosis?.orderSystemFit ?? "",
+
+        careRegistrationExceptions:
+          parsed.diagnosis?.careRegistrationExceptions ?? "",
+        careAccountabilityPressure:
+          parsed.diagnosis?.careAccountabilityPressure ?? "",
+
+        educationIntakePlanningConsistency:
+          parsed.diagnosis?.educationIntakePlanningConsistency ?? "",
+        educationProcessAdminAlignment:
+          parsed.diagnosis?.educationProcessAdminAlignment ?? "",
+        educationExceptionHandling:
+          parsed.diagnosis?.educationExceptionHandling ?? "",
       },
       comments:
         typeof parsed.comments === "object" && parsed.comments !== null
@@ -236,25 +306,14 @@ export function ScanProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const setCustomerName = (value: string) => {
-    updateProfile("customerName", value);
-  };
-
-  const setSector = (value: string) => {
-    updateProfile("sector", value);
-  };
-
-  const setOrganizationSize = (value: string) => {
+  const setCustomerName = (value: string) => updateProfile("customerName", value);
+  const setSector = (value: string) => updateProfile("sector", value);
+  const setOrganizationSize = (value: string) =>
     updateProfile("organizationSize", value);
-  };
-
-  const setAdministrationCount = (value: string) => {
+  const setAdministrationCount = (value: string) =>
     updateProfile("administrationCount", value);
-  };
-
-  const setOrganizationType = (value: string) => {
+  const setOrganizationType = (value: string) =>
     updateProfile("organizationType", value);
-  };
 
   const setAfasProducts = (value: string[]) => {
     setScan((current) => ({
@@ -266,13 +325,10 @@ export function ScanProvider({ children }: { children: ReactNode }) {
     }));
   };
 
-  const setOwnershipModel = (value: string) => {
+  const setOwnershipModel = (value: string) =>
     updateProfile("ownershipModel", value);
-  };
-
-  const setStandardizationContext = (value: string) => {
+  const setStandardizationContext = (value: string) =>
     updateProfile("standardizationContext", value);
-  };
 
   const setPrimaryProcessChains = (value: string[]) => {
     setScan((current) => ({
@@ -284,9 +340,7 @@ export function ScanProvider({ children }: { children: ReactNode }) {
     }));
   };
 
-  const setScanReason = (value: string) => {
-    updateProfile("scanReason", value);
-  };
+  const setScanReason = (value: string) => updateProfile("scanReason", value);
 
   const setBiggestBottleneck = (value: string[]) => {
     setScan((current) => ({
@@ -328,29 +382,44 @@ export function ScanProvider({ children }: { children: ReactNode }) {
     }));
   };
 
-  const setOwnershipClarity = (value: string) => {
+  const setOwnershipClarity = (value: string) =>
     updateDiagnosis("ownershipClarity", value);
-  };
-
-  const setChangeDecisionProcess = (value: string) => {
+  const setChangeDecisionProcess = (value: string) =>
     updateDiagnosis("changeDecisionProcess", value);
-  };
-
-  const setImprovementGovernance = (value: string) => {
+  const setImprovementGovernance = (value: string) =>
     updateDiagnosis("improvementGovernance", value);
-  };
-
-  const setProcessStandardization = (value: string) => {
+  const setProcessStandardization = (value: string) =>
     updateDiagnosis("processStandardization", value);
-  };
-
-  const setExceptionControl = (value: string) => {
+  const setExceptionControl = (value: string) =>
     updateDiagnosis("exceptionControl", value);
-  };
-
-  const setIssueResolution = (value: string) => {
+  const setIssueResolution = (value: string) =>
     updateDiagnosis("issueResolution", value);
-  };
+
+  const setFinanceFoundationReliability = (value: string) =>
+    updateDiagnosis("financeFoundationReliability", value);
+  const setFinanceExceptionHandling = (value: string) =>
+    updateDiagnosis("financeExceptionHandling", value);
+  const setFinanceReportingMaturity = (value: string) =>
+    updateDiagnosis("financeReportingMaturity", value);
+
+  const setOrderFlowStandardization = (value: string) =>
+    updateDiagnosis("orderFlowStandardization", value);
+  const setOrderExceptionComplexity = (value: string) =>
+    updateDiagnosis("orderExceptionComplexity", value);
+  const setOrderSystemFit = (value: string) =>
+    updateDiagnosis("orderSystemFit", value);
+
+  const setCareRegistrationExceptions = (value: string) =>
+    updateDiagnosis("careRegistrationExceptions", value);
+  const setCareAccountabilityPressure = (value: string) =>
+    updateDiagnosis("careAccountabilityPressure", value);
+
+  const setEducationIntakePlanningConsistency = (value: string) =>
+    updateDiagnosis("educationIntakePlanningConsistency", value);
+  const setEducationProcessAdminAlignment = (value: string) =>
+    updateDiagnosis("educationProcessAdminAlignment", value);
+  const setEducationExceptionHandling = (value: string) =>
+    updateDiagnosis("educationExceptionHandling", value);
 
   const setComment = (questionKey: string, value: string) => {
     setScan((current) => ({
@@ -391,6 +460,21 @@ export function ScanProvider({ children }: { children: ReactNode }) {
       setProcessStandardization,
       setExceptionControl,
       setIssueResolution,
+
+      setFinanceFoundationReliability,
+      setFinanceExceptionHandling,
+      setFinanceReportingMaturity,
+
+      setOrderFlowStandardization,
+      setOrderExceptionComplexity,
+      setOrderSystemFit,
+
+      setCareRegistrationExceptions,
+      setCareAccountabilityPressure,
+
+      setEducationIntakePlanningConsistency,
+      setEducationProcessAdminAlignment,
+      setEducationExceptionHandling,
 
       setComment,
     }),
