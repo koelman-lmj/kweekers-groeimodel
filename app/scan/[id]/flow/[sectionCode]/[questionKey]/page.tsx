@@ -229,23 +229,21 @@ export default function FlowQuestionPage() {
 
   return (
     <div className="space-y-8">
-      <div className="space-y-3">
-        <p className="text-sm text-muted-foreground">
-          Stap {questionIndex} van {sectionQuestions.length}
-        </p>
+<div className="space-y-4">
+  <div className="space-y-1">
+    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+      Stap {questionIndex} van {sectionQuestions.length}
+    </p>
 
-        <h1 className="text-4xl font-semibold tracking-tight">
-          {question.label}
-        </h1>
+    <h1 className="text-5xl font-semibold tracking-tight">
+      {question.label}
+    </h1>
+  </div>
 
-        <p className="text-base text-muted-foreground">{shortHelpText}</p>
-      </div>
-
-      {showValidation && !canContinue && (
-        <div className="kweekers-accent-box text-sm">
-          Kies eerst een antwoord om verder te gaan.
-        </div>
-      )}
+  <p className="max-w-2xl text-sm text-muted-foreground">
+    {shortHelpText}
+  </p>
+</div>
 
       <section className="space-y-4 rounded-2xl border p-5">
         {question.inputType === "text" && (
