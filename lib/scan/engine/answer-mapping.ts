@@ -15,8 +15,16 @@ export function getAnswerFromScan(
       return scan.profile.organizationSize;
     case "administration_count":
       return scan.profile.administrationCount;
+    case "organization_type":
+      return scan.profile.organizationType;
     case "afas_products":
       return scan.profile.afasProducts;
+    case "ownership_model":
+      return scan.profile.ownershipModel;
+    case "standardization_context":
+      return scan.profile.standardizationContext;
+    case "primary_process_chains":
+      return scan.profile.primaryProcessChains;
 
     case "scan_reason":
       return scan.profile.scanReason;
@@ -53,7 +61,11 @@ export type ScanActions = {
   setSector: (value: string) => void;
   setOrganizationSize: (value: string) => void;
   setAdministrationCount: (value: string) => void;
+  setOrganizationType: (value: string) => void;
   setAfasProducts: (value: string[]) => void;
+  setOwnershipModel: (value: string) => void;
+  setStandardizationContext: (value: string) => void;
+  setPrimaryProcessChains: (value: string[]) => void;
 
   setScanReason: (value: string) => void;
   setBiggestBottleneck: (value: string[]) => void;
@@ -108,8 +120,20 @@ export function setAnswerToScan(
     case "administration_count":
       actions.setAdministrationCount(ensureString(value));
       return;
+    case "organization_type":
+      actions.setOrganizationType(ensureString(value));
+      return;
     case "afas_products":
       actions.setAfasProducts(ensureStringArray(value));
+      return;
+    case "ownership_model":
+      actions.setOwnershipModel(ensureString(value));
+      return;
+    case "standardization_context":
+      actions.setStandardizationContext(ensureString(value));
+      return;
+    case "primary_process_chains":
+      actions.setPrimaryProcessChains(ensureStringArray(value));
       return;
 
     case "scan_reason":
