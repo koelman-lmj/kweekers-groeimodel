@@ -104,7 +104,7 @@ function getStepStatus(
     sectionsForStep.length > 0 &&
     sectionsForStep.every((sectionCode) => sectionStatuses[sectionCode]);
 
-  if (isCompleted) {
+  if (isCompleted && stepIndex < currentStepIndex) {
     return "completed";
   }
 
