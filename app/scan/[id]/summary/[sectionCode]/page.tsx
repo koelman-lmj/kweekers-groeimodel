@@ -51,6 +51,7 @@ function getStatusMeta(headline: string) {
     return {
       tone: "border-red-200 bg-red-50 text-red-900",
       badge: "bg-red-100 text-red-700",
+      chipTone: "border-red-200 bg-white text-red-700",
       icon: "●",
       compactLabel: "Stabiliseren",
     };
@@ -60,6 +61,7 @@ function getStatusMeta(headline: string) {
     return {
       tone: "border-amber-200 bg-amber-50 text-amber-900",
       badge: "bg-amber-100 text-amber-700",
+      chipTone: "border-amber-200 bg-white text-amber-700",
       icon: "●",
       compactLabel: "Aanscherpen",
     };
@@ -68,6 +70,7 @@ function getStatusMeta(headline: string) {
   return {
     tone: "border-emerald-200 bg-emerald-50 text-emerald-900",
     badge: "bg-emerald-100 text-emerald-700",
+    chipTone: "border-emerald-200 bg-white text-emerald-700",
     icon: "●",
     compactLabel: "Doorontwikkelen",
   };
@@ -534,25 +537,48 @@ export default function SectionSummaryPage() {
 
       {isFinalStep && canContinue && adviceSummary && statusMeta && (
         <>
-          <section className={`rounded-3xl border p-5 ${statusMeta.tone}`}>
-            <div className="flex items-start gap-4">
-              <div
-                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-lg font-bold ${statusMeta.badge}`}
-              >
-                {statusMeta.icon}
+          <section className={`rounded-3xl border p-4 ${statusMeta.tone}`}>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <div
+                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold ${statusMeta.badge}`}
+                >
+                  {statusMeta.icon}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <div className="text-xl font-semibold tracking-tight">
+                    {adviceSummary.headline}
+                  </div>
+                  <div className="inline-flex rounded-full px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide bg-white/70">
+                    {statusMeta.compactLabel}
+                  </div>
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <div className="inline-flex rounded-full px-3 py-1 text-xs font-medium uppercase tracking-wide bg-white/70">
-                  {statusMeta.compactLabel}
+              <p className="text-sm leading-6">{adviceSummary.mainView}</p>
+
+              <div className="space-y-1">
+                <div className="text-[11px] font-medium uppercase tracking-wide opacity-70">
+                  Focus nu op
                 </div>
-                <h2 className="text-2xl font-semibold tracking-tight">
-                  {adviceSummary.headline}
-                </h2>
-                <p className="text-sm">{adviceSummary.mainView}</p>
-                <p className="text-sm font-medium">
-                  Focus nu op: eigenaarschap, standaardisatie en beheersing.
-                </p>
+                <div className="flex flex-wrap gap-2">
+                  <span
+                    className={`rounded-full border px-3 py-1 text-xs ${statusMeta.chipTone}`}
+                  >
+                    Eigenaarschap
+                  </span>
+                  <span
+                    className={`rounded-full border px-3 py-1 text-xs ${statusMeta.chipTone}`}
+                  >
+                    Standaardisatie
+                  </span>
+                  <span
+                    className={`rounded-full border px-3 py-1 text-xs ${statusMeta.chipTone}`}
+                  >
+                    Uitzonderingen
+                  </span>
+                </div>
               </div>
             </div>
           </section>
@@ -680,11 +706,13 @@ export default function SectionSummaryPage() {
             </section>
           )}
 
-          <section className="space-y-4 rounded-3xl border border-black/10 bg-black/[0.01] p-5">
-            <h2 className="text-lg font-medium">Volgende stap</h2>
-            <p className="text-sm text-muted-foreground">
-              {adviceSummary.firstStep}
-            </p>
+          <section className="space-y-3 rounded-3xl border border-black/10 bg-black/[0.01] p-5">
+            <div className="space-y-1">
+              <h2 className="text-lg font-medium">Volgende stap</h2>
+              <p className="text-sm text-muted-foreground">
+                {adviceSummary.firstStep}
+              </p>
+            </div>
 
             <div className="rounded-2xl border border-black/10 bg-white p-4">
               <div className="text-sm font-semibold">Doe dit eerst</div>
