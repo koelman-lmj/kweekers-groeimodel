@@ -14,6 +14,7 @@ import {
 import {
   getAnswerFromScan,
   setAnswerToScan,
+  type AnswerValue,
 } from "@/lib/scan/engine/answer-mapping";
 
 function getParam(value: string | string[] | undefined): string {
@@ -21,8 +22,20 @@ function getParam(value: string | string[] | undefined): string {
   return value ?? "";
 }
 
-function isFilled(value: string): boolean {
+function isFilled(value: AnswerValue): boolean {
+  if (Array.isArray(value)) {
+    return value.length > 0;
+  }
+
   return value.trim() !== "";
+}
+
+function asArray(value: AnswerValue): string[] {
+  return Array.isArray(value) ? value : [];
+}
+
+function asString(value: AnswerValue): string {
+  return typeof value === "string" ? value : "";
 }
 
 export default function FlowQuestionPage() {
@@ -43,6 +56,7 @@ export default function FlowQuestionPage() {
     setSector,
     setOrganizationSize,
     setAdministrationCount,
+    setAfasProducts,
     setScanReason,
     setBiggestBottleneck,
     setScopeWidth,
@@ -115,16 +129,19 @@ export default function FlowQuestionPage() {
   }
 
   const answerValue = getAnswerFromScan(scan, questionKey);
+  const answerArray = asArray(answerValue);
+  const answerString = asString(answerValue);
   const commentValue = scan.comments[questionKey] ?? "";
   const [showValidation, setShowValidation] = useState(false);
 
-  const setAnswerValue = (value: string) => {
+  const setAnswerValue = (value: AnswerValue) => {
     setAnswerToScan(
       {
         setCustomerName,
         setSector,
         setOrganizationSize,
         setAdministrationCount,
+        setAfasProducts,
         setScanReason,
         setBiggestBottleneck,
         setScopeWidth,
@@ -142,6 +159,26 @@ export default function FlowQuestionPage() {
     );
 
     setShowValidation(false);
+  };
+
+  const toggleMultiSelectValue = (optionValue: string) => {
+    const currentValues = answerArray;
+    const isSelected = currentValues.includes(optionValue);
+    const maxSelections = question.maxSelections ?? Number.POSITIVE_INFINITY;
+
+    let nextValues: string[];
+
+    if (isSelected) {
+      nextValues = currentValues.filter((value) => value !== optionValue);
+    } else {
+      if (currentValues.length >= maxSelections) {
+        return;
+      }
+
+      nextValues = [...currentValues, optionValue];
+    }
+
+    setAnswerValue(nextValues);
   };
 
   const setCommentValue = (value: string) => {
@@ -202,7 +239,7 @@ export default function FlowQuestionPage() {
             <input
               id={question.key}
               type="text"
-              value={answerValue}
+              value={answerString}
               onChange={(event) => setAnswerValue(event.target.value)}
               placeholder={question.placeholder}
               className="w-full rounded-2xl border bg-white px-4 py-3 outline-none"
@@ -215,7 +252,7 @@ export default function FlowQuestionPage() {
             {[...optionSet.options]
               .sort((a, b) => a.order - b.order)
               .map((option) => {
-                const isActive = answerValue === option.value;
+                const isActive = answerString === option.value;
 
                 return (
                   <button
@@ -238,6 +275,52 @@ export default function FlowQuestionPage() {
                   </button>
                 );
               })}
+          </div>
+        )}
+
+        {question.inputType === "multi_select" && optionSet && (
+          <div className="space-y-3">
+            <div className="flex flex-wrap justify-center gap-3">
+              {[...optionSet.options]
+                .sort((a, b) => a.order - b.order)
+                .map((option) => {
+                  const isActive = answerArray.includes(option.value);
+                  const maxSelections = question.maxSelections ?? Number.POSITIVE_INFINITY;
+                  const disableNewSelection =
+                    !isActive &&
+                    answerArray.length >= maxSelections;
+
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => toggleMultiSelectValue(option.value)}
+                      aria-pressed={isActive}
+                      disabled={disableNewSelection}
+                      className={
+                        isActive
+                          ? "kweekers-active-panel min-h-[64px] w-full max-w-[260px] rounded-2xl border px-4 py-3 text-center font-semibold transition"
+                          : disableNewSelection
+                            ? "min-h-[64px] w-full max-w-[260px] rounded-2xl border bg-white px-4 py-3 text-center font-semibold opacity-40"
+                            : "kweekers-selectable-hover min-h-[64px] w-full max-w-[260px] rounded-2xl border bg-white px-4 py-3 text-center font-semibold transition"
+                      }
+                    >
+                      <div className="text-sm font-semibold">{option.label}</div>
+                      {option.description && (
+                        <div className="mt-1 text-center text-xs font-medium text-current/80">
+                          {option.description}
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+            </div>
+
+            {typeof question.maxSelections === "number" && (
+              <p className="text-center text-xs text-muted-foreground">
+                Gekozen: {answerArray.length} van maximaal {question.maxSelections}
+              </p>
+            )}
           </div>
         )}
 
