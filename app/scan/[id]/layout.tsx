@@ -36,7 +36,9 @@ const STEPS = [
     title: "Advies",
     description: "Bekijk de eerste richting en focuspunten.",
   },
-];
+] as const;
+
+type StepStatus = "completed" | "current" | "available" | "locked";
 
 function getCurrentSectionCode(pathname: string | null): string {
   if (!pathname) return "profile_basis";
@@ -64,16 +66,83 @@ function getCurrentSectionCode(pathname: string | null): string {
 
 function getStepStatus(
   step: (typeof STEPS)[number],
-  sectionStatuses: Record<string, "completed" | "current" | "available" | "locked">
-): "completed" | "current" | "available" | "locked" {
-  const statuses = step.sectionCodes.map(
-    (sectionCode) => sectionStatuses[sectionCode] ?? "locked"
-  );
+  sectionStatuses: Record<string, boolean>,
+  currentSectionCode: string
+): StepStatus {
+  const stepSections: Record<string, string[]> = {
+    profile: ["profile_basis", "profile_reason"],
+    scope: ["scope"],
+    diagnose: ["diagnose"],
+    advies: ["advies"],
+  };
 
-  if (statuses.some((status) => status === "current")) return "current";
-  if (statuses.every((status) => status === "completed")) return "completed";
-  if (statuses.some((status) => status === "available")) return "available";
+  const stepKeyMap: Record<string, string> = {
+    profile_basis: "profile",
+    profile_reason: "profile",
+    scope: "scope",
+    diagnose: "diagnose",
+    advies: "advies",
+  };
+
+  const currentStepKey = stepKeyMap[currentSectionCode] ?? "profile";
+  const orderedSteps = ["profile", "scope", "diagnose", "advies"];
+  const currentStepIndex = orderedSteps.indexOf(currentStepKey);
+
+  const stepKey =
+    step.primarySectionCode === "profile_basis"
+      ? "profile"
+      : step.primarySectionCode;
+
+  const stepIndex = orderedSteps.indexOf(stepKey);
+  const sectionsForStep = stepSections[stepKey] ?? [];
+
+  if (sectionsForStep.includes(currentSectionCode)) {
+    return "current";
+  }
+
+  const isCompleted =
+    sectionsForStep.length > 0 &&
+    sectionsForStep.every((sectionCode) => sectionStatuses[sectionCode]);
+
+  if (isCompleted) {
+    return "completed";
+  }
+
+  if (stepIndex === currentStepIndex + 1) {
+    return "available";
+  }
+
+  if (stepIndex < currentStepIndex) {
+    return "completed";
+  }
+
   return "locked";
+}
+
+function getStepHref(
+  scanId: string,
+  step: (typeof STEPS)[number],
+  status: StepStatus
+): string {
+  if (status === "locked") return "";
+
+  if (step.primarySectionCode === "advies") {
+    return `/scan/${scanId}/summary/advies`;
+  }
+
+  if (step.primarySectionCode === "profile_basis") {
+    return `/scan/${scanId}/flow/profile_basis/customer_name`;
+  }
+
+  if (step.primarySectionCode === "scope") {
+    return `/scan/${scanId}/flow/scope/scope`;
+  }
+
+  if (step.primarySectionCode === "diagnose") {
+    return `/scan/${scanId}/flow/diagnose/ownership_clarity`;
+  }
+
+  return "";
 }
 
 function ScanShell({ children }: { children: ReactNode }) {
@@ -122,14 +191,15 @@ function ScanShell({ children }: { children: ReactNode }) {
 
               <div className="space-y-3 pt-2">
                 {STEPS.map((step) => {
-                  const status = getStepStatus(step, sectionStatuses);
+                  const status = getStepStatus(
+                    step,
+                    sectionStatuses,
+                    currentSectionCode
+                  );
 
-                  const href =
-                    status === "completed" ||
-                    status === "current" ||
-                    status === "available"
-                      ? `/scan/${scanId}/summary/${step.primarySectionCode}`
-                      : "";
+                  const href = scanId
+                    ? getStepHref(scanId, step, status)
+                    : "";
 
                   const cardClass =
                     status === "current"
