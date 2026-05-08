@@ -13,18 +13,11 @@ import {
   type AnswerValue,
 } from "@/lib/scan/engine/answer-mapping";
 import { buildDomainScores } from "@/lib/scan/engine/build-domain-scores";
+import { buildScanContextSummary } from "@/lib/scan/engine/build-scan-context-summary";
 
 function getParam(value: string | string[] | undefined): string {
   if (Array.isArray(value)) return value[0] ?? "";
   return value ?? "";
-}
-
-function asArray(value: AnswerValue): string[] {
-  return Array.isArray(value) ? value : [];
-}
-
-function asString(value: AnswerValue): string {
-  return typeof value === "string" ? value : "";
 }
 
 function getDisplayValue(
@@ -249,6 +242,7 @@ export default function SectionSummaryPage() {
   const isFinalStep = !hasNextStep;
   const adviceSummary = isFinalStep ? buildAdviceSummary(scan) : null;
   const domainScores = isFinalStep ? buildDomainScores(scan) : [];
+  const contextSummary = isFinalStep ? buildScanContextSummary(scan) : null;
 
   return (
     <div className="space-y-8">
@@ -317,7 +311,7 @@ export default function SectionSummaryPage() {
         </div>
       )}
 
-      {isFinalStep && canContinue && adviceSummary && (
+      {isFinalStep && canContinue && adviceSummary && contextSummary && (
         <>
           <section className="space-y-3 rounded-2xl border p-5">
             <h2 className="text-lg font-medium">Hoofdbeeld</h2>
@@ -356,6 +350,59 @@ export default function SectionSummaryPage() {
               ))}
             </div>
           </section>
+
+          {(contextSummary.bottleneckLines.length > 0 ||
+            contextSummary.focusLines.length > 0 ||
+            contextSummary.productLines.length > 0) && (
+            <section className="space-y-4 rounded-2xl border p-5">
+              <h2 className="text-lg font-medium">Context uit de scan</h2>
+
+              {contextSummary.bottleneckLines.length > 0 && (
+                <div className="space-y-2">
+                  <h3 className="text-sm font-semibold">
+                    Knelpunten die nu vooral spelen
+                  </h3>
+                  <ul className="space-y-1 text-sm text-muted-foreground">
+                    {contextSummary.bottleneckLines.map((line) => (
+                      <li key={line} className="ml-5 list-disc">
+                        {line}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {contextSummary.focusLines.length > 0 && (
+                <div className="space-y-2">
+                  <h3 className="text-sm font-semibold">
+                    Onderwerpen die bewust centraal staan
+                  </h3>
+                  <ul className="space-y-1 text-sm text-muted-foreground">
+                    {contextSummary.focusLines.map((line) => (
+                      <li key={line} className="ml-5 list-disc">
+                        {line}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {contextSummary.productLines.length > 0 && (
+                <div className="space-y-2">
+                  <h3 className="text-sm font-semibold">
+                    Relevante AFAS-context
+                  </h3>
+                  <ul className="space-y-1 text-sm text-muted-foreground">
+                    {contextSummary.productLines.map((line) => (
+                      <li key={line} className="ml-5 list-disc">
+                        {line}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </section>
+          )}
 
           <section className="space-y-3 rounded-2xl border p-5">
             <h2 className="text-lg font-medium">
