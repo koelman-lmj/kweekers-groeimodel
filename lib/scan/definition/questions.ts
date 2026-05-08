@@ -20,6 +20,10 @@ export const questions: QuestionDefinition[] = [
     inputType: "single_select",
     required: true,
     optionSetKey: "sector_options",
+    examples: [
+      "Bijvoorbeeld: zorg, onderwijs of commercieel.",
+      "Kies de sector die het meest bepalend is voor processen en inrichting.",
+    ],
   },
   {
     key: "organization_size",
@@ -30,6 +34,10 @@ export const questions: QuestionDefinition[] = [
     inputType: "single_select",
     required: true,
     optionSetKey: "organization_size_options",
+    examples: [
+      "Denk aan het totaal aantal medewerkers dat binnen de organisatie werkt.",
+      "Kies de klasse die het best past bij de huidige omvang van de organisatie.",
+    ],
   },
   {
     key: "administration_count",
@@ -40,6 +48,10 @@ export const questions: QuestionDefinition[] = [
     inputType: "single_select",
     required: true,
     optionSetKey: "administration_count_options",
+    examples: [
+      "Denk aan aparte administraties, bv’s of andere juridische entiteiten.",
+      "Kies wat het best past bij het deel van de organisatie dat je wilt beoordelen.",
+    ],
   },
   {
     key: "afas_products",
@@ -51,6 +63,10 @@ export const questions: QuestionDefinition[] = [
     inputType: "multi_select",
     required: false,
     optionSetKey: "afas_products_options",
+    examples: [
+      "Bijvoorbeeld: Financieel, HRM, Inkoop, Ordermanagement of Workflow.",
+      "Kies ook onderdelen die al wel relevant zijn voor de scan, ook als ze nog niet volledig worden benut.",
+    ],
   },
   {
     key: "scan_reason",
@@ -62,6 +78,10 @@ export const questions: QuestionDefinition[] = [
     inputType: "single_select",
     required: true,
     optionSetKey: "scan_reason_options",
+    examples: [
+      "Bijvoorbeeld: nulmeting, optimalisatie, herinrichting of voorbereiding op groei.",
+      "Kies de reden die nu het zwaarst weegt voor deze scan.",
+    ],
   },
   {
     key: "biggest_bottleneck",
@@ -74,6 +94,10 @@ export const questions: QuestionDefinition[] = [
     required: true,
     optionSetKey: "biggest_bottleneck_options",
     maxSelections: 3,
+    examples: [
+      "Bijvoorbeeld: processen lopen niet eenduidig, eigenaarschap is onduidelijk of rapportages geven te weinig grip.",
+      "Kies alleen de onderwerpen die nu echt de meeste druk of onrust veroorzaken.",
+    ],
   },
   {
     key: "scope",
@@ -84,6 +108,10 @@ export const questions: QuestionDefinition[] = [
     inputType: "single_select",
     required: true,
     optionSetKey: "scope_options",
+    examples: [
+      "Smal: gericht op een beperkt aantal onderwerpen.",
+      "Breed: meerdere domeinen en processen in samenhang bekijken.",
+    ],
   },
   {
     key: "scope_focus",
@@ -95,6 +123,10 @@ export const questions: QuestionDefinition[] = [
     required: true,
     optionSetKey: "scope_focus_options",
     maxSelections: 2,
+    examples: [
+      "Bijvoorbeeld: processen en werkwijze, AFAS-inrichting en gebruik, of rapportage en sturing.",
+      "Kies de gebieden waar de scan bewust extra scherpte op moet aanbrengen.",
+    ],
   },
   {
     key: "scope_depth",
@@ -105,6 +137,10 @@ export const questions: QuestionDefinition[] = [
     inputType: "single_select",
     required: true,
     optionSetKey: "scope_depth_options",
+    examples: [
+      "Snel eerste beeld: vooral richting en hoofdlijnen.",
+      "Basis voor concreet verbeterplan: meer detail en meer houvast voor opvolging.",
+    ],
   },
   {
     key: "ownership_clarity",
@@ -116,6 +152,10 @@ export const questions: QuestionDefinition[] = [
     required: true,
     optionSetKey: "maturity_3level_clarity_options",
     allowsComment: true,
+    examples: [
+      "Bijvoorbeeld: is duidelijk wie beslist over wijzigingen in processen of AFAS?",
+      "Denk aan: wie is eigenaar van orderverwerking, facturatie, inkoop of HR-processen?",
+    ],
   },
   {
     key: "change_decision_process",
@@ -128,50 +168,7 @@ export const questions: QuestionDefinition[] = [
     required: true,
     optionSetKey: "maturity_3level_change_governance_options",
     allowsComment: true,
-  },
-  {
-    key: "improvement_governance",
-    sectionCode: "diagnose",
-    order: 30,
-    label: "Sturing op verbetering",
-    helpText:
-      "In welke mate wordt actief gestuurd op verbetering van processen en inrichting?",
-    inputType: "single_select",
-    required: true,
-    optionSetKey: "maturity_3level_improvement_options",
-    allowsComment: true,
-  },
-  {
-    key: "process_standardization",
-    sectionCode: "diagnose",
-    order: 40,
-    label: "Eenduidigheid van werkwijze",
-    helpText: "Hoe eenduidig worden de belangrijkste processen uitgevoerd?",
-    inputType: "single_select",
-    required: true,
-    optionSetKey: "maturity_3level_standardization_options",
-    allowsComment: true,
-  },
-  {
-    key: "exception_control",
-    sectionCode: "diagnose",
-    order: 50,
-    label: "Omgaan met uitzonderingen",
-    helpText: "Hoe beheersbaar zijn uitzonderingen binnen de processen?",
-    inputType: "single_select",
-    required: true,
-    optionSetKey: "maturity_3level_exception_control_options",
-    allowsComment: true,
-  },
-  {
-    key: "issue_resolution",
-    sectionCode: "diagnose",
-    order: 60,
-    label: "Structureel oplossen van knelpunten",
-    helpText: "Hoe worden terugkerende fouten of knelpunten meestal aangepakt?",
-    inputType: "single_select",
-    required: true,
-    optionSetKey: "maturity_3level_issue_resolution_options",
-    allowsComment: true,
-  },
-];
+    examples: [
+      "Bijvoorbeeld: worden wijzigingen besproken in een vast overleg of vooral ad hoc doorgevoerd?",
+      "Denk aan: is er een duidelijke route voor wijzigingsverzoeken en besluiten?",
+   
