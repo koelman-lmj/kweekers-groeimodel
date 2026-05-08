@@ -35,32 +35,32 @@ export const optionSets: OptionSetDefinition[] = [
     options: [
       {
         value: "centraal_operationeel",
-        label: "Centraal aangestuurde operatie",
+        label: "Centraal aangestuurd",
         order: 10,
       },
       {
         value: "meerdere_teams_locaties",
-        label: "Meerdere teams of locaties",
+        label: "Meerdere teams / locaties",
         order: 20,
       },
       {
         value: "meerdere_entiteiten",
-        label: "Meerdere bedrijven of entiteiten",
+        label: "Meerdere entiteiten",
         order: 30,
       },
       {
         value: "projectmatig",
-        label: "Overwegend projectmatig georganiseerd",
+        label: "Projectmatig",
         order: 40,
       },
       {
         value: "transactiegedreven",
-        label: "Overwegend transactiegedreven",
+        label: "Transactiegedreven",
         order: 50,
       },
       {
         value: "hybride",
-        label: "Hybride of gemengde organisatievorm",
+        label: "Hybride",
         order: 60,
       },
     ],
@@ -101,32 +101,32 @@ export const optionSets: OptionSetDefinition[] = [
     options: [
       {
         value: "een_beheerder",
-        label: "Vooral één beheerder of sleutelpersoon",
+        label: "Eén beheerder",
         order: 10,
       },
       {
         value: "klein_centraal_team",
-        label: "Klein centraal beheerteam",
+        label: "Klein centraal team",
         order: 20,
       },
       {
         value: "verdeeld_over_afdelingen",
-        label: "Verdeeld over meerdere afdelingen",
+        label: "Verdeeld over afdelingen",
         order: 30,
       },
       {
         value: "management_en_beheer_gemengd",
-        label: "Beheer en besluitvorming lopen door elkaar",
+        label: "Beheer loopt door elkaar",
         order: 40,
       },
       {
         value: "extern_ondersteund",
-        label: "Sterk afhankelijk van externe ondersteuning",
+        label: "Extern ondersteund",
         order: 50,
       },
       {
         value: "formeel_belegd",
-        label: "Formeel belegd met duidelijke rollen",
+        label: "Formeel belegd",
         order: 60,
       },
     ],
@@ -136,32 +136,32 @@ export const optionSets: OptionSetDefinition[] = [
     options: [
       {
         value: "vooral_standaard",
-        label: "Vooral standaard en eenduidig",
+        label: "Vooral standaard",
         order: 10,
       },
       {
         value: "standaard_met_beperkte_afwijkingen",
-        label: "Standaard met beperkte afwijkingen",
+        label: "Beperkte afwijkingen",
         order: 20,
       },
       {
         value: "mix_standaard_specifiek",
-        label: "Mix van standaard en specifieke inrichting",
+        label: "Mix standaard / specifiek",
         order: 30,
       },
       {
         value: "veel_afwijkingen",
-        label: "Veel afwijkingen of uitzonderingen",
+        label: "Veel uitzonderingen",
         order: 40,
       },
       {
         value: "maatwerk_zwaar",
-        label: "Zware afhankelijkheid van specifieke inrichting of maatwerk",
+        label: "Sterk maatwerkafhankelijk",
         order: 50,
       },
       {
         value: "onduidelijk",
-        label: "Moeilijk goed te beoordelen",
+        label: "Moeilijk te beoordelen",
         order: 60,
       },
     ],
@@ -176,7 +176,7 @@ export const optionSets: OptionSetDefinition[] = [
       },
       {
         value: "order_to_cash",
-        label: "Order tot factuur / order-to-cash",
+        label: "Order tot factuur",
         order: 20,
       },
       {
@@ -186,17 +186,17 @@ export const optionSets: OptionSetDefinition[] = [
       },
       {
         value: "project_to_invoice",
-        label: "Project tot factuur / nacalculatie",
+        label: "Project tot factuur",
         order: 40,
       },
       {
         value: "hr_to_payroll",
-        label: "HR-mutatie tot salaris",
+        label: "HR tot salaris",
         order: 50,
       },
       {
         value: "service_support",
-        label: "Service, support of opvolging",
+        label: "Service / support",
         order: 60,
       },
       {
@@ -211,7 +211,7 @@ export const optionSets: OptionSetDefinition[] = [
       },
       {
         value: "integration_chain",
-        label: "Keten van koppelingen en gegevensuitwisseling",
+        label: "Koppelingen en uitwisseling",
         order: 90,
       },
     ],
@@ -320,12 +320,12 @@ export const optionSets: OptionSetDefinition[] = [
     options: [
       {
         value: "onvoldoende_duidelijk",
-        label: "Onvoldoende duidelijk",
+        label: "Onduidelijk",
         order: 10,
       },
       {
         value: "gedeeltelijk_duidelijk",
-        label: "Gedeeltelijk duidelijk",
+        label: "Deels duidelijk",
         order: 20,
       },
       {
@@ -342,7 +342,7 @@ export const optionSets: OptionSetDefinition[] = [
       { value: "deels_afgestemd", label: "Deels afgestemd", order: 20 },
       {
         value: "vast_proces",
-        label: "Vast proces met duidelijke besluitvorming",
+        label: "Vast proces",
         order: 30,
       },
     ],
@@ -360,7 +360,7 @@ export const optionSets: OptionSetDefinition[] = [
     options: [
       {
         value: "sterk_verschillend",
-        label: "Sterk verschillend per persoon of team",
+        label: "Sterk verschillend",
         order: 10,
       },
       {
@@ -370,7 +370,7 @@ export const optionSets: OptionSetDefinition[] = [
       },
       {
         value: "gestandaardiseerd",
-        label: "Overwegend gestandaardiseerd",
+        label: "Grotendeels gestandaardiseerd",
         order: 30,
       },
     ],
@@ -380,17 +380,17 @@ export const optionSets: OptionSetDefinition[] = [
     options: [
       {
         value: "uitzondering_is_norm",
-        label: "Uitzonderingen zijn vaak de norm",
+        label: "Uitzonderingen zijn de norm",
         order: 10,
       },
       {
         value: "deels_beheersbaar",
-        label: "Regelmatig uitzonderingen, maar deels beheersbaar",
+        label: "Regelmatig maar beheersbaar",
         order: 20,
       },
       {
         value: "beperkt_en_beheerst",
-        label: "Uitzonderingen zijn beperkt en beheerst",
+        label: "Beperkt en beheerst",
         order: 30,
       },
     ],
