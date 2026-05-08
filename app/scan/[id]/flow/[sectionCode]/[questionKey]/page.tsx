@@ -442,24 +442,23 @@ export default function FlowQuestionPage() {
           question.key === "afas_products" && (
             <div className="space-y-6">
               {selectedLabels.length > 0 && (
-{selectedLabels.length > 0 && (
-  <div className="rounded-2xl border border-black/10 bg-white/80 p-3">
-    <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-      Gekozen
-    </div>
+                <div className="rounded-2xl border border-black/10 bg-white/80 p-3">
+                  <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                    Gekozen
+                  </div>
 
-    <div className="mt-2 flex flex-wrap gap-2">
-      {selectedLabels.map((label) => (
-        <span
-          key={label}
-          className="rounded-full border border-[#c7d2e8] bg-[#eef3fb] px-3 py-1 text-xs font-medium text-[#2f426a]"
-        >
-          {label}
-        </span>
-      ))}
-    </div>
-  </div>
-)}
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {selectedLabels.map((label) => (
+                      <span
+                        key={label}
+                        className="rounded-full border border-[#c7d2e8] bg-[#eef3fb] px-3 py-1 text-xs font-medium text-[#2f426a]"
+                      >
+                        {label}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {groupedOptions.map((group) => (
                 <div key={group.title} className="space-y-3">
