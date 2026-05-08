@@ -546,13 +546,8 @@ export default function SectionSummaryPage() {
                   {statusMeta.icon}
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <div className="text-xl font-semibold tracking-tight">
-                    {adviceSummary.headline}
-                  </div>
-                  <div className="inline-flex rounded-full px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide bg-white/70">
-                    {statusMeta.compactLabel}
-                  </div>
+                <div className="text-xl font-semibold tracking-tight">
+                  {adviceSummary.headline}
                 </div>
               </div>
 
@@ -643,65 +638,45 @@ export default function SectionSummaryPage() {
           )}
 
           {compactContext && (
-            <section className="space-y-4 rounded-3xl border border-black/10 bg-black/[0.01] p-5">
+            <section className="space-y-3 rounded-3xl border border-black/10 bg-black/[0.01] p-5">
               <h2 className="text-lg font-medium">Context van de scan</h2>
 
-              <div className="grid gap-4 md:grid-cols-2">
-                <div>
-                  <div className="text-sm font-semibold">Knelpunten</div>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {compactContext.bottlenecks.map((item) => (
-                      <span
-                        key={item}
-                        className="rounded-full border border-black/10 bg-white px-3 py-1 text-xs"
-                      >
-                        {item}
-                      </span>
-                    ))}
+              <div className="space-y-3 rounded-2xl border border-black/10 bg-white/80 p-4">
+                {compactContext.bottlenecks.length > 0 && (
+                  <div className="text-sm">
+                    <span className="font-semibold">Knelpunten:</span>{" "}
+                    <span className="text-muted-foreground">
+                      {compactContext.bottlenecks.join(", ")}
+                    </span>
                   </div>
-                </div>
+                )}
 
-                <div>
-                  <div className="text-sm font-semibold">Focus</div>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {compactContext.focus.map((item) => (
-                      <span
-                        key={item}
-                        className="rounded-full border border-black/10 bg-white px-3 py-1 text-xs"
-                      >
-                        {item}
-                      </span>
-                    ))}
+                {compactContext.focus.length > 0 && (
+                  <div className="text-sm">
+                    <span className="font-semibold">Focus:</span>{" "}
+                    <span className="text-muted-foreground">
+                      {compactContext.focus.join(", ")}
+                    </span>
                   </div>
-                </div>
+                )}
 
-                <div>
-                  <div className="text-sm font-semibold">AFAS-context</div>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {compactContext.products.map((item) => (
-                      <span
-                        key={item}
-                        className="rounded-full border border-black/10 bg-white px-3 py-1 text-xs"
-                      >
-                        {item}
-                      </span>
-                    ))}
+                {compactContext.products.length > 0 && (
+                  <div className="text-sm">
+                    <span className="font-semibold">AFAS-context:</span>{" "}
+                    <span className="text-muted-foreground">
+                      {compactContext.products.join(", ")}
+                    </span>
                   </div>
-                </div>
+                )}
 
-                <div>
-                  <div className="text-sm font-semibold">Procesketens</div>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {compactContext.chains.map((item) => (
-                      <span
-                        key={item}
-                        className="rounded-full border border-black/10 bg-white px-3 py-1 text-xs"
-                      >
-                        {item}
-                      </span>
-                    ))}
+                {compactContext.chains.length > 0 && (
+                  <div className="text-sm">
+                    <span className="font-semibold">Procesketens:</span>{" "}
+                    <span className="text-muted-foreground">
+                      {compactContext.chains.join(", ")}
+                    </span>
                   </div>
-                </div>
+                )}
               </div>
             </section>
           )}
