@@ -300,6 +300,16 @@ export default function FlowQuestionPage() {
         })).filter((group) => group.options.length > 0)
       : [];
 
+  const selectedLabels =
+    question.key === "afas_products" && optionSet
+      ? answerArray
+          .map(
+            (value) =>
+              optionSet.options.find((option) => option.value === value)?.label ?? value
+          )
+          .filter(Boolean)
+      : [];
+
   const handleNext = () => {
     if (!canContinue) {
       setShowValidation(true);
@@ -431,6 +441,17 @@ export default function FlowQuestionPage() {
           optionSet &&
           question.key === "afas_products" && (
             <div className="space-y-6">
+              {selectedLabels.length > 0 && (
+                <div className="rounded-2xl border border-black/10 bg-white/80 p-3">
+                  <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                    Gekozen
+                  </div>
+                  <div className="mt-1 text-sm text-muted-foreground">
+                    {selectedLabels.join(", ")}
+                  </div>
+                </div>
+              )}
+
               {groupedOptions.map((group) => (
                 <div key={group.title} className="space-y-3">
                   <div className="border-b border-black/10 pb-1 text-sm font-semibold text-black">
