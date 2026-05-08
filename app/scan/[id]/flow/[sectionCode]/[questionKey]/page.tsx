@@ -38,6 +38,14 @@ function asString(value: AnswerValue): string {
   return typeof value === "string" ? value : "";
 }
 
+function getShortHelpText(questionLabel: string, helpText?: string): string {
+  if (!helpText) {
+    return `Kies wat het best past bij ${questionLabel.toLowerCase()}.`;
+  }
+
+  return helpText;
+}
+
 export default function FlowQuestionPage() {
   const params = useParams<{
     id: string | string[];
@@ -218,45 +226,33 @@ export default function FlowQuestionPage() {
     router.push(nextHref);
   };
 
+  const shortHelpText = getShortHelpText(question.label, question.helpText);
+
   return (
     <div className="space-y-8">
-      <div className="space-y-2">
+      <div className="space-y-3">
         <p className="text-sm text-muted-foreground">
-          {section.title} — stap {questionIndex} van {sectionQuestions.length}
+          Stap {questionIndex} van {sectionQuestions.length}
         </p>
-        <h1 className="text-3xl font-semibold tracking-tight">
+
+        <h1 className="text-4xl font-semibold tracking-tight">
           {question.label}
         </h1>
 
-        {question.helpText && (
-          <p className="text-sm text-muted-foreground">{question.helpText}</p>
-        )}
-
-        {question.examples && question.examples.length > 0 && (
-          <div className="rounded-2xl border bg-white/60 p-4">
-            <div className="text-sm font-medium">Voorbeelden</div>
-            <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
-              {question.examples.map((example) => (
-                <li key={example} className="ml-5 list-disc">
-                  {example}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        <p className="text-base text-muted-foreground">{shortHelpText}</p>
       </div>
 
       {showValidation && !canContinue && (
         <div className="kweekers-accent-box text-sm">
-          Vul eerst deze vraag in om verder te gaan.
+          Kies eerst een antwoord om verder te gaan.
         </div>
       )}
 
-      <section className="space-y-4 rounded-2xl border p-5">
+      <section className="space-y-5 rounded-2xl border p-6">
         {question.inputType === "text" && (
           <div className="space-y-2">
             <label htmlFor={question.key} className="text-sm font-medium">
-              {question.label}
+              Antwoord
             </label>
             <input
               id={question.key}
@@ -270,7 +266,7 @@ export default function FlowQuestionPage() {
         )}
 
         {question.inputType === "single_select" && optionSet && (
-          <div className="flex flex-wrap justify-center gap-3">
+          <div className="grid gap-3 sm:grid-cols-2">
             {[...optionSet.options]
               .sort((a, b) => a.order - b.order)
               .map((option) => {
@@ -284,13 +280,13 @@ export default function FlowQuestionPage() {
                     aria-pressed={isActive}
                     className={
                       isActive
-                        ? "kweekers-active-panel min-h-[64px] w-full max-w-[260px] rounded-2xl border px-4 py-3 text-center font-semibold transition"
-                        : "kweekers-selectable-hover min-h-[64px] w-full max-w-[260px] rounded-2xl border bg-white px-4 py-3 text-center font-semibold transition"
+                        ? "kweekers-active-panel min-h-[84px] rounded-2xl border px-4 py-4 text-center transition"
+                        : "kweekers-selectable-hover min-h-[84px] rounded-2xl border bg-white px-4 py-4 text-center transition"
                     }
                   >
-                    <div className="text-sm font-semibold">{option.label}</div>
+                    <div className="text-base font-semibold">{option.label}</div>
                     {option.description && (
-                      <div className="mt-1 text-center text-xs font-medium text-current/80">
+                      <div className="mt-1 text-sm text-current/80">
                         {option.description}
                       </div>
                     )}
@@ -301,8 +297,8 @@ export default function FlowQuestionPage() {
         )}
 
         {question.inputType === "multi_select" && optionSet && (
-          <div className="space-y-3">
-            <div className="flex flex-wrap justify-center gap-3">
+          <div className="space-y-4">
+            <div className="grid gap-3 sm:grid-cols-2">
               {[...optionSet.options]
                 .sort((a, b) => a.order - b.order)
                 .map((option) => {
@@ -321,15 +317,15 @@ export default function FlowQuestionPage() {
                       disabled={disableNewSelection}
                       className={
                         isActive
-                          ? "kweekers-active-panel min-h-[64px] w-full max-w-[260px] rounded-2xl border px-4 py-3 text-center font-semibold transition"
+                          ? "kweekers-active-panel min-h-[84px] rounded-2xl border px-4 py-4 text-center transition"
                           : disableNewSelection
-                            ? "min-h-[64px] w-full max-w-[260px] rounded-2xl border bg-white px-4 py-3 text-center font-semibold opacity-40"
-                            : "kweekers-selectable-hover min-h-[64px] w-full max-w-[260px] rounded-2xl border bg-white px-4 py-3 text-center font-semibold transition"
+                            ? "min-h-[84px] rounded-2xl border bg-white px-4 py-4 text-center opacity-40"
+                            : "kweekers-selectable-hover min-h-[84px] rounded-2xl border bg-white px-4 py-4 text-center transition"
                       }
                     >
-                      <div className="text-sm font-semibold">{option.label}</div>
+                      <div className="text-base font-semibold">{option.label}</div>
                       {option.description && (
-                        <div className="mt-1 text-center text-xs font-medium text-current/80">
+                        <div className="mt-1 text-sm text-current/80">
                           {option.description}
                         </div>
                       )}
@@ -339,10 +335,23 @@ export default function FlowQuestionPage() {
             </div>
 
             {typeof question.maxSelections === "number" && (
-              <p className="text-center text-xs text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 Gekozen: {answerArray.length} van maximaal {question.maxSelections}
               </p>
             )}
+          </div>
+        )}
+
+        {question.examples && question.examples.length > 0 && (
+          <div className="rounded-xl border bg-black/[0.02] p-4">
+            <div className="text-sm font-medium">Hulp bij deze vraag</div>
+            <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
+              {question.examples.map((example) => (
+                <li key={example} className="ml-5 list-disc">
+                  {example}
+                </li>
+              ))}
+            </ul>
           </div>
         )}
 
