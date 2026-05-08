@@ -45,6 +45,168 @@ function getDisplayValue(
   return optionSet.options.find((option) => option.value === rawValue)?.label ?? rawValue;
 }
 
+function unique(values: string[]): string[] {
+  return [...new Set(values)];
+}
+
+function buildAdviceContextAdditions(scan: ScanState) {
+  const mainViewAdditions: string[] = [];
+  const firstStepAdditions: string[] = [];
+
+  const bottlenecks = scan.profile.biggestBottleneck;
+  const focusAreas = scan.scope.focus;
+  const afasProducts = scan.profile.afasProducts;
+
+  if (bottlenecks.includes("eigenaarschap")) {
+    mainViewAdditions.push(
+      "Daarnaast laat de scan zien dat verantwoordelijkheden en besluitvorming extra aandacht vragen."
+    );
+    firstStepAdditions.push(
+      "Leg daarbij expliciet vast wie proceseigenaar is en wie beslist over wijzigingen."
+    );
+  }
+
+  if (bottlenecks.includes("processen")) {
+    mainViewAdditions.push(
+      "De uitkomst wijst ook op duidelijke frictie in de procesuitvoering en de manier waarop werk in de praktijk verloopt."
+    );
+    firstStepAdditions.push(
+      "Breng de belangrijkste procesvarianten terug naar één herkenbare standaard werkwijze."
+    );
+  }
+
+  if (bottlenecks.includes("rapportage")) {
+    mainViewAdditions.push(
+      "Ook stuurinformatie en rapportage lijken nu onvoldoende te ondersteunen in dagelijkse of bestuurlijke sturing."
+    );
+    firstStepAdditions.push(
+      "Werk tegelijk toe naar duidelijke KPI-definities, eigenaarschap op rapportage en een beperkte set managementinzichten."
+    );
+  }
+
+  if (bottlenecks.includes("afas")) {
+    mainViewAdditions.push(
+      "De inrichting en het gebruik van AFAS lijken niet overal goed aan te sluiten op de gewenste werkwijze."
+    );
+    firstStepAdditions.push(
+      "Kijk daarom ook gericht naar standaardinrichting, workflow en de aansluiting tussen proces en systeemondersteuning."
+    );
+  }
+
+  if (bottlenecks.includes("data_integraties")) {
+    mainViewAdditions.push(
+      "Een deel van de frictie lijkt ook te zitten in gegevenskwaliteit of in de samenwerking tussen systemen."
+    );
+    firstStepAdditions.push(
+      "Maak datastromen, definities en integratie-afspraken expliciet onderdeel van de eerste verbeterstap."
+    );
+  }
+
+  if (bottlenecks.includes("adoptie")) {
+    mainViewAdditions.push(
+      "De uitdaging zit niet alleen in proces of systeem, maar ook in gebruik, discipline en borging."
+    );
+    firstStepAdditions.push(
+      "Combineer procesverbetering daarom met duidelijke werkafspraken, adoptie en borging in het team."
+    );
+  }
+
+  if (focusAreas.includes("organisatie_eigenaarschap")) {
+    mainViewAdditions.push(
+      "Omdat de scan nadrukkelijk ook kijkt naar governance en eigenaarschap, wegen rolverdeling en besluitvorming extra zwaar mee in de duiding."
+    );
+  }
+
+  if (focusAreas.includes("processen_werkwijze")) {
+    mainViewAdditions.push(
+      "De scan is bovendien expliciet gericht op processen en werkwijze, waardoor standaardisatie en uitvoerbaarheid extra zwaar meewegen."
+    );
+  }
+
+  if (focusAreas.includes("afas_inrichting_gebruik")) {
+    mainViewAdditions.push(
+      "Omdat ook AFAS-inrichting en gebruik centraal staan, telt de aansluiting tussen proces en systeemondersteuning zwaarder mee."
+    );
+  }
+
+  if (focusAreas.includes("rapportage_sturing")) {
+    mainViewAdditions.push(
+      "De scan richt zich mede op stuurinformatie, inzicht en bestuurlijke grip."
+    );
+  }
+
+  if (focusAreas.includes("beheer_doorontwikkeling")) {
+    mainViewAdditions.push(
+      "Daarnaast kijkt de scan ook naar het vermogen om inrichting en processen structureel te beheren en door te ontwikkelen."
+    );
+  }
+
+  if (afasProducts.includes("financieel")) {
+    mainViewAdditions.push(
+      "Binnen AFAS zijn financiële processen en sturing relevant voor de verbeteropgave."
+    );
+    firstStepAdditions.push(
+      "Neem daarbij administratie, uitzonderingen, autorisatie en rapportage expliciet mee."
+    );
+  }
+
+  if (afasProducts.includes("ordermanagement")) {
+    mainViewAdditions.push(
+      "Ook orderprocessen en de aansluiting op uitvoering of facturatie spelen een rol."
+    );
+    firstStepAdditions.push(
+      "Richt je eerste verbeterstap dan ook op standaardroutes, uitzonderingen en beheersing in het orderproces."
+    );
+  }
+
+  if (afasProducts.includes("inkoop")) {
+    mainViewAdditions.push(
+      "Inkoopstromen zijn eveneens relevant binnen deze scan."
+    );
+    firstStepAdditions.push(
+      "Neem bestelproces, goedkeuring en factuurverwerking mee in de eerste verbeterslag."
+    );
+  }
+
+  if (afasProducts.includes("crm")) {
+    mainViewAdditions.push(
+      "Commerciële processen en klantgericht werken kunnen onderdeel zijn van de verbeteropgave."
+    );
+  }
+
+  if (afasProducts.includes("hrm") || afasProducts.includes("payroll")) {
+    mainViewAdditions.push(
+      "HR-processen en mutatiestromen zijn relevant in deze scan."
+    );
+    firstStepAdditions.push(
+      "Richt je eerste verbeterstap dan ook op workflow, verantwoordelijkheden en borging binnen HR-processen."
+    );
+  }
+
+  if (afasProducts.includes("workflow")) {
+    mainViewAdditions.push(
+      "De inzet van workflow is relevant voor de mate van standaardisatie en beheersing."
+    );
+  }
+
+  if (afasProducts.includes("rapportage_dashboards")) {
+    mainViewAdditions.push(
+      "De behoefte aan stuurinformatie en dashboards is expliciet relevant binnen deze scan."
+    );
+  }
+
+  if (afasProducts.includes("integraties")) {
+    mainViewAdditions.push(
+      "De scan raakt ook de samenwerking tussen AFAS en andere systemen, waardoor ketenafhankelijkheden extra belangrijk worden."
+    );
+  }
+
+  return {
+    mainViewAdditions: unique(mainViewAdditions),
+    firstStepAdditions: unique(firstStepAdditions),
+  };
+}
+
 function buildAdviceSummary(scan: ScanState) {
   const {
     ownershipClarity,
@@ -65,30 +227,30 @@ function buildAdviceSummary(scan: ScanState) {
   ].filter(Boolean).length;
 
   let headline = "Gericht doorontwikkelen";
-  let mainView =
+  let baseMainView =
     "De scan laat zien dat er een bruikbare basis aanwezig is, maar dat de organisatie nog niet overal op een vaste en beheersbare manier werkt. Vooral in eigenaarschap, standaardisatie en structurele verbetering is nog winst te halen.";
 
   if (lowSignals >= 4) {
     headline = "Stabiliseren";
-    mainView =
+    baseMainView =
       "De scan laat zien dat op meerdere onderdelen nog basisproblemen aanwezig zijn. Werkwijze, besluitvorming en beheersing zijn nog onvoldoende stevig om duurzaam te verbeteren. De eerste stap is daarom niet verbreden, maar stabiliseren.";
   } else if (
     ownershipClarity === "onvoldoende_duidelijk" ||
     changeDecisionProcess === "ad_hoc"
   ) {
     headline = "Governance versterken";
-    mainView =
+    baseMainView =
       "De scan laat zien dat de grootste eerste winst zit in het scherper beleggen van eigenaarschap en besluitvorming. Zonder die basis blijft verbetering te veel afhankelijk van personen in plaats van van een vaste werkwijze.";
   } else if (
     processStandardization === "sterk_verschillend" ||
     exceptionControl === "uitzondering_is_norm"
   ) {
     headline = "Processen standaardiseren";
-    mainView =
+    baseMainView =
       "De scan laat zien dat de organisatie nog te veel leunt op verschillen in werkwijze en uitzonderingen. Meer standaardisatie is de logische eerste stap om de uitvoering beter beheersbaar te maken.";
   } else {
     headline = "Gericht doorontwikkelen";
-    mainView =
+    baseMainView =
       "De scan laat zien dat de organisatie op hoofdlijnen een bruikbare basis heeft. Er zijn aandachtspunten, maar geen direct zwaar fundamentprobleem. De volgende stap ligt vooral in gericht verbeteren en verder aanscherpen.";
   }
 
@@ -155,28 +317,40 @@ function buildAdviceSummary(scan: ScanState) {
           "De scan laat geen direct zwaar knelpunt zien, maar verdere aanscherping blijft wenselijk.",
         ];
 
-  let firstStep =
+  let baseFirstStep =
     "Breng de belangrijkste verbeterkansen terug naar een beperkt en concreet verbeterplan, zodat de organisatie gericht kan doorontwikkelen.";
 
   if (lowSignals >= 4) {
-    firstStep =
+    baseFirstStep =
       "Start met het stabiliseren van de basis. Breng eerst verantwoordelijkheden, werkwijze en uitzonderingen terug naar een beheersbaar niveau voordat je verder verbreedt of verdiept.";
   } else if (
     ownershipClarity === "onvoldoende_duidelijk" ||
     changeDecisionProcess === "ad_hoc"
   ) {
-    firstStep =
+    baseFirstStep =
       "Start met het expliciet beleggen van proceseigenaarschap en het vastleggen van besluitvorming over wijzigingen. Zonder die basis blijft verbetering afhankelijk van personen.";
   } else if (
     processStandardization === "sterk_verschillend" ||
     exceptionControl === "uitzondering_is_norm"
   ) {
-    firstStep =
+    baseFirstStep =
       "Breng eerst de belangrijkste processen en uitzonderingen terug naar één herkenbare standaard werkwijze. Dat maakt de organisatie direct beter beheersbaar.";
   } else {
-    firstStep =
+    baseFirstStep =
       "De organisatie lijkt voldoende basis te hebben om gericht door te ontwikkelen. De eerste stap is nu om de belangrijkste verbeterkansen te prioriteren en om te zetten in een concreet verbeterplan.";
   }
+
+  const contextAdditions = buildAdviceContextAdditions(scan);
+
+  const mainView = [
+    baseMainView,
+    ...contextAdditions.mainViewAdditions.slice(0, 2),
+  ].join(" ");
+
+  const firstStep = [
+    baseFirstStep,
+    ...contextAdditions.firstStepAdditions.slice(0, 1),
+  ].join(" ");
 
   return {
     headline,
