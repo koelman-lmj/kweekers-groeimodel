@@ -415,4 +415,36 @@ export const optionSets: OptionSetDefinition[] = [
       },
     ],
   },
+  {
+    key: "maturity_3level_strength_options",
+    options: [
+      { value: "kwetsbaar", label: "Kwetsbaar", order: 10 },
+      { value: "redelijk", label: "Redelijk", order: 20 },
+      { value: "sterk", label: "Sterk", order: 30 },
+    ],
+  },
+  {
+    key: "maturity_3level_usefulness_options",
+    options: [
+      { value: "beperkt_bruikbaar", label: "Beperkt bruikbaar", order: 10 },
+      { value: "deels_bruikbaar", label: "Deels bruikbaar", order: 20 },
+      { value: "goed_bruikbaar", label: "Goed bruikbaar", order: 30 },
+    ],
+  },
+  {
+    key: "maturity_3level_fit_options",
+    options: [
+      { value: "sluit_beperkt_aan", label: "Sluit beperkt aan", order: 10 },
+      { value: "sluit_deels_aan", label: "Sluit deels aan", order: 20 },
+      { value: "sluit_goed_aan", label: "Sluit goed aan", order: 30 },
+    ],
+  },
+  {
+    key: "maturity_3level_exception_practical_options",
+    options: [
+      { value: "vooral_handmatig", label: "Vooral handmatig", order: 10 },
+      { value: "deels_beheersbaar", label: "Deels beheersbaar", order: 20 },
+      { value: "goed_beheerst", label: "Goed beheerst", order: 30 },
+    ],
+  },
 ];
