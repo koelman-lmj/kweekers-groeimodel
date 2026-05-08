@@ -46,6 +46,40 @@ function getShortHelpText(questionLabel: string, helpText?: string): string {
   return helpText;
 }
 
+type OptionGroup = {
+  title: string;
+  values: string[];
+};
+
+const AFAS_PRODUCT_GROUPS: OptionGroup[] = [
+  {
+    title: "Commercie & relatie",
+    values: ["crm", "outsite", "abonnementen"],
+  },
+  {
+    title: "Financieel & administratie",
+    values: [
+      "financieel",
+      "autorisatie",
+      "rapportage_dashboards",
+      "integraties",
+      "dossier_documentbeheer",
+    ],
+  },
+  {
+    title: "Operationeel",
+    values: ["inkoop", "ordermanagement", "projecten", "workflow"],
+  },
+  {
+    title: "HR & medewerkers",
+    values: ["hrm", "payroll", "verlof_verzuim", "declaraties"],
+  },
+  {
+    title: "Portaal & overig",
+    values: ["insite", "overig"],
+  },
+];
+
 export default function FlowQuestionPage() {
   const params = useParams<{
     id: string | string[];
@@ -249,6 +283,18 @@ export default function FlowQuestionPage() {
   const canContinue = question.required ? isFilled(answerValue) : true;
   const shortHelpText = getShortHelpText(question.label, question.helpText);
 
+  const groupedOptions =
+    question.key === "afas_products" && optionSet
+      ? AFAS_PRODUCT_GROUPS.map((group) => ({
+          title: group.title,
+          options: group.values
+            .map((value) =>
+              optionSet.options.find((option) => option.value === value)
+            )
+            .filter((option): option is NonNullable<typeof option> => Boolean(option)),
+        })).filter((group) => group.options.length > 0)
+      : [];
+
   const handleNext = () => {
     if (!canContinue) {
       setShowValidation(true);
@@ -330,51 +376,105 @@ export default function FlowQuestionPage() {
           </div>
         )}
 
-        {question.inputType === "multi_select" && optionSet && (
-          <div className="space-y-4">
-            <div className="grid gap-3 sm:grid-cols-2">
-              {[...optionSet.options]
-                .sort((a, b) => a.order - b.order)
-                .map((option) => {
-                  const isActive = answerArray.includes(option.value);
-                  const maxSelections =
-                    question.maxSelections ?? Number.POSITIVE_INFINITY;
-                  const disableNewSelection =
-                    !isActive && answerArray.length >= maxSelections;
+        {question.inputType === "multi_select" &&
+          optionSet &&
+          question.key !== "afas_products" && (
+            <div className="space-y-4">
+              <div className="grid gap-3 sm:grid-cols-2">
+                {[...optionSet.options]
+                  .sort((a, b) => a.order - b.order)
+                  .map((option) => {
+                    const isActive = answerArray.includes(option.value);
+                    const maxSelections =
+                      question.maxSelections ?? Number.POSITIVE_INFINITY;
+                    const disableNewSelection =
+                      !isActive && answerArray.length >= maxSelections;
 
-                  return (
-                    <button
-                      key={option.value}
-                      type="button"
-                      onClick={() => toggleMultiSelectValue(option.value)}
-                      aria-pressed={isActive}
-                      disabled={disableNewSelection}
-                      className={
-                        isActive
-                          ? "kweekers-active-panel min-h-[72px] rounded-2xl border px-4 py-3 text-center transition"
-                          : disableNewSelection
-                            ? "min-h-[72px] rounded-2xl border border-black/10 bg-white px-4 py-3 text-center opacity-40"
-                            : "kweekers-selectable-hover min-h-[72px] rounded-2xl border border-black/10 bg-white px-4 py-3 text-center transition"
-                      }
-                    >
-                      <div className="text-sm font-semibold">{option.label}</div>
-                      {option.description && (
-                        <div className="mt-1 text-xs text-current/80">
-                          {option.description}
-                        </div>
-                      )}
-                    </button>
-                  );
-                })}
+                    return (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => toggleMultiSelectValue(option.value)}
+                        aria-pressed={isActive}
+                        disabled={disableNewSelection}
+                        className={
+                          isActive
+                            ? "kweekers-active-panel min-h-[72px] rounded-2xl border px-4 py-3 text-center transition"
+                            : disableNewSelection
+                              ? "min-h-[72px] rounded-2xl border border-black/10 bg-white px-4 py-3 text-center opacity-40"
+                              : "kweekers-selectable-hover min-h-[72px] rounded-2xl border border-black/10 bg-white px-4 py-3 text-center transition"
+                        }
+                      >
+                        <div className="text-sm font-semibold">{option.label}</div>
+                        {option.description && (
+                          <div className="mt-1 text-xs text-current/80">
+                            {option.description}
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+              </div>
+
+              {typeof question.maxSelections === "number" && (
+                <p className="text-sm text-muted-foreground">
+                  Gekozen: {answerArray.length} van maximaal {question.maxSelections}
+                </p>
+              )}
             </div>
+          )}
 
-            {typeof question.maxSelections === "number" && (
-              <p className="text-sm text-muted-foreground">
-                Gekozen: {answerArray.length} van maximaal {question.maxSelections}
-              </p>
-            )}
-          </div>
-        )}
+        {question.inputType === "multi_select" &&
+          optionSet &&
+          question.key === "afas_products" && (
+            <div className="space-y-5">
+              {groupedOptions.map((group) => (
+                <div key={group.title} className="space-y-3">
+                  <div className="text-sm font-semibold">{group.title}</div>
+
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {group.options.map((option) => {
+                      const isActive = answerArray.includes(option.value);
+                      const maxSelections =
+                        question.maxSelections ?? Number.POSITIVE_INFINITY;
+                      const disableNewSelection =
+                        !isActive && answerArray.length >= maxSelections;
+
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => toggleMultiSelectValue(option.value)}
+                          aria-pressed={isActive}
+                          disabled={disableNewSelection}
+                          className={
+                            isActive
+                              ? "kweekers-active-panel min-h-[72px] rounded-2xl border px-4 py-3 text-center transition"
+                              : disableNewSelection
+                                ? "min-h-[72px] rounded-2xl border border-black/10 bg-white px-4 py-3 text-center opacity-40"
+                                : "kweekers-selectable-hover min-h-[72px] rounded-2xl border border-black/10 bg-white px-4 py-3 text-center transition"
+                          }
+                        >
+                          <div className="text-sm font-semibold">{option.label}</div>
+                          {option.description && (
+                            <div className="mt-1 text-xs text-current/80">
+                              {option.description}
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+
+              {typeof question.maxSelections === "number" && (
+                <p className="text-sm text-muted-foreground">
+                  Gekozen: {answerArray.length} van maximaal {question.maxSelections}
+                </p>
+              )}
+            </div>
+          )}
 
         {question.examples && question.examples.length > 0 && (
           <div className="rounded-2xl border border-black/10 bg-white/70 p-3">
