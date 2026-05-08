@@ -53,30 +53,32 @@ type OptionGroup = {
 
 const AFAS_PRODUCT_GROUPS: OptionGroup[] = [
   {
-    title: "Commercie & relatie",
-    values: ["crm", "outsite", "abonnementen"],
-  },
-  {
-    title: "Financieel & administratie",
+    title: "ALGEMEEN",
     values: [
-      "financieel",
       "autorisatie",
-      "rapportage_dashboards",
       "integraties",
+      "insite",
+      "outsite",
+      "rapportage_dashboards",
+      "workflow",
       "dossier_documentbeheer",
+      "overig",
     ],
   },
   {
-    title: "Operationeel",
-    values: ["inkoop", "ordermanagement", "projecten", "workflow"],
+    title: "ERP",
+    values: [
+      "crm",
+      "financieel",
+      "inkoop",
+      "projecten",
+      "abonnementen",
+      "ordermanagement",
+    ],
   },
   {
-    title: "HR & medewerkers",
+    title: "HRM/Payroll",
     values: ["hrm", "payroll", "verlof_verzuim", "declaraties"],
-  },
-  {
-    title: "Portaal & overig",
-    values: ["insite", "overig"],
   },
 ];
 
