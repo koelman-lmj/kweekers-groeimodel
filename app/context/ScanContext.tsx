@@ -16,12 +16,13 @@ export type ScanState = {
     sector: string;
     organizationSize: string;
     administrationCount: string;
+    afasProducts: string[];
     scanReason: string;
-    biggestBottleneck: string;
+    biggestBottleneck: string[];
   };
   scope: {
     width: string;
-    focus: string;
+    focus: string[];
     depth: string;
   };
   diagnosis: {
@@ -32,8 +33,6 @@ export type ScanState = {
     exceptionControl: string;
     issueResolution: string;
   };
-
-  // Nieuwe generieke laag voor opmerkingen per vraag
   comments: Record<string, string>;
 };
 
@@ -45,12 +44,13 @@ const INITIAL_SCAN: ScanState = {
     sector: "",
     organizationSize: "",
     administrationCount: "",
+    afasProducts: [],
     scanReason: "",
-    biggestBottleneck: "",
+    biggestBottleneck: [],
   },
   scope: {
     width: "",
-    focus: "",
+    focus: [],
     depth: "",
   },
   diagnosis: {
@@ -73,12 +73,13 @@ type ScanContextValue = {
   setSector: (value: string) => void;
   setOrganizationSize: (value: string) => void;
   setAdministrationCount: (value: string) => void;
+  setAfasProducts: (value: string[]) => void;
 
   setScanReason: (value: string) => void;
-  setBiggestBottleneck: (value: string) => void;
+  setBiggestBottleneck: (value: string[]) => void;
 
   setScopeWidth: (value: string) => void;
-  setScopeFocus: (value: string) => void;
+  setScopeFocus: (value: string[]) => void;
   setScopeDepth: (value: string) => void;
 
   setOwnershipClarity: (value: string) => void;
@@ -92,6 +93,18 @@ type ScanContextValue = {
 };
 
 const ScanContext = createContext<ScanContextValue | undefined>(undefined);
+
+function toStringArray(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value.filter((item): item is string => typeof item === "string");
+  }
+
+  if (typeof value === "string" && value.trim() !== "") {
+    return [value];
+  }
+
+  return [];
+}
 
 function loadInitialScan(): ScanState {
   if (typeof window === "undefined") return INITIAL_SCAN;
@@ -108,8 +121,9 @@ function loadInitialScan(): ScanState {
         sector: parsed.profile?.sector ?? "",
         organizationSize: parsed.profile?.organizationSize ?? "",
         administrationCount: parsed.profile?.administrationCount ?? "",
+        afasProducts: toStringArray(parsed.profile?.afasProducts),
         scanReason: parsed.profile?.scanReason ?? "",
-        biggestBottleneck: parsed.profile?.biggestBottleneck ?? "",
+        biggestBottleneck: toStringArray(parsed.profile?.biggestBottleneck),
       },
       scope: {
         width:
@@ -118,8 +132,8 @@ function loadInitialScan(): ScanState {
             : "",
         focus:
           typeof parsed.scope === "object" && parsed.scope !== null
-            ? parsed.scope.focus ?? ""
-            : "",
+            ? toStringArray(parsed.scope.focus)
+            : [],
         depth:
           typeof parsed.scope === "object" && parsed.scope !== null
             ? parsed.scope.depth ?? ""
@@ -165,7 +179,10 @@ export function ScanProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const updateProfile = (field: keyof ScanState["profile"], value: string) => {
+  const updateProfile = (
+    field: keyof Omit<ScanState["profile"], "afasProducts" | "biggestBottleneck">,
+    value: string
+  ) => {
     setScan((current) => ({
       ...current,
       profile: {
@@ -216,12 +233,28 @@ export function ScanProvider({ children }: { children: ReactNode }) {
     updateProfile("administrationCount", value);
   };
 
+  const setAfasProducts = (value: string[]) => {
+    setScan((current) => ({
+      ...current,
+      profile: {
+        ...current.profile,
+        afasProducts: value,
+      },
+    }));
+  };
+
   const setScanReason = (value: string) => {
     updateProfile("scanReason", value);
   };
 
-  const setBiggestBottleneck = (value: string) => {
-    updateProfile("biggestBottleneck", value);
+  const setBiggestBottleneck = (value: string[]) => {
+    setScan((current) => ({
+      ...current,
+      profile: {
+        ...current.profile,
+        biggestBottleneck: value,
+      },
+    }));
   };
 
   const setScopeWidth = (value: string) => {
@@ -234,7 +267,7 @@ export function ScanProvider({ children }: { children: ReactNode }) {
     }));
   };
 
-  const setScopeFocus = (value: string) => {
+  const setScopeFocus = (value: string[]) => {
     setScan((current) => ({
       ...current,
       scope: {
@@ -298,6 +331,7 @@ export function ScanProvider({ children }: { children: ReactNode }) {
       setSector,
       setOrganizationSize,
       setAdministrationCount,
+      setAfasProducts,
 
       setScanReason,
       setBiggestBottleneck,
