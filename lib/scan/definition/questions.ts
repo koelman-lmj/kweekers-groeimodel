@@ -158,17 +158,18 @@ export const questions: QuestionDefinition[] = [
     ],
   },
   {
-    key: "change_decision_process",
+    key: "issue_resolution",
     sectionCode: "diagnose",
-    order: 20,
-    label: "Besluitvorming over wijzigingen",
-    helpText:
-      "Hoe gestructureerd worden wijzigingen in processen of AFAS besloten?",
+    order: 60,
+    label: "Structureel oplossen van knelpunten",
+    helpText: "Hoe worden terugkerende fouten of knelpunten meestal aangepakt?",
     inputType: "single_select",
     required: true,
-    optionSetKey: "maturity_3level_change_governance_options",
+    optionSetKey: "maturity_3level_issue_resolution_options",
     allowsComment: true,
     examples: [
-      "Bijvoorbeeld: worden wijzigingen besproken in een vast overleg of vooral ad hoc doorgevoerd?",
-      "Denk aan: is er een duidelijke route voor wijzigingsverzoeken en besluiten?",
-   
+      "Bijvoorbeeld: wordt een probleem eenmalig opgelost, of wordt ook de oorzaak aangepakt?",
+      "Denk aan terugkerende fouten, handwerk, uitzonderingen of afhankelijkheid van bepaalde personen.",
+    ],
+  },
+];
