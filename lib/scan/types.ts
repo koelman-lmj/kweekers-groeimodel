@@ -1,5 +1,13 @@
 export type InputType = "text" | "single_select" | "multi_select";
 
+export type VisibilityOperator = "equals" | "includes" | "one_of";
+
+export type VisibilityRule = {
+  field: string;
+  operator: VisibilityOperator;
+  value: string | string[];
+};
+
 export type OptionDefinition = {
   value: string;
   label: string;
@@ -37,6 +45,7 @@ export type QuestionDefinition = {
   domain?: string;
   category?: string;
   maxSelections?: number;
+  visibleWhen?: VisibilityRule[];
 };
 
 export type ScanDefinition = {
