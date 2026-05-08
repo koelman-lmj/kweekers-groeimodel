@@ -5,7 +5,6 @@ import { useParams } from "next/navigation";
 import { useScanContext } from "@/app/context/ScanContext";
 import { sections } from "@/lib/scan/definition/sections";
 import {
-  getNextQuestionKey,
   getOptionSet,
   getQuestion,
   getQuestionsForSection,
@@ -91,15 +90,27 @@ export default function FlowQuestionPage() {
   const previousHref =
     currentQuestionIndex > 0
       ? `/scan/${scanId}/flow/${sectionCode}/${sectionQuestions[currentQuestionIndex - 1].key}`
-      : previousSection?.summaryEnabled
-        ? `/scan/${scanId}/summary/${previousSection.code}`
-        : `/scan/${scanId}/summary/profile_basis`;
+      : previousSection
+        ? `/scan/${scanId}/flow/${previousSection.code}/${getQuestionsForSection(previousSection.code)[getQuestionsForSection(previousSection.code).length - 1]?.key}`
+        : `/scan/${scanId}/flow/profile_basis/customer_name`;
 
-  const nextQuestionKey = getNextQuestionKey(sectionCode, questionKey);
+  const nextQuestion = sectionQuestions[currentQuestionIndex + 1];
+  const nextSection = section.nextSectionCode
+    ? getSection(section.nextSectionCode)
+    : undefined;
+  const nextSectionQuestions = nextSection
+    ? getQuestionsForSection(nextSection.code)
+    : [];
 
-  const nextHref = nextQuestionKey
-    ? `/scan/${scanId}/flow/${sectionCode}/${nextQuestionKey}`
-    : `/scan/${scanId}/summary/${sectionCode}`;
+  let nextHref = `/scan/${scanId}/summary/advies`;
+
+  if (nextQuestion) {
+    nextHref = `/scan/${scanId}/flow/${sectionCode}/${nextQuestion.key}`;
+  } else if (nextSection && nextSectionQuestions.length > 0) {
+    nextHref = `/scan/${scanId}/flow/${nextSection.code}/${nextSectionQuestions[0].key}`;
+  } else {
+    nextHref = `/scan/${scanId}/summary/advies`;
+  }
 
   const answerValue = getAnswerFromScan(scan, questionKey);
   const commentValue = scan.comments[questionKey] ?? "";
