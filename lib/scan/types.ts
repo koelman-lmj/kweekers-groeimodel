@@ -32,12 +32,11 @@ export type QuestionDefinition = {
   required: boolean;
   placeholder?: string;
   optionSetKey?: string;
-
-  // Nieuwe velden voor volgende fase
   examples?: string[];
   allowsComment?: boolean;
   domain?: string;
   category?: string;
+  maxSelections?: number;
 };
 
 export type ScanDefinition = {
