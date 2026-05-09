@@ -13,10 +13,6 @@ import {
   type AnswerValue,
 } from "@/lib/scan/engine/answer-mapping";
 import { buildDomainScores } from "@/lib/scan/engine/build-domain-scores";
-import {
-  buildPriorityAdvice,
-  getRootCauseLabel,
-} from "@/lib/scan/engine/build-priority-advice";
 import { buildScanOutput } from "@/lib/build-scan-output";
 import { normalizeScanForOutput } from "@/lib/scan/normalize-scan-for-output";
 
@@ -47,37 +43,6 @@ function getDisplayValue(
   return optionSet.options.find((option) => option.value === rawValue)?.label ?? rawValue;
 }
 
-function getStatusMeta(priorityType: string) {
-  if (priorityType === "finance") {
-    return {
-      tone: "border-red-200 bg-red-50 text-red-900",
-      badge: "bg-red-100 text-red-700",
-      chipTone: "border-red-200 bg-white text-red-700",
-      compactLabel: "Eerst stabiliseren",
-    };
-  }
-
-  if (
-    priorityType === "governance" ||
-    priorityType === "process" ||
-    priorityType === "system"
-  ) {
-    return {
-      tone: "border-amber-200 bg-amber-50 text-amber-900",
-      badge: "bg-amber-100 text-amber-700",
-      chipTone: "border-amber-200 bg-white text-amber-700",
-      compactLabel: "Eerst aanscherpen",
-    };
-  }
-
-  return {
-    tone: "border-emerald-200 bg-emerald-50 text-emerald-900",
-    badge: "bg-emerald-100 text-emerald-700",
-    chipTone: "border-emerald-200 bg-white text-emerald-700",
-    compactLabel: "Gericht doorpakken",
-  };
-}
-
 function getScoreLabel(score: number) {
   if (score < 2.5) return "Kwetsbaar";
   if (score < 4.5) return "Basis aanwezig";
@@ -87,6 +52,18 @@ function getScoreLabel(score: number) {
 
 function getFilledBlocks(score: number) {
   return Math.max(0, Math.min(10, Math.round(score * 1.25)));
+}
+
+function getPriorityLabel(priority: "hoog" | "middel" | "laag") {
+  if (priority === "hoog") return "Hoog";
+  if (priority === "middel") return "Middel";
+  return "Laag";
+}
+
+function getBucketLabel(bucket: "now" | "next" | "later") {
+  if (bucket === "now") return "Nu";
+  if (bucket === "next") return "Daarna";
+  return "Later";
 }
 
 export default function SectionSummaryPage() {
@@ -141,12 +118,7 @@ export default function SectionSummaryPage() {
   const isFinalStep = !hasNextStep;
 
   const domainScores = isFinalStep ? buildDomainScores(scan) : [];
-  const priorityAdvice = isFinalStep ? buildPriorityAdvice(scan) : null;
   const scanOutput = isFinalStep ? buildScanOutput(normalizeScanForOutput(scan)) : null;
-
-  const statusMeta = priorityAdvice
-    ? getStatusMeta(priorityAdvice.priorityType)
-    : null;
 
   const compactContext = isFinalStep
     ? {
@@ -242,180 +214,141 @@ export default function SectionSummaryPage() {
         </div>
       )}
 
-      {isFinalStep && canContinue && priorityAdvice && statusMeta && (
+      {isFinalStep && canContinue && scanOutput && (
         <>
-          {scanOutput && (
-            <>
-              <section className="rounded-3xl border border-black/10 bg-white p-5">
-                <div className="space-y-2">
-                  <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    KWEEKERS advies
-                  </div>
-                  <h2 className="text-2xl font-semibold tracking-tight">
-                    {scanOutput.summary.headline}
-                  </h2>
-                  <p className="text-sm text-muted-foreground">
-                    {scanOutput.summary.explanation}
-                  </p>
-                  <div className="inline-flex rounded-full border border-black/10 bg-black/[0.03] px-3 py-1 text-xs font-medium">
-                    {scanOutput.summary.scoreLabel}
-                  </div>
-                </div>
-              </section>
+          <section className="rounded-3xl border border-black/10 bg-white p-5">
+            <div className="space-y-2">
+              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                KWEEKERS advies
+              </div>
+              <h2 className="text-2xl font-semibold tracking-tight">
+                {scanOutput.summary.headline}
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {scanOutput.summary.explanation}
+              </p>
+              <div className="inline-flex rounded-full border border-black/10 bg-black/[0.03] px-3 py-1 text-xs font-medium">
+                {scanOutput.summary.scoreLabel}
+              </div>
+            </div>
+          </section>
 
-              {scanOutput.quickWins.length > 0 && (
-                <section className="space-y-3 rounded-3xl border border-black/10 bg-black/[0.01] p-5">
-                  <h2 className="text-lg font-medium">Quick wins</h2>
+          {scanOutput.quickWins.length > 0 && (
+            <section className="space-y-3 rounded-3xl border border-black/10 bg-black/[0.01] p-5">
+              <h2 className="text-lg font-medium">Quick wins</h2>
 
-                  <div className="rounded-2xl border border-black/10 bg-white p-4">
-                    <ul className="space-y-2 text-sm text-muted-foreground">
-                      {scanOutput.quickWins.map((item) => (
-                        <li key={item} className="ml-5 list-disc">
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </section>
-              )}
-
-              <section className="space-y-3 rounded-3xl border border-black/10 bg-black/[0.01] p-5">
-                <h2 className="text-lg font-medium">Prioriteiten</h2>
-
-                <div className="space-y-3">
-                  {scanOutput.priorities.map((item) => (
-                    <div
-                      key={item.id}
-                      className="rounded-2xl border border-black/10 bg-white p-4"
-                    >
-                      <div className="flex flex-wrap items-center gap-2">
-                        <div className="text-base font-semibold">{item.title}</div>
-                        <span className="rounded-full border border-black/10 bg-black/[0.03] px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide">
-                          {item.priority}
-                        </span>
-                        <span className="rounded-full border border-black/10 bg-black/[0.03] px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide">
-                          {item.bucket}
-                        </span>
-                      </div>
-
-                      <p className="mt-3 text-sm text-muted-foreground">{item.reason}</p>
-
-                      <div className="mt-3 rounded-xl border border-black/10 bg-black/[0.02] p-3">
-                        <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                          Advies
-                        </div>
-                        <p className="mt-1 text-sm text-muted-foreground">{item.advice}</p>
-                      </div>
-
-                      {item.signals.length > 0 && (
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          {item.signals.map((signal) => (
-                            <span
-                              key={signal}
-                              className="rounded-full border border-black/10 bg-white px-3 py-1 text-xs text-muted-foreground"
-                            >
-                              {signal}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+              <div className="rounded-2xl border border-black/10 bg-white p-4">
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  {scanOutput.quickWins.map((item) => (
+                    <li key={item} className="ml-5 list-disc">
+                      {item}
+                    </li>
                   ))}
-                </div>
-              </section>
-
-              <section className="space-y-3 rounded-3xl border border-black/10 bg-black/[0.01] p-5">
-                <h2 className="text-lg font-medium">Roadmap</h2>
-
-                <div className="grid gap-4 md:grid-cols-3">
-                  <div className="rounded-2xl border border-black/10 bg-white p-4">
-                    <div className="text-sm font-semibold">Nu</div>
-                    <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
-                      {scanOutput.roadmap.now.length > 0 ? (
-                        scanOutput.roadmap.now.map((item) => (
-                          <li key={item.id} className="ml-5 list-disc">
-                            {item.title}
-                          </li>
-                        ))
-                      ) : (
-                        <li className="list-none text-muted-foreground">
-                          Geen directe acties.
-                        </li>
-                      )}
-                    </ul>
-                  </div>
-
-                  <div className="rounded-2xl border border-black/10 bg-white p-4">
-                    <div className="text-sm font-semibold">Daarna</div>
-                    <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
-                      {scanOutput.roadmap.next.length > 0 ? (
-                        scanOutput.roadmap.next.map((item) => (
-                          <li key={item.id} className="ml-5 list-disc">
-                            {item.title}
-                          </li>
-                        ))
-                      ) : (
-                        <li className="list-none text-muted-foreground">
-                          Nog geen volgende stap bepaald.
-                        </li>
-                      )}
-                    </ul>
-                  </div>
-
-                  <div className="rounded-2xl border border-black/10 bg-white p-4">
-                    <div className="text-sm font-semibold">Later</div>
-                    <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
-                      {scanOutput.roadmap.later.length > 0 ? (
-                        scanOutput.roadmap.later.map((item) => (
-                          <li key={item.id} className="ml-5 list-disc">
-                            {item.title}
-                          </li>
-                        ))
-                      ) : (
-                        <li className="list-none text-muted-foreground">
-                          Nog niets voor later.
-                        </li>
-                      )}
-                    </ul>
-                  </div>
-                </div>
-              </section>
-            </>
+                </ul>
+              </div>
+            </section>
           )}
 
-          <section className={`rounded-3xl border p-4 ${statusMeta.tone}`}>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <div
-                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold ${statusMeta.badge}`}
-                >
-                  ●
-                </div>
+          <section className="space-y-3 rounded-3xl border border-black/10 bg-black/[0.01] p-5">
+            <h2 className="text-lg font-medium">Prioriteiten</h2>
 
-                <div className="text-xl font-semibold tracking-tight">
-                  {priorityAdvice.mainBottleneckTitle}
+            <div className="space-y-3">
+              {scanOutput.priorities.map((item) => (
+                <div
+                  key={item.id}
+                  className="rounded-2xl border border-black/10 bg-white p-4"
+                >
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="text-base font-semibold">{item.title}</div>
+
+                    <span className="rounded-full border border-black/10 bg-black/[0.03] px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide">
+                      {getPriorityLabel(item.priority)}
+                    </span>
+
+                    <span className="rounded-full border border-black/10 bg-black/[0.03] px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide">
+                      {getBucketLabel(item.bucket)}
+                    </span>
+                  </div>
+
+                  <p className="mt-3 text-sm text-muted-foreground">{item.reason}</p>
+
+                  <div className="mt-3 rounded-xl border border-black/10 bg-black/[0.02] p-3">
+                    <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                      Advies
+                    </div>
+                    <p className="mt-1 text-sm text-muted-foreground">{item.advice}</p>
+                  </div>
+
+                  {item.signals.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {item.signals.map((signal) => (
+                        <span
+                          key={signal}
+                          className="rounded-full border border-black/10 bg-white px-3 py-1 text-xs text-muted-foreground"
+                        >
+                          {signal}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="space-y-3 rounded-3xl border border-black/10 bg-black/[0.01] p-5">
+            <h2 className="text-lg font-medium">Roadmap</h2>
+
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="rounded-2xl border border-black/10 bg-white p-4">
+                <div className="text-sm font-semibold">Nu</div>
+                <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
+                  {scanOutput.roadmap.now.length > 0 ? (
+                    scanOutput.roadmap.now.map((item) => (
+                      <li key={item.id} className="ml-5 list-disc">
+                        {item.title}
+                      </li>
+                    ))
+                  ) : (
+                    <li className="list-none text-muted-foreground">
+                      Geen directe acties.
+                    </li>
+                  )}
+                </ul>
               </div>
 
-              <p className="text-sm leading-6">{priorityAdvice.mainBottleneckText}</p>
+              <div className="rounded-2xl border border-black/10 bg-white p-4">
+                <div className="text-sm font-semibold">Daarna</div>
+                <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
+                  {scanOutput.roadmap.next.length > 0 ? (
+                    scanOutput.roadmap.next.map((item) => (
+                      <li key={item.id} className="ml-5 list-disc">
+                        {item.title}
+                      </li>
+                    ))
+                  ) : (
+                    <li className="list-none text-muted-foreground">
+                      Nog geen volgende stap bepaald.
+                    </li>
+                  )}
+                </ul>
+              </div>
 
-              <div className="space-y-1">
-                <div className="text-[11px] font-medium uppercase tracking-wide opacity-70">
-                  Onderliggende oorzaak
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <span
-                    className={`rounded-full border px-3 py-1 text-xs ${statusMeta.chipTone}`}
-                  >
-                    {getRootCauseLabel(priorityAdvice.rootCauseCategory)}
-                  </span>
-
-                  <span
-                    className={`rounded-full border px-3 py-1 text-xs ${statusMeta.chipTone}`}
-                  >
-                    {statusMeta.compactLabel}
-                  </span>
-                </div>
+              <div className="rounded-2xl border border-black/10 bg-white p-4">
+                <div className="text-sm font-semibold">Later</div>
+                <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
+                  {scanOutput.roadmap.later.length > 0 ? (
+                    scanOutput.roadmap.later.map((item) => (
+                      <li key={item.id} className="ml-5 list-disc">
+                        {item.title}
+                      </li>
+                    ))
+                  ) : (
+                    <li className="list-none text-muted-foreground">
+                      Nog niets voor later.
+                    </li>
+                  )}
+                </ul>
               </div>
             </div>
           </section>
@@ -459,54 +392,6 @@ export default function SectionSummaryPage() {
               ))}
             </div>
           </section>
-
-          <section className="space-y-3 rounded-3xl border border-black/10 bg-black/[0.01] p-5">
-            <div className="space-y-1">
-              <h2 className="text-lg font-medium">{priorityAdvice.firstStepTitle}</h2>
-              <p className="text-sm text-muted-foreground">
-                {priorityAdvice.firstStepText}
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-black/10 bg-white p-4">
-              <div className="text-sm font-semibold">Doe dit eerst</div>
-              <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
-                {priorityAdvice.actions.map((action) => (
-                  <li key={action} className="ml-5 list-disc">
-                    {action}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </section>
-
-          <section className="space-y-3 rounded-3xl border border-black/10 bg-black/[0.01] p-5">
-            <div className="space-y-1">
-              <h2 className="text-lg font-medium">{priorityAdvice.notFirstTitle}</h2>
-              <p className="text-sm text-muted-foreground">
-                {priorityAdvice.notFirstText}
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-black/10 bg-white p-4">
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                {priorityAdvice.notFirst.map((item) => (
-                  <li key={item} className="ml-5 list-disc">
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </section>
-
-          {priorityAdvice.nextLikelyFocus && (
-            <section className="space-y-2 rounded-3xl border border-black/10 bg-black/[0.01] p-5">
-              <h2 className="text-lg font-medium">Daarna waarschijnlijk relevant</h2>
-              <p className="text-sm text-muted-foreground">
-                {priorityAdvice.nextLikelyFocus}
-              </p>
-            </section>
-          )}
 
           {compactContext && (
             <section className="space-y-3 rounded-3xl border border-black/10 bg-black/[0.01] p-5">
