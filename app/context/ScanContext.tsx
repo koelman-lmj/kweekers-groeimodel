@@ -2,6 +2,7 @@
 
 import {
   createContext,
+  useCallback,
   useContext,
   useMemo,
   useState,
@@ -328,11 +329,19 @@ export function ScanProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const markSectionVisited = (sectionCode: string, route: string) => {
-    setScan((current) => ({
+const markSectionVisited = useCallback((sectionCode: string, route: string) => {
+  setScan((current) => {
+    const alreadyVisited = current.ui.visitedSections.includes(sectionCode);
+    const currentRoute = current.ui.lastVisitedRouteBySection[sectionCode];
+
+    if (alreadyVisited && currentRoute === route) {
+      return current;
+    }
+
+    return {
       ...current,
       ui: {
-        visitedSections: current.ui.visitedSections.includes(sectionCode)
+        visitedSections: alreadyVisited
           ? current.ui.visitedSections
           : [...current.ui.visitedSections, sectionCode],
         lastVisitedRouteBySection: {
@@ -340,8 +349,9 @@ export function ScanProvider({ children }: { children: ReactNode }) {
           [sectionCode]: route,
         },
       },
-    }));
-  };
+    };
+  });
+}, [setScan]);
 
   const setCustomerName = (value: string) => updateProfile("customerName", value);
   const setSector = (value: string) => updateProfile("sector", value);
