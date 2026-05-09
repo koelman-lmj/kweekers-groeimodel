@@ -140,7 +140,7 @@ function getBaseOptionButtonClass(disabled: boolean) {
 }
 
 function getActiveOptionButtonClass() {
-  return "justify-self-center w-[320px] min-h-[52px] rounded-xl border border-[#33406f] bg-[#3f4e87] px-3 py-2 text-center text-white shadow-sm transition";
+  return "justify-self-center w-[320px] min-h-[52px] rounded-xl border border-[#db5f34] bg-[#3f4e87] px-3 py-2 text-center text-white shadow-sm transition ring-1 ring-[#f2c2ae]";
 }
 
 export default function FlowQuestionPage() {
@@ -682,7 +682,7 @@ export default function FlowQuestionPage() {
               question.key === "afas_products" && (
                 <div className="space-y-5">
                   {selectedLabels.length > 0 && (
-                    <div className="rounded-xl border border-black/10 bg-white/80 p-3">
+                    <div className="kweekers-help-box rounded-xl p-3">
                       <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
                         Gekozen
                       </div>
@@ -691,7 +691,7 @@ export default function FlowQuestionPage() {
                         {selectedLabels.map((label) => (
                           <span
                             key={label}
-                            className="rounded-full border border-[#c7d2e8] bg-[#eef3fb] px-3 py-1 text-xs font-medium text-[#2f426a]"
+                            className="kweekers-chip-selected"
                           >
                             {label}
                           </span>
@@ -752,7 +752,7 @@ export default function FlowQuestionPage() {
               )}
 
             {question.examples && question.examples.length > 0 && (
-              <div className="rounded-xl border border-black/10 bg-white/80 p-3">
+              <div className="kweekers-help-box rounded-xl p-3">
                 <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
                   Hulp bij deze vraag
                 </div>
