@@ -182,15 +182,16 @@ function ScanShell({ children }: { children: ReactNode }) {
         <aside className="lg:sticky lg:top-8 lg:self-start">
           <div className="rounded-3xl border border-[var(--kweekers-card-border)] bg-white p-5 shadow-sm">
             <div className="space-y-5">
-              <div className="kweekers-badge">
-                <Image
-                  src="/kweekers-logo.png"
-                  alt="Kweekers logo"
-                  width={32}
-                  height={32}
-                />
-                <span>KWEEKERS Groeimodel</span>
-              </div>
+<div className="kweekers-badge">
+  <Image
+    src="/kweekers-logo.png"
+    alt="Kweekers logo"
+    width={96}
+    height={24}
+    className="h-6 w-auto"
+    priority
+  />
+</div>
 
               <div className="space-y-1">
                 <h2 className="text-xl font-semibold tracking-tight">
