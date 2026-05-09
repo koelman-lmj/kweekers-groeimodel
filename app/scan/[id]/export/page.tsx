@@ -7,11 +7,10 @@ import { useScanContext } from "@/app/context/ScanContext";
 import {
   getOptionSet,
   getQuestionsForSection,
-  getSection,
 } from "@/lib/scan/engine/definition-helpers";
-import { getAnswerFromScan } from "@/lib/scan/engine/answer-mapping";
 import { buildDomainScores } from "@/lib/scan/engine/build-domain-scores";
 import { buildScanOutput } from "@/lib/build-scan-output";
+import { normalizeScanForOutput } from "@/lib/scan/normalize-scan-for-output";
 
 function getParam(value: string | string[] | undefined): string {
   if (Array.isArray(value)) return value[0] ?? "";
@@ -74,45 +73,6 @@ function getPriorityLabel(priority: "hoog" | "middel" | "laag") {
   return "Laag";
 }
 
-function normalizeScanForOutput(scan: ReturnType<typeof useScanContext>["scan"]) {
-  const sectionCodes = ["profile_basis", "profile_reason", "scope", "diagnose"];
-
-  const sections = sectionCodes.map((code) => {
-    const section = getSection(code);
-    const questions = getQuestionsForSection(code, scan);
-
-    const answers = Object.fromEntries(
-      questions.map((question) => [
-        question.key,
-        getAnswerFromScan(scan, question.key),
-      ])
-    );
-
-    return {
-      id: code,
-      title: section?.title ?? code,
-      category: "Scan",
-      score: null,
-      answers,
-    };
-  });
-
-  const domainScores = buildDomainScores(scan);
-  const averageScore =
-    domainScores.length > 0
-      ? domainScores.reduce((sum, domain) => sum + domain.score, 0) / domainScores.length
-      : null;
-
-  return {
-    id: "current-scan",
-    customerName: scan.profile.customerName || "Onbekende klant",
-    sector: scan.profile.sector || "Onbekende sector",
-    goal: scan.scope.focus?.join(", ") || "Nog niet ingevuld",
-    overallScore: averageScore,
-    sections,
-  };
-}
-
 export default function ScanExportPage() {
   const params = useParams<{ id: string | string[] }>();
   const scanId = getParam(params.id);
@@ -168,7 +128,7 @@ export default function ScanExportPage() {
 
   return (
     <div className="min-h-screen bg-white text-black">
-<div className="mx-auto w-full max-w-[960px] px-8 py-10 print:max-w-none print:px-6 print:py-6">
+      <div className="mx-auto w-full max-w-[1120px] px-10 py-10 print:max-w-none print:px-6 print:py-6">
         <div className="mb-8 flex items-center justify-between gap-4 print:hidden">
           <Link
             href={`/scan/${scanId}/summary/advies`}
@@ -192,7 +152,7 @@ export default function ScanExportPage() {
               <p className="text-xs font-medium uppercase tracking-[0.18em] text-neutral-500">
                 KWEEKERS Groeiscan
               </p>
-              <h1 className="text-3xl font-semibold tracking-tight">
+              <h1 className="text-4xl font-semibold tracking-tight">
                 Samenvatting groeiscan
               </h1>
             </div>
@@ -224,7 +184,7 @@ export default function ScanExportPage() {
               <h2 className="text-2xl font-semibold tracking-tight">
                 {scanOutput.summary.headline}
               </h2>
-              <p className="text-sm leading-6 text-neutral-700">
+              <p className="text-[15px] leading-7 text-neutral-700">
                 {scanOutput.summary.explanation}
               </p>
               <div className="inline-flex rounded-full border border-black/10 px-3 py-1 text-xs font-medium">
@@ -235,10 +195,10 @@ export default function ScanExportPage() {
 
           {scanOutput.quickWins.length > 0 && (
             <section className="space-y-3">
-              <h2 className="text-xl font-semibold tracking-tight">Quick wins</h2>
+              <h2 className="text-2xl font-semibold tracking-tight">Quick wins</h2>
 
               <div className="rounded-2xl border border-black/10 p-5">
-                <ul className="space-y-2 text-sm text-neutral-700">
+                <ul className="space-y-2 text-[15px] leading-7 text-neutral-700">
                   {scanOutput.quickWins.map((item) => (
                     <li key={item} className="ml-5 list-disc">
                       {item}
@@ -250,7 +210,7 @@ export default function ScanExportPage() {
           )}
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold tracking-tight">Prioriteiten</h2>
+            <h2 className="text-2xl font-semibold tracking-tight">Prioriteiten</h2>
 
             <div className="space-y-4">
               {scanOutput.priorities.map((item) => (
@@ -267,7 +227,7 @@ export default function ScanExportPage() {
                     </span>
                   </div>
 
-                  <p className="mt-3 text-sm leading-6 text-neutral-700">
+                  <p className="mt-3 text-[15px] leading-7 text-neutral-700">
                     {item.reason}
                   </p>
 
@@ -275,7 +235,7 @@ export default function ScanExportPage() {
                     <div className="text-xs font-medium uppercase tracking-[0.12em] text-neutral-500">
                       Advies
                     </div>
-                    <p className="mt-1 text-sm leading-6 text-neutral-700">
+                    <p className="mt-1 text-[15px] leading-7 text-neutral-700">
                       {item.advice}
                     </p>
                   </div>
@@ -298,12 +258,12 @@ export default function ScanExportPage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold tracking-tight">Roadmap</h2>
+            <h2 className="text-2xl font-semibold tracking-tight">Roadmap</h2>
 
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="rounded-2xl border border-black/10 p-5">
                 <div className="text-base font-semibold">Nu</div>
-                <ul className="mt-3 space-y-2 text-sm text-neutral-700">
+                <ul className="mt-3 space-y-2 text-[15px] leading-7 text-neutral-700">
                   {scanOutput.roadmap.now.length > 0 ? (
                     scanOutput.roadmap.now.map((item) => (
                       <li key={item.id} className="ml-5 list-disc">
@@ -318,7 +278,7 @@ export default function ScanExportPage() {
 
               <div className="rounded-2xl border border-black/10 p-5">
                 <div className="text-base font-semibold">Daarna</div>
-                <ul className="mt-3 space-y-2 text-sm text-neutral-700">
+                <ul className="mt-3 space-y-2 text-[15px] leading-7 text-neutral-700">
                   {scanOutput.roadmap.next.length > 0 ? (
                     scanOutput.roadmap.next.map((item) => (
                       <li key={item.id} className="ml-5 list-disc">
@@ -335,7 +295,7 @@ export default function ScanExportPage() {
 
               <div className="rounded-2xl border border-black/10 p-5">
                 <div className="text-base font-semibold">Later</div>
-                <ul className="mt-3 space-y-2 text-sm text-neutral-700">
+                <ul className="mt-3 space-y-2 text-[15px] leading-7 text-neutral-700">
                   {scanOutput.roadmap.later.length > 0 ? (
                     scanOutput.roadmap.later.map((item) => (
                       <li key={item.id} className="ml-5 list-disc">
@@ -351,7 +311,7 @@ export default function ScanExportPage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold tracking-tight">Domeinscores</h2>
+            <h2 className="text-2xl font-semibold tracking-tight">Domeinscores</h2>
 
             <div className="space-y-4">
               {domainScores.map((domain) => (
@@ -391,7 +351,7 @@ export default function ScanExportPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-semibold tracking-tight">Context van de scan</h2>
+            <h2 className="text-2xl font-semibold tracking-tight">Context van de scan</h2>
 
             <div className="space-y-2 text-sm">
               {bottleneckLabels.length > 0 && (
@@ -432,7 +392,7 @@ export default function ScanExportPage() {
 
           {comments.length > 0 && (
             <section className="space-y-3">
-              <h2 className="text-xl font-semibold tracking-tight">
+              <h2 className="text-2xl font-semibold tracking-tight">
                 Opmerkingen uit de scan
               </h2>
 
