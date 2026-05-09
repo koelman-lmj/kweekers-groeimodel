@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import { useScanContext } from "@/app/context/ScanContext";
 import { sections } from "@/lib/scan/definition/sections";
 import {
@@ -150,6 +150,7 @@ export default function FlowQuestionPage() {
     questionKey: string | string[];
   }>();
   const router = useRouter();
+  const pathname = usePathname();
 
   const scanId = getParam(params.id);
   const sectionCode = getParam(params.sectionCode);
@@ -189,6 +190,7 @@ export default function FlowQuestionPage() {
     setEducationProcessAdminAlignment,
     setEducationExceptionHandling,
     setComment,
+    markSectionVisited,
   } = useScanContext();
 
   const section = getSection(sectionCode);
@@ -212,6 +214,19 @@ export default function FlowQuestionPage() {
       router.replace(`/scan/${scanId}/flow/profile_basis/customer_name`);
     }
   }, [shouldRedirectSkippedProfileBasis, router, scanId]);
+
+  useEffect(() => {
+    if (!pathname) return;
+    if (!sectionCode) return;
+    if (shouldRedirectSkippedProfileBasis) return;
+
+    markSectionVisited(sectionCode, pathname);
+  }, [
+    pathname,
+    sectionCode,
+    shouldRedirectSkippedProfileBasis,
+    markSectionVisited,
+  ]);
 
   if (shouldRedirectSkippedProfileBasis) {
     return null;
