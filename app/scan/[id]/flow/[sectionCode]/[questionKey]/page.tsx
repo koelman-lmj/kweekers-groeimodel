@@ -46,6 +46,10 @@ function getShortHelpText(questionLabel: string, helpText?: string): string {
   return helpText;
 }
 
+function RequiredAsterisk() {
+  return <span className="kweekers-required ml-1">*</span>;
+}
+
 type OptionGroup = {
   title: string;
   values: string[];
@@ -493,10 +497,10 @@ export default function FlowQuestionPage() {
         {isProfileBasisOverview ? (
           <div className="space-y-5">
             <div className="space-y-2">
-<label htmlFor="customer_name" className="text-sm font-medium">
-  Klantnaam
-  <RequiredAsterisk />
-</label>
+              <label htmlFor="customer_name" className="text-sm font-medium">
+                Klantnaam
+                <RequiredAsterisk />
+              </label>
               <input
                 id="customer_name"
                 type="text"
@@ -510,7 +514,10 @@ export default function FlowQuestionPage() {
             </div>
 
             <div className="space-y-2">
-              <div className="text-sm font-medium">Sector</div>
+              <div className="text-sm font-medium">
+                Sector
+                <RequiredAsterisk />
+              </div>
               {renderSingleSelectGrid(
                 "sector_options",
                 asString(profileOverviewValues.sector),
@@ -519,7 +526,10 @@ export default function FlowQuestionPage() {
             </div>
 
             <div className="space-y-2">
-              <div className="text-sm font-medium">Organisatiegrootte</div>
+              <div className="text-sm font-medium">
+                Organisatiegrootte
+                <RequiredAsterisk />
+              </div>
               {renderSingleSelectGrid(
                 "organization_size_options",
                 asString(profileOverviewValues.organization_size),
@@ -530,6 +540,7 @@ export default function FlowQuestionPage() {
             <div className="space-y-2">
               <div className="text-sm font-medium">
                 Aantal administraties / entiteiten
+                <RequiredAsterisk />
               </div>
               {renderSingleSelectGrid(
                 "administration_count_options",
@@ -539,7 +550,10 @@ export default function FlowQuestionPage() {
             </div>
 
             <div className="space-y-2">
-              <div className="text-sm font-medium">Type organisatie en operatie</div>
+              <div className="text-sm font-medium">
+                Type organisatie en operatie
+                <RequiredAsterisk />
+              </div>
               {renderSingleSelectGrid(
                 "organization_type_options",
                 asString(profileOverviewValues.organization_type),
@@ -553,6 +567,7 @@ export default function FlowQuestionPage() {
               <div className="space-y-2">
                 <label htmlFor={question.key} className="text-sm font-medium">
                   Antwoord
+                  {question.required && <RequiredAsterisk />}
                 </label>
                 <input
                   id={question.key}
