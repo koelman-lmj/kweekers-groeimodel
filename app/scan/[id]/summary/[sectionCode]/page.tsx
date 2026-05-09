@@ -18,6 +18,7 @@ import {
   getRootCauseLabel,
 } from "@/lib/scan/engine/build-priority-advice";
 import { buildScanOutput } from "@/lib/build-scan-output";
+import { normalizeScanForOutput } from "@/lib/scan/normalize-scan-for-output";
 
 function getParam(value: string | string[] | undefined): string {
   if (Array.isArray(value)) return value[0] ?? "";
@@ -86,47 +87,6 @@ function getScoreLabel(score: number) {
 
 function getFilledBlocks(score: number) {
   return Math.max(0, Math.min(10, Math.round(score * 1.25)));
-}
-
-function normalizeScanForOutput(scan: ReturnType<typeof useScanContext>["scan"]) {
-  const sectionCodes = ["profile_basis", "profile_reason", "scope", "diagnose"];
-
-  const sections = sectionCodes.map((code) => {
-    const section = getSection(code);
-    const questions = getQuestionsForSection(code, scan);
-
-    const answers = Object.fromEntries(
-      questions.map((question) => [
-        question.key,
-        getAnswerFromScan(scan, question.key),
-      ])
-    );
-
-    return {
-      id: code,
-      title: section?.title ?? code,
-      category: "Scan",
-      score: null,
-      answers,
-    };
-  });
-
-  const domainScores = buildDomainScores(scan);
-  const averageScore =
-    domainScores.length > 0
-      ? domainScores.reduce((sum, domain) => sum + domain.score, 0) / domainScores.length
-      : null;
-
-return {
-  id: "current-scan",
-  customerName: scan.profile.customerName || "Onbekende klant",
-  sector: scan.profile.sector || "Onbekende sector",
-  goal:
-    scan.scope.focus?.join(", ") ||
-    "Nog niet ingevuld",
-  overallScore: averageScore,
-  sections,
-};
 }
 
 export default function SectionSummaryPage() {
