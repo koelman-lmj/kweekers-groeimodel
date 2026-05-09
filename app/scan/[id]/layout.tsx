@@ -150,6 +150,12 @@ function ScanShell({ children }: { children: ReactNode }) {
   const params = useParams();
   const { scan } = useScanContext();
 
+  const isExportPage = pathname?.includes("/export");
+
+  if (isExportPage) {
+    return <div className="min-h-screen bg-white">{children}</div>;
+  }
+
   const scanId = Array.isArray(params.id) ? params.id[0] : params.id;
   const currentSectionCode = getCurrentSectionCode(pathname);
   const sectionStatuses = getSectionStatuses(scan);
