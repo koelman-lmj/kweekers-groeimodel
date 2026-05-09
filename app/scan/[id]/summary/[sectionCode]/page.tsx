@@ -261,11 +261,11 @@ export default function SectionSummaryPage() {
                   <div className="flex flex-wrap items-center gap-2">
                     <div className="text-base font-semibold">{item.title}</div>
 
-                    <span className="rounded-full border border-black/10 bg-black/[0.03] px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide">
+                    <span className="rounded-full border border-black/10 bg-black/[0.03] px-2.5 py-1 text-[11px] font-medium">
                       {getPriorityLabel(item.priority)}
                     </span>
 
-                    <span className="rounded-full border border-black/10 bg-black/[0.03] px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide">
+                    <span className="rounded-full border border-black/10 bg-black/[0.03] px-2.5 py-1 text-[11px] font-medium">
                       {getBucketLabel(item.bucket)}
                     </span>
                   </div>
