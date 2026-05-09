@@ -123,8 +123,8 @@ function getStepHref(
   scanId: string,
   step: (typeof STEPS)[number],
   status: StepStatus
-): string {
-  if (status !== "current" && status !== "completed") return "";
+): string | null {
+  if (status !== "current" && status !== "completed") return null;
 
   if (step.primarySectionCode === "advies") {
     return `/scan/${scanId}/summary/advies`;
@@ -142,7 +142,7 @@ function getStepHref(
     return `/scan/${scanId}/flow/diagnose/ownership_clarity`;
   }
 
-  return "";
+  return null;
 }
 
 function ScanShell({ children }: { children: ReactNode }) {
