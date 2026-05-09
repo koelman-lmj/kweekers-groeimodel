@@ -121,10 +121,10 @@ return {
   id: "current-scan",
   customerName: scan.profile.customerName || "Onbekende klant",
   sector: scan.profile.sector || "Onbekende sector",
-  goal:
-    scan.profile.reasonForModel?.join(", ") ||
-    scan.scope.focus?.join(", ") ||
-    "Nog niet ingevuld",
+goal:
+  scan.profile.reasonForModel2?.join(", ") ||
+  scan.scope.focus?.join(", ") ||
+  "Nog niet ingevuld",
   overallScore: averageScore,
   sections,
 };
