@@ -124,7 +124,7 @@ function getStepHref(
   step: (typeof STEPS)[number],
   status: StepStatus
 ): string {
-  if (status === "locked") return "";
+  if (status !== "current" && status !== "completed") return "";
 
   if (step.primarySectionCode === "advies") {
     return `/scan/${scanId}/summary/advies`;
