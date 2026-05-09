@@ -168,7 +168,7 @@ export default function ScanExportPage() {
 
   return (
     <div className="min-h-screen bg-white text-black">
-      <div className="mx-auto max-w-4xl px-8 py-10 print:max-w-none print:px-6 print:py-6">
+<div className="mx-auto w-full max-w-[960px] px-8 py-10 print:max-w-none print:px-6 print:py-6">
         <div className="mb-8 flex items-center justify-between gap-4 print:hidden">
           <Link
             href={`/scan/${scanId}/summary/advies`}
