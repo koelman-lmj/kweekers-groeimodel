@@ -15,7 +15,7 @@ export type ScanSectionInput = {
   id: string;
   title: string;
   category?: string;
-  score?: number | null; // 0-100 of 1-5, maakt voor deze eerste versie niet veel uit
+  score?: number | null;
   answers?: ScanAnswers;
 };
 
@@ -81,7 +81,6 @@ function hasAnySignalInAnswers(
   words: string[]
 ): boolean {
   if (!answers) return false;
-
   return Object.values(answers).some((value) => hasSignal(value, words));
 }
 
@@ -90,9 +89,6 @@ function safeSectionScore(section: ScanSectionInput): number {
     return 50;
   }
 
-  // Eerste versie:
-  // - score 0-100 blijft score 0-100
-  // - score 1-5 schalen we om naar 20-100
   if (section.score >= 0 && section.score <= 5) {
     return clamp(section.score * 20, 0, 100);
   }
@@ -189,10 +185,8 @@ function calculatePriorityScore(section: ScanSectionInput): number {
   const baseScore = safeSectionScore(section);
   const answers = section.answers ?? {};
 
-  // Lage volwassenheid = hogere prioriteit
   let priorityScore = 100 - baseScore;
 
-  // Extra gewicht op duidelijke pijn
   if (
     hasAnySignalInAnswers(answers, [
       "handmatig",
@@ -251,13 +245,23 @@ function mapPriorityLevel(score: number): PriorityLevel {
 
 function mapRoadmapBucket(
   priority: PriorityLevel,
-  signals: string[]
+  signals: string[],
+  score: number
 ): RoadmapBucket {
-  const hasQuickWinSignal =
-    signals.includes("Veel handwerk") || signals.includes("Foutgevoelig proces");
+  const hasDirectPain =
+    signals.includes("Veel handwerk") ||
+    signals.includes("Foutgevoelig proces") ||
+    signals.includes("Proces vraagt sturing of controle");
 
-  if (priority === "hoog" && hasQuickWinSignal) return "now";
-  if (priority === "hoog") return "now";
+  const hasStructuralPain =
+    signals.includes("Beperkt inzicht") ||
+    signals.includes("Afhankelijk van keten of koppeling") ||
+    signals.includes("Veel uitzonderingen");
+
+  if (priority === "hoog" && (hasDirectPain || score >= 80)) return "now";
+  if (priority === "hoog") return "next";
+  if (priority === "middel" && hasDirectPain) return "next";
+  if (priority === "middel" && hasStructuralPain) return "later";
   if (priority === "middel") return "next";
   return "later";
 }
@@ -267,31 +271,45 @@ function buildReason(
   signals: string[],
   priority: PriorityLevel
 ): string {
-  const parts: string[] = [];
-
-  if (signals.length > 0) {
-    parts.push(signals.join(", ").toLowerCase());
-  }
-
   const score = safeSectionScore(section);
 
+  if (signals.includes("Veel handwerk")) {
+    return "Veel handwerk maakt dit onderdeel traag en onnodig foutgevoelig.";
+  }
+
+  if (signals.includes("Foutgevoelig proces")) {
+    return "De basis is nog niet betrouwbaar genoeg om hier strak op te sturen.";
+  }
+
+  if (signals.includes("Proces vraagt sturing of controle")) {
+    return "Rollen, controles en besluitmomenten zijn nog niet scherp genoeg ingericht.";
+  }
+
+  if (signals.includes("Beperkt inzicht")) {
+    return "Er is te weinig inzicht om hier goed op te sturen.";
+  }
+
+  if (signals.includes("Afhankelijk van keten of koppeling")) {
+    return "Dit onderdeel hangt sterk samen met andere stappen in de keten.";
+  }
+
+  if (signals.includes("Veel uitzonderingen")) {
+    return "Uitzonderingen drukken hier te zwaar op het standaardproces.";
+  }
+
   if (score < 40) {
-    parts.push("de huidige inrichting is nog niet stabiel genoeg");
-  } else if (score < 65) {
-    parts.push("de basis staat deels, maar kan duidelijk sterker");
-  } else {
-    parts.push("dit onderdeel werkt redelijk, maar kan slimmer");
+    return "De basis van dit onderdeel is nog te kwetsbaar.";
   }
 
-  if (priority === "hoog") {
-    parts.push("dit heeft direct effect op rust, grip en kwaliteit");
-  } else if (priority === "middel") {
-    parts.push("dit is belangrijk voor de volgende verbeterslag");
-  } else {
-    parts.push("dit kan later worden opgepakt");
+  if (score < 65) {
+    return priority === "hoog"
+      ? "De basis staat deels, maar vraagt nu duidelijke aanscherping."
+      : "De basis staat deels, maar kan duidelijk sterker.";
   }
 
-  return capitalize(parts.join(". ")) + ".";
+  return priority === "laag"
+    ? "Dit onderdeel is werkbaar en kan later verder worden verbeterd."
+    : "Dit onderdeel werkt redelijk, maar kan slimmer en strakker.";
 }
 
 function buildAdvice(
@@ -299,37 +317,41 @@ function buildAdvice(
   signals: string[],
   priority: PriorityLevel
 ): string {
-  const lowerTitle = section.title.toLowerCase();
+  const title = section.title.toLowerCase();
 
   if (signals.includes("Veel handwerk")) {
-    return `Breng eerst de standaard werkwijze voor ${lowerTitle} terug naar één duidelijke route. Haal losse Excel-stappen, mailafspraken en handmatige tussenstappen weg waar dat kan.`;
+    return `Maak voor ${title} één vaste werkwijze. Haal losse Excel-stappen en mailafspraken uit het proces.`;
   }
 
   if (signals.includes("Foutgevoelig proces")) {
-    return `Maak voor ${lowerTitle} eerst de basis betrouwbaar. Leg controles, verplichte velden en duidelijke werkafspraken vast voordat je verder automatiseert.`;
+    return `Maak ${title} eerst betrouwbaar. Leg controles, verplichte velden en werkafspraken vast.`;
   }
 
   if (signals.includes("Beperkt inzicht")) {
-    return `Spreek eerst af welke stuurinformatie echt nodig is binnen ${lowerTitle}. Bouw daarna pas rapportages, zodat het team stuurt op één duidelijke waarheid.`;
+    return `Bepaal eerst welke stuurinformatie echt nodig is voor ${title}. Bouw rapportages pas daarna.`;
   }
 
   if (signals.includes("Afhankelijk van keten of koppeling")) {
-    return `Kijk bij ${lowerTitle} eerst naar het proces in de hele keten. Maak duidelijk wat in AFAS leidend is en wat via koppelingen of portalen moet lopen.`;
+    return `Maak bij ${title} eerst duidelijk wat leidend is in de keten. Bepaal daarna pas de koppelingen.`;
   }
 
   if (signals.includes("Proces vraagt sturing of controle")) {
-    return `Richt voor ${lowerTitle} een simpele en duidelijke workflow in. Zorg dat verantwoordelijkheden, controles en uitzonderingen helder zijn.`;
+    return `Richt voor ${title} een duidelijke workflow in. Maak verantwoordelijkheden en controles expliciet.`;
+  }
+
+  if (signals.includes("Veel uitzonderingen")) {
+    return `Versimpel ${title} eerst. Breng uitzonderingen terug en maak de standaard leidend.`;
   }
 
   if (priority === "hoog") {
-    return `Pak ${lowerTitle} als eerstvolgende verbeterpunt op. Begin klein, kies de grootste knelpunten en maak daarna pas de stap naar verdere optimalisatie.`;
+    return `Pak ${title} nu als eerst aan. Houd de aanpak klein en praktisch.`;
   }
 
   if (priority === "middel") {
-    return `Plan ${lowerTitle} in als volgende verbeterslag. Eerst de hoofdprocessen stabiel, daarna dit onderdeel verder aanscherpen.`;
+    return `Plan ${title} in als volgende verbeterslag, na de grootste knelpunten.`;
   }
 
-  return `Laat ${lowerTitle} nu nog even staan zoals het is. Leg alleen vast wat later nodig is, zodat dit onderdeel in een volgende fase slim kan worden opgepakt.`;
+  return `Laat ${title} voorlopig staan en pak dit later gericht op.`;
 }
 
 function buildScoreLabel(score: number | null | undefined): string {
@@ -343,11 +365,6 @@ function buildScoreLabel(score: number | null | undefined): string {
   return "Direct verbeteren nodig";
 }
 
-function capitalize(text: string): string {
-  if (!text) return text;
-  return text.charAt(0).toUpperCase() + text.slice(1);
-}
-
 function buildHeadline(
   overallScore: number | null | undefined,
   highCount: number
@@ -357,20 +374,20 @@ function buildHeadline(
       return "De basis staat, maar gerichte aanscherping geeft nu de meeste waarde.";
     }
     if (overallScore >= 55) {
-      return "Er staat al iets goeds, maar een paar duidelijke keuzes maken nu het verschil.";
+      return "Er staat al iets goeds, maar een paar scherpe keuzes maken nu het verschil.";
     }
     if (overallScore >= 35) {
-      return "De organisatie heeft een bruikbare basis, maar meerdere onderdelen vragen nu gerichte aandacht.";
+      return "De basis is bruikbaar, maar meerdere onderdelen vragen nu aandacht.";
     }
     return "De basis is nog te kwetsbaar en vraagt eerst rust, structuur en duidelijke keuzes.";
   }
 
   if (highCount >= 3) {
-    return "Meerdere onderdelen vragen nu directe aandacht om meer grip en rust te krijgen.";
+    return "Meerdere onderdelen vragen nu directe aandacht.";
   }
 
   if (highCount >= 1) {
-    return "Er zijn een paar duidelijke verbeterpunten die je het beste als eerste kunt oppakken.";
+    return "Er zijn een paar duidelijke verbeterpunten die je het beste eerst oppakt.";
   }
 
   return "De scan laat vooral kansen zien om slimmer en consistenter te werken.";
@@ -378,42 +395,56 @@ function buildHeadline(
 
 function buildExplanation(priorities: OutputPriorityItem[]): string {
   const high = priorities.filter((item) => item.priority === "hoog").length;
-  const medium = priorities.filter((item) => item.priority === "middel").length;
+  const now = priorities.filter((item) => item.bucket === "now").length;
 
   if (high >= 3) {
-    return "Advies: begin met de onderdelen die vandaag al zorgen voor handwerk, fouten of onduidelijkheid. Pas daarna heeft verdere optimalisatie echt zin.";
+    return "Begin bij de onderdelen die nu zorgen voor handwerk, fouten of onduidelijkheid. Pas daarna heeft verdere optimalisatie echt zin.";
+  }
+
+  if (now >= 1) {
+    return "Pak eerst de onderdelen op die direct effect hebben op rust, grip en kwaliteit.";
   }
 
   if (high >= 1) {
-    return "Advies: pak eerst de hoogste prioriteiten op. Daarmee maak je de meeste impact op kwaliteit, snelheid en grip.";
+    return "Start met de hoogste prioriteiten. Daarmee maak je nu het meeste verschil.";
   }
 
-  if (medium >= 2) {
-    return "Advies: de basis lijkt redelijk op orde. De grootste winst zit nu in gericht verbeteren en beter standaardiseren.";
+  return "Houd de basis simpel en stabiel. Werk daarna stap voor stap verder aan verbetering.";
+}
+
+function buildQuickWinText(item: OutputPriorityItem): string {
+  if (item.signals.includes("Veel handwerk")) {
+    return `${item.title}: maak één vaste werkwijze.`;
   }
 
-  return "Advies: houd de basis simpel en stabiel. Werk daarna stap voor stap verder aan optimalisatie.";
+  if (item.signals.includes("Foutgevoelig proces")) {
+    return `${item.title}: leg controles en verplichte stappen vast.`;
+  }
+
+  if (item.signals.includes("Proces vraagt sturing of controle")) {
+    return `${item.title}: maak rollen en goedkeuring duidelijk.`;
+  }
+
+  if (item.signals.includes("Beperkt inzicht")) {
+    return `${item.title}: bepaal eerst de juiste stuurinformatie.`;
+  }
+
+  if (item.signals.includes("Afhankelijk van keten of koppeling")) {
+    return `${item.title}: maak eerst de keten leidend.`;
+  }
+
+  return `${item.title}: eerst versimpelen, daarna verbeteren.`;
 }
 
 function buildQuickWins(priorities: OutputPriorityItem[]): string[] {
   const quickWins = priorities
-    .filter(
-      (item) =>
-        item.bucket === "now" &&
-        (item.signals.includes("Veel handwerk") ||
-          item.signals.includes("Foutgevoelig proces"))
-    )
+    .filter((item) => item.bucket === "now" || item.priority === "hoog")
     .slice(0, 3)
-    .map(
-      (item) =>
-        `${item.title}: breng de standaard werkwijze terug naar één duidelijke route.`
-    );
+    .map(buildQuickWinText);
 
   if (quickWins.length > 0) return quickWins;
 
-  return priorities
-    .slice(0, 3)
-    .map((item) => `${item.title}: eerst versimpelen, daarna pas verder optimaliseren.`);
+  return priorities.slice(0, 3).map(buildQuickWinText);
 }
 
 export function buildScanOutput(scan: ScanInput): ScanOutput {
@@ -424,7 +455,7 @@ export function buildScanOutput(scan: ScanInput): ScanOutput {
       const signals = deriveSignals(section);
       const score = calculatePriorityScore(section);
       const priority = mapPriorityLevel(score);
-      const bucket = mapRoadmapBucket(priority, signals);
+      const bucket = mapRoadmapBucket(priority, signals, score);
 
       return {
         id: section.id,
@@ -441,7 +472,6 @@ export function buildScanOutput(scan: ScanInput): ScanOutput {
     .sort((a, b) => b.score - a.score);
 
   const highCount = priorities.filter((item) => item.priority === "hoog").length;
-
   const overallScore =
     typeof scan.overallScore === "number" ? scan.overallScore : null;
 
