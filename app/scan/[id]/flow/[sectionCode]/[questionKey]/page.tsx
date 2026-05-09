@@ -129,14 +129,14 @@ function getProfileBasisCompactStepIndex(questionKey: string): number {
 
 function getBaseOptionButtonClass(disabled: boolean) {
   if (disabled) {
-    return "min-h-[52px] rounded-xl border border-black/15 bg-white px-3 py-2 text-center opacity-40";
+    return "mx-auto w-full max-w-[420px] min-h-[52px] rounded-xl border border-black/15 bg-white px-3 py-2 text-center opacity-40";
   }
 
-  return "min-h-[52px] rounded-xl border border-black/15 bg-white px-3 py-2 text-center transition hover:bg-black/[0.02]";
+  return "mx-auto w-full max-w-[420px] min-h-[52px] rounded-xl border border-black/15 bg-white px-3 py-2 text-center transition hover:bg-black/[0.02]";
 }
 
 function getActiveOptionButtonClass() {
-  return "min-h-[52px] rounded-xl border border-[#33406f] bg-[#3f4e87] px-3 py-2 text-center text-white shadow-sm transition";
+  return "mx-auto w-full max-w-[420px] min-h-[52px] rounded-xl border border-[#33406f] bg-[#3f4e87] px-3 py-2 text-center text-white shadow-sm transition";
 }
 
 export default function FlowQuestionPage() {
@@ -419,7 +419,7 @@ export default function FlowQuestionPage() {
     if (!currentOptionSet) return null;
 
     return (
-      <div className="grid gap-2 sm:grid-cols-2">
+      <div className="grid gap-2 sm:grid-cols-2 sm:justify-center">
         {[...currentOptionSet.options]
           .sort((a, b) => a.order - b.order)
           .map((option) => {
@@ -565,7 +565,7 @@ export default function FlowQuestionPage() {
             )}
 
             {question.inputType === "single_select" && optionSet && (
-              <div className="grid gap-2 sm:grid-cols-2">
+              <div className="grid gap-2 sm:grid-cols-2 sm:justify-center">
                 {[...optionSet.options]
                   .sort((a, b) => a.order - b.order)
                   .map((option) => {
@@ -601,7 +601,7 @@ export default function FlowQuestionPage() {
               optionSet &&
               question.key !== "afas_products" && (
                 <div className="space-y-3">
-                  <div className="grid gap-2 sm:grid-cols-2">
+                  <div className="grid gap-2 sm:grid-cols-2 sm:justify-center">
                     {[...optionSet.options]
                       .sort((a, b) => a.order - b.order)
                       .map((option) => {
@@ -675,7 +675,7 @@ export default function FlowQuestionPage() {
                         {group.title}
                       </div>
 
-                      <div className="grid gap-2 sm:grid-cols-2">
+                      <div className="grid gap-2 sm:grid-cols-2 sm:justify-center">
                         {group.options.map((option) => {
                           const isActive = answerArray.includes(option.value);
                           const maxSelections =
