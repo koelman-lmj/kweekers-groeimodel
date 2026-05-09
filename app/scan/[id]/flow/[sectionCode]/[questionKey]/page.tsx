@@ -493,9 +493,10 @@ export default function FlowQuestionPage() {
         {isProfileBasisOverview ? (
           <div className="space-y-5">
             <div className="space-y-2">
-              <label htmlFor="customer_name" className="text-sm font-medium">
-                Klantnaam
-              </label>
+<label htmlFor="customer_name" className="text-sm font-medium">
+  Klantnaam
+  <RequiredAsterisk />
+</label>
               <input
                 id="customer_name"
                 type="text"
