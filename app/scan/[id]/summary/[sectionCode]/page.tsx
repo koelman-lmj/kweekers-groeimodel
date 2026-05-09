@@ -117,17 +117,17 @@ function normalizeScanForOutput(scan: ReturnType<typeof useScanContext>["scan"])
       ? domainScores.reduce((sum, domain) => sum + domain.score, 0) / domainScores.length
       : null;
 
-  return {
-    id: "current-scan",
-    customerName: scan.profile.customerName || "Onbekende klant",
-    sector: scan.profile.industry || "Onbekende sector",
-    goal:
-      scan.profile.reasonForModel?.join(", ") ||
-      scan.scope.focus?.join(", ") ||
-      "Nog niet ingevuld",
-    overallScore: averageScore,
-    sections,
-  };
+return {
+  id: "current-scan",
+  customerName: scan.profile.customerName || "Onbekende klant",
+  sector: scan.profile.sector || "Onbekende sector",
+  goal:
+    scan.profile.reasonForModel?.join(", ") ||
+    scan.scope.focus?.join(", ") ||
+    "Nog niet ingevuld",
+  overallScore: averageScore,
+  sections,
+};
 }
 
 export default function SectionSummaryPage() {
