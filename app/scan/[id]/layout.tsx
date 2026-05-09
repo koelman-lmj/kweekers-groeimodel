@@ -122,9 +122,22 @@ function getStepStatus(
 function getStepHref(
   scanId: string,
   step: (typeof STEPS)[number],
-  status: StepStatus
+  status: StepStatus,
+  visitedSections: string[],
+  lastVisitedRouteBySection: Record<string, string>
 ): string | null {
-  if (status !== "current" && status !== "completed") return null;
+  const stepVisited = step.sectionCodes.some((sectionCode) =>
+    visitedSections.includes(sectionCode)
+  );
+
+  if (status !== "current" && status !== "completed" && !stepVisited) {
+    return null;
+  }
+
+  for (const sectionCode of step.sectionCodes) {
+    const visitedRoute = lastVisitedRouteBySection[sectionCode];
+    if (visitedRoute) return visitedRoute;
+  }
 
   if (step.primarySectionCode === "advies") {
     return `/scan/${scanId}/summary/advies`;
@@ -149,6 +162,9 @@ function ScanShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const params = useParams();
   const { scan } = useScanContext();
+
+  const visitedSections = scan.ui.visitedSections;
+  const lastVisitedRouteBySection = scan.ui.lastVisitedRouteBySection;
 
   const isExportPage = pathname?.includes("/export");
 
@@ -193,7 +209,15 @@ function ScanShell({ children }: { children: ReactNode }) {
                     currentSectionCode
                   );
 
-                  const href = scanId ? getStepHref(scanId, step, status) : "";
+                  const href = scanId
+                    ? getStepHref(
+                        scanId,
+                        step,
+                        status,
+                        visitedSections,
+                        lastVisitedRouteBySection
+                      )
+                    : null;
 
                   const cardClass =
                     status === "current"
@@ -254,28 +278,28 @@ function ScanShell({ children }: { children: ReactNode }) {
                     </div>
                   );
 
-                 if (href !== null) {
-  return (
-    <Link
-      key={step.primarySectionCode}
-      href={href}
-      className="block"
-      prefetch={false}
-    >
-      {content}
-    </Link>
-  );
-}
+                  if (href !== null) {
+                    return (
+                      <Link
+                        key={step.primarySectionCode}
+                        href={href}
+                        className="block"
+                        prefetch={false}
+                      >
+                        {content}
+                      </Link>
+                    );
+                  }
 
-return (
-  <div
-    key={step.primarySectionCode}
-    className="block cursor-default pointer-events-none"
-    aria-disabled="true"
-  >
-    {content}
-  </div>
-);
+                  return (
+                    <div
+                      key={step.primarySectionCode}
+                      className="block cursor-default pointer-events-none"
+                      aria-disabled="true"
+                    >
+                      {content}
+                    </div>
+                  );
                 })}
               </div>
             </div>
