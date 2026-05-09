@@ -164,7 +164,7 @@ function ScanShell({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-neutral-50">
       <div className="mx-auto grid max-w-7xl gap-6 px-6 py-8 lg:grid-cols-[280px_minmax(0,1fr)] lg:px-8">
         <aside className="lg:sticky lg:top-8 lg:self-start">
-          <div className="rounded-3xl border bg-white p-5 shadow-sm">
+          <div className="rounded-3xl border border-[var(--kweekers-card-border)] bg-white p-5 shadow-sm">
             <div className="space-y-5">
               <div className="kweekers-badge">
                 <Image
@@ -197,39 +197,39 @@ function ScanShell({ children }: { children: ReactNode }) {
 
                   const cardClass =
                     status === "current"
-                      ? "border-[#c7d2e8] bg-[#eef3fb]"
+                      ? "kweekers-step-current"
                       : status === "completed"
-                        ? "border-[#b7dfc2] bg-[#eef8f1]"
+                        ? "kweekers-step-completed"
                         : status === "available"
-                          ? "border-[#e6dfd4] bg-[#fcfaf7] hover:bg-[#f8f3ec]"
-                          : "border-neutral-200 bg-white opacity-70";
+                          ? "kweekers-step-available hover:bg-[#f7f3ed]"
+                          : "kweekers-step-locked";
 
                   const numberClass =
                     status === "current"
-                      ? "border-[#8fa4cc] bg-[#8fa4cc] text-white"
+                      ? "kweekers-step-current-number"
                       : status === "completed"
-                        ? "border-[#56a26a] bg-[#56a26a] text-white"
+                        ? "kweekers-step-completed-number"
                         : status === "available"
-                          ? "border-[#b8ab97] text-[#6a5b49]"
-                          : "border-neutral-300 text-neutral-400";
+                          ? "kweekers-step-available-number"
+                          : "kweekers-step-locked-number";
 
                   const titleClass =
                     status === "current"
-                      ? "text-[#2f426a]"
+                      ? "kweekers-step-current-title"
                       : status === "completed"
-                        ? "text-[#1f5130]"
+                        ? "kweekers-step-completed-title"
                         : status === "available"
-                          ? "text-[#2d241a]"
-                          : "text-neutral-400";
+                          ? "kweekers-step-available-title"
+                          : "kweekers-step-locked-title";
 
                   const descriptionClass =
                     status === "current"
-                      ? "text-[#5b6f94]"
+                      ? "kweekers-step-current-description"
                       : status === "completed"
-                        ? "text-[#4a7356]"
+                        ? "kweekers-step-completed-description"
                         : status === "available"
-                          ? "text-[#7a6a57]"
-                          : "text-neutral-400";
+                          ? "kweekers-step-available-description"
+                          : "kweekers-step-locked-description";
 
                   const displayNumber = status === "completed" ? "✓" : step.number;
 
@@ -270,7 +270,7 @@ function ScanShell({ children }: { children: ReactNode }) {
         </aside>
 
         <main className="min-w-0">
-          <div className="rounded-3xl border bg-white p-6 shadow-sm sm:p-8 lg:p-10">
+          <div className="rounded-3xl border border-[var(--kweekers-card-border)] bg-white p-6 shadow-sm sm:p-8 lg:p-10">
             {children}
           </div>
         </main>
