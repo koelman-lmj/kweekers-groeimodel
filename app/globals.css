@@ -9,7 +9,9 @@
   --kweekers-primary-soft: #e9eef9;
 
   --kweekers-accent: #ed6e41;
+  --kweekers-accent-dark: #db5f34;
   --kweekers-accent-soft: #fce7de;
+  --kweekers-accent-soft-2: #fff3ed;
 
   --kweekers-success: #2f7a46;
   --kweekers-success-soft: #eaf6ee;
@@ -63,13 +65,14 @@ body {
   color: white;
   padding: 12px 20px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: background 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
 }
 
 .kweekers-primary-button:hover {
-  opacity: 0.95;
+  background: var(--kweekers-accent-dark);
+  opacity: 1;
   transform: translateY(-1px);
 }
 
@@ -83,6 +86,7 @@ body {
 
 .kweekers-required {
   color: var(--kweekers-accent);
+  font-weight: 700;
 }
 
 .kweekers-active-panel {
@@ -107,13 +111,15 @@ body {
 
 .kweekers-step-current {
   border-color: #aab8de;
-  background: var(--kweekers-primary-soft);
+  background: linear-gradient(to right, var(--kweekers-accent-soft-2), var(--kweekers-primary-soft));
+  box-shadow: inset 0 0 0 1px rgba(237, 110, 65, 0.18);
 }
 
 .kweekers-step-current-number {
-  border-color: var(--kweekers-primary);
+  border-color: var(--kweekers-accent);
   background: var(--kweekers-primary);
   color: white;
+  box-shadow: 0 0 0 2px rgba(237, 110, 65, 0.18);
 }
 
 .kweekers-step-current-title {
@@ -149,8 +155,9 @@ body {
 }
 
 .kweekers-step-available-number {
-  border-color: #b8ab97;
-  color: #6a5b49;
+  border-color: #c9a186;
+  color: #8a5d40;
+  background: white;
 }
 
 .kweekers-step-available-title {
@@ -178,4 +185,19 @@ body {
 
 .kweekers-step-locked-description {
   color: #aaaaa4;
+}
+
+.kweekers-chip-selected {
+  border: 1px solid #f2c2ae;
+  background: var(--kweekers-accent-soft);
+  color: #8a4b2f;
+  border-radius: 9999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.kweekers-help-box {
+  border: 1px solid #f2d5c8;
+  background: #fffaf7;
 }
