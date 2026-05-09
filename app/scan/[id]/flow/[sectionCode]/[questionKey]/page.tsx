@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useScanContext } from "@/app/context/ScanContext";
 import { sections } from "@/lib/scan/definition/sections";
@@ -82,6 +82,51 @@ const AFAS_PRODUCT_GROUPS: OptionGroup[] = [
   },
 ];
 
+const PROFILE_BASIS_OVERVIEW_KEYS = [
+  "customer_name",
+  "sector",
+  "organization_size",
+  "administration_count",
+  "organization_type",
+] as const;
+
+const PROFILE_BASIS_SKIPPED_KEYS = [
+  "sector",
+  "organization_size",
+  "administration_count",
+  "organization_type",
+] as const;
+
+function isProfileBasisOverviewRoute(sectionCode: string, questionKey: string) {
+  return sectionCode === "profile_basis" && questionKey === "customer_name";
+}
+
+function isSkippedProfileBasisRoute(sectionCode: string, questionKey: string) {
+  return (
+    sectionCode === "profile_basis" &&
+    PROFILE_BASIS_SKIPPED_KEYS.includes(
+      questionKey as (typeof PROFILE_BASIS_SKIPPED_KEYS)[number]
+    )
+  );
+}
+
+function getProfileBasisCompactStepIndex(questionKey: string): number {
+  switch (questionKey) {
+    case "customer_name":
+      return 1;
+    case "afas_products":
+      return 2;
+    case "ownership_model":
+      return 3;
+    case "standardization_context":
+      return 4;
+    case "primary_process_chains":
+      return 5;
+    default:
+      return 1;
+  }
+}
+
 function getBaseOptionButtonClass(disabled: boolean) {
   if (disabled) {
     return "min-h-[72px] rounded-2xl border border-black/15 bg-white px-4 py-3 text-center opacity-40";
@@ -149,6 +194,25 @@ export default function FlowQuestionPage() {
     ? getOptionSet(question.optionSetKey)
     : undefined;
 
+  const isProfileBasisOverview = isProfileBasisOverviewRoute(
+    sectionCode,
+    questionKey
+  );
+  const shouldRedirectSkippedProfileBasis = isSkippedProfileBasisRoute(
+    sectionCode,
+    questionKey
+  );
+
+  useEffect(() => {
+    if (shouldRedirectSkippedProfileBasis) {
+      router.replace(`/scan/${scanId}/flow/profile_basis/customer_name`);
+    }
+  }, [shouldRedirectSkippedProfileBasis, router, scanId]);
+
+  if (shouldRedirectSkippedProfileBasis) {
+    return null;
+  }
+
   if (!section || !question || question.sectionCode !== sectionCode) {
     return (
       <div className="space-y-4">
@@ -175,8 +239,6 @@ export default function FlowQuestionPage() {
     );
   }
 
-  const questionIndex = currentQuestionIndex + 1;
-
   const currentSectionIndex = sections.findIndex(
     (item) => item.code === sectionCode
   );
@@ -188,12 +250,28 @@ export default function FlowQuestionPage() {
     ? getQuestionsForSection(previousSection.code, scan)
     : [];
 
-  const previousHref =
+  let questionIndex = currentQuestionIndex + 1;
+  let questionTotal = sectionQuestions.length;
+
+  if (sectionCode === "profile_basis") {
+    questionIndex = getProfileBasisCompactStepIndex(questionKey);
+    questionTotal = 5;
+  }
+
+  let previousHref =
     currentQuestionIndex > 0
       ? `/scan/${scanId}/flow/${sectionCode}/${sectionQuestions[currentQuestionIndex - 1].key}`
       : previousSection && previousSectionQuestions.length > 0
         ? `/scan/${scanId}/flow/${previousSection.code}/${previousSectionQuestions[previousSectionQuestions.length - 1].key}`
         : `/scan/${scanId}/flow/profile_basis/customer_name`;
+
+  if (isProfileBasisOverview) {
+    previousHref = `/scan/${scanId}/flow/profile_basis/customer_name`;
+  }
+
+  if (sectionCode === "profile_basis" && questionKey === "afas_products") {
+    previousHref = `/scan/${scanId}/flow/profile_basis/customer_name`;
+  }
 
   const nextQuestion = sectionQuestions[currentQuestionIndex + 1];
   const nextSection = section.nextSectionCode
@@ -205,7 +283,9 @@ export default function FlowQuestionPage() {
 
   let nextHref = `/scan/${scanId}/summary/advies`;
 
-  if (nextQuestion) {
+  if (isProfileBasisOverview) {
+    nextHref = `/scan/${scanId}/flow/profile_basis/afas_products`;
+  } else if (nextQuestion) {
     nextHref = `/scan/${scanId}/flow/${sectionCode}/${nextQuestion.key}`;
   } else if (nextSection && nextSectionQuestions.length > 0) {
     nextHref = `/scan/${scanId}/flow/${nextSection.code}/${nextSectionQuestions[0].key}`;
@@ -219,46 +299,47 @@ export default function FlowQuestionPage() {
   const commentValue = scan.comments[questionKey] ?? "";
   const [showValidation, setShowValidation] = useState(false);
 
-  const setAnswerValue = (value: AnswerValue) => {
-    setAnswerToScan(
-      {
-        setCustomerName,
-        setSector,
-        setOrganizationSize,
-        setAdministrationCount,
-        setOrganizationType,
-        setAfasProducts,
-        setOwnershipModel,
-        setStandardizationContext,
-        setPrimaryProcessChains,
-        setScanReason,
-        setBiggestBottleneck,
-        setScopeWidth,
-        setScopeFocus,
-        setScopeDepth,
-        setOwnershipClarity,
-        setChangeDecisionProcess,
-        setImprovementGovernance,
-        setProcessStandardization,
-        setExceptionControl,
-        setIssueResolution,
-        setFinanceFoundationReliability,
-        setFinanceExceptionHandling,
-        setFinanceReportingMaturity,
-        setOrderFlowStandardization,
-        setOrderExceptionComplexity,
-        setOrderSystemFit,
-        setCareRegistrationExceptions,
-        setCareAccountabilityPressure,
-        setEducationIntakePlanningConsistency,
-        setEducationProcessAdminAlignment,
-        setEducationExceptionHandling,
-      },
-      questionKey,
-      value
-    );
+  const setterBag = {
+    setCustomerName,
+    setSector,
+    setOrganizationSize,
+    setAdministrationCount,
+    setOrganizationType,
+    setAfasProducts,
+    setOwnershipModel,
+    setStandardizationContext,
+    setPrimaryProcessChains,
+    setScanReason,
+    setBiggestBottleneck,
+    setScopeWidth,
+    setScopeFocus,
+    setScopeDepth,
+    setOwnershipClarity,
+    setChangeDecisionProcess,
+    setImprovementGovernance,
+    setProcessStandardization,
+    setExceptionControl,
+    setIssueResolution,
+    setFinanceFoundationReliability,
+    setFinanceExceptionHandling,
+    setFinanceReportingMaturity,
+    setOrderFlowStandardization,
+    setOrderExceptionComplexity,
+    setOrderSystemFit,
+    setCareRegistrationExceptions,
+    setCareAccountabilityPressure,
+    setEducationIntakePlanningConsistency,
+    setEducationProcessAdminAlignment,
+    setEducationExceptionHandling,
+  };
 
+  const setFieldValue = (fieldKey: string, value: AnswerValue) => {
+    setAnswerToScan(setterBag, fieldKey, value);
     setShowValidation(false);
+  };
+
+  const setAnswerValue = (value: AnswerValue) => {
+    setFieldValue(questionKey, value);
   };
 
   const toggleMultiSelectValue = (optionValue: string) => {
@@ -285,8 +366,9 @@ export default function FlowQuestionPage() {
     setComment(questionKey, value);
   };
 
-  const canContinue = question.required ? isFilled(answerValue) : true;
-  const shortHelpText = getShortHelpText(question.label, question.helpText);
+  const shortHelpText = isProfileBasisOverview
+    ? "We leggen eerst de belangrijkste basisgegevens van de organisatie vast."
+    : getShortHelpText(question.label, question.helpText);
 
   const groupedOptions =
     question.key === "afas_products" && optionSet
@@ -310,6 +392,64 @@ export default function FlowQuestionPage() {
           .filter(Boolean)
       : [];
 
+  const profileOverviewValues = {
+    customer_name: getAnswerFromScan(scan, "customer_name"),
+    sector: getAnswerFromScan(scan, "sector"),
+    organization_size: getAnswerFromScan(scan, "organization_size"),
+    administration_count: getAnswerFromScan(scan, "administration_count"),
+    organization_type: getAnswerFromScan(scan, "organization_type"),
+  };
+
+  const profileOverviewComplete = PROFILE_BASIS_OVERVIEW_KEYS.every((key) =>
+    isFilled(profileOverviewValues[key])
+  );
+
+  const canContinue = isProfileBasisOverview
+    ? profileOverviewComplete
+    : question.required
+      ? isFilled(answerValue)
+      : true;
+
+  const renderSingleSelectGrid = (
+    optionSetKey: string,
+    currentValue: string,
+    onSelect: (value: string) => void
+  ) => {
+    const currentOptionSet = getOptionSet(optionSetKey);
+    if (!currentOptionSet) return null;
+
+    return (
+      <div className="grid gap-3 sm:grid-cols-2">
+        {[...currentOptionSet.options]
+          .sort((a, b) => a.order - b.order)
+          .map((option) => {
+            const isActive = currentValue === option.value;
+
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => onSelect(option.value)}
+                aria-pressed={isActive}
+                className={
+                  isActive
+                    ? getActiveOptionButtonClass()
+                    : getBaseOptionButtonClass(false)
+                }
+              >
+                <div className="text-sm font-semibold">{option.label}</div>
+                {option.description && (
+                  <div className="mt-1 text-xs text-current/80">
+                    {option.description}
+                  </div>
+                )}
+              </button>
+            );
+          })}
+      </div>
+    );
+  };
+
   const handleNext = () => {
     if (!canContinue) {
       setShowValidation(true);
@@ -319,17 +459,17 @@ export default function FlowQuestionPage() {
     router.push(nextHref);
   };
 
+  const title = isProfileBasisOverview ? "Basis van de organisatie" : question.label;
+
   return (
     <div className="space-y-10">
       <div className="space-y-4">
         <div className="space-y-1">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Stap {questionIndex} van {sectionQuestions.length}
+            Stap {questionIndex} van {questionTotal}
           </p>
 
-          <h1 className="text-5xl font-semibold tracking-tight">
-            {question.label}
-          </h1>
+          <h1 className="text-5xl font-semibold tracking-tight">{title}</h1>
         </div>
 
         <p className="max-w-2xl text-sm text-muted-foreground">
@@ -339,83 +479,104 @@ export default function FlowQuestionPage() {
 
       {showValidation && !canContinue && (
         <div className="kweekers-accent-box text-sm">
-          Kies eerst een antwoord om verder te gaan.
+          {isProfileBasisOverview
+            ? "Vul eerst alle basisvelden in om verder te gaan."
+            : "Kies eerst een antwoord om verder te gaan."}
         </div>
       )}
 
       <section className="space-y-5 rounded-3xl border border-black/10 bg-[#fafafa] p-5">
-        {question.inputType === "text" && (
-          <div className="space-y-2">
-            <label htmlFor={question.key} className="text-sm font-medium">
-              Antwoord
-            </label>
-            <input
-              id={question.key}
-              type="text"
-              value={answerString}
-              onChange={(event) => setAnswerValue(event.target.value)}
-              placeholder={question.placeholder}
-              className="w-full rounded-2xl border border-black/15 bg-white px-4 py-3 outline-none"
-            />
+        {isProfileBasisOverview ? (
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <label htmlFor="customer_name" className="text-sm font-medium">
+                Klantnaam
+              </label>
+              <input
+                id="customer_name"
+                type="text"
+                value={asString(profileOverviewValues.customer_name)}
+                onChange={(event) =>
+                  setFieldValue("customer_name", event.target.value)
+                }
+                placeholder="Bijvoorbeeld: Janssen BV"
+                className="w-full rounded-2xl border border-black/15 bg-white px-4 py-3 outline-none"
+              />
+            </div>
+
+            <div className="space-y-3">
+              <div className="text-sm font-medium">Sector</div>
+              {renderSingleSelectGrid(
+                "sector_options",
+                asString(profileOverviewValues.sector),
+                (value) => setFieldValue("sector", value)
+              )}
+            </div>
+
+            <div className="space-y-3">
+              <div className="text-sm font-medium">Organisatiegrootte</div>
+              {renderSingleSelectGrid(
+                "organization_size_options",
+                asString(profileOverviewValues.organization_size),
+                (value) => setFieldValue("organization_size", value)
+              )}
+            </div>
+
+            <div className="space-y-3">
+              <div className="text-sm font-medium">
+                Aantal administraties / entiteiten
+              </div>
+              {renderSingleSelectGrid(
+                "administration_count_options",
+                asString(profileOverviewValues.administration_count),
+                (value) => setFieldValue("administration_count", value)
+              )}
+            </div>
+
+            <div className="space-y-3">
+              <div className="text-sm font-medium">Type organisatie en operatie</div>
+              {renderSingleSelectGrid(
+                "organization_type_options",
+                asString(profileOverviewValues.organization_type),
+                (value) => setFieldValue("organization_type", value)
+              )}
+            </div>
           </div>
-        )}
+        ) : (
+          <>
+            {question.inputType === "text" && (
+              <div className="space-y-2">
+                <label htmlFor={question.key} className="text-sm font-medium">
+                  Antwoord
+                </label>
+                <input
+                  id={question.key}
+                  type="text"
+                  value={answerString}
+                  onChange={(event) => setAnswerValue(event.target.value)}
+                  placeholder={question.placeholder}
+                  className="w-full rounded-2xl border border-black/15 bg-white px-4 py-3 outline-none"
+                />
+              </div>
+            )}
 
-        {question.inputType === "single_select" && optionSet && (
-          <div className="grid gap-3 sm:grid-cols-2">
-            {[...optionSet.options]
-              .sort((a, b) => a.order - b.order)
-              .map((option) => {
-                const isActive = answerString === option.value;
-
-                return (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => setAnswerValue(option.value)}
-                    aria-pressed={isActive}
-                    className={
-                      isActive
-                        ? getActiveOptionButtonClass()
-                        : getBaseOptionButtonClass(false)
-                    }
-                  >
-                    <div className="text-sm font-semibold">{option.label}</div>
-                    {option.description && (
-                      <div className="mt-1 text-xs text-current/80">
-                        {option.description}
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
-          </div>
-        )}
-
-        {question.inputType === "multi_select" &&
-          optionSet &&
-          question.key !== "afas_products" && (
-            <div className="space-y-4">
+            {question.inputType === "single_select" && optionSet && (
               <div className="grid gap-3 sm:grid-cols-2">
                 {[...optionSet.options]
                   .sort((a, b) => a.order - b.order)
                   .map((option) => {
-                    const isActive = answerArray.includes(option.value);
-                    const maxSelections =
-                      question.maxSelections ?? Number.POSITIVE_INFINITY;
-                    const disableNewSelection =
-                      !isActive && answerArray.length >= maxSelections;
+                    const isActive = answerString === option.value;
 
                     return (
                       <button
                         key={option.value}
                         type="button"
-                        onClick={() => toggleMultiSelectValue(option.value)}
+                        onClick={() => setAnswerValue(option.value)}
                         aria-pressed={isActive}
-                        disabled={disableNewSelection}
                         className={
                           isActive
                             ? getActiveOptionButtonClass()
-                            : getBaseOptionButtonClass(disableNewSelection)
+                            : getBaseOptionButtonClass(false)
                         }
                       >
                         <div className="text-sm font-semibold">{option.label}</div>
@@ -428,122 +589,167 @@ export default function FlowQuestionPage() {
                     );
                   })}
               </div>
+            )}
 
-              {typeof question.maxSelections === "number" && (
-                <p className="text-sm text-muted-foreground">
-                  Gekozen: {answerArray.length} van maximaal {question.maxSelections}
-                </p>
-              )}
-            </div>
-          )}
-
-        {question.inputType === "multi_select" &&
-          optionSet &&
-          question.key === "afas_products" && (
-            <div className="space-y-6">
-              {selectedLabels.length > 0 && (
-                <div className="rounded-2xl border border-black/10 bg-white/80 p-3">
-                  <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                    Gekozen
-                  </div>
-
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {selectedLabels.map((label) => (
-                      <span
-                        key={label}
-                        className="rounded-full border border-[#c7d2e8] bg-[#eef3fb] px-3 py-1 text-xs font-medium text-[#2f426a]"
-                      >
-                        {label}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {groupedOptions.map((group) => (
-                <div key={group.title} className="space-y-3">
-                  <div className="border-b border-black/10 pb-1 text-sm font-semibold text-black">
-                    {group.title}
-                  </div>
-
+            {question.inputType === "multi_select" &&
+              optionSet &&
+              question.key !== "afas_products" && (
+                <div className="space-y-4">
                   <div className="grid gap-3 sm:grid-cols-2">
-                    {group.options.map((option) => {
-                      const isActive = answerArray.includes(option.value);
-                      const maxSelections =
-                        question.maxSelections ?? Number.POSITIVE_INFINITY;
-                      const disableNewSelection =
-                        !isActive && answerArray.length >= maxSelections;
+                    {[...optionSet.options]
+                      .sort((a, b) => a.order - b.order)
+                      .map((option) => {
+                        const isActive = answerArray.includes(option.value);
+                        const maxSelections =
+                          question.maxSelections ?? Number.POSITIVE_INFINITY;
+                        const disableNewSelection =
+                          !isActive && answerArray.length >= maxSelections;
 
-                      return (
-                        <button
-                          key={option.value}
-                          type="button"
-                          onClick={() => toggleMultiSelectValue(option.value)}
-                          aria-pressed={isActive}
-                          disabled={disableNewSelection}
-                          className={
-                            isActive
-                              ? getActiveOptionButtonClass()
-                              : getBaseOptionButtonClass(disableNewSelection)
-                          }
-                        >
-                          <div className="text-sm font-semibold">{option.label}</div>
-                          {option.description && (
-                            <div className="mt-1 text-xs text-current/80">
-                              {option.description}
-                            </div>
-                          )}
-                        </button>
-                      );
-                    })}
+                        return (
+                          <button
+                            key={option.value}
+                            type="button"
+                            onClick={() => toggleMultiSelectValue(option.value)}
+                            aria-pressed={isActive}
+                            disabled={disableNewSelection}
+                            className={
+                              isActive
+                                ? getActiveOptionButtonClass()
+                                : getBaseOptionButtonClass(disableNewSelection)
+                            }
+                          >
+                            <div className="text-sm font-semibold">{option.label}</div>
+                            {option.description && (
+                              <div className="mt-1 text-xs text-current/80">
+                                {option.description}
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })}
                   </div>
+
+                  {typeof question.maxSelections === "number" && (
+                    <p className="text-sm text-muted-foreground">
+                      Gekozen: {answerArray.length} van maximaal{" "}
+                      {question.maxSelections}
+                    </p>
+                  )}
                 </div>
-              ))}
-
-              {typeof question.maxSelections === "number" && (
-                <p className="text-sm text-muted-foreground">
-                  Gekozen: {answerArray.length} van maximaal {question.maxSelections}
-                </p>
               )}
-            </div>
-          )}
 
-        {question.examples && question.examples.length > 0 && (
-          <div className="rounded-2xl border border-black/10 bg-white/80 p-3">
-            <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-              Hulp bij deze vraag
-            </div>
-            <ul className="mt-1.5 space-y-1 text-xs text-muted-foreground">
-              {question.examples.map((example) => (
-                <li key={example} className="ml-5 list-disc">
-                  {example}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+            {question.inputType === "multi_select" &&
+              optionSet &&
+              question.key === "afas_products" && (
+                <div className="space-y-6">
+                  {selectedLabels.length > 0 && (
+                    <div className="rounded-2xl border border-black/10 bg-white/80 p-3">
+                      <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                        Gekozen
+                      </div>
 
-        {question.allowsComment && (
-          <div className="space-y-2 border-t border-black/10 pt-4">
-            <label
-              htmlFor={`${question.key}-comment`}
-              className="text-sm font-medium"
-            >
-              Opmerking
-            </label>
-            <textarea
-              id={`${question.key}-comment`}
-              value={commentValue}
-              onChange={(event) => setCommentValue(event.target.value)}
-              placeholder="Bijvoorbeeld: dit verschilt per team of is nog niet formeel belegd."
-              rows={4}
-              className="w-full rounded-2xl border border-black/15 bg-white px-4 py-3 outline-none"
-            />
-            <p className="text-xs text-muted-foreground">
-              Deze opmerking kan later worden meegenomen in samenvatting of
-              rapportage.
-            </p>
-          </div>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {selectedLabels.map((label) => (
+                          <span
+                            key={label}
+                            className="rounded-full border border-[#c7d2e8] bg-[#eef3fb] px-3 py-1 text-xs font-medium text-[#2f426a]"
+                          >
+                            {label}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {groupedOptions.map((group) => (
+                    <div key={group.title} className="space-y-3">
+                      <div className="border-b border-black/10 pb-1 text-sm font-semibold text-black">
+                        {group.title}
+                      </div>
+
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        {group.options.map((option) => {
+                          const isActive = answerArray.includes(option.value);
+                          const maxSelections =
+                            question.maxSelections ?? Number.POSITIVE_INFINITY;
+                          const disableNewSelection =
+                            !isActive && answerArray.length >= maxSelections;
+
+                          return (
+                            <button
+                              key={option.value}
+                              type="button"
+                              onClick={() => toggleMultiSelectValue(option.value)}
+                              aria-pressed={isActive}
+                              disabled={disableNewSelection}
+                              className={
+                                isActive
+                                  ? getActiveOptionButtonClass()
+                                  : getBaseOptionButtonClass(disableNewSelection)
+                              }
+                            >
+                              <div className="text-sm font-semibold">
+                                {option.label}
+                              </div>
+                              {option.description && (
+                                <div className="mt-1 text-xs text-current/80">
+                                  {option.description}
+                                </div>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+
+                  {typeof question.maxSelections === "number" && (
+                    <p className="text-sm text-muted-foreground">
+                      Gekozen: {answerArray.length} van maximaal{" "}
+                      {question.maxSelections}
+                    </p>
+                  )}
+                </div>
+              )}
+
+            {question.examples && question.examples.length > 0 && (
+              <div className="rounded-2xl border border-black/10 bg-white/80 p-3">
+                <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                  Hulp bij deze vraag
+                </div>
+                <ul className="mt-1.5 space-y-1 text-xs text-muted-foreground">
+                  {question.examples.map((example) => (
+                    <li key={example} className="ml-5 list-disc">
+                      {example}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {question.allowsComment && (
+              <div className="space-y-2 border-t border-black/10 pt-4">
+                <label
+                  htmlFor={`${question.key}-comment`}
+                  className="text-sm font-medium"
+                >
+                  Opmerking
+                </label>
+                <textarea
+                  id={`${question.key}-comment`}
+                  value={commentValue}
+                  onChange={(event) => setCommentValue(event.target.value)}
+                  placeholder="Bijvoorbeeld: dit verschilt per team of is nog niet formeel belegd."
+                  rows={4}
+                  className="w-full rounded-2xl border border-black/15 bg-white px-4 py-3 outline-none"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Deze opmerking kan later worden meegenomen in samenvatting of
+                  rapportage.
+                </p>
+              </div>
+            )}
+          </>
         )}
       </section>
 
