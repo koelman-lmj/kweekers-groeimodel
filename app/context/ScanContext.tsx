@@ -53,6 +53,10 @@ export type ScanState = {
     educationExceptionHandling: string;
   };
   comments: Record<string, string>;
+  ui: {
+    visitedSections: string[];
+    lastVisitedRouteBySection: Record<string, string>;
+  };
 };
 
 const STORAGE_KEY = "kweekers-groeimodel-scan";
@@ -100,6 +104,10 @@ const INITIAL_SCAN: ScanState = {
     educationExceptionHandling: "",
   },
   comments: {},
+  ui: {
+    visitedSections: [],
+    lastVisitedRouteBySection: {},
+  },
 };
 
 type ScanContextValue = {
@@ -147,6 +155,7 @@ type ScanContextValue = {
   setEducationExceptionHandling: (value: string) => void;
 
   setComment: (questionKey: string, value: string) => void;
+  markSectionVisited: (sectionCode: string, route: string) => void;
 };
 
 const ScanContext = createContext<ScanContextValue | undefined>(undefined);
@@ -237,6 +246,19 @@ function loadInitialScan(): ScanState {
         typeof parsed.comments === "object" && parsed.comments !== null
           ? parsed.comments
           : {},
+      ui: {
+        visitedSections:
+          typeof parsed.ui === "object" && parsed.ui !== null
+            ? toStringArray(parsed.ui.visitedSections)
+            : [],
+        lastVisitedRouteBySection:
+          typeof parsed.ui === "object" &&
+          parsed.ui !== null &&
+          typeof parsed.ui.lastVisitedRouteBySection === "object" &&
+          parsed.ui.lastVisitedRouteBySection !== null
+            ? parsed.ui.lastVisitedRouteBySection
+            : {},
+      },
     };
   } catch (error) {
     console.error("Kon scan-state niet laden uit localStorage", error);
@@ -304,6 +326,21 @@ export function ScanProvider({ children }: { children: ReactNode }) {
         console.error("Kon scan-state niet verwijderen uit localStorage", error);
       }
     }
+  };
+
+  const markSectionVisited = (sectionCode: string, route: string) => {
+    setScan((current) => ({
+      ...current,
+      ui: {
+        visitedSections: current.ui.visitedSections.includes(sectionCode)
+          ? current.ui.visitedSections
+          : [...current.ui.visitedSections, sectionCode],
+        lastVisitedRouteBySection: {
+          ...current.ui.lastVisitedRouteBySection,
+          [sectionCode]: route,
+        },
+      },
+    }));
   };
 
   const setCustomerName = (value: string) => updateProfile("customerName", value);
@@ -477,6 +514,7 @@ export function ScanProvider({ children }: { children: ReactNode }) {
       setEducationExceptionHandling,
 
       setComment,
+      markSectionVisited,
     }),
     [scanState]
   );
