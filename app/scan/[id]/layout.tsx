@@ -254,15 +254,28 @@ function ScanShell({ children }: { children: ReactNode }) {
                     </div>
                   );
 
-                  if (href) {
-                    return (
-                      <Link key={step.primarySectionCode} href={href} className="block">
-                        {content}
-                      </Link>
-                    );
-                  }
+                 if (href !== null) {
+  return (
+    <Link
+      key={step.primarySectionCode}
+      href={href}
+      className="block"
+      prefetch={false}
+    >
+      {content}
+    </Link>
+  );
+}
 
-                  return <div key={step.primarySectionCode}>{content}</div>;
+return (
+  <div
+    key={step.primarySectionCode}
+    className="block cursor-default pointer-events-none"
+    aria-disabled="true"
+  >
+    {content}
+  </div>
+);
                 })}
               </div>
             </div>
