@@ -129,14 +129,14 @@ function getProfileBasisCompactStepIndex(questionKey: string): number {
 
 function getBaseOptionButtonClass(disabled: boolean) {
   if (disabled) {
-    return "min-h-[72px] rounded-2xl border border-black/15 bg-white px-4 py-3 text-center opacity-40";
+    return "min-h-[52px] rounded-xl border border-black/15 bg-white px-3 py-2 text-center opacity-40";
   }
 
-  return "min-h-[72px] rounded-2xl border border-black/15 bg-white px-4 py-3 text-center transition hover:bg-black/[0.02]";
+  return "min-h-[52px] rounded-xl border border-black/15 bg-white px-3 py-2 text-center transition hover:bg-black/[0.02]";
 }
 
 function getActiveOptionButtonClass() {
-  return "min-h-[72px] rounded-2xl border border-[#2f426a] bg-[#3d4a78] px-4 py-3 text-center text-white shadow-sm transition";
+  return "min-h-[52px] rounded-xl border border-[#33406f] bg-[#3f4e87] px-3 py-2 text-center text-white shadow-sm transition";
 }
 
 export default function FlowQuestionPage() {
@@ -419,7 +419,7 @@ export default function FlowQuestionPage() {
     if (!currentOptionSet) return null;
 
     return (
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-2 sm:grid-cols-2">
         {[...currentOptionSet.options]
           .sort((a, b) => a.order - b.order)
           .map((option) => {
@@ -437,7 +437,9 @@ export default function FlowQuestionPage() {
                     : getBaseOptionButtonClass(false)
                 }
               >
-                <div className="text-sm font-semibold">{option.label}</div>
+                <div className="text-[13px] font-semibold leading-5">
+                  {option.label}
+                </div>
                 {option.description && (
                   <div className="mt-1 text-xs text-current/80">
                     {option.description}
@@ -462,14 +464,16 @@ export default function FlowQuestionPage() {
   const title = isProfileBasisOverview ? "Basis van de organisatie" : question.label;
 
   return (
-    <div className="space-y-10">
-      <div className="space-y-4">
+    <div className="space-y-8">
+      <div className="space-y-3">
         <div className="space-y-1">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Stap {questionIndex} van {questionTotal}
           </p>
 
-          <h1 className="text-5xl font-semibold tracking-tight">{title}</h1>
+          <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
+            {title}
+          </h1>
         </div>
 
         <p className="max-w-2xl text-sm text-muted-foreground">
@@ -485,9 +489,9 @@ export default function FlowQuestionPage() {
         </div>
       )}
 
-      <section className="space-y-5 rounded-3xl border border-black/10 bg-[#fafafa] p-5">
+      <section className="space-y-4 rounded-3xl border border-black/10 bg-[#fafafa] p-4 sm:p-5">
         {isProfileBasisOverview ? (
-          <div className="space-y-6">
+          <div className="space-y-5">
             <div className="space-y-2">
               <label htmlFor="customer_name" className="text-sm font-medium">
                 Klantnaam
@@ -500,11 +504,11 @@ export default function FlowQuestionPage() {
                   setFieldValue("customer_name", event.target.value)
                 }
                 placeholder="Bijvoorbeeld: Janssen BV"
-                className="w-full rounded-2xl border border-black/15 bg-white px-4 py-3 outline-none"
+                className="w-full rounded-xl border border-black/15 bg-white px-4 py-3 outline-none"
               />
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2">
               <div className="text-sm font-medium">Sector</div>
               {renderSingleSelectGrid(
                 "sector_options",
@@ -513,7 +517,7 @@ export default function FlowQuestionPage() {
               )}
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2">
               <div className="text-sm font-medium">Organisatiegrootte</div>
               {renderSingleSelectGrid(
                 "organization_size_options",
@@ -522,7 +526,7 @@ export default function FlowQuestionPage() {
               )}
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2">
               <div className="text-sm font-medium">
                 Aantal administraties / entiteiten
               </div>
@@ -533,7 +537,7 @@ export default function FlowQuestionPage() {
               )}
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2">
               <div className="text-sm font-medium">Type organisatie en operatie</div>
               {renderSingleSelectGrid(
                 "organization_type_options",
@@ -555,13 +559,13 @@ export default function FlowQuestionPage() {
                   value={answerString}
                   onChange={(event) => setAnswerValue(event.target.value)}
                   placeholder={question.placeholder}
-                  className="w-full rounded-2xl border border-black/15 bg-white px-4 py-3 outline-none"
+                  className="w-full rounded-xl border border-black/15 bg-white px-4 py-3 outline-none"
                 />
               </div>
             )}
 
             {question.inputType === "single_select" && optionSet && (
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-2 sm:grid-cols-2">
                 {[...optionSet.options]
                   .sort((a, b) => a.order - b.order)
                   .map((option) => {
@@ -579,7 +583,9 @@ export default function FlowQuestionPage() {
                             : getBaseOptionButtonClass(false)
                         }
                       >
-                        <div className="text-sm font-semibold">{option.label}</div>
+                        <div className="text-[13px] font-semibold leading-5">
+                          {option.label}
+                        </div>
                         {option.description && (
                           <div className="mt-1 text-xs text-current/80">
                             {option.description}
@@ -594,8 +600,8 @@ export default function FlowQuestionPage() {
             {question.inputType === "multi_select" &&
               optionSet &&
               question.key !== "afas_products" && (
-                <div className="space-y-4">
-                  <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-3">
+                  <div className="grid gap-2 sm:grid-cols-2">
                     {[...optionSet.options]
                       .sort((a, b) => a.order - b.order)
                       .map((option) => {
@@ -618,7 +624,9 @@ export default function FlowQuestionPage() {
                                 : getBaseOptionButtonClass(disableNewSelection)
                             }
                           >
-                            <div className="text-sm font-semibold">{option.label}</div>
+                            <div className="text-[13px] font-semibold leading-5">
+                              {option.label}
+                            </div>
                             {option.description && (
                               <div className="mt-1 text-xs text-current/80">
                                 {option.description}
@@ -641,9 +649,9 @@ export default function FlowQuestionPage() {
             {question.inputType === "multi_select" &&
               optionSet &&
               question.key === "afas_products" && (
-                <div className="space-y-6">
+                <div className="space-y-5">
                   {selectedLabels.length > 0 && (
-                    <div className="rounded-2xl border border-black/10 bg-white/80 p-3">
+                    <div className="rounded-xl border border-black/10 bg-white/80 p-3">
                       <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
                         Gekozen
                       </div>
@@ -662,12 +670,12 @@ export default function FlowQuestionPage() {
                   )}
 
                   {groupedOptions.map((group) => (
-                    <div key={group.title} className="space-y-3">
+                    <div key={group.title} className="space-y-2">
                       <div className="border-b border-black/10 pb-1 text-sm font-semibold text-black">
                         {group.title}
                       </div>
 
-                      <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="grid gap-2 sm:grid-cols-2">
                         {group.options.map((option) => {
                           const isActive = answerArray.includes(option.value);
                           const maxSelections =
@@ -688,7 +696,7 @@ export default function FlowQuestionPage() {
                                   : getBaseOptionButtonClass(disableNewSelection)
                               }
                             >
-                              <div className="text-sm font-semibold">
+                              <div className="text-[13px] font-semibold leading-5">
                                 {option.label}
                               </div>
                               {option.description && (
@@ -713,7 +721,7 @@ export default function FlowQuestionPage() {
               )}
 
             {question.examples && question.examples.length > 0 && (
-              <div className="rounded-2xl border border-black/10 bg-white/80 p-3">
+              <div className="rounded-xl border border-black/10 bg-white/80 p-3">
                 <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
                   Hulp bij deze vraag
                 </div>
@@ -741,7 +749,7 @@ export default function FlowQuestionPage() {
                   onChange={(event) => setCommentValue(event.target.value)}
                   placeholder="Bijvoorbeeld: dit verschilt per team of is nog niet formeel belegd."
                   rows={4}
-                  className="w-full rounded-2xl border border-black/15 bg-white px-4 py-3 outline-none"
+                  className="w-full rounded-xl border border-black/15 bg-white px-4 py-3 outline-none"
                 />
                 <p className="text-xs text-muted-foreground">
                   Deze opmerking kan later worden meegenomen in samenvatting of
