@@ -234,6 +234,14 @@ function calculatePriorityScore(section: ScanSectionInput): number {
     priorityScore += 8;
   }
 
+  if (section.id === "scope") {
+    priorityScore += 4;
+  }
+
+  if (section.id === "diagnose") {
+    priorityScore += 6;
+  }
+
   return clamp(Math.round(priorityScore), 0, 100);
 }
 
@@ -244,6 +252,7 @@ function mapPriorityLevel(score: number): PriorityLevel {
 }
 
 function mapRoadmapBucket(
+  section: ScanSectionInput,
   priority: PriorityLevel,
   signals: string[],
   score: number
@@ -253,17 +262,64 @@ function mapRoadmapBucket(
     signals.includes("Foutgevoelig proces") ||
     signals.includes("Proces vraagt sturing of controle");
 
-  const hasStructuralPain =
-    signals.includes("Beperkt inzicht") ||
-    signals.includes("Afhankelijk van keten of koppeling") ||
-    signals.includes("Veel uitzonderingen");
-
   if (priority === "hoog" && (hasDirectPain || score >= 80)) return "now";
+  if (section.id === "diagnose" && priority !== "laag") return "now";
+  if (section.id === "scope" && priority === "hoog") return "now";
   if (priority === "hoog") return "next";
-  if (priority === "middel" && hasDirectPain) return "next";
-  if (priority === "middel" && hasStructuralPain) return "later";
   if (priority === "middel") return "next";
   return "later";
+}
+
+function buildSectionSpecificReason(
+  section: ScanSectionInput,
+  signals: string[],
+  priority: PriorityLevel
+): string | null {
+  switch (section.id) {
+    case "profile_basis":
+      if (signals.includes("Veel uitzonderingen")) {
+        return "De uitgangssituatie is nog te breed en bevat te veel uitzonderingen.";
+      }
+      if (signals.includes("Veel handwerk")) {
+        return "De basisinformatie wordt nog te versnipperd opgehaald of vastgelegd.";
+      }
+      return priority === "laag"
+        ? "De uitgangssituatie is bruikbaar en kan later verder worden aangescherpt."
+        : "De uitgangssituatie is nog niet scherp genoeg als stevige basis voor de scan.";
+
+    case "profile_reason":
+      if (signals.includes("Beperkt inzicht")) {
+        return "De aanleiding is nog niet scherp genoeg om goed te kunnen sturen op prioriteit.";
+      }
+      return priority === "laag"
+        ? "De aanleiding is werkbaar en kan later nog verder worden aangescherpt."
+        : "De aanleiding en het verbeterdoel kunnen nog concreter worden gemaakt.";
+
+    case "scope":
+      if (signals.includes("Veel uitzonderingen")) {
+        return "De scope is nog te breed of te diffuus om strak te kunnen prioriteren.";
+      }
+      if (signals.includes("Beperkt inzicht")) {
+        return "De focus is nog niet scherp genoeg om te bepalen waar de meeste winst zit.";
+      }
+      return priority === "laag"
+        ? "De scope is bruikbaar en kan later verder worden verfijnd."
+        : "De scope vraagt nog duidelijke keuzes in focus en afbakening.";
+
+    case "diagnose":
+      if (signals.includes("Veel handwerk")) {
+        return "De belangrijkste knelpunten zijn nog niet strak genoeg teruggebracht tot de kern.";
+      }
+      if (signals.includes("Foutgevoelig proces")) {
+        return "De diagnose is nog niet scherp genoeg om gericht te verbeteren.";
+      }
+      return priority === "laag"
+        ? "De diagnose is bruikbaar en kan later verder worden verdiept."
+        : "De diagnose vraagt nog verdere aanscherping van oorzaken en knelpunten.";
+
+    default:
+      return null;
+  }
 }
 
 function buildReason(
@@ -271,6 +327,9 @@ function buildReason(
   signals: string[],
   priority: PriorityLevel
 ): string {
+  const specificReason = buildSectionSpecificReason(section, signals, priority);
+  if (specificReason) return specificReason;
+
   const score = safeSectionScore(section);
 
   if (signals.includes("Veel handwerk")) {
@@ -312,11 +371,63 @@ function buildReason(
     : "Dit onderdeel werkt redelijk, maar kan slimmer en strakker.";
 }
 
+function buildSectionSpecificAdvice(
+  section: ScanSectionInput,
+  signals: string[],
+  priority: PriorityLevel
+): string | null {
+  switch (section.id) {
+    case "profile_basis":
+      if (signals.includes("Veel uitzonderingen")) {
+        return "Versimpel eerst de basis van het klantprofiel. Breng uitzonderingen terug en maak de standaard leidend.";
+      }
+      return priority === "laag"
+        ? "Laat het klantprofiel voorlopig staan en scherpt dit later verder aan."
+        : "Maak het klantprofiel eerst scherper. Zorg voor één heldere uitgangssituatie als basis voor het vervolg.";
+
+    case "profile_reason":
+      if (signals.includes("Beperkt inzicht")) {
+        return "Maak de aanleiding concreter. Benoem wat nu echt beter moet en waarom dat belangrijk is.";
+      }
+      return priority === "laag"
+        ? "Laat de aanleiding nu staan en werk deze later verder uit."
+        : "Scherp de aanleiding verder aan. Maak het doel concreter en beter bespreekbaar.";
+
+    case "scope":
+      if (signals.includes("Veel uitzonderingen")) {
+        return "Maak de scope smaller en concreter. Kies eerst waar de grootste winst zit.";
+      }
+      if (signals.includes("Beperkt inzicht")) {
+        return "Breng de scope terug naar een paar duidelijke keuzes. Maak eerst scherp waar je wel en niet op focust.";
+      }
+      return priority === "laag"
+        ? "Laat de scope voorlopig staan en verfijn deze later verder."
+        : "Scherp de scope eerst aan. Maak focus en afbakening duidelijk voordat je verder verdiept.";
+
+    case "diagnose":
+      if (signals.includes("Veel handwerk")) {
+        return "Breng de diagnose terug naar de kern. Maak per knelpunt duidelijk wat er echt misgaat en waar het ontstaat.";
+      }
+      if (signals.includes("Foutgevoelig proces")) {
+        return "Maak de diagnose concreter. Benoem per knelpunt oorzaak, effect en impact.";
+      }
+      return priority === "laag"
+        ? "Laat de diagnose voorlopig staan en verdiep deze later verder."
+        : "Werk de diagnose eerst scherper uit. Maak oorzaken en knelpunten concreet genoeg om gericht te verbeteren.";
+
+    default:
+      return null;
+  }
+}
+
 function buildAdvice(
   section: ScanSectionInput,
   signals: string[],
   priority: PriorityLevel
 ): string {
+  const specificAdvice = buildSectionSpecificAdvice(section, signals, priority);
+  if (specificAdvice) return specificAdvice;
+
   const title = section.title.toLowerCase();
 
   if (signals.includes("Veel handwerk")) {
@@ -398,11 +509,11 @@ function buildExplanation(priorities: OutputPriorityItem[]): string {
   const now = priorities.filter((item) => item.bucket === "now").length;
 
   if (high >= 3) {
-    return "Begin bij de onderdelen die nu zorgen voor handwerk, fouten of onduidelijkheid. Pas daarna heeft verdere optimalisatie echt zin.";
+    return "Begin bij de onderdelen die nu zorgen voor onduidelijkheid of vertraging. Pas daarna heeft verdere optimalisatie echt zin.";
   }
 
   if (now >= 1) {
-    return "Pak eerst de onderdelen op die direct effect hebben op rust, grip en kwaliteit.";
+    return "Pak eerst de onderdelen op die direct effect hebben op rust, grip en scherpte.";
   }
 
   if (high >= 1) {
@@ -413,6 +524,19 @@ function buildExplanation(priorities: OutputPriorityItem[]): string {
 }
 
 function buildQuickWinText(item: OutputPriorityItem): string {
+  switch (item.id) {
+    case "profile_basis":
+      return "Profiel - Basis: maak de uitgangssituatie scherper.";
+    case "profile_reason":
+      return "Profiel - Aanleiding: maak het verbeterdoel concreter.";
+    case "scope":
+      return "Scope: kies eerst een scherpere focus.";
+    case "diagnose":
+      return "Diagnose: breng knelpunten terug tot de kern.";
+    default:
+      break;
+  }
+
   if (item.signals.includes("Veel handwerk")) {
     return `${item.title}: maak één vaste werkwijze.`;
   }
@@ -455,7 +579,7 @@ export function buildScanOutput(scan: ScanInput): ScanOutput {
       const signals = deriveSignals(section);
       const score = calculatePriorityScore(section);
       const priority = mapPriorityLevel(score);
-      const bucket = mapRoadmapBucket(priority, signals, score);
+      const bucket = mapRoadmapBucket(section, priority, signals, score);
 
       return {
         id: section.id,
