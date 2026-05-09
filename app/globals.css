@@ -3,6 +3,22 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  --kweekers-primary: #3f4e87;
+  --kweekers-primary-dark: #33406f;
+  --kweekers-primary-soft: #e9eef9;
+
+  --kweekers-accent: #ed6e41;
+  --kweekers-accent-soft: #fce7de;
+
+  --kweekers-success: #2f7a46;
+  --kweekers-success-soft: #eaf6ee;
+  --kweekers-success-border: #9dceac;
+
+  --kweekers-neutral-soft: #faf8f4;
+  --kweekers-neutral-border: #d8cdbd;
+
+  --kweekers-card-border: #d9d9d6;
 }
 
 @theme inline {
@@ -24,24 +40,20 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
-:root {
-  --kweekers-primary: #353F63;
-  --kweekers-accent: #ED6E41;
-  --kweekers-accent-soft: #FCE7DE;
-}
 
 .kweekers-badge {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  border: 1px solid rgba(53, 63, 99, 0.35);
+  border: 1px solid rgba(63, 78, 135, 0.4);
   border-radius: 9999px;
   padding: 8px 14px;
-  color: var(--kweekers-primary);
+  color: var(--kweekers-primary-dark);
   background: linear-gradient(to right, var(--kweekers-accent-soft), white 28%);
   font-size: 12px;
   font-weight: 600;
 }
+
 .kweekers-primary-button {
   display: inline-flex;
   align-items: center;
@@ -72,17 +84,98 @@ body {
 .kweekers-required {
   color: var(--kweekers-accent);
 }
+
 .kweekers-active-panel {
-  border-color: var(--kweekers-primary);
+  border-color: var(--kweekers-primary-dark);
   background: var(--kweekers-primary);
   color: white;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
 .kweekers-active-panel-muted {
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.88);
 }
 
 .kweekers-selectable-hover:hover {
-  background: rgba(53, 63, 99, 0.04);
+  background: rgba(63, 78, 135, 0.06);
+}
+
+.kweekers-card {
+  border: 1px solid var(--kweekers-card-border);
+  background: #fcfcfb;
+}
+
+.kweekers-step-current {
+  border-color: #aab8de;
+  background: var(--kweekers-primary-soft);
+}
+
+.kweekers-step-current-number {
+  border-color: var(--kweekers-primary);
+  background: var(--kweekers-primary);
+  color: white;
+}
+
+.kweekers-step-current-title {
+  color: var(--kweekers-primary-dark);
+}
+
+.kweekers-step-current-description {
+  color: #5c6f9f;
+}
+
+.kweekers-step-completed {
+  border-color: var(--kweekers-success-border);
+  background: var(--kweekers-success-soft);
+}
+
+.kweekers-step-completed-number {
+  border-color: var(--kweekers-success);
+  background: var(--kweekers-success);
+  color: white;
+}
+
+.kweekers-step-completed-title {
+  color: #1f5130;
+}
+
+.kweekers-step-completed-description {
+  color: #4d7358;
+}
+
+.kweekers-step-available {
+  border-color: var(--kweekers-neutral-border);
+  background: var(--kweekers-neutral-soft);
+}
+
+.kweekers-step-available-number {
+  border-color: #b8ab97;
+  color: #6a5b49;
+}
+
+.kweekers-step-available-title {
+  color: #2d241a;
+}
+
+.kweekers-step-available-description {
+  color: #7a6a57;
+}
+
+.kweekers-step-locked {
+  border-color: #e2e2de;
+  background: white;
+  opacity: 0.72;
+}
+
+.kweekers-step-locked-number {
+  border-color: #cfcfcb;
+  color: #9a9a94;
+}
+
+.kweekers-step-locked-title {
+  color: #9a9a94;
+}
+
+.kweekers-step-locked-description {
+  color: #aaaaa4;
 }
