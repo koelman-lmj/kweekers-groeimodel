@@ -129,14 +129,14 @@ function getProfileBasisCompactStepIndex(questionKey: string): number {
 
 function getBaseOptionButtonClass(disabled: boolean) {
   if (disabled) {
-    return "mx-auto w-full max-w-[420px] min-h-[52px] rounded-xl border border-black/15 bg-white px-3 py-2 text-center opacity-40";
+    return "mx-auto w-full max-w-[380px] min-h-[52px] rounded-xl border border-black/15 bg-white px-3 py-2 text-center opacity-40";
   }
 
-  return "mx-auto w-full max-w-[420px] min-h-[52px] rounded-xl border border-black/15 bg-white px-3 py-2 text-center transition hover:bg-black/[0.02]";
+  return "mx-auto w-full max-w-[380px] min-h-[52px] rounded-xl border border-black/15 bg-white px-3 py-2 text-center transition hover:bg-black/[0.02]";
 }
 
 function getActiveOptionButtonClass() {
-  return "mx-auto w-full max-w-[420px] min-h-[52px] rounded-xl border border-[#33406f] bg-[#3f4e87] px-3 py-2 text-center text-white shadow-sm transition";
+  return "mx-auto w-full max-w-[380px] min-h-[52px] rounded-xl border border-[#33406f] bg-[#3f4e87] px-3 py-2 text-center text-white shadow-sm transition";
 }
 
 export default function FlowQuestionPage() {
