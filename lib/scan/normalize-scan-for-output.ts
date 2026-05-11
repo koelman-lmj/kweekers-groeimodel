@@ -29,14 +29,18 @@ export function normalizeScanForOutput(scan: ScanState) {
   const domainScores = buildDomainScores(scan);
   const averageScore =
     domainScores.length > 0
-      ? domainScores.reduce((sum, domain) => sum + domain.score, 0) / domainScores.length
+      ? domainScores.reduce((sum, domain) => sum + domain.score, 0) /
+        domainScores.length
       : null;
 
   return {
     id: "current-scan",
     customerName: scan.profile.customerName || "Onbekende klant",
     sector: scan.profile.sector || "Onbekende sector",
-    goal: scan.scope.focus?.join(", ") || "Nog niet ingevuld",
+    goal:
+      scan.scope.focus && scan.scope.focus.length > 0
+        ? scan.scope.focus.join(", ")
+        : "Nog niet ingevuld",
     overallScore: averageScore,
     sections,
   };
