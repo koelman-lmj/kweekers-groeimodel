@@ -12,7 +12,6 @@ import {
   getAnswerFromScan,
   type AnswerValue,
 } from "@/lib/scan/engine/answer-mapping";
-import { buildDomainScores } from "@/lib/scan/engine/build-domain-scores";
 import { buildScanOutput } from "@/lib/build-scan-output";
 import { normalizeScanForOutput } from "@/lib/scan/normalize-scan-for-output";
 
@@ -43,17 +42,6 @@ function getDisplayValue(
   return optionSet.options.find((option) => option.value === rawValue)?.label ?? rawValue;
 }
 
-function getScoreLabel(score: number) {
-  if (score < 2.5) return "Kwetsbaar";
-  if (score < 4.5) return "Basis aanwezig";
-  if (score < 6.5) return "Redelijk op orde";
-  return "Sterk";
-}
-
-function getFilledBlocks(score: number) {
-  return Math.max(0, Math.min(10, Math.round(score * 1.25)));
-}
-
 function getPriorityLabel(priority: "hoog" | "middel" | "laag") {
   if (priority === "hoog") return "Hoog";
   if (priority === "middel") return "Middel";
@@ -66,31 +54,16 @@ function getBucketLabel(bucket: "now" | "next" | "later") {
   return "Later";
 }
 
-function ScoreBlocks({ score }: { score: number }) {
-  const filledBlocks = getFilledBlocks(score);
-
-  return (
-    <div className="flex items-center gap-[3px]">
-      {Array.from({ length: 10 }).map((_, index) => {
-        const isFilled = index < filledBlocks;
-
-        return (
-          <span
-            key={index}
-            className={
-              isFilled
-                ? "h-2.5 w-2.5 rounded-[2px] bg-black"
-                : "h-2.5 w-2.5 rounded-[2px] border border-black/20 bg-white"
-            }
-          />
-        );
-      })}
-    </div>
-  );
+function scoreToFiveDots(priorityScore: number) {
+  if (priorityScore >= 85) return 1;
+  if (priorityScore >= 70) return 2;
+  if (priorityScore >= 55) return 3;
+  if (priorityScore >= 40) return 4;
+  return 5;
 }
 
-function ScoreDots({ score }: { score: number }) {
-  const active = Math.max(1, Math.min(5, Math.round(score / 2)));
+function ScoreDots({ priorityScore }: { priorityScore: number }) {
+  const active = scoreToFiveDots(priorityScore);
 
   return (
     <div className="flex items-center gap-1.5">
@@ -108,11 +81,20 @@ function ScoreDots({ score }: { score: number }) {
   );
 }
 
-type DomainCardItem = {
+type ThemeCardItem = {
+  id: string;
   title: string;
   score: number;
-  summary: string;
+  reason: string;
+  category?: string;
 };
+
+function groupThemesByCategory(
+  items: ThemeCardItem[],
+  category: string
+): ThemeCardItem[] {
+  return items.filter((item) => item.category === category);
+}
 
 export default function SectionSummaryPage() {
   const params = useParams<{
@@ -164,8 +146,6 @@ export default function SectionSummaryPage() {
   });
 
   const isFinalStep = !hasNextStep;
-
-  const domainScores = isFinalStep ? buildDomainScores(scan) : [];
   const scanOutput = isFinalStep ? buildScanOutput(normalizeScanForOutput(scan)) : null;
 
   const handlePrint = () => {
@@ -238,84 +218,38 @@ export default function SectionSummaryPage() {
       }
     : null;
 
-  const modulesDomainItems: DomainCardItem[] = domainScores
-    .filter((domain) =>
-      [
-        "finance",
-        "crm",
-        "ordermanagement",
-        "hrm",
-        "payroll",
-        "projects",
-        "procurement",
-      ].includes(domain.code)
-    )
-    .map((domain) => ({
-      title: domain.title,
-      score: domain.score,
-      summary: `${getScoreLabel(domain.score)} — ${domain.score.toFixed(1)} van 8`,
-    }));
+  const themeItems: ThemeCardItem[] =
+    scanOutput?.priorities.map((item) => ({
+      id: item.id,
+      title: item.title,
+      score: item.score,
+      reason: item.reason,
+      category: item.category,
+    })) ?? [];
 
-  const integrationsDomainItems: DomainCardItem[] = domainScores
-    .filter((domain) =>
-      ["integrations", "integration", "koppelingen", "beheer"].includes(domain.code)
-    )
-    .map((domain) => ({
-      title: domain.title,
-      score: domain.score,
-      summary: `${getScoreLabel(domain.score)} — ${domain.score.toFixed(1)} van 8`,
-    }));
+  const moduleItems = groupThemesByCategory(themeItems, "AFAS Modules");
+  const integrationItems = groupThemesByCategory(themeItems, "Integraties & Beheer");
+  const reportingItems = groupThemesByCategory(themeItems, "Rapportage & Data");
+  const organizationItems = groupThemesByCategory(themeItems, "Organisatie & Beheer");
 
-  const reportingDomainItems: DomainCardItem[] = domainScores
-    .filter((domain) =>
-      ["reporting", "data", "rapportage", "sturing"].includes(domain.code)
-    )
-    .map((domain) => ({
-      title: domain.title,
-      score: domain.score,
-      summary: `${getScoreLabel(domain.score)} — ${domain.score.toFixed(1)} van 8`,
-    }));
+  const fallbackItems = themeItems.slice(0, 4);
 
-  const organizationDomainItems: DomainCardItem[] = domainScores
-    .filter((domain) =>
-      ["organization", "governance", "process", "adoption", "organisatie"].includes(
-        domain.code
-      )
-    )
-    .map((domain) => ({
-      title: domain.title,
-      score: domain.score,
-      summary: `${getScoreLabel(domain.score)} — ${domain.score.toFixed(1)} van 8`,
-    }));
-
-  const fallbackDomainItems: DomainCardItem[] = domainScores.map((domain) => ({
-    title: domain.title,
-    score: domain.score,
-    summary: `${getScoreLabel(domain.score)} — ${domain.score.toFixed(1)} van 8`,
-  }));
-
-  const displayModulesDomainItems =
-    modulesDomainItems.length > 0 ? modulesDomainItems : fallbackDomainItems.slice(0, 4);
-
-  const displayIntegrationsDomainItems =
-    integrationsDomainItems.length > 0
-      ? integrationsDomainItems
-      : fallbackDomainItems.slice(0, 3);
-
-  const displayReportingDomainItems =
-    reportingDomainItems.length > 0
-      ? reportingDomainItems
-      : fallbackDomainItems.slice(0, 3);
-
-  const displayOrganizationDomainItems =
-    organizationDomainItems.length > 0
-      ? organizationDomainItems
-      : fallbackDomainItems.slice(0, 4);
+  const displayModulesItems = moduleItems.length > 0 ? moduleItems : fallbackItems;
+  const displayIntegrationItems =
+    integrationItems.length > 0 ? integrationItems : fallbackItems;
+  const displayReportingItems =
+    reportingItems.length > 0 ? reportingItems : fallbackItems;
+  const displayOrganizationItems =
+    organizationItems.length > 0 ? organizationItems : fallbackItems;
 
   const totalScore =
-    domainScores.length > 0
-      ? domainScores.reduce((sum, item) => sum + item.score, 0) / domainScores.length
-      : 0;
+    scanOutput && scanOutput.priorities.length > 0
+      ? (
+          scanOutput.priorities.reduce((sum, item) => {
+            return sum + scoreToFiveDots(item.score);
+          }, 0) / scanOutput.priorities.length
+        ).toFixed(1)
+      : "-";
 
   return (
     <div className="space-y-8">
@@ -412,15 +346,10 @@ export default function SectionSummaryPage() {
           <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <div className="rounded-2xl border border-black/10 bg-white p-4">
               <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Totaalscore
+                Totaalbeeld
               </div>
-              <div className="mt-2 text-3xl font-semibold">
-                {totalScore > 0 ? totalScore.toFixed(1) : "-"}
-              </div>
-              <div className="mt-2 flex items-center gap-3">
-                <ScoreBlocks score={totalScore} />
-                <span className="text-sm text-muted-foreground">van 8</span>
-              </div>
+              <div className="mt-2 text-3xl font-semibold">{totalScore}</div>
+              <div className="mt-2 text-sm text-muted-foreground">op schaal 1–5</div>
             </div>
 
             <div className="rounded-2xl border border-black/10 bg-white p-4">
@@ -461,13 +390,13 @@ export default function SectionSummaryPage() {
               </div>
 
               <div className="mt-4 space-y-4">
-                {displayModulesDomainItems.map((item) => (
-                  <div key={item.title} className="space-y-1.5">
+                {displayModulesItems.map((item) => (
+                  <div key={item.id} className="space-y-1.5">
                     <div className="flex items-center justify-between gap-3">
                       <div className="text-sm font-medium">{item.title}</div>
-                      <ScoreDots score={item.score} />
+                      <ScoreDots priorityScore={item.score} />
                     </div>
-                    <p className="text-sm text-muted-foreground">{item.summary}</p>
+                    <p className="text-sm text-muted-foreground">{item.reason}</p>
                   </div>
                 ))}
               </div>
@@ -482,13 +411,13 @@ export default function SectionSummaryPage() {
               </div>
 
               <div className="mt-4 space-y-4">
-                {displayIntegrationsDomainItems.map((item) => (
-                  <div key={item.title} className="space-y-1.5">
+                {displayIntegrationItems.map((item) => (
+                  <div key={item.id} className="space-y-1.5">
                     <div className="flex items-center justify-between gap-3">
                       <div className="text-sm font-medium">{item.title}</div>
-                      <ScoreDots score={item.score} />
+                      <ScoreDots priorityScore={item.score} />
                     </div>
-                    <p className="text-sm text-muted-foreground">{item.summary}</p>
+                    <p className="text-sm text-muted-foreground">{item.reason}</p>
                   </div>
                 ))}
               </div>
@@ -503,13 +432,13 @@ export default function SectionSummaryPage() {
               </div>
 
               <div className="mt-4 space-y-4">
-                {displayReportingDomainItems.map((item) => (
-                  <div key={item.title} className="space-y-1.5">
+                {displayReportingItems.map((item) => (
+                  <div key={item.id} className="space-y-1.5">
                     <div className="flex items-center justify-between gap-3">
                       <div className="text-sm font-medium">{item.title}</div>
-                      <ScoreDots score={item.score} />
+                      <ScoreDots priorityScore={item.score} />
                     </div>
-                    <p className="text-sm text-muted-foreground">{item.summary}</p>
+                    <p className="text-sm text-muted-foreground">{item.reason}</p>
                   </div>
                 ))}
               </div>
@@ -524,13 +453,13 @@ export default function SectionSummaryPage() {
               </div>
 
               <div className="mt-4 space-y-4">
-                {displayOrganizationDomainItems.map((item) => (
-                  <div key={item.title} className="space-y-1.5">
+                {displayOrganizationItems.map((item) => (
+                  <div key={item.id} className="space-y-1.5">
                     <div className="flex items-center justify-between gap-3">
                       <div className="text-sm font-medium">{item.title}</div>
-                      <ScoreDots score={item.score} />
+                      <ScoreDots priorityScore={item.score} />
                     </div>
-                    <p className="text-sm text-muted-foreground">{item.summary}</p>
+                    <p className="text-sm text-muted-foreground">{item.reason}</p>
                   </div>
                 ))}
               </div>
@@ -587,6 +516,12 @@ export default function SectionSummaryPage() {
                     <span className="rounded-full border border-black/10 bg-white px-2.5 py-1 text-[11px] font-medium">
                       {getBucketLabel(item.bucket)}
                     </span>
+
+                    {item.category && (
+                      <span className="rounded-full border border-black/10 bg-white px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
+                        {item.category}
+                      </span>
+                    )}
                   </div>
 
                   <p className="mt-3 text-sm text-muted-foreground">{item.reason}</p>
