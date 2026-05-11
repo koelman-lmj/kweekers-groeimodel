@@ -91,6 +91,18 @@ type ThemeCardItem = {
   category?: string;
 };
 
+type EvidenceItem = {
+  key: string;
+  label: string;
+  value: string;
+};
+
+type GroupedEvidence = {
+  priorityId: string;
+  priorityTitle: string;
+  items: EvidenceItem[];
+};
+
 function ThemeCard({
   title,
   description,
@@ -222,6 +234,26 @@ function getRelevantEvidenceKeysForPriority(priorityId: string): string[] {
   }
 }
 
+function buildGroupedEvidence(
+  topPriorities: { id: string; title: string }[],
+  allEvidenceItems: EvidenceItem[]
+): GroupedEvidence[] {
+  return topPriorities
+    .map((priority) => {
+      const relevantKeys = getRelevantEvidenceKeysForPriority(priority.id);
+      const items = allEvidenceItems.filter((item) =>
+        relevantKeys.includes(item.key)
+      );
+
+      return {
+        priorityId: priority.id,
+        priorityTitle: priority.title,
+        items,
+      };
+    })
+    .filter((group) => group.items.length > 0);
+}
+
 export default function SectionSummaryPage() {
   const params = useParams<{
     id: string | string[];
@@ -294,7 +326,7 @@ export default function SectionSummaryPage() {
       value: scan.comments[question.key],
     }));
 
-  const allEvidenceItems = isFinalStep
+  const allEvidenceItems: EvidenceItem[] = isFinalStep
     ? [
         ...getQuestionsForSection("profile_basis", scan),
         ...getQuestionsForSection("profile_reason", scan),
@@ -321,23 +353,19 @@ export default function SectionSummaryPage() {
         })
     : [];
 
-  const relevantEvidenceKeys =
+  const groupedEvidence =
     isFinalStep && scanOutput
-      ? Array.from(
-          new Set(
-            scanOutput.priorities
-              .slice(0, 3)
-              .flatMap((item) => getRelevantEvidenceKeysForPriority(item.id))
-          )
+      ? buildGroupedEvidence(
+          scanOutput.priorities.slice(0, 3).map((item) => ({
+            id: item.id,
+            title: item.title,
+          })),
+          allEvidenceItems
         )
       : [];
 
-  const evidenceItems = isFinalStep
-    ? allEvidenceItems.filter((item) => relevantEvidenceKeys.includes(item.key))
-    : [];
-
   const fallbackEvidenceItems =
-    evidenceItems.length > 0 ? evidenceItems : allEvidenceItems.slice(0, 8);
+    groupedEvidence.length === 0 ? allEvidenceItems.slice(0, 8) : [];
 
   const compactContext = isFinalStep
     ? {
@@ -823,22 +851,54 @@ export default function SectionSummaryPage() {
             <div className="space-y-1">
               <h2 className="text-lg font-semibold">Onderbouwing</h2>
               <p className="text-sm text-muted-foreground">
-                Alleen de antwoorden die het meest relevant zijn voor de topprioriteiten.
+                De antwoorden hieronder zijn gegroepeerd per topprioriteit.
               </p>
             </div>
 
-            <div className="mt-4 space-y-3">
-              {fallbackEvidenceItems.slice(0, 8).map((item) => (
-                <div
-                  key={item.key}
-                  className="rounded-2xl border border-black/10 bg-black/[0.02] p-4"
-                >
-                  <div className="text-sm font-medium">{item.label}</div>
-                  <div className="mt-1 text-sm text-muted-foreground">
-                    {item.value}
+            <div className="mt-4 space-y-4">
+              {groupedEvidence.length > 0 ? (
+                groupedEvidence.map((group, index) => (
+                  <div
+                    key={group.priorityId}
+                    className="rounded-2xl border border-black/10 bg-black/[0.02] p-4"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-black/10 bg-white text-sm font-semibold">
+                        {index + 1}
+                      </div>
+                      <div className="text-base font-semibold">
+                        {group.priorityTitle}
+                      </div>
+                    </div>
+
+                    <div className="mt-4 space-y-3">
+                      {group.items.slice(0, 4).map((item) => (
+                        <div
+                          key={item.key}
+                          className="rounded-xl border border-black/10 bg-white p-3"
+                        >
+                          <div className="text-sm font-medium">{item.label}</div>
+                          <div className="mt-1 text-sm text-muted-foreground">
+                            {item.value}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                fallbackEvidenceItems.map((item) => (
+                  <div
+                    key={item.key}
+                    className="rounded-2xl border border-black/10 bg-black/[0.02] p-4"
+                  >
+                    <div className="text-sm font-medium">{item.label}</div>
+                    <div className="mt-1 text-sm text-muted-foreground">
+                      {item.value}
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </section>
 
