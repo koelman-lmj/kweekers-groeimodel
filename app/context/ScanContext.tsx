@@ -20,6 +20,9 @@ export type ScanState = {
     organizationType: string[];
     afasProducts: string[];
     ownershipModel: string;
+    afasUsageDuration: string;
+    maintenanceQuality: string;
+    expectedOrgChanges: string;
     standardizationContext: string;
     primaryProcessChains: string[];
     scanReason: string;
@@ -71,6 +74,9 @@ const INITIAL_SCAN: ScanState = {
     organizationType: [],
     afasProducts: [],
     ownershipModel: "",
+    afasUsageDuration: "",
+    maintenanceQuality: "",
+    expectedOrgChanges: "",
     standardizationContext: "",
     primaryProcessChains: [],
     scanReason: "",
@@ -123,6 +129,9 @@ type ScanContextValue = {
   setOrganizationType: (value: string[]) => void;
   setAfasProducts: (value: string[]) => void;
   setOwnershipModel: (value: string) => void;
+  setAfasUsageDuration: (value: string) => void;
+  setMaintenanceQuality: (value: string) => void;
+  setExpectedOrgChanges: (value: string) => void;
   setStandardizationContext: (value: string) => void;
   setPrimaryProcessChains: (value: string[]) => void;
 
@@ -191,6 +200,9 @@ function loadInitialScan(): ScanState {
         organizationType: toStringArray(parsed.profile?.organizationType),
         afasProducts: toStringArray(parsed.profile?.afasProducts),
         ownershipModel: parsed.profile?.ownershipModel ?? "",
+        afasUsageDuration: parsed.profile?.afasUsageDuration ?? "",
+        maintenanceQuality: parsed.profile?.maintenanceQuality ?? "",
+        expectedOrgChanges: parsed.profile?.expectedOrgChanges ?? "",
         standardizationContext: parsed.profile?.standardizationContext ?? "",
         primaryProcessChains: toStringArray(parsed.profile?.primaryProcessChains),
         scanReason: parsed.profile?.scanReason ?? "",
@@ -385,6 +397,12 @@ export function ScanProvider({ children }: { children: ReactNode }) {
 
   const setOwnershipModel = (value: string) =>
     updateProfile("ownershipModel", value);
+  const setAfasUsageDuration = (value: string) =>
+    updateProfile("afasUsageDuration", value);
+  const setMaintenanceQuality = (value: string) =>
+    updateProfile("maintenanceQuality", value);
+  const setExpectedOrgChanges = (value: string) =>
+    updateProfile("expectedOrgChanges", value);
   const setStandardizationContext = (value: string) =>
     updateProfile("standardizationContext", value);
 
@@ -502,6 +520,9 @@ export function ScanProvider({ children }: { children: ReactNode }) {
       setOrganizationType,
       setAfasProducts,
       setOwnershipModel,
+      setAfasUsageDuration,
+      setMaintenanceQuality,
+      setExpectedOrgChanges,
       setStandardizationContext,
       setPrimaryProcessChains,
 
