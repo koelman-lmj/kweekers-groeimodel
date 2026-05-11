@@ -39,7 +39,9 @@ function getDisplayValue(
   if (!rawValue) return "Nog niet ingevuld";
   if (!optionSet) return rawValue;
 
-  return optionSet.options.find((option) => option.value === rawValue)?.label ?? rawValue;
+  return (
+    optionSet.options.find((option) => option.value === rawValue)?.label ?? rawValue
+  );
 }
 
 function getPriorityLabel(priority: "hoog" | "middel" | "laag") {
@@ -89,11 +91,41 @@ type ThemeCardItem = {
   category?: string;
 };
 
-function groupThemesByCategory(
-  items: ThemeCardItem[],
-  category: string
-): ThemeCardItem[] {
-  return items.filter((item) => item.category === category);
+function ThemeCard({
+  title,
+  description,
+  items,
+  emptyText,
+}: {
+  title: string;
+  description: string;
+  items: ThemeCardItem[];
+  emptyText: string;
+}) {
+  return (
+    <div className="rounded-3xl border border-black/10 bg-white p-5">
+      <div className="space-y-1">
+        <h2 className="text-lg font-semibold">{title}</h2>
+        <p className="text-sm text-muted-foreground">{description}</p>
+      </div>
+
+      <div className="mt-4 space-y-4">
+        {items.length > 0 ? (
+          items.map((item) => (
+            <div key={item.id} className="space-y-1.5">
+              <div className="flex items-center justify-between gap-3">
+                <div className="text-sm font-medium">{item.title}</div>
+                <ScoreDots priorityScore={item.score} />
+              </div>
+              <p className="text-sm text-muted-foreground">{item.reason}</p>
+            </div>
+          ))
+        ) : (
+          <p className="text-sm text-muted-foreground">{emptyText}</p>
+        )}
+      </div>
+    </div>
+  );
 }
 
 export default function SectionSummaryPage() {
@@ -205,15 +237,21 @@ export default function SectionSummaryPage() {
         }),
         focus: scan.scope.focus.map((item) => {
           const optionSet = getOptionSet("scope_focus_options");
-          return optionSet?.options.find((option) => option.value === item)?.label ?? item;
+          return (
+            optionSet?.options.find((option) => option.value === item)?.label ?? item
+          );
         }),
         products: scan.profile.afasProducts.map((item) => {
           const optionSet = getOptionSet("afas_products_options");
-          return optionSet?.options.find((option) => option.value === item)?.label ?? item;
+          return (
+            optionSet?.options.find((option) => option.value === item)?.label ?? item
+          );
         }),
         chains: scan.profile.primaryProcessChains.map((item) => {
           const optionSet = getOptionSet("primary_process_chains_options");
-          return optionSet?.options.find((option) => option.value === item)?.label ?? item;
+          return (
+            optionSet?.options.find((option) => option.value === item)?.label ?? item
+          );
         }),
       }
     : null;
@@ -227,20 +265,25 @@ export default function SectionSummaryPage() {
       category: item.category,
     })) ?? [];
 
-  const moduleItems = groupThemesByCategory(themeItems, "AFAS Modules");
-  const integrationItems = groupThemesByCategory(themeItems, "Integraties & Beheer");
-  const reportingItems = groupThemesByCategory(themeItems, "Rapportage & Data");
-  const organizationItems = groupThemesByCategory(themeItems, "Organisatie & Beheer");
+  const displayModulesItems = themeItems.filter((item) =>
+    ["finance", "ordermanagement", "crm", "hrm"].includes(item.id)
+  );
 
-  const fallbackItems = themeItems.slice(0, 4);
+  const displayIntegrationItems = themeItems.filter(
+    (item) => item.id === "integrations"
+  );
 
-  const displayModulesItems = moduleItems.length > 0 ? moduleItems : fallbackItems;
-  const displayIntegrationItems =
-    integrationItems.length > 0 ? integrationItems : fallbackItems;
-  const displayReportingItems =
-    reportingItems.length > 0 ? reportingItems : fallbackItems;
-  const displayOrganizationItems =
-    organizationItems.length > 0 ? organizationItems : fallbackItems;
+  const displayReportingItems = themeItems.filter(
+    (item) => item.id === "reporting"
+  );
+
+  const displayOrganizationItems = themeItems.filter((item) =>
+    ["governance", "processes"].includes(item.id)
+  );
+
+  const displayBranchItems = themeItems.filter((item) =>
+    ["care", "education"].includes(item.id)
+  );
 
   const totalScore =
     scanOutput && scanOutput.priorities.length > 0
@@ -381,90 +424,59 @@ export default function SectionSummaryPage() {
           </section>
 
           <section className="grid gap-4 xl:grid-cols-2">
-            <div className="rounded-3xl border border-black/10 bg-white p-5">
-              <div className="space-y-1">
-                <h2 className="text-lg font-semibold">AFAS Modules</h2>
-                <p className="text-sm text-muted-foreground">
-                  Hoe sterk zijn de gekozen modules nu ingericht en bruikbaar?
-                </p>
-              </div>
+            <ThemeCard
+              title="AFAS Modules"
+              description="Hoe sterk zijn de gekozen modules nu ingericht en bruikbaar?"
+              items={displayModulesItems}
+              emptyText="Geen relevante modulethema’s geselecteerd in deze scan."
+            />
 
-              <div className="mt-4 space-y-4">
-                {displayModulesItems.map((item) => (
-                  <div key={item.id} className="space-y-1.5">
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="text-sm font-medium">{item.title}</div>
-                      <ScoreDots priorityScore={item.score} />
-                    </div>
-                    <p className="text-sm text-muted-foreground">{item.reason}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <ThemeCard
+              title="Integraties & Beheer"
+              description="Hoe stabiel en beheersbaar is de keten rondom AFAS?"
+              items={displayIntegrationItems}
+              emptyText="Geen integratiethema’s meegenomen in deze scan."
+            />
 
-            <div className="rounded-3xl border border-black/10 bg-white p-5">
-              <div className="space-y-1">
-                <h2 className="text-lg font-semibold">Integraties & Beheer</h2>
-                <p className="text-sm text-muted-foreground">
-                  Hoe stabiel en beheersbaar is de keten rondom AFAS?
-                </p>
-              </div>
+            <ThemeCard
+              title="Rapportage & Data"
+              description="Hoe bruikbaar en betrouwbaar is informatie voor sturing?"
+              items={displayReportingItems}
+              emptyText="Geen rapportage- of datathema’s meegenomen in deze scan."
+            />
 
-              <div className="mt-4 space-y-4">
-                {displayIntegrationItems.map((item) => (
-                  <div key={item.id} className="space-y-1.5">
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="text-sm font-medium">{item.title}</div>
-                      <ScoreDots priorityScore={item.score} />
-                    </div>
-                    <p className="text-sm text-muted-foreground">{item.reason}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-3xl border border-black/10 bg-white p-5">
-              <div className="space-y-1">
-                <h2 className="text-lg font-semibold">Rapportage & Data</h2>
-                <p className="text-sm text-muted-foreground">
-                  Hoe bruikbaar en betrouwbaar is informatie voor sturing?
-                </p>
-              </div>
-
-              <div className="mt-4 space-y-4">
-                {displayReportingItems.map((item) => (
-                  <div key={item.id} className="space-y-1.5">
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="text-sm font-medium">{item.title}</div>
-                      <ScoreDots priorityScore={item.score} />
-                    </div>
-                    <p className="text-sm text-muted-foreground">{item.reason}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-3xl border border-black/10 bg-white p-5">
-              <div className="space-y-1">
-                <h2 className="text-lg font-semibold">Organisatie & Beheer</h2>
-                <p className="text-sm text-muted-foreground">
-                  Hoe volwassen zijn eigenaarschap, governance en werkwijze?
-                </p>
-              </div>
-
-              <div className="mt-4 space-y-4">
-                {displayOrganizationItems.map((item) => (
-                  <div key={item.id} className="space-y-1.5">
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="text-sm font-medium">{item.title}</div>
-                      <ScoreDots priorityScore={item.score} />
-                    </div>
-                    <p className="text-sm text-muted-foreground">{item.reason}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <ThemeCard
+              title="Organisatie & Beheer"
+              description="Hoe volwassen zijn eigenaarschap, governance en werkwijze?"
+              items={displayOrganizationItems}
+              emptyText="Geen organisatie- of beheerthema’s meegenomen in deze scan."
+            />
           </section>
+
+          {displayBranchItems.length > 0 && (
+            <section className="rounded-3xl border border-black/10 bg-white p-5">
+              <div className="space-y-1">
+                <h2 className="text-lg font-semibold">
+                  Branchespecifieke aandachtspunten
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  Thema’s die specifiek samenhangen met de sector van deze organisatie.
+                </p>
+              </div>
+
+              <div className="mt-4 space-y-4">
+                {displayBranchItems.map((item) => (
+                  <div key={item.id} className="space-y-1.5">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="text-sm font-medium">{item.title}</div>
+                      <ScoreDots priorityScore={item.score} />
+                    </div>
+                    <p className="text-sm text-muted-foreground">{item.reason}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
 
           {scanOutput.quickWins.length > 0 && (
             <section className="rounded-3xl border border-black/10 bg-white p-5">
