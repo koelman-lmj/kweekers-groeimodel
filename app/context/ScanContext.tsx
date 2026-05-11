@@ -17,7 +17,7 @@ export type ScanState = {
     sector: string;
     organizationSize: string;
     administrationCount: string;
-    organizationType: string;
+    organizationType: string[];
     afasProducts: string[];
     ownershipModel: string;
     standardizationContext: string;
@@ -68,7 +68,7 @@ const INITIAL_SCAN: ScanState = {
     sector: "",
     organizationSize: "",
     administrationCount: "",
-    organizationType: "",
+    organizationType: [],
     afasProducts: [],
     ownershipModel: "",
     standardizationContext: "",
@@ -120,7 +120,7 @@ type ScanContextValue = {
   setSector: (value: string) => void;
   setOrganizationSize: (value: string) => void;
   setAdministrationCount: (value: string) => void;
-  setOrganizationType: (value: string) => void;
+  setOrganizationType: (value: string[]) => void;
   setAfasProducts: (value: string[]) => void;
   setOwnershipModel: (value: string) => void;
   setStandardizationContext: (value: string) => void;
@@ -188,7 +188,7 @@ function loadInitialScan(): ScanState {
         sector: parsed.profile?.sector ?? "",
         organizationSize: parsed.profile?.organizationSize ?? "",
         administrationCount: parsed.profile?.administrationCount ?? "",
-        organizationType: parsed.profile?.organizationType ?? "",
+        organizationType: toStringArray(parsed.profile?.organizationType),
         afasProducts: toStringArray(parsed.profile?.afasProducts),
         ownershipModel: parsed.profile?.ownershipModel ?? "",
         standardizationContext: parsed.profile?.standardizationContext ?? "",
@@ -291,7 +291,10 @@ export function ScanProvider({ children }: { children: ReactNode }) {
   const updateProfile = (
     field: keyof Omit<
       ScanState["profile"],
-      "afasProducts" | "primaryProcessChains" | "biggestBottleneck"
+      | "afasProducts"
+      | "primaryProcessChains"
+      | "biggestBottleneck"
+      | "organizationType"
     >,
     value: string
   ) => {
@@ -329,29 +332,29 @@ export function ScanProvider({ children }: { children: ReactNode }) {
     }
   };
 
-const markSectionVisited = useCallback((sectionCode: string, route: string) => {
-  setScan((current) => {
-    const alreadyVisited = current.ui.visitedSections.includes(sectionCode);
-    const currentRoute = current.ui.lastVisitedRouteBySection[sectionCode];
+  const markSectionVisited = useCallback((sectionCode: string, route: string) => {
+    setScan((current) => {
+      const alreadyVisited = current.ui.visitedSections.includes(sectionCode);
+      const currentRoute = current.ui.lastVisitedRouteBySection[sectionCode];
 
-    if (alreadyVisited && currentRoute === route) {
-      return current;
-    }
+      if (alreadyVisited && currentRoute === route) {
+        return current;
+      }
 
-    return {
-      ...current,
-      ui: {
-        visitedSections: alreadyVisited
-          ? current.ui.visitedSections
-          : [...current.ui.visitedSections, sectionCode],
-        lastVisitedRouteBySection: {
-          ...current.ui.lastVisitedRouteBySection,
-          [sectionCode]: route,
+      return {
+        ...current,
+        ui: {
+          visitedSections: alreadyVisited
+            ? current.ui.visitedSections
+            : [...current.ui.visitedSections, sectionCode],
+          lastVisitedRouteBySection: {
+            ...current.ui.lastVisitedRouteBySection,
+            [sectionCode]: route,
+          },
         },
-      },
-    };
-  });
-}, [setScan]);
+      };
+    });
+  }, [setScan]);
 
   const setCustomerName = (value: string) => updateProfile("customerName", value);
   const setSector = (value: string) => updateProfile("sector", value);
@@ -359,8 +362,16 @@ const markSectionVisited = useCallback((sectionCode: string, route: string) => {
     updateProfile("organizationSize", value);
   const setAdministrationCount = (value: string) =>
     updateProfile("administrationCount", value);
-  const setOrganizationType = (value: string) =>
-    updateProfile("organizationType", value);
+
+  const setOrganizationType = (value: string[]) => {
+    setScan((current) => ({
+      ...current,
+      profile: {
+        ...current.profile,
+        organizationType: value,
+      },
+    }));
+  };
 
   const setAfasProducts = (value: string[]) => {
     setScan((current) => ({
@@ -526,7 +537,7 @@ const markSectionVisited = useCallback((sectionCode: string, route: string) => {
       setComment,
       markSectionVisited,
     }),
-    [scanState]
+    [scanState, markSectionVisited]
   );
 
   return <ScanContext.Provider value={value}>{children}</ScanContext.Provider>;
