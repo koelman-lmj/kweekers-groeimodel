@@ -51,6 +51,9 @@ export type ScanOutput = {
     headline: string;
     explanation: string;
     scoreLabel: string;
+    biggestRisk: string;
+    biggestOpportunity: string;
+    nextBestStep: string;
   };
   priorities: OutputPriorityItem[];
   quickWins: string[];
@@ -59,6 +62,7 @@ export type ScanOutput = {
     next: OutputPriorityItem[];
     later: OutputPriorityItem[];
   };
+  impact: string[];
 };
 
 function clamp(value: number, min: number, max: number): number {
@@ -108,6 +112,7 @@ function deriveSignals(section: ScanSectionInput): string[] {
       "mail",
       "kopiëren",
       "overtypen",
+      "handwerk",
     ])
   ) {
     signals.push("Veel handwerk");
@@ -121,6 +126,7 @@ function deriveSignals(section: ScanSectionInput): string[] {
       "incorrect",
       "mis",
       "onduidelijk",
+      "kwetsbaar",
     ])
   ) {
     signals.push("Foutgevoelig proces");
@@ -135,6 +141,8 @@ function deriveSignals(section: ScanSectionInput): string[] {
       "stuurinformatie",
       "power bi",
       "dashboard",
+      "rapportage",
+      "kpi",
     ])
   ) {
     signals.push("Beperkt inzicht");
@@ -149,6 +157,7 @@ function deriveSignals(section: ScanSectionInput): string[] {
       "getconnector",
       "import",
       "export",
+      "keten",
     ])
   ) {
     signals.push("Afhankelijk van keten of koppeling");
@@ -161,6 +170,8 @@ function deriveSignals(section: ScanSectionInput): string[] {
       "controle",
       "autorisatie",
       "vier ogen",
+      "governance",
+      "eigenaarschap",
     ])
   ) {
     signals.push("Proces vraagt sturing of controle");
@@ -173,6 +184,7 @@ function deriveSignals(section: ScanSectionInput): string[] {
       "maatwerk",
       "afwijkend",
       "specifiek",
+      "afwijking",
     ])
   ) {
     signals.push("Veel uitzonderingen");
@@ -194,6 +206,7 @@ function calculatePriorityScore(section: ScanSectionInput): number {
       "overtypen",
       "mail",
       "foutgevoelig",
+      "handwerk",
     ])
   ) {
     priorityScore += 15;
@@ -206,6 +219,7 @@ function calculatePriorityScore(section: ScanSectionInput): number {
       "stuurinformatie",
       "dashboard",
       "vertraging",
+      "rapportage",
     ])
   ) {
     priorityScore += 10;
@@ -218,6 +232,7 @@ function calculatePriorityScore(section: ScanSectionInput): number {
       "controle",
       "compliance",
       "risico",
+      "eigenaarschap",
     ])
   ) {
     priorityScore += 10;
@@ -571,6 +586,109 @@ function buildQuickWins(priorities: OutputPriorityItem[]): string[] {
   return priorities.slice(0, 3).map(buildQuickWinText);
 }
 
+function buildBiggestRisk(priorities: OutputPriorityItem[]): string {
+  const highest = priorities.find((item) => item.priority === "hoog");
+  if (!highest) {
+    return "Er is geen direct kritiek risico zichtbaar, maar verdere aanscherping blijft zinvol.";
+  }
+
+  if (highest.signals.includes("Veel handwerk")) {
+    return `Veel handwerk binnen ${highest.title.toLowerCase()} zorgt voor vertraging en foutkans.`;
+  }
+
+  if (highest.signals.includes("Foutgevoelig proces")) {
+    return `${highest.title} is nog te foutgevoelig om hier stabiel op te sturen.`;
+  }
+
+  if (highest.signals.includes("Proces vraagt sturing of controle")) {
+    return `Binnen ${highest.title.toLowerCase()} zijn rollen en besluitmomenten nog onvoldoende scherp.`;
+  }
+
+  if (highest.signals.includes("Beperkt inzicht")) {
+    return `Beperkt inzicht binnen ${highest.title.toLowerCase()} belemmert gerichte sturing.`;
+  }
+
+  return highest.reason;
+}
+
+function buildBiggestOpportunity(
+  priorities: OutputPriorityItem[],
+  quickWins: string[]
+): string {
+  if (quickWins.length > 0) {
+    return quickWins[0];
+  }
+
+  const next = priorities.find(
+    (item) => item.bucket === "now" || item.bucket === "next"
+  );
+
+  if (!next) {
+    return "De grootste kans zit in het verder standaardiseren van de basis.";
+  }
+
+  if (next.signals.includes("Beperkt inzicht")) {
+    return `Meer grip op ${next.title.toLowerCase()} geeft snel betere stuurinformatie.`;
+  }
+
+  if (next.signals.includes("Veel uitzonderingen")) {
+    return `Versimpeling van ${next.title.toLowerCase()} kan snel meer rust en standaardisatie brengen.`;
+  }
+
+  return next.advice;
+}
+
+function buildNextBestStep(priorities: OutputPriorityItem[]): string {
+  const nowItem = priorities.find((item) => item.bucket === "now");
+  if (nowItem) {
+    return nowItem.title;
+  }
+
+  const nextItem = priorities.find((item) => item.bucket === "next");
+  if (nextItem) {
+    return nextItem.title;
+  }
+
+  return priorities[0]?.title ?? "Nog geen eerstvolgende stap bepaald";
+}
+
+function buildImpactItems(priorities: OutputPriorityItem[]): string[] {
+  const impact = new Set<string>();
+
+  for (const item of priorities.slice(0, 5)) {
+    if (item.signals.includes("Veel handwerk")) {
+      impact.add("Minder handmatig werk en minder afhankelijkheid van losse acties");
+    }
+
+    if (item.signals.includes("Foutgevoelig proces")) {
+      impact.add("Betrouwbaardere uitvoering en minder fouten in het proces");
+    }
+
+    if (item.signals.includes("Beperkt inzicht")) {
+      impact.add("Betere stuurinformatie en meer grip op prestaties");
+    }
+
+    if (item.signals.includes("Proces vraagt sturing of controle")) {
+      impact.add("Duidelijker eigenaarschap en strakkere besluitvorming");
+    }
+
+    if (item.signals.includes("Afhankelijk van keten of koppeling")) {
+      impact.add("Meer stabiliteit in de keten en minder verstoringen");
+    }
+
+    if (item.signals.includes("Veel uitzonderingen")) {
+      impact.add("Meer standaardisatie en rust in de uitvoering");
+    }
+  }
+
+  if (impact.size === 0) {
+    impact.add("Meer rust en scherpte in de basis");
+    impact.add("Betere prioritering van vervolgverbeteringen");
+  }
+
+  return Array.from(impact).slice(0, 5);
+}
+
 export function buildScanOutput(scan: ScanInput): ScanOutput {
   const sections = scan.sections ?? [];
 
@@ -599,6 +717,12 @@ export function buildScanOutput(scan: ScanInput): ScanOutput {
   const overallScore =
     typeof scan.overallScore === "number" ? scan.overallScore : null;
 
+  const quickWins = buildQuickWins(priorities);
+  const biggestRisk = buildBiggestRisk(priorities);
+  const biggestOpportunity = buildBiggestOpportunity(priorities, quickWins);
+  const nextBestStep = buildNextBestStep(priorities);
+  const impact = buildImpactItems(priorities);
+
   return {
     meta: {
       customerName: scan.customerName ?? "Onbekende klant",
@@ -610,13 +734,17 @@ export function buildScanOutput(scan: ScanInput): ScanOutput {
       headline: buildHeadline(overallScore, highCount),
       explanation: buildExplanation(priorities),
       scoreLabel: buildScoreLabel(overallScore),
+      biggestRisk,
+      biggestOpportunity,
+      nextBestStep,
     },
     priorities,
-    quickWins: buildQuickWins(priorities),
+    quickWins,
     roadmap: {
       now: priorities.filter((item) => item.bucket === "now"),
       next: priorities.filter((item) => item.bucket === "next"),
       later: priorities.filter((item) => item.bucket === "later"),
     },
+    impact,
   };
 }
