@@ -878,6 +878,3 @@ export default function FlowQuestionPage() {
     </div>
   );
 }
-
-
-kan je checken?
