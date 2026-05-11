@@ -65,6 +65,21 @@ export type ScanOutput = {
   impact: string[];
 };
 
+type ThemeDefinition = {
+  id: string;
+  title: string;
+  category: string;
+  keys: string[];
+  enabledWhen?: (answers: ScanAnswers) => boolean;
+};
+
+type ThemeInput = {
+  id: string;
+  title: string;
+  category: string;
+  answers: ScanAnswers;
+};
+
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
@@ -73,6 +88,24 @@ function normalizeText(value: ScanAnswerValue): string {
   if (value === null || value === undefined) return "";
   if (Array.isArray(value)) return value.join(" ").toLowerCase();
   return String(value).toLowerCase();
+}
+
+function asArray(value: ScanAnswerValue): string[] {
+  if (Array.isArray(value)) {
+    return value.map(String);
+  }
+
+  if (typeof value === "string" && value.trim() !== "") {
+    return [value];
+  }
+
+  return [];
+}
+
+function hasValue(value: ScanAnswerValue): boolean {
+  if (Array.isArray(value)) return value.length > 0;
+  if (value === null || value === undefined) return false;
+  return String(value).trim() !== "";
 }
 
 function hasSignal(value: ScanAnswerValue, words: string[]): boolean {
@@ -88,20 +121,92 @@ function hasAnySignalInAnswers(
   return Object.values(answers).some((value) => hasSignal(value, words));
 }
 
-function safeSectionScore(section: ScanSectionInput): number {
-  if (typeof section.score !== "number" || Number.isNaN(section.score)) {
-    return 50;
-  }
-
-  if (section.score >= 0 && section.score <= 5) {
-    return clamp(section.score * 20, 0, 100);
-  }
-
-  return clamp(section.score, 0, 100);
+function answerEquals(answers: ScanAnswers, key: string, expected: string): boolean {
+  return normalizeText(answers[key]) === expected.toLowerCase();
 }
 
-function deriveSignals(section: ScanSectionInput): string[] {
-  const answers = section.answers ?? {};
+function answerIncludes(answers: ScanAnswers, key: string, expected: string): boolean {
+  return asArray(answers[key]).includes(expected);
+}
+
+function pickAnswers(allAnswers: ScanAnswers, keys: string[]): ScanAnswers {
+  return Object.fromEntries(
+    keys
+      .filter((key) => hasValue(allAnswers[key]))
+      .map((key) => [key, allAnswers[key]])
+  );
+}
+
+function toMaturityScore(value: ScanAnswerValue): number {
+  const raw = typeof value === "string" ? value : "";
+
+  const scoreMap: Record<string, number> = {
+    onvoldoende_duidelijk: 1,
+    gedeeltelijk_duidelijk: 2,
+    duidelijk_belegd: 3,
+
+    ad_hoc: 1,
+    deels_afgestemd: 2,
+    vast_proces: 3,
+
+    nauwelijks: 1,
+    af_en_toe: 2,
+    structureel: 3,
+
+    sterk_verschillend: 1,
+    redelijk_eenduidig: 2,
+    gestandaardiseerd: 3,
+
+    uitzondering_is_norm: 1,
+    deels_beheersbaar: 2,
+    beperkt_en_beheerst: 3,
+
+    handmatig_herstellen: 1,
+    mix_ad_hoc_structureel: 2,
+    meestal_structureel: 3,
+
+    kwetsbaar: 1,
+    redelijk: 2,
+    sterk: 3,
+
+    beperkt_bruikbaar: 1,
+    deels_bruikbaar: 2,
+    goed_bruikbaar: 3,
+
+    sluit_beperkt_aan: 1,
+    sluit_deels_aan: 2,
+    sluit_goed_aan: 3,
+
+    vooral_handmatig: 1,
+    deels_beheersbaar_finance: 2,
+    goed_beheerst: 3,
+
+    lage_druk: 1,
+    middel_druk: 2,
+    hoge_druk: 3,
+  };
+
+  return scoreMap[raw] ?? 0;
+}
+
+function average(scores: number[]): number {
+  const validScores = scores.filter((score) => score > 0);
+  if (validScores.length === 0) return 0;
+  return Number(
+    (validScores.reduce((sum, score) => sum + score, 0) / validScores.length).toFixed(1)
+  );
+}
+
+function themeScoreTo100(answers: ScanAnswers): number {
+  const values = Object.values(answers).map(toMaturityScore).filter((v) => v > 0);
+  if (values.length === 0) return 50;
+
+  const avg = average(values); // 1-3
+  return clamp(Math.round(((avg - 1) / 2) * 100), 0, 100);
+}
+
+function deriveSignals(theme: ThemeInput): string[] {
+  const answers = theme.answers;
   const signals: string[] = [];
 
   if (
@@ -113,6 +218,7 @@ function deriveSignals(section: ScanSectionInput): string[] {
       "kopiëren",
       "overtypen",
       "handwerk",
+      "vooral_handmatig",
     ])
   ) {
     signals.push("Veel handwerk");
@@ -127,6 +233,7 @@ function deriveSignals(section: ScanSectionInput): string[] {
       "mis",
       "onduidelijk",
       "kwetsbaar",
+      "sluit_beperkt_aan",
     ])
   ) {
     signals.push("Foutgevoelig proces");
@@ -137,12 +244,10 @@ function deriveSignals(section: ScanSectionInput): string[] {
       "geen inzicht",
       "weinig inzicht",
       "onvoldoende inzicht",
-      "geen rapportage",
-      "stuurinformatie",
-      "power bi",
       "dashboard",
       "rapportage",
       "kpi",
+      "beperkt_bruikbaar",
     ])
   ) {
     signals.push("Beperkt inzicht");
@@ -172,6 +277,8 @@ function deriveSignals(section: ScanSectionInput): string[] {
       "vier ogen",
       "governance",
       "eigenaarschap",
+      "onvoldoende_duidelijk",
+      "ad_hoc",
     ])
   ) {
     signals.push("Proces vraagt sturing of controle");
@@ -185,77 +292,37 @@ function deriveSignals(section: ScanSectionInput): string[] {
       "afwijkend",
       "specifiek",
       "afwijking",
+      "uitzondering_is_norm",
     ])
   ) {
     signals.push("Veel uitzonderingen");
   }
 
+  if (
+    hasAnySignalInAnswers(answers, [
+      "hoge_druk",
+      "hoog",
+      "kritiek",
+      "urgent",
+    ])
+  ) {
+    signals.push("Hoge strategische druk");
+  }
+
   return signals;
 }
 
-function calculatePriorityScore(section: ScanSectionInput): number {
-  const baseScore = safeSectionScore(section);
-  const answers = section.answers ?? {};
-
+function calculatePriorityScore(theme: ThemeInput, signals: string[]): number {
+  const baseScore = themeScoreTo100(theme.answers);
   let priorityScore = 100 - baseScore;
 
-  if (
-    hasAnySignalInAnswers(answers, [
-      "handmatig",
-      "excel",
-      "overtypen",
-      "mail",
-      "foutgevoelig",
-      "handwerk",
-    ])
-  ) {
-    priorityScore += 15;
-  }
-
-  if (
-    hasAnySignalInAnswers(answers, [
-      "geen inzicht",
-      "weinig inzicht",
-      "stuurinformatie",
-      "dashboard",
-      "vertraging",
-      "rapportage",
-    ])
-  ) {
-    priorityScore += 10;
-  }
-
-  if (
-    hasAnySignalInAnswers(answers, [
-      "goedkeuring",
-      "autorisatie",
-      "controle",
-      "compliance",
-      "risico",
-      "eigenaarschap",
-    ])
-  ) {
-    priorityScore += 10;
-  }
-
-  if (
-    hasAnySignalInAnswers(answers, [
-      "maatwerk",
-      "uitzondering",
-      "spoed",
-      "afwijkend",
-    ])
-  ) {
-    priorityScore += 8;
-  }
-
-  if (section.id === "scope") {
-    priorityScore += 4;
-  }
-
-  if (section.id === "diagnose") {
-    priorityScore += 6;
-  }
+  if (signals.includes("Veel handwerk")) priorityScore += 15;
+  if (signals.includes("Foutgevoelig proces")) priorityScore += 12;
+  if (signals.includes("Beperkt inzicht")) priorityScore += 10;
+  if (signals.includes("Proces vraagt sturing of controle")) priorityScore += 10;
+  if (signals.includes("Veel uitzonderingen")) priorityScore += 8;
+  if (signals.includes("Afhankelijk van keten of koppeling")) priorityScore += 6;
+  if (signals.includes("Hoge strategische druk")) priorityScore += 12;
 
   return clamp(Math.round(priorityScore), 0, 100);
 }
@@ -267,7 +334,7 @@ function mapPriorityLevel(score: number): PriorityLevel {
 }
 
 function mapRoadmapBucket(
-  section: ScanSectionInput,
+  theme: ThemeInput,
   priority: PriorityLevel,
   signals: string[],
   score: number
@@ -275,209 +342,144 @@ function mapRoadmapBucket(
   const hasDirectPain =
     signals.includes("Veel handwerk") ||
     signals.includes("Foutgevoelig proces") ||
-    signals.includes("Proces vraagt sturing of controle");
+    signals.includes("Proces vraagt sturing of controle") ||
+    signals.includes("Hoge strategische druk");
 
   if (priority === "hoog" && (hasDirectPain || score >= 80)) return "now";
-  if (section.id === "diagnose" && priority !== "laag") return "now";
-  if (section.id === "scope" && priority === "hoog") return "now";
   if (priority === "hoog") return "next";
   if (priority === "middel") return "next";
   return "later";
 }
 
-function buildSectionSpecificReason(
-  section: ScanSectionInput,
-  signals: string[],
-  priority: PriorityLevel
-): string | null {
-  switch (section.id) {
-    case "profile_basis":
-      if (signals.includes("Veel uitzonderingen")) {
-        return "De uitgangssituatie is nog te breed en bevat te veel uitzonderingen.";
-      }
-      if (signals.includes("Veel handwerk")) {
-        return "De basisinformatie wordt nog te versnipperd opgehaald of vastgelegd.";
-      }
-      return priority === "laag"
-        ? "De uitgangssituatie is bruikbaar en kan later verder worden aangescherpt."
-        : "De uitgangssituatie is nog niet scherp genoeg als stevige basis voor de scan.";
-
-    case "profile_reason":
-      if (signals.includes("Beperkt inzicht")) {
-        return "De aanleiding is nog niet scherp genoeg om goed te kunnen sturen op prioriteit.";
-      }
-      return priority === "laag"
-        ? "De aanleiding is werkbaar en kan later nog verder worden aangescherpt."
-        : "De aanleiding en het verbeterdoel kunnen nog concreter worden gemaakt.";
-
-    case "scope":
-      if (signals.includes("Veel uitzonderingen")) {
-        return "De scope is nog te breed of te diffuus om strak te kunnen prioriteren.";
-      }
-      if (signals.includes("Beperkt inzicht")) {
-        return "De focus is nog niet scherp genoeg om te bepalen waar de meeste winst zit.";
-      }
-      return priority === "laag"
-        ? "De scope is bruikbaar en kan later verder worden verfijnd."
-        : "De scope vraagt nog duidelijke keuzes in focus en afbakening.";
-
-    case "diagnose":
-      if (signals.includes("Veel handwerk")) {
-        return "De belangrijkste knelpunten zijn nog niet strak genoeg teruggebracht tot de kern.";
-      }
-      if (signals.includes("Foutgevoelig proces")) {
-        return "De diagnose is nog niet scherp genoeg om gericht te verbeteren.";
-      }
-      return priority === "laag"
-        ? "De diagnose is bruikbaar en kan later verder worden verdiept."
-        : "De diagnose vraagt nog verdere aanscherping van oorzaken en knelpunten.";
-
-    default:
-      return null;
-  }
-}
-
-function buildReason(
-  section: ScanSectionInput,
+function buildThemeReason(
+  theme: ThemeInput,
   signals: string[],
   priority: PriorityLevel
 ): string {
-  const specificReason = buildSectionSpecificReason(section, signals, priority);
-  if (specificReason) return specificReason;
+  switch (theme.id) {
+    case "governance":
+      return priority === "laag"
+        ? "Eigenaarschap en besluitvorming zijn bruikbaar ingericht, maar kunnen later nog strakker."
+        : "Eigenaarschap, besluitvorming en verbetersturing zijn nog niet scherp genoeg georganiseerd.";
 
-  const score = safeSectionScore(section);
+    case "processes":
+      return priority === "laag"
+        ? "De procesbasis is werkbaar en kan later verder worden geoptimaliseerd."
+        : "De werkwijze is nog niet eenduidig genoeg en uitzonderingen drukken te zwaar op de uitvoering.";
+
+    case "finance":
+      return priority === "laag"
+        ? "De financiële basis is bruikbaar, met nog ruimte voor verdere verfijning."
+        : "De financiële basis, verwerking of stuurinformatie vragen nog duidelijke aanscherping.";
+
+    case "ordermanagement":
+      return priority === "laag"
+        ? "Het orderproces is in de basis werkbaar."
+        : "Het orderproces kent nog te veel afwijkingen of sluit nog niet goed aan op de gewenste route.";
+
+    case "crm":
+      return priority === "laag"
+        ? "CRM is bruikbaar ingericht, maar kan later nog sterker worden."
+        : "CRM-data, procesvolwassenheid of bruikbaarheid voor sturing zijn nog niet sterk genoeg.";
+
+    case "hrm":
+      return priority === "laag"
+        ? "HRM is in de basis bruikbaar ingericht."
+        : "HRM-processen of datakwaliteit zijn nog niet stabiel genoeg voor een strakke uitvoering.";
+
+    case "reporting":
+      return priority === "laag"
+        ? "Rapportage en data zijn bruikbaar, met ruimte voor verdere standaardisatie."
+        : "Rapportage, definities en bruikbaarheid van data zijn nog onvoldoende scherp voor goede sturing.";
+
+    case "integrations":
+      return priority === "laag"
+        ? "Integraties en ketenafspraken zijn in de basis bruikbaar."
+        : "Integraties missen nog voldoende stabiliteit, monitoring of helder eigenaarschap.";
+
+    case "care":
+      return priority === "laag"
+        ? "De zorgspecifieke uitvoering is werkbaar ingericht."
+        : "Registratie, declaratie of verantwoording vragen nog meer beheersing.";
+
+    case "education":
+      return priority === "laag"
+        ? "De onderwijsspecifieke uitvoering is werkbaar ingericht."
+        : "Intake, planning en administratieve aansluiting vragen nog meer eenduidigheid en borging.";
+
+    default:
+      break;
+  }
 
   if (signals.includes("Veel handwerk")) {
-    return "Veel handwerk maakt dit onderdeel traag en onnodig foutgevoelig.";
+    return `Binnen ${theme.title.toLowerCase()} zorgt handmatig werk nog voor vertraging en extra foutkans.`;
   }
 
   if (signals.includes("Foutgevoelig proces")) {
-    return "De basis is nog niet betrouwbaar genoeg om hier strak op te sturen.";
-  }
-
-  if (signals.includes("Proces vraagt sturing of controle")) {
-    return "Rollen, controles en besluitmomenten zijn nog niet scherp genoeg ingericht.";
+    return `${theme.title} is nog niet betrouwbaar genoeg om hier strak op te sturen.`;
   }
 
   if (signals.includes("Beperkt inzicht")) {
-    return "Er is te weinig inzicht om hier goed op te sturen.";
+    return `Binnen ${theme.title.toLowerCase()} ontbreekt nog voldoende inzicht om goed te kunnen sturen.`;
   }
 
-  if (signals.includes("Afhankelijk van keten of koppeling")) {
-    return "Dit onderdeel hangt sterk samen met andere stappen in de keten.";
-  }
-
-  if (signals.includes("Veel uitzonderingen")) {
-    return "Uitzonderingen drukken hier te zwaar op het standaardproces.";
-  }
-
-  if (score < 40) {
-    return "De basis van dit onderdeel is nog te kwetsbaar.";
-  }
-
-  if (score < 65) {
-    return priority === "hoog"
-      ? "De basis staat deels, maar vraagt nu duidelijke aanscherping."
-      : "De basis staat deels, maar kan duidelijk sterker.";
-  }
-
-  return priority === "laag"
-    ? "Dit onderdeel is werkbaar en kan later verder worden verbeterd."
-    : "Dit onderdeel werkt redelijk, maar kan slimmer en strakker.";
+  return `${theme.title} vraagt nog gerichte verbetering.`;
 }
 
-function buildSectionSpecificAdvice(
-  section: ScanSectionInput,
-  signals: string[],
-  priority: PriorityLevel
-): string | null {
-  switch (section.id) {
-    case "profile_basis":
-      if (signals.includes("Veel uitzonderingen")) {
-        return "Versimpel eerst de basis van het klantprofiel. Breng uitzonderingen terug en maak de standaard leidend.";
-      }
-      return priority === "laag"
-        ? "Laat het klantprofiel voorlopig staan en scherpt dit later verder aan."
-        : "Maak het klantprofiel eerst scherper. Zorg voor één heldere uitgangssituatie als basis voor het vervolg.";
-
-    case "profile_reason":
-      if (signals.includes("Beperkt inzicht")) {
-        return "Maak de aanleiding concreter. Benoem wat nu echt beter moet en waarom dat belangrijk is.";
-      }
-      return priority === "laag"
-        ? "Laat de aanleiding nu staan en werk deze later verder uit."
-        : "Scherp de aanleiding verder aan. Maak het doel concreter en beter bespreekbaar.";
-
-    case "scope":
-      if (signals.includes("Veel uitzonderingen")) {
-        return "Maak de scope smaller en concreter. Kies eerst waar de grootste winst zit.";
-      }
-      if (signals.includes("Beperkt inzicht")) {
-        return "Breng de scope terug naar een paar duidelijke keuzes. Maak eerst scherp waar je wel en niet op focust.";
-      }
-      return priority === "laag"
-        ? "Laat de scope voorlopig staan en verfijn deze later verder."
-        : "Scherp de scope eerst aan. Maak focus en afbakening duidelijk voordat je verder verdiept.";
-
-    case "diagnose":
-      if (signals.includes("Veel handwerk")) {
-        return "Breng de diagnose terug naar de kern. Maak per knelpunt duidelijk wat er echt misgaat en waar het ontstaat.";
-      }
-      if (signals.includes("Foutgevoelig proces")) {
-        return "Maak de diagnose concreter. Benoem per knelpunt oorzaak, effect en impact.";
-      }
-      return priority === "laag"
-        ? "Laat de diagnose voorlopig staan en verdiep deze later verder."
-        : "Werk de diagnose eerst scherper uit. Maak oorzaken en knelpunten concreet genoeg om gericht te verbeteren.";
-
-    default:
-      return null;
-  }
-}
-
-function buildAdvice(
-  section: ScanSectionInput,
+function buildThemeAdvice(
+  theme: ThemeInput,
   signals: string[],
   priority: PriorityLevel
 ): string {
-  const specificAdvice = buildSectionSpecificAdvice(section, signals, priority);
-  if (specificAdvice) return specificAdvice;
+  switch (theme.id) {
+    case "governance":
+      return "Maak eigenaarschap, besluitvorming en wijzigingsregie expliciet. Leg vast wie beslist, wie uitvoert en wie bewaakt.";
 
-  const title = section.title.toLowerCase();
+    case "processes":
+      return "Breng processen terug naar één herkenbare standaard. Verminder uitzonderingen en leg vaste werkafspraken vast.";
 
-  if (signals.includes("Veel handwerk")) {
-    return `Maak voor ${title} één vaste werkwijze. Haal losse Excel-stappen en mailafspraken uit het proces.`;
+    case "finance":
+      return "Versterk eerst de financiële basis. Maak verwerking, uitzonderingen en rapportage eenduidiger voordat je verder optimaliseert.";
+
+    case "ordermanagement":
+      return "Maak de orderroute leidend. Breng blokkades, uitzonderingen en factuurmomenten terug naar een vaste werkwijze.";
+
+    case "crm":
+      return "Maak CRM bruikbaar als stuurmiddel. Verbeter datakwaliteit, procesdiscipline en de aansluiting op rapportage.";
+
+    case "hrm":
+      return "Versterk de HRM-basis met eenduidige processen, betere gegevenskwaliteit en duidelijke werkafspraken.";
+
+    case "reporting":
+      return "Maak definities, KPI’s en rapportages eenduidig. Bouw pas verder als duidelijk is welke stuurinformatie echt nodig is.";
+
+    case "integrations":
+      return "Maak de keten rond AFAS beheersbaar. Richt eigenaarschap, monitoring en duidelijke afspraken over brondata in.";
+
+    case "care":
+      return "Breng registratie, declaratie en verantwoording terug naar een beheersbare standaard met minder herstelwerk.";
+
+    case "education":
+      return "Maak intake, planning en administratie beter op elkaar afgestemd. Verminder overdrachtsfouten en uitzonderingen.";
   }
 
-  if (signals.includes("Foutgevoelig proces")) {
-    return `Maak ${title} eerst betrouwbaar. Leg controles, verplichte velden en werkafspraken vast.`;
+  if (signals.includes("Veel handwerk")) {
+    return `Maak voor ${theme.title.toLowerCase()} één vaste werkwijze en haal losse handmatige stappen uit het proces.`;
   }
 
   if (signals.includes("Beperkt inzicht")) {
-    return `Bepaal eerst welke stuurinformatie echt nodig is voor ${title}. Bouw rapportages pas daarna.`;
-  }
-
-  if (signals.includes("Afhankelijk van keten of koppeling")) {
-    return `Maak bij ${title} eerst duidelijk wat leidend is in de keten. Bepaal daarna pas de koppelingen.`;
-  }
-
-  if (signals.includes("Proces vraagt sturing of controle")) {
-    return `Richt voor ${title} een duidelijke workflow in. Maak verantwoordelijkheden en controles expliciet.`;
-  }
-
-  if (signals.includes("Veel uitzonderingen")) {
-    return `Versimpel ${title} eerst. Breng uitzonderingen terug en maak de standaard leidend.`;
+    return `Bepaal eerst welke stuurinformatie binnen ${theme.title.toLowerCase()} echt nodig is.`;
   }
 
   if (priority === "hoog") {
-    return `Pak ${title} nu als eerst aan. Houd de aanpak klein en praktisch.`;
+    return `Pak ${theme.title.toLowerCase()} nu als eerste aan met een kleine en concrete verbeterslag.`;
   }
 
   if (priority === "middel") {
-    return `Plan ${title} in als volgende verbeterslag, na de grootste knelpunten.`;
+    return `Plan ${theme.title.toLowerCase()} in als volgende verbeterslag.`;
   }
 
-  return `Laat ${title} voorlopig staan en pak dit later gericht op.`;
+  return `Laat ${theme.title.toLowerCase()} voorlopig staan en verbeter dit later gericht.`;
 }
 
 function buildScoreLabel(score: number | null | undefined): string {
@@ -485,9 +487,9 @@ function buildScoreLabel(score: number | null | undefined): string {
     return "Nog geen totaalscore";
   }
 
-  if (score >= 75) return "Sterke basis";
-  if (score >= 55) return "Redelijke basis";
-  if (score >= 35) return "Basis vraagt aandacht";
+  if (score >= 2.5) return "Sterke basis";
+  if (score >= 2.0) return "Redelijke basis";
+  if (score >= 1.5) return "Basis vraagt aandacht";
   return "Direct verbeteren nodig";
 }
 
@@ -496,20 +498,20 @@ function buildHeadline(
   highCount: number
 ): string {
   if (typeof overallScore === "number") {
-    if (overallScore >= 75) {
+    if (overallScore >= 2.5) {
       return "De basis staat, maar gerichte aanscherping geeft nu de meeste waarde.";
     }
-    if (overallScore >= 55) {
+    if (overallScore >= 2.0) {
       return "Er staat al iets goeds, maar een paar scherpe keuzes maken nu het verschil.";
     }
-    if (overallScore >= 35) {
-      return "De basis is bruikbaar, maar meerdere onderdelen vragen nu aandacht.";
+    if (overallScore >= 1.5) {
+      return "De basis is bruikbaar, maar meerdere thema’s vragen nu aandacht.";
     }
     return "De basis is nog te kwetsbaar en vraagt eerst rust, structuur en duidelijke keuzes.";
   }
 
   if (highCount >= 3) {
-    return "Meerdere onderdelen vragen nu directe aandacht.";
+    return "Meerdere thema’s vragen nu directe aandacht.";
   }
 
   if (highCount >= 1) {
@@ -524,7 +526,7 @@ function buildExplanation(priorities: OutputPriorityItem[]): string {
   const now = priorities.filter((item) => item.bucket === "now").length;
 
   if (high >= 3) {
-    return "Begin bij de onderdelen die nu zorgen voor onduidelijkheid of vertraging. Pas daarna heeft verdere optimalisatie echt zin.";
+    return "Begin bij de thema’s die nu zorgen voor vertraging, onduidelijkheid of beperkte sturing. Pas daarna heeft verdere optimalisatie echt zin.";
   }
 
   if (now >= 1) {
@@ -539,40 +541,27 @@ function buildExplanation(priorities: OutputPriorityItem[]): string {
 }
 
 function buildQuickWinText(item: OutputPriorityItem): string {
-  switch (item.id) {
-    case "profile_basis":
-      return "Profiel - Basis: maak de uitgangssituatie scherper.";
-    case "profile_reason":
-      return "Profiel - Aanleiding: maak het verbeterdoel concreter.";
-    case "scope":
-      return "Scope: kies eerst een scherpere focus.";
-    case "diagnose":
-      return "Diagnose: breng knelpunten terug tot de kern.";
-    default:
-      break;
-  }
-
   if (item.signals.includes("Veel handwerk")) {
-    return `${item.title}: maak één vaste werkwijze.`;
+    return `${item.title}: haal handmatig werk uit de kern van het proces.`;
   }
 
   if (item.signals.includes("Foutgevoelig proces")) {
-    return `${item.title}: leg controles en verplichte stappen vast.`;
-  }
-
-  if (item.signals.includes("Proces vraagt sturing of controle")) {
-    return `${item.title}: maak rollen en goedkeuring duidelijk.`;
+    return `${item.title}: leg controles en vaste werkafspraken vast.`;
   }
 
   if (item.signals.includes("Beperkt inzicht")) {
-    return `${item.title}: bepaal eerst de juiste stuurinformatie.`;
+    return `${item.title}: maak stuurinformatie eerst eenduidig en bruikbaar.`;
   }
 
-  if (item.signals.includes("Afhankelijk van keten of koppeling")) {
-    return `${item.title}: maak eerst de keten leidend.`;
+  if (item.signals.includes("Proces vraagt sturing of controle")) {
+    return `${item.title}: maak eigenaarschap en besluitvorming expliciet.`;
   }
 
-  return `${item.title}: eerst versimpelen, daarna verbeteren.`;
+  if (item.signals.includes("Veel uitzonderingen")) {
+    return `${item.title}: breng uitzonderingen terug en maak de standaard leidend.`;
+  }
+
+  return `${item.title}: maak de basis eerst eenvoudiger en strakker.`;
 }
 
 function buildQuickWins(priorities: OutputPriorityItem[]): string[] {
@@ -582,7 +571,6 @@ function buildQuickWins(priorities: OutputPriorityItem[]): string[] {
     .map(buildQuickWinText);
 
   if (quickWins.length > 0) return quickWins;
-
   return priorities.slice(0, 3).map(buildQuickWinText);
 }
 
@@ -640,14 +628,10 @@ function buildBiggestOpportunity(
 
 function buildNextBestStep(priorities: OutputPriorityItem[]): string {
   const nowItem = priorities.find((item) => item.bucket === "now");
-  if (nowItem) {
-    return nowItem.title;
-  }
+  if (nowItem) return nowItem.title;
 
   const nextItem = priorities.find((item) => item.bucket === "next");
-  if (nextItem) {
-    return nextItem.title;
-  }
+  if (nextItem) return nextItem.title;
 
   return priorities[0]?.title ?? "Nog geen eerstvolgende stap bepaald";
 }
@@ -689,25 +673,173 @@ function buildImpactItems(priorities: OutputPriorityItem[]): string[] {
   return Array.from(impact).slice(0, 5);
 }
 
+function mergeAllAnswers(sections: ScanSectionInput[]): ScanAnswers {
+  return sections.reduce<ScanAnswers>((acc, section) => {
+    return {
+      ...acc,
+      ...(section.answers ?? {}),
+    };
+  }, {});
+}
+
+function buildThemeDefinitions(): ThemeDefinition[] {
+  return [
+    {
+      id: "governance",
+      title: "Eigenaarschap & governance",
+      category: "Organisatie & Beheer",
+      keys: [
+        "ownership_clarity",
+        "change_decision_process",
+        "improvement_governance",
+      ],
+    },
+    {
+      id: "processes",
+      title: "Processen & standaardisatie",
+      category: "Organisatie & Beheer",
+      keys: [
+        "process_standardization",
+        "exception_control",
+        "issue_resolution",
+        "standardization_context",
+      ],
+    },
+    {
+      id: "finance",
+      title: "Financieel",
+      category: "AFAS Modules",
+      keys: [
+        "finance_strategic_pressure",
+        "finance_foundation_reliability",
+        "finance_exception_handling",
+        "finance_reporting_maturity",
+      ],
+      enabledWhen: (answers) => answerIncludes(answers, "afas_products", "financieel"),
+    },
+    {
+      id: "ordermanagement",
+      title: "Ordermanagement",
+      category: "AFAS Modules",
+      keys: [
+        "order_strategic_pressure",
+        "order_flow_standardization",
+        "order_exception_complexity",
+        "order_system_fit",
+      ],
+      enabledWhen: (answers) =>
+        answerIncludes(answers, "afas_products", "ordermanagement"),
+    },
+    {
+      id: "crm",
+      title: "CRM",
+      category: "AFAS Modules",
+      keys: [
+        "crm_strategic_pressure",
+        "crm_process_maturity",
+        "crm_data_quality",
+        "crm_reporting_usefulness",
+      ],
+      enabledWhen: (answers) => answerIncludes(answers, "afas_products", "crm"),
+    },
+    {
+      id: "hrm",
+      title: "HRM",
+      category: "AFAS Modules",
+      keys: [
+        "hrm_strategic_pressure",
+        "hrm_process_maturity",
+        "hrm_data_quality",
+      ],
+      enabledWhen: (answers) =>
+        answerIncludes(answers, "afas_products", "hrm") ||
+        answerIncludes(answers, "afas_products", "payroll"),
+    },
+    {
+      id: "reporting",
+      title: "Rapportage & data",
+      category: "Rapportage & Data",
+      keys: [
+        "reporting_strategic_pressure",
+        "reporting_definition_consistency",
+        "reporting_usefulness",
+      ],
+      enabledWhen: (answers) =>
+        answerIncludes(answers, "scope_focus", "rapportage_sturing") ||
+        answerIncludes(answers, "afas_products", "rapportage_dashboards"),
+    },
+    {
+      id: "integrations",
+      title: "Integraties & keten",
+      category: "Integraties & Beheer",
+      keys: [
+        "integration_strategic_pressure",
+        "integration_stability",
+        "integration_ownership",
+        "integration_monitoring_maturity",
+      ],
+      enabledWhen: (answers) =>
+        answerIncludes(answers, "afas_products", "integraties"),
+    },
+    {
+      id: "care",
+      title: "Zorgspecifieke uitvoering",
+      category: "Branche",
+      keys: [
+        "care_registration_exceptions",
+        "care_accountability_pressure",
+      ],
+      enabledWhen: (answers) => answerEquals(answers, "sector", "zorg"),
+    },
+    {
+      id: "education",
+      title: "Onderwijsspecifieke uitvoering",
+      category: "Branche",
+      keys: [
+        "education_intake_planning_consistency",
+        "education_process_admin_alignment",
+        "education_exception_handling",
+      ],
+      enabledWhen: (answers) => answerEquals(answers, "sector", "onderwijs"),
+    },
+  ];
+}
+
+function buildThemeInputs(sections: ScanSectionInput[]): ThemeInput[] {
+  const allAnswers = mergeAllAnswers(sections);
+  const definitions = buildThemeDefinitions();
+
+  return definitions
+    .filter((theme) => (theme.enabledWhen ? theme.enabledWhen(allAnswers) : true))
+    .map((theme) => ({
+      id: theme.id,
+      title: theme.title,
+      category: theme.category,
+      answers: pickAnswers(allAnswers, theme.keys),
+    }))
+    .filter((theme) => Object.keys(theme.answers).length > 0);
+}
+
 export function buildScanOutput(scan: ScanInput): ScanOutput {
   const sections = scan.sections ?? [];
+  const themes = buildThemeInputs(sections);
 
-  const priorities: OutputPriorityItem[] = sections
-    .map((section) => {
-      const signals = deriveSignals(section);
-      const score = calculatePriorityScore(section);
+  const priorities: OutputPriorityItem[] = themes
+    .map((theme) => {
+      const signals = deriveSignals(theme);
+      const score = calculatePriorityScore(theme, signals);
       const priority = mapPriorityLevel(score);
-      const bucket = mapRoadmapBucket(section, priority, signals, score);
+      const bucket = mapRoadmapBucket(theme, priority, signals, score);
 
       return {
-        id: section.id,
-        title: section.title,
-        category: section.category,
+        id: theme.id,
+        title: theme.title,
+        category: theme.category,
         priority,
         bucket,
         score,
-        reason: buildReason(section, signals, priority),
-        advice: buildAdvice(section, signals, priority),
+        reason: buildThemeReason(theme, signals, priority),
+        advice: buildThemeAdvice(theme, signals, priority),
         signals,
       };
     })
