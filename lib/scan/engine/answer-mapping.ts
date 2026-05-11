@@ -21,6 +21,12 @@ export function getAnswerFromScan(
       return scan.profile.afasProducts;
     case "ownership_model":
       return scan.profile.ownershipModel;
+    case "afas_usage_duration":
+      return scan.profile.afasUsageDuration;
+    case "maintenance_quality":
+      return scan.profile.maintenanceQuality;
+    case "expected_org_changes":
+      return scan.profile.expectedOrgChanges;
     case "standardization_context":
       return scan.profile.standardizationContext;
     case "primary_process_chains":
@@ -90,6 +96,9 @@ export type ScanActions = {
   setOrganizationType: (value: string[]) => void;
   setAfasProducts: (value: string[]) => void;
   setOwnershipModel: (value: string) => void;
+  setAfasUsageDuration: (value: string) => void;
+  setMaintenanceQuality: (value: string) => void;
+  setExpectedOrgChanges: (value: string) => void;
   setStandardizationContext: (value: string) => void;
   setPrimaryProcessChains: (value: string[]) => void;
 
@@ -169,6 +178,15 @@ export function setAnswerToScan(
       return;
     case "ownership_model":
       actions.setOwnershipModel(ensureString(value));
+      return;
+    case "afas_usage_duration":
+      actions.setAfasUsageDuration(ensureString(value));
+      return;
+    case "maintenance_quality":
+      actions.setMaintenanceQuality(ensureString(value));
+      return;
+    case "expected_org_changes":
+      actions.setExpectedOrgChanges(ensureString(value));
       return;
     case "standardization_context":
       actions.setStandardizationContext(ensureString(value));
