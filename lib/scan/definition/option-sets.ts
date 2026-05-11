@@ -30,47 +30,53 @@ export const optionSets: OptionSetDefinition[] = [
       { value: "10+", label: "10+ administraties", order: 40 },
     ],
   },
-{
-  key: "organization_type_options",
-  options: [
-    {
-      value: "centraal_operationeel",
-      label: "Centraal aangestuurd",
-      description: "Belangrijke keuzes, inrichting en werkwijze worden vooral centraal bepaald.",
-      order: 10,
-    },
-    {
-      value: "meerdere_teams_locaties",
-      label: "Meerdere teams / locaties",
-      description: "De organisatie werkt vanuit meerdere teams, vestigingen of locaties.",
-      order: 20,
-    },
-    {
-      value: "meerdere_entiteiten",
-      label: "Meerdere entiteiten",
-      description: "Er zijn meerdere bv’s, administraties of organisatorische eenheden.",
-      order: 30,
-    },
-    {
-      value: "projectmatig",
-      label: "Projectmatig",
-      description: "Werk wordt voor een belangrijk deel uitgevoerd en gestuurd per project.",
-      order: 40,
-    },
-    {
-      value: "transactiegedreven",
-      label: "Transactiegedreven",
-      description: "De operatie draait vooral om repeterende transacties, volume en verwerking.",
-      order: 50,
-    },
-    {
-      value: "hybride",
-      label: "Hybride",
-      description: "De organisatie combineert meerdere werkvormen naast elkaar.",
-      order: 60,
-    },
-  ],
-},
+  {
+    key: "organization_type_options",
+    options: [
+      {
+        value: "centraal_operationeel",
+        label: "Centraal aangestuurd",
+        description:
+          "Belangrijke keuzes, inrichting en werkwijze worden vooral centraal bepaald.",
+        order: 10,
+      },
+      {
+        value: "meerdere_teams_locaties",
+        label: "Meerdere teams / locaties",
+        description:
+          "De organisatie werkt vanuit meerdere teams, vestigingen of locaties.",
+        order: 20,
+      },
+      {
+        value: "meerdere_entiteiten",
+        label: "Meerdere entiteiten",
+        description:
+          "Er zijn meerdere bv’s, administraties of organisatorische eenheden.",
+        order: 30,
+      },
+      {
+        value: "projectmatig",
+        label: "Projectmatig",
+        description:
+          "Werk wordt voor een belangrijk deel uitgevoerd en gestuurd per project.",
+        order: 40,
+      },
+      {
+        value: "transactiegedreven",
+        label: "Transactiegedreven",
+        description:
+          "De operatie draait vooral om repeterende transacties, volume en verwerking.",
+        order: 50,
+      },
+      {
+        value: "hybride",
+        label: "Hybride",
+        description:
+          "De organisatie combineert meerdere werkvormen naast elkaar.",
+        order: 60,
+      },
+    ],
+  },
   {
     key: "afas_products_options",
     options: [
@@ -102,218 +108,193 @@ export const optionSets: OptionSetDefinition[] = [
       { value: "overig", label: "Overig", order: 180 },
     ],
   },
-{
-  key: "ownership_model_options",
-  options: [
-    {
-      value: "extern_uitbesteed",
-      label: "Beheer uitbesteed aan externe partij",
-      description:
-        "Functioneel beheer en wijzigingen liggen vooral bij een externe partner.",
-      order: 10,
-    },
-    {
-      value: "een_beheerder",
-      label: "1 beheerder",
-      description:
-        "Er is één persoon die AFAS en procesbeheer grotendeels trekt.",
-      order: 20,
-    },
-    {
-      value: "centraal_beheerteam",
-      label: "Beheerdersteam (centraal geregeld)",
-      description:
-        "Beheer is centraal georganiseerd in een vast team of centrale beheerfunctie.",
-      order: 30,
-    },
-    {
-      value: "decentraal_key_users",
-      label: "Beheer per afdeling (key-users) zonder centraal",
-      description:
-        "Beheer ligt verspreid bij key-users of afdelingen, zonder centrale regie.",
-      order: 40,
-    },
-    {
-      value: "geen_beheer",
-      label: "Geen duidelijke beheerstructuur",
-      description:
-        "Er is geen duidelijke beheerstructuur of vast aanspreekpunt ingericht.",
-      order: 50,
-    },
-  ],
-},
-{
-  key: "afas_usage_duration_options",
-  options: [
-    {
-      value: "korter_dan_2_jaar",
-      label: "Minder dan 2 jaar",
-      description:
-        "AFAS is nog relatief recent in gebruik. De inrichting is waarschijnlijk nog jong.",
-      order: 10,
-    },
-    {
-      value: "tussen_2_en_5_jaar",
-      label: "2 tot 5 jaar",
-      description:
-        "AFAS is al enige tijd in gebruik, maar de inrichting is nog niet heel oud.",
-      order: 20,
-    },
-    {
-      value: "tussen_5_en_10_jaar",
-      label: "5 tot 10 jaar",
-      description:
-        "De inrichting heeft al meerdere jaren historie en waarschijnlijk meerdere wijzigingsrondes gehad.",
-      order: 30,
-    },
-    {
-      value: "10_jaar_of_langer",
-      label: "10 jaar of langer",
-      description:
-        "AFAS heeft een lange historie binnen de organisatie. De kans op opgebouwde complexiteit is groter.",
-      order: 40,
-    },
-    {
-      value: "onbekend",
-      label: "Onbekend",
-      description:
-        "Het is niet goed bekend sinds wanneer AFAS in gebruik is.",
-      order: 50,
-    },
-  ],
-},
-{
-  key: "maintenance_quality_options",
-  options: [
-    {
-      value: "goed_onderhouden",
-      label: "Goed onderhouden",
-      description:
-        "Beheer, opschoning, documentatie en wijzigingen zijn de afgelopen jaren goed bijgehouden.",
-      order: 10,
-    },
-    {
-      value: "redelijk_onderhouden",
-      label: "Redelijk onderhouden",
-      description:
-        "De basis is bijgehouden, maar niet alles is even strak of structureel onderhouden.",
-      order: 20,
-    },
-    {
-      value: "achterstallig_onderhoud",
-      label: "Achterstallig onderhoud",
-      description:
-        "Er is duidelijk achterstand in beheer, opschoning, documentatie of gecontroleerde wijzigingen.",
-      order: 30,
-    },
-    {
-      value: "moeilijk_te_beoordelen",
-      label: "Moeilijk te beoordelen",
-      description:
-        "Het is op dit moment nog niet goed vast te stellen hoe goed de inrichting is onderhouden.",
-      order: 40,
-    },
-  ],
-},
-{
-  key: "expected_org_changes_options",
-  options: [
-    {
-      value: "ja_waarschijnlijk",
-      label: "Ja, waarschijnlijk",
-      description:
-        "Er worden naar verwachting organisatieveranderingen voorzien die impact hebben op inrichting of beheer.",
-      order: 10,
-    },
-    {
-      value: "mogelijk",
-      label: "Mogelijk",
-      description:
-        "Er zijn signalen of plannen, maar nog geen harde zekerheid over de impact of timing.",
-      order: 20,
-    },
-    {
-      value: "nee",
-      label: "Nee",
-      description:
-        "Er worden op dit moment geen grote organisatieveranderingen verwacht.",
-      order: 30,
-    },
-    {
-      value: "nog_onbekend",
-      label: "Nog onbekend",
-      description:
-        "Het is nog niet duidelijk of zulke veranderingen gaan spelen.",
-      order: 40,
-    },
-  ],
-},
   {
-  key: "standardization_context_options",
-  options: [
-    {
-      value: "afas_standaard",
-      label: "AFAS Standaard",
-      description:
-        "De inrichting volgt grotendeels de standaard van AFAS, met weinig uitzonderingen.",
-      order: 10,
-    },
-    {
-      value: "standaard_met_beetje_maatwerk",
-      label: "Standaard met een klein beetje maatwerk",
-      description:
-        "De basis is standaard, met enkele aanvullende uitzonderingen of beperkte aanpassingen.",
-      order: 20,
-    },
-    {
-      value: "veel_maatwerk",
-      label: "Veel maatwerk",
-      description:
-        "De inrichting en werkwijze leunen sterk op maatwerk, uitzonderingen of afwijkende oplossingen.",
-      order: 30,
-    },
-    {
-      value: "moeilijk_te_beoordelen",
-      label: "Moeilijk te beoordelen",
-      description:
-        "Het is nu nog niet duidelijk in hoeverre de inrichting standaard of maatwerkgedreven is.",
-      order: 40,
-    },
-  ],
-},
-  {
-    key: "primary_process_chains_options",
+    key: "ownership_model_options",
     options: [
       {
-        value: "lead_to_order",
-        label: "Lead tot order",
+        value: "extern_uitbesteed",
+        label: "Beheer uitbesteed aan externe partij",
+        description:
+          "Functioneel beheer en wijzigingen liggen vooral bij een externe partner.",
         order: 10,
       },
       {
-        value: "order_to_cash",
-        label: "Order tot factuur",
+        value: "een_beheerder",
+        label: "1 beheerder",
+        description:
+          "Er is één persoon die AFAS en procesbeheer grotendeels trekt.",
         order: 20,
       },
       {
-        value: "procure_to_pay",
-        label: "Inkoop tot betaling",
+        value: "centraal_beheerteam",
+        label: "Beheerdersteam (centraal geregeld)",
+        description:
+          "Beheer is centraal georganiseerd in een vast team of centrale beheerfunctie.",
         order: 30,
       },
       {
-        value: "project_to_invoice",
-        label: "Project tot factuur",
+        value: "decentraal_key_users",
+        label: "Beheer per afdeling (key-users) zonder centraal",
+        description:
+          "Beheer ligt verspreid bij key-users of afdelingen, zonder centrale regie.",
         order: 40,
       },
       {
-        value: "hr_to_payroll",
-        label: "HR tot salaris",
+        value: "geen_beheer",
+        label: "Geen duidelijke beheerstructuur",
+        description:
+          "Er is geen duidelijke beheerstructuur of vast aanspreekpunt ingericht.",
         order: 50,
       },
+    ],
+  },
+  {
+    key: "afas_usage_duration_options",
+    options: [
       {
-        value: "service_support",
-        label: "Service / support",
-        order: 60,
+        value: "korter_dan_2_jaar",
+        label: "Minder dan 2 jaar",
+        description:
+          "AFAS is nog relatief recent in gebruik. De inrichting is waarschijnlijk nog jong.",
+        order: 10,
       },
+      {
+        value: "tussen_2_en_5_jaar",
+        label: "2 tot 5 jaar",
+        description:
+          "AFAS is al enige tijd in gebruik, maar de inrichting is nog niet heel oud.",
+        order: 20,
+      },
+      {
+        value: "tussen_5_en_10_jaar",
+        label: "5 tot 10 jaar",
+        description:
+          "De inrichting heeft al meerdere jaren historie en waarschijnlijk meerdere wijzigingsrondes gehad.",
+        order: 30,
+      },
+      {
+        value: "10_jaar_of_langer",
+        label: "10 jaar of langer",
+        description:
+          "AFAS heeft een lange historie binnen de organisatie. De kans op opgebouwde complexiteit is groter.",
+        order: 40,
+      },
+      {
+        value: "onbekend",
+        label: "Onbekend",
+        description: "Het is niet goed bekend sinds wanneer AFAS in gebruik is.",
+        order: 50,
+      },
+    ],
+  },
+  {
+    key: "maintenance_quality_options",
+    options: [
+      {
+        value: "goed_onderhouden",
+        label: "Goed onderhouden",
+        description:
+          "Beheer, opschoning, documentatie en wijzigingen zijn de afgelopen jaren goed bijgehouden.",
+        order: 10,
+      },
+      {
+        value: "redelijk_onderhouden",
+        label: "Redelijk onderhouden",
+        description:
+          "De basis is bijgehouden, maar niet alles is even strak of structureel onderhouden.",
+        order: 20,
+      },
+      {
+        value: "achterstallig_onderhoud",
+        label: "Achterstallig onderhoud",
+        description:
+          "Er is duidelijk achterstand in beheer, opschoning, documentatie of gecontroleerde wijzigingen.",
+        order: 30,
+      },
+      {
+        value: "moeilijk_te_beoordelen",
+        label: "Moeilijk te beoordelen",
+        description:
+          "Het is op dit moment nog niet goed vast te stellen hoe goed de inrichting is onderhouden.",
+        order: 40,
+      },
+    ],
+  },
+  {
+    key: "expected_org_changes_options",
+    options: [
+      {
+        value: "ja_waarschijnlijk",
+        label: "Ja, waarschijnlijk",
+        description:
+          "Er worden naar verwachting organisatieveranderingen voorzien die impact hebben op inrichting of beheer.",
+        order: 10,
+      },
+      {
+        value: "mogelijk",
+        label: "Mogelijk",
+        description:
+          "Er zijn signalen of plannen, maar nog geen harde zekerheid over de impact of timing.",
+        order: 20,
+      },
+      {
+        value: "nee",
+        label: "Nee",
+        description:
+          "Er worden op dit moment geen grote organisatieveranderingen verwacht.",
+        order: 30,
+      },
+      {
+        value: "nog_onbekend",
+        label: "Nog onbekend",
+        description:
+          "Het is nog niet duidelijk of zulke veranderingen gaan spelen.",
+        order: 40,
+      },
+    ],
+  },
+  {
+    key: "standardization_context_options",
+    options: [
+      {
+        value: "afas_standaard",
+        label: "AFAS Standaard",
+        description:
+          "De inrichting volgt grotendeels de standaard van AFAS, met weinig uitzonderingen.",
+        order: 10,
+      },
+      {
+        value: "standaard_met_beetje_maatwerk",
+        label: "Standaard met een klein beetje maatwerk",
+        description:
+          "De basis is standaard, met enkele aanvullende uitzonderingen of beperkte aanpassingen.",
+        order: 20,
+      },
+      {
+        value: "veel_maatwerk",
+        label: "Veel maatwerk",
+        description:
+          "De inrichting en werkwijze leunen sterk op maatwerk, uitzonderingen of afwijkende oplossingen.",
+        order: 30,
+      },
+      {
+        value: "moeilijk_te_beoordelen",
+        label: "Moeilijk te beoordelen",
+        description:
+          "Het is nu nog niet duidelijk in hoeverre de inrichting standaard of maatwerkgedreven is.",
+        order: 40,
+      },
+    ],
+  },
+  {
+    key: "primary_process_chains_options",
+    options: [
+      { value: "lead_to_order", label: "Lead tot order", order: 10 },
+      { value: "order_to_cash", label: "Order tot factuur", order: 20 },
+      { value: "procure_to_pay", label: "Inkoop tot betaling", order: 30 },
+      { value: "project_to_invoice", label: "Project tot factuur", order: 40 },
+      { value: "hr_to_payroll", label: "HR tot salaris", order: 50 },
+      { value: "service_support", label: "Service / support", order: 60 },
       {
         value: "reporting_control",
         label: "Rapportage en sturing",
@@ -369,13 +350,15 @@ export const optionSets: OptionSetDefinition[] = [
       {
         value: "normaal",
         label: "Normaal",
-        description: "Een gebalanceerde scan van de belangrijkste onderdelen.",
+        description:
+          "Een gebalanceerde scan van de belangrijkste onderdelen.",
         order: 20,
       },
       {
         value: "breed",
         label: "Breed",
-        description: "Een brede scan over meerdere domeinen en processen.",
+        description:
+          "Een brede scan over meerdere domeinen en processen.",
         order: 30,
       },
     ],
@@ -455,11 +438,7 @@ export const optionSets: OptionSetDefinition[] = [
     options: [
       { value: "ad_hoc", label: "Ad hoc", order: 10 },
       { value: "deels_afgestemd", label: "Deels afgestemd", order: 20 },
-      {
-        value: "vast_proces",
-        label: "Vast proces",
-        order: 30,
-      },
+      { value: "vast_proces", label: "Vast proces", order: 30 },
     ],
   },
   {
@@ -541,25 +520,252 @@ export const optionSets: OptionSetDefinition[] = [
   {
     key: "maturity_3level_usefulness_options",
     options: [
-      { value: "beperkt_bruikbaar", label: "Beperkt bruikbaar", order: 10 },
-      { value: "deels_bruikbaar", label: "Deels bruikbaar", order: 20 },
-      { value: "goed_bruikbaar", label: "Goed bruikbaar", order: 30 },
+      {
+        value: "beperkt_bruikbaar",
+        label: "Beperkt bruikbaar",
+        order: 10,
+      },
+      {
+        value: "deels_bruikbaar",
+        label: "Deels bruikbaar",
+        order: 20,
+      },
+      {
+        value: "goed_bruikbaar",
+        label: "Goed bruikbaar",
+        order: 30,
+      },
     ],
   },
   {
     key: "maturity_3level_fit_options",
     options: [
-      { value: "sluit_beperkt_aan", label: "Sluit beperkt aan", order: 10 },
-      { value: "sluit_deels_aan", label: "Sluit deels aan", order: 20 },
-      { value: "sluit_goed_aan", label: "Sluit goed aan", order: 30 },
+      {
+        value: "sluit_beperkt_aan",
+        label: "Sluit beperkt aan",
+        order: 10,
+      },
+      {
+        value: "sluit_deels_aan",
+        label: "Sluit deels aan",
+        order: 20,
+      },
+      {
+        value: "sluit_goed_aan",
+        label: "Sluit goed aan",
+        order: 30,
+      },
     ],
   },
   {
     key: "maturity_3level_exception_practical_options",
     options: [
       { value: "vooral_handmatig", label: "Vooral handmatig", order: 10 },
-      { value: "deels_beheersbaar", label: "Deels beheersbaar", order: 20 },
+      {
+        value: "deels_beheersbaar",
+        label: "Deels beheersbaar",
+        order: 20,
+      },
       { value: "goed_beheerst", label: "Goed beheerst", order: 30 },
+    ],
+  },
+
+  {
+    key: "finance_strategic_pressure_options",
+    options: [
+      {
+        value: "betrouwbaarheid_basis",
+        label: "Betrouwbaarheid van de basis",
+        description:
+          "De grootste opgave zit in een stabiele en betrouwbare financiële basis.",
+        order: 10,
+      },
+      {
+        value: "uitzonderingen_handwerk",
+        label: "Uitzonderingen en handwerk",
+        description:
+          "De grootste opgave zit in afwijkingen, correcties en handmatige verwerking.",
+        order: 20,
+      },
+      {
+        value: "stuurinformatie",
+        label: "Stuurinformatie en inzicht",
+        description:
+          "De grootste opgave zit in tijdig, betrouwbaar en bruikbaar inzicht.",
+        order: 30,
+      },
+      {
+        value: "meerdere_administraties",
+        label: "Complexiteit door meerdere administraties",
+        description:
+          "De grootste opgave zit in structuur, samenhang of afstemming tussen administraties.",
+        order: 40,
+      },
+    ],
+  },
+  {
+    key: "crm_strategic_pressure_options",
+    options: [
+      {
+        value: "lead_opvolging",
+        label: "Leadopvolging en commerciële discipline",
+        description:
+          "De grootste opgave zit in het consequent vastleggen en opvolgen van commerciële acties.",
+        order: 10,
+      },
+      {
+        value: "pipeline_forecast",
+        label: "Pipeline en forecast",
+        description:
+          "De grootste opgave zit in grip op kansen, voortgang en verwachte omzet.",
+        order: 20,
+      },
+      {
+        value: "relatie_data",
+        label: "Relatie- en contactgegevens",
+        description:
+          "De grootste opgave zit in kwaliteit, volledigheid en actualiteit van CRM-gegevens.",
+        order: 30,
+      },
+      {
+        value: "gebruik_adoptie",
+        label: "Gebruik en adoptie",
+        description:
+          "De grootste opgave zit in structureel gebruik van CRM door de organisatie.",
+        order: 40,
+      },
+    ],
+  },
+  {
+    key: "order_strategic_pressure_options",
+    options: [
+      {
+        value: "orderinvoer",
+        label: "Orderinvoer en verwerking",
+        description:
+          "De grootste opgave zit in het goed en eenduidig verwerken van orders.",
+        order: 10,
+      },
+      {
+        value: "blokkades_vrijgave",
+        label: "Blokkades en vrijgave",
+        description:
+          "De grootste opgave zit in controle, vrijgave en uitzonderingen in de orderflow.",
+        order: 20,
+      },
+      {
+        value: "levering_facturatie",
+        label: "Levering en facturatie",
+        description:
+          "De grootste opgave zit in de doorstroming naar levering en factuur.",
+        order: 30,
+      },
+      {
+        value: "afwijkingen_handwerk",
+        label: "Afwijkingen en handwerk",
+        description:
+          "De grootste opgave zit in afwijkende routes, uitzonderingen en handmatige ingrepen.",
+        order: 40,
+      },
+    ],
+  },
+  {
+    key: "hrm_strategic_pressure_options",
+    options: [
+      {
+        value: "mutatieverwerking",
+        label: "Mutatieverwerking",
+        description:
+          "De grootste opgave zit in het correct en tijdig verwerken van HR-mutaties.",
+        order: 10,
+      },
+      {
+        value: "dossiers_vastlegging",
+        label: "Dossiers en vastlegging",
+        description:
+          "De grootste opgave zit in volledigheid en kwaliteit van HR-dossiers en gegevens.",
+        order: 20,
+      },
+      {
+        value: "proces_uniformiteit",
+        label: "Procesuniformiteit",
+        description:
+          "De grootste opgave zit in eenduidige HR-processen en werkwijzen.",
+        order: 30,
+      },
+      {
+        value: "selfservice_gebruik",
+        label: "Selfservice en gebruik",
+        description:
+          "De grootste opgave zit in gebruik door medewerkers en leidinggevenden.",
+        order: 40,
+      },
+    ],
+  },
+  {
+    key: "reporting_strategic_pressure_options",
+    options: [
+      {
+        value: "definities_kpis",
+        label: "Definities en KPI’s",
+        description:
+          "De grootste opgave zit in eenduidige definities en stuurgetallen.",
+        order: 10,
+      },
+      {
+        value: "betrouwbaarheid_cijfers",
+        label: "Betrouwbaarheid van cijfers",
+        description:
+          "De grootste opgave zit in vertrouwen in de juistheid van rapportages.",
+        order: 20,
+      },
+      {
+        value: "snelheid_actualiteit",
+        label: "Snelheid en actualiteit",
+        description:
+          "De grootste opgave zit in tijdige beschikbaarheid van informatie.",
+        order: 30,
+      },
+      {
+        value: "bruikbaarheid_sturing",
+        label: "Bruikbaarheid voor sturing",
+        description:
+          "De grootste opgave zit in het daadwerkelijk gebruiken van rapportage voor besluitvorming.",
+        order: 40,
+      },
+    ],
+  },
+  {
+    key: "integration_strategic_pressure_options",
+    options: [
+      {
+        value: "stabiliteit_keten",
+        label: "Stabiliteit van de keten",
+        description:
+          "De grootste opgave zit in uitval, verstoringen en continuïteit van koppelingen.",
+        order: 10,
+      },
+      {
+        value: "eigenaarschap_beheer",
+        label: "Eigenaarschap en beheer",
+        description:
+          "De grootste opgave zit in duidelijke verantwoordelijkheid voor koppelingen en wijzigingen.",
+        order: 20,
+      },
+      {
+        value: "monitoring_opvolging",
+        label: "Monitoring en opvolging",
+        description:
+          "De grootste opgave zit in signalering en opvolging van fouten en verstoringen.",
+        order: 30,
+      },
+      {
+        value: "handmatig_herstel",
+        label: "Handmatig herstel",
+        description:
+          "De grootste opgave zit in afhankelijkheid van handmatige controles of herstelacties.",
+        order: 40,
+      },
     ],
   },
 ];
