@@ -128,6 +128,100 @@ function ThemeCard({
   );
 }
 
+function getRelevantEvidenceKeysForPriority(priorityId: string): string[] {
+  switch (priorityId) {
+    case "governance":
+      return [
+        "ownership_clarity",
+        "change_decision_process",
+        "improvement_governance",
+        "ownership_model",
+      ];
+
+    case "processes":
+      return [
+        "process_standardization",
+        "exception_control",
+        "issue_resolution",
+        "standardization_context",
+        "primary_process_chains",
+      ];
+
+    case "finance":
+      return [
+        "finance_strategic_pressure",
+        "finance_foundation_reliability",
+        "finance_exception_handling",
+        "finance_reporting_maturity",
+        "afas_products",
+        "scope_focus",
+      ];
+
+    case "ordermanagement":
+      return [
+        "order_strategic_pressure",
+        "order_flow_standardization",
+        "order_exception_complexity",
+        "order_system_fit",
+        "primary_process_chains",
+      ];
+
+    case "crm":
+      return [
+        "crm_strategic_pressure",
+        "crm_process_maturity",
+        "crm_data_quality",
+        "crm_reporting_usefulness",
+        "afas_products",
+      ];
+
+    case "hrm":
+      return [
+        "hrm_strategic_pressure",
+        "hrm_process_maturity",
+        "hrm_data_quality",
+        "afas_products",
+      ];
+
+    case "reporting":
+      return [
+        "reporting_strategic_pressure",
+        "reporting_definition_consistency",
+        "reporting_usefulness",
+        "scope_focus",
+        "biggest_bottleneck",
+      ];
+
+    case "integrations":
+      return [
+        "integration_strategic_pressure",
+        "integration_stability",
+        "integration_ownership",
+        "integration_monitoring_maturity",
+        "afas_products",
+        "primary_process_chains",
+      ];
+
+    case "care":
+      return [
+        "care_registration_exceptions",
+        "care_accountability_pressure",
+        "sector",
+      ];
+
+    case "education":
+      return [
+        "education_intake_planning_consistency",
+        "education_process_admin_alignment",
+        "education_exception_handling",
+        "sector",
+      ];
+
+    default:
+      return [];
+  }
+}
+
 export default function SectionSummaryPage() {
   const params = useParams<{
     id: string | string[];
@@ -200,7 +294,7 @@ export default function SectionSummaryPage() {
       value: scan.comments[question.key],
     }));
 
-  const evidenceItems = isFinalStep
+  const allEvidenceItems = isFinalStep
     ? [
         ...getQuestionsForSection("profile_basis", scan),
         ...getQuestionsForSection("profile_reason", scan),
@@ -226,6 +320,24 @@ export default function SectionSummaryPage() {
           };
         })
     : [];
+
+  const relevantEvidenceKeys =
+    isFinalStep && scanOutput
+      ? Array.from(
+          new Set(
+            scanOutput.priorities
+              .slice(0, 3)
+              .flatMap((item) => getRelevantEvidenceKeysForPriority(item.id))
+          )
+        )
+      : [];
+
+  const evidenceItems = isFinalStep
+    ? allEvidenceItems.filter((item) => relevantEvidenceKeys.includes(item.key))
+    : [];
+
+  const fallbackEvidenceItems =
+    evidenceItems.length > 0 ? evidenceItems : allEvidenceItems.slice(0, 8);
 
   const compactContext = isFinalStep
     ? {
@@ -711,12 +823,12 @@ export default function SectionSummaryPage() {
             <div className="space-y-1">
               <h2 className="text-lg font-semibold">Onderbouwing</h2>
               <p className="text-sm text-muted-foreground">
-                Detailinformatie uit de ingevulde antwoorden.
+                Alleen de antwoorden die het meest relevant zijn voor de topprioriteiten.
               </p>
             </div>
 
             <div className="mt-4 space-y-3">
-              {evidenceItems.slice(0, 12).map((item) => (
+              {fallbackEvidenceItems.slice(0, 8).map((item) => (
                 <div
                   key={item.key}
                   className="rounded-2xl border border-black/10 bg-black/[0.02] p-4"
