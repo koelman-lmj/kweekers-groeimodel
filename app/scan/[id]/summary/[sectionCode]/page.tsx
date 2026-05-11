@@ -100,6 +100,7 @@ type EvidenceItem = {
 type GroupedEvidence = {
   priorityId: string;
   priorityTitle: string;
+  conclusion: string;
   items: EvidenceItem[];
 };
 
@@ -234,6 +235,33 @@ function getRelevantEvidenceKeysForPriority(priorityId: string): string[] {
   }
 }
 
+function buildPriorityConclusion(priorityId: string, priorityTitle: string): string {
+  switch (priorityId) {
+    case "governance":
+      return "Eigenaarschap en besluitvorming zijn nog niet scherp genoeg georganiseerd om verbeteringen strak aan te sturen.";
+    case "processes":
+      return "De werkwijze is nog niet eenduidig genoeg en uitzonderingen drukken te zwaar op de uitvoering.";
+    case "finance":
+      return "De financiële basis of stuurinformatie vraagt nog aanscherping om betrouwbaar te kunnen sturen.";
+    case "ordermanagement":
+      return "De orderroute kent nog afwijkingen of sluit nog niet strak genoeg aan op de gewenste werkwijze.";
+    case "crm":
+      return "CRM-data en procesdiscipline zijn nog niet sterk genoeg om CRM echt als stuurmiddel te gebruiken.";
+    case "hrm":
+      return "HRM-processen of datakwaliteit zijn nog niet stabiel genoeg voor een strakke uitvoering.";
+    case "reporting":
+      return "Rapportage en definities zijn nog niet scherp genoeg om goed en eenduidig te sturen.";
+    case "integrations":
+      return "Integraties en ketenafspraken missen nog voldoende stabiliteit, monitoring of eigenaarschap.";
+    case "care":
+      return "De zorgspecifieke uitvoering vraagt nog meer beheersing in registratie, declaratie en verantwoording.";
+    case "education":
+      return "De onderwijsspecifieke uitvoering vraagt nog meer eenduidigheid in intake, planning en administratie.";
+    default:
+      return `${priorityTitle} vraagt nog gerichte aanscherping.`;
+  }
+}
+
 function buildGroupedEvidence(
   topPriorities: { id: string; title: string }[],
   allEvidenceItems: EvidenceItem[]
@@ -248,6 +276,7 @@ function buildGroupedEvidence(
       return {
         priorityId: priority.id,
         priorityTitle: priority.title,
+        conclusion: buildPriorityConclusion(priority.id, priority.title),
         items,
       };
     })
@@ -870,6 +899,10 @@ export default function SectionSummaryPage() {
                         {group.priorityTitle}
                       </div>
                     </div>
+
+                    <p className="mt-3 text-sm text-muted-foreground">
+                      {group.conclusion}
+                    </p>
 
                     <div className="mt-4 space-y-3">
                       {group.items.slice(0, 4).map((item) => (
