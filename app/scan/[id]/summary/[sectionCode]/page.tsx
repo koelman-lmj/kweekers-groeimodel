@@ -108,12 +108,10 @@ function ThemeCard({
   title,
   description,
   items,
-  emptyText,
 }: {
   title: string;
   description: string;
   items: ThemeCardItem[];
-  emptyText: string;
 }) {
   return (
     <div className="rounded-3xl border border-black/10 bg-white p-5">
@@ -123,19 +121,15 @@ function ThemeCard({
       </div>
 
       <div className="mt-4 space-y-4">
-        {items.length > 0 ? (
-          items.map((item) => (
-            <div key={item.id} className="space-y-1.5">
-              <div className="flex items-center justify-between gap-3">
-                <div className="text-sm font-medium">{item.title}</div>
-                <ScoreDots priorityScore={item.score} />
-              </div>
-              <p className="text-sm text-muted-foreground">{item.reason}</p>
+        {items.map((item) => (
+          <div key={item.id} className="space-y-1.5">
+            <div className="flex items-center justify-between gap-3">
+              <div className="text-sm font-medium">{item.title}</div>
+              <ScoreDots priorityScore={item.score} />
             </div>
-          ))
-        ) : (
-          <p className="text-sm text-muted-foreground">{emptyText}</p>
-        )}
+            <p className="text-sm text-muted-foreground">{item.reason}</p>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -372,7 +366,9 @@ export default function SectionSummaryPage() {
   });
 
   const isFinalStep = !hasNextStep;
-  const scanOutput = isFinalStep ? buildScanOutput(normalizeScanForOutput(scan)) : null;
+  const scanOutput = isFinalStep
+    ? buildScanOutput(normalizeScanForOutput(scan))
+    : null;
 
   const handlePrint = () => {
     window.print();
@@ -494,6 +490,33 @@ export default function SectionSummaryPage() {
   const displayBranchItems = themeItems.filter((item) =>
     ["care", "education"].includes(item.id)
   );
+
+  const visibleThemeCards = [
+    {
+      key: "modules",
+      title: "AFAS Modules",
+      description: "Hoe sterk zijn de gekozen modules nu ingericht en bruikbaar?",
+      items: displayModulesItems,
+    },
+    {
+      key: "integrations",
+      title: "Integraties & Beheer",
+      description: "Hoe stabiel en beheersbaar is de keten rondom AFAS?",
+      items: displayIntegrationItems,
+    },
+    {
+      key: "reporting",
+      title: "Rapportage & Data",
+      description: "Hoe bruikbaar en betrouwbaar is informatie voor sturing?",
+      items: displayReportingItems,
+    },
+    {
+      key: "organization",
+      title: "Organisatie & Beheer",
+      description: "Hoe volwassen zijn eigenaarschap, governance en werkwijze?",
+      items: displayOrganizationItems,
+    },
+  ].filter((card) => card.items.length > 0);
 
   const totalScore =
     scanOutput && scanOutput.priorities.length > 0
@@ -633,35 +656,18 @@ export default function SectionSummaryPage() {
             </div>
           </section>
 
-          <section className="grid gap-4 xl:grid-cols-2">
-            <ThemeCard
-              title="AFAS Modules"
-              description="Hoe sterk zijn de gekozen modules nu ingericht en bruikbaar?"
-              items={displayModulesItems}
-              emptyText="Geen relevante modulethema’s geselecteerd in deze scan."
-            />
-
-            <ThemeCard
-              title="Integraties & Beheer"
-              description="Hoe stabiel en beheersbaar is de keten rondom AFAS?"
-              items={displayIntegrationItems}
-              emptyText="Geen integratiethema’s meegenomen in deze scan."
-            />
-
-            <ThemeCard
-              title="Rapportage & Data"
-              description="Hoe bruikbaar en betrouwbaar is informatie voor sturing?"
-              items={displayReportingItems}
-              emptyText="Geen rapportage- of datathema’s meegenomen in deze scan."
-            />
-
-            <ThemeCard
-              title="Organisatie & Beheer"
-              description="Hoe volwassen zijn eigenaarschap, governance en werkwijze?"
-              items={displayOrganizationItems}
-              emptyText="Geen organisatie- of beheerthema’s meegenomen in deze scan."
-            />
-          </section>
+          {visibleThemeCards.length > 0 && (
+            <section className="grid gap-4 md:grid-cols-2">
+              {visibleThemeCards.map((card) => (
+                <ThemeCard
+                  key={card.key}
+                  title={card.title}
+                  description={card.description}
+                  items={card.items}
+                />
+              ))}
+            </section>
+          )}
 
           {displayBranchItems.length > 0 && (
             <section className="rounded-3xl border border-black/10 bg-white p-5">
