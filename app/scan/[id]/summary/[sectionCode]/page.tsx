@@ -56,6 +56,54 @@ function getBucketLabel(bucket: "now" | "next" | "later") {
   return "Later";
 }
 
+function getPriorityBadgeClass(priority: "hoog" | "middel" | "laag") {
+  switch (priority) {
+    case "hoog":
+      return "border-orange-300 bg-orange-50 text-orange-900";
+    case "middel":
+      return "border-amber-300 bg-amber-50 text-amber-900";
+    case "laag":
+      return "border-emerald-300 bg-emerald-50 text-emerald-900";
+    default:
+      return "border-slate-200 bg-slate-50 text-slate-900";
+  }
+}
+
+function getScoreLabelClass(scoreLabel: string) {
+  const label = scoreLabel.toLowerCase();
+
+  if (label.includes("direct verbeteren")) {
+    return "border-orange-300 bg-orange-50 text-orange-900";
+  }
+
+  if (label.includes("basis vraagt aandacht")) {
+    return "border-amber-300 bg-amber-50 text-amber-900";
+  }
+
+  if (label.includes("redelijke basis")) {
+    return "border-blue-300 bg-blue-50 text-blue-900";
+  }
+
+  if (label.includes("sterke basis")) {
+    return "border-emerald-300 bg-emerald-50 text-emerald-900";
+  }
+
+  return "border-slate-200 bg-slate-50 text-slate-900";
+}
+
+function getRoadmapBucketClass(bucket: "now" | "next" | "later") {
+  switch (bucket) {
+    case "now":
+      return "border-orange-200 bg-orange-50";
+    case "next":
+      return "border-amber-200 bg-amber-50";
+    case "later":
+      return "border-slate-200 bg-slate-50";
+    default:
+      return "border-slate-200 bg-slate-50";
+  }
+}
+
 function scoreToFiveDots(priorityScore: number) {
   if (priorityScore >= 85) return 1;
   if (priorityScore >= 70) return 2;
@@ -64,20 +112,38 @@ function scoreToFiveDots(priorityScore: number) {
   return 5;
 }
 
-function ScoreDots({ priorityScore }: { priorityScore: number }) {
+function getDotClass(priorityScore: number, index: number) {
   const active = scoreToFiveDots(priorityScore);
+  const isFilled = index < active;
 
+  if (!isFilled) {
+    return "h-2.5 w-2.5 rounded-full border border-black/20 bg-white";
+  }
+
+  if (priorityScore >= 85) {
+    return "h-2.5 w-2.5 rounded-full bg-orange-500";
+  }
+
+  if (priorityScore >= 70) {
+    return "h-2.5 w-2.5 rounded-full bg-amber-500";
+  }
+
+  if (priorityScore >= 55) {
+    return "h-2.5 w-2.5 rounded-full bg-yellow-500";
+  }
+
+  if (priorityScore >= 40) {
+    return "h-2.5 w-2.5 rounded-full bg-lime-500";
+  }
+
+  return "h-2.5 w-2.5 rounded-full bg-emerald-500";
+}
+
+function ScoreDots({ priorityScore }: { priorityScore: number }) {
   return (
     <div className="flex items-center gap-1.5">
       {Array.from({ length: 5 }).map((_, index) => (
-        <span
-          key={index}
-          className={
-            index < active
-              ? "h-2.5 w-2.5 rounded-full bg-black"
-              : "h-2.5 w-2.5 rounded-full border border-black/20 bg-white"
-          }
-        />
+        <span key={index} className={getDotClass(priorityScore, index)} />
       ))}
     </div>
   );
@@ -612,7 +678,11 @@ export default function SectionSummaryPage() {
                   </p>
                 </div>
 
-                <div className="inline-flex rounded-full border border-black/10 bg-black/[0.03] px-4 py-2 text-sm font-semibold">
+                <div
+                  className={`inline-flex rounded-full border px-4 py-2 text-sm font-semibold ${getScoreLabelClass(
+                    scanOutput.summary.scoreLabel
+                  )}`}
+                >
                   {scanOutput.summary.scoreLabel}
                 </div>
               </div>
@@ -620,37 +690,39 @@ export default function SectionSummaryPage() {
           </section>
 
           <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <div className="rounded-2xl border border-black/10 bg-white p-4">
-              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <div className="text-xs font-medium uppercase tracking-wide text-slate-600">
                 Totaalbeeld
               </div>
-              <div className="mt-2 text-3xl font-semibold">{totalScore}</div>
-              <div className="mt-2 text-sm text-muted-foreground">op schaal 1–5</div>
+              <div className="mt-2 text-3xl font-semibold text-slate-900">
+                {totalScore}
+              </div>
+              <div className="mt-2 text-sm text-slate-700">op schaal 1–5</div>
             </div>
 
-            <div className="rounded-2xl border border-black/10 bg-white p-4">
-              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            <div className="rounded-2xl border border-orange-200 bg-orange-50 p-4">
+              <div className="text-xs font-medium uppercase tracking-wide text-orange-700">
                 Grootste risico
               </div>
-              <div className="mt-2 text-sm font-medium">
+              <div className="mt-2 text-sm font-medium text-orange-950">
                 {scanOutput.summary.biggestRisk}
               </div>
             </div>
 
-            <div className="rounded-2xl border border-black/10 bg-white p-4">
-              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+              <div className="text-xs font-medium uppercase tracking-wide text-emerald-700">
                 Grootste kans
               </div>
-              <div className="mt-2 text-sm font-medium">
+              <div className="mt-2 text-sm font-medium text-emerald-950">
                 {scanOutput.summary.biggestOpportunity}
               </div>
             </div>
 
-            <div className="rounded-2xl border border-black/10 bg-white p-4">
-              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4">
+              <div className="text-xs font-medium uppercase tracking-wide text-blue-700">
                 Beste eerstvolgende stap
               </div>
-              <div className="mt-2 text-sm font-medium">
+              <div className="mt-2 text-sm font-medium text-blue-950">
                 {scanOutput.summary.nextBestStep}
               </div>
             </div>
@@ -737,7 +809,11 @@ export default function SectionSummaryPage() {
 
                     <div className="text-base font-semibold">{item.title}</div>
 
-                    <span className="rounded-full border border-black/10 bg-white px-2.5 py-1 text-[11px] font-medium">
+                    <span
+                      className={`rounded-full border px-2.5 py-1 text-[11px] font-medium ${getPriorityBadgeClass(
+                        item.priority
+                      )}`}
+                    >
                       {getPriorityLabel(item.priority)}
                     </span>
 
@@ -774,7 +850,7 @@ export default function SectionSummaryPage() {
             </div>
 
             <div className="mt-4 grid gap-4 md:grid-cols-3">
-              <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
+              <div className={`rounded-2xl border p-4 ${getRoadmapBucketClass("now")}`}>
                 <div className="text-sm font-semibold">Nu</div>
                 <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
                   {scanOutput.roadmap.now.length > 0 ? (
@@ -791,7 +867,7 @@ export default function SectionSummaryPage() {
                 </ul>
               </div>
 
-              <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
+              <div className={`rounded-2xl border p-4 ${getRoadmapBucketClass("next")}`}>
                 <div className="text-sm font-semibold">Daarna</div>
                 <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
                   {scanOutput.roadmap.next.length > 0 ? (
@@ -808,7 +884,7 @@ export default function SectionSummaryPage() {
                 </ul>
               </div>
 
-              <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
+              <div className={`rounded-2xl border p-4 ${getRoadmapBucketClass("later")}`}>
                 <div className="text-sm font-semibold">Later</div>
                 <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
                   {scanOutput.roadmap.later.length > 0 ? (
