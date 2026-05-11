@@ -121,11 +121,19 @@ function hasAnySignalInAnswers(
   return Object.values(answers).some((value) => hasSignal(value, words));
 }
 
-function answerEquals(answers: ScanAnswers, key: string, expected: string): boolean {
+function answerEquals(
+  answers: ScanAnswers,
+  key: string,
+  expected: string
+): boolean {
   return normalizeText(answers[key]) === expected.toLowerCase();
 }
 
-function answerIncludes(answers: ScanAnswers, key: string, expected: string): boolean {
+function answerIncludes(
+  answers: ScanAnswers,
+  key: string,
+  expected: string
+): boolean {
   return asArray(answers[key]).includes(expected);
 }
 
@@ -178,7 +186,6 @@ function toMaturityScore(value: ScanAnswerValue): number {
     sluit_goed_aan: 3,
 
     vooral_handmatig: 1,
-    deels_beheersbaar_finance: 2,
     goed_beheerst: 3,
 
     lage_druk: 1,
@@ -192,8 +199,11 @@ function toMaturityScore(value: ScanAnswerValue): number {
 function average(scores: number[]): number {
   const validScores = scores.filter((score) => score > 0);
   if (validScores.length === 0) return 0;
+
   return Number(
-    (validScores.reduce((sum, score) => sum + score, 0) / validScores.length).toFixed(1)
+    (
+      validScores.reduce((sum, score) => sum + score, 0) / validScores.length
+    ).toFixed(1)
   );
 }
 
@@ -201,7 +211,7 @@ function themeScoreTo100(answers: ScanAnswers): number {
   const values = Object.values(answers).map(toMaturityScore).filter((v) => v > 0);
   if (values.length === 0) return 50;
 
-  const avg = average(values); // 1-3
+  const avg = average(values);
   return clamp(Math.round(((avg - 1) / 2) * 100), 0, 100);
 }
 
@@ -299,12 +309,7 @@ function deriveSignals(theme: ThemeInput): string[] {
   }
 
   if (
-    hasAnySignalInAnswers(answers, [
-      "hoge_druk",
-      "hoog",
-      "kritiek",
-      "urgent",
-    ])
+    hasAnySignalInAnswers(answers, ["hoge_druk", "hoog", "kritiek", "urgent"])
   ) {
     signals.push("Hoge strategische druk");
   }
@@ -334,7 +339,7 @@ function mapPriorityLevel(score: number): PriorityLevel {
 }
 
 function mapRoadmapBucket(
-  theme: ThemeInput,
+  _theme: ThemeInput,
   priority: PriorityLevel,
   signals: string[],
   score: number
@@ -495,49 +500,138 @@ function buildScoreLabel(score: number | null | undefined): string {
 
 function buildHeadline(
   overallScore: number | null | undefined,
-  highCount: number
+  priorities: OutputPriorityItem[]
 ): string {
-  if (typeof overallScore === "number") {
-    if (overallScore >= 2.5) {
-      return "De basis staat, maar gerichte aanscherping geeft nu de meeste waarde.";
-    }
-    if (overallScore >= 2.0) {
-      return "Er staat al iets goeds, maar een paar scherpe keuzes maken nu het verschil.";
-    }
-    if (overallScore >= 1.5) {
-      return "De basis is bruikbaar, maar meerdere thema’s vragen nu aandacht.";
-    }
-    return "De basis is nog te kwetsbaar en vraagt eerst rust, structuur en duidelijke keuzes.";
+  const top = priorities[0];
+
+  if (!top) {
+    return "De scan laat vooral kansen zien om slimmer en consistenter te werken.";
   }
 
-  if (highCount >= 3) {
-    return "Meerdere thema’s vragen nu directe aandacht.";
+  if (top.id === "governance") {
+    if (top.priority === "hoog") {
+      return "De basis vraagt eerst scherper eigenaarschap en duidelijke besluitvorming.";
+    }
+    return "De basis staat, maar governance kan nog duidelijk strakker.";
   }
 
-  if (highCount >= 1) {
-    return "Er zijn een paar duidelijke verbeterpunten die je het beste eerst oppakt.";
+  if (top.id === "processes") {
+    if (top.priority === "hoog") {
+      return "De grootste winst zit nu in meer standaardisatie en minder uitzonderingen.";
+    }
+    return "De basis staat, maar processen kunnen nog eenduidiger en rustiger worden ingericht.";
   }
 
-  return "De scan laat vooral kansen zien om slimmer en consistenter te werken.";
+  if (top.id === "finance") {
+    if (top.priority === "hoog") {
+      return "De financiële basis vraagt eerst aanscherping voor betrouwbare sturing.";
+    }
+    return "Financieel staat in de basis, maar kan nog sterker worden ingericht.";
+  }
+
+  if (top.id === "ordermanagement") {
+    if (top.priority === "hoog") {
+      return "De orderroute vraagt eerst meer grip, eenvoud en vaste werkwijze.";
+    }
+    return "Ordermanagement werkt in de basis, maar kan nog strakker worden ingericht.";
+  }
+
+  if (top.id === "crm") {
+    if (top.priority === "hoog") {
+      return "CRM vraagt nu vooral betere datakwaliteit en scherpere procesdiscipline.";
+    }
+    return "CRM staat in de basis, maar kan nog veel bruikbaarder worden voor sturing.";
+  }
+
+  if (top.id === "hrm") {
+    if (top.priority === "hoog") {
+      return "HRM vraagt eerst meer stabiliteit in proces en gegevenskwaliteit.";
+    }
+    return "HRM is bruikbaar ingericht, met ruimte voor verdere versterking.";
+  }
+
+  if (top.id === "reporting") {
+    if (top.priority === "hoog") {
+      return "De grootste winst zit nu in scherpere rapportage, definities en stuurinformatie.";
+    }
+    return "Rapportage en data bieden een basis, maar kunnen nog veel bruikbaarder worden.";
+  }
+
+  if (top.id === "integrations") {
+    if (top.priority === "hoog") {
+      return "De keten rond AFAS vraagt eerst meer stabiliteit, monitoring en eigenaarschap.";
+    }
+    return "Integraties werken in de basis, maar kunnen nog beheersbaarder worden gemaakt.";
+  }
+
+  if (top.id === "care") {
+    if (top.priority === "hoog") {
+      return "De zorgspecifieke uitvoering vraagt eerst meer eenvoud en beheersing.";
+    }
+    return "De basis staat, maar de zorgspecifieke uitvoering kan nog strakker.";
+  }
+
+  if (top.id === "education") {
+    if (top.priority === "hoog") {
+      return "De onderwijsspecifieke uitvoering vraagt eerst meer eenduidigheid en afstemming.";
+    }
+    return "De basis staat, maar de onderwijsuitvoering kan nog beter worden gestroomlijnd.";
+  }
+
+  if (typeof overallScore === "number" && overallScore >= 4.2) {
+    return "De basis staat, maar gerichte aanscherping geeft nu de meeste waarde.";
+  }
+
+  if (typeof overallScore === "number" && overallScore >= 3.2) {
+    return "Er staat al iets goeds, maar een paar scherpe keuzes maken nu het verschil.";
+  }
+
+  if (typeof overallScore === "number" && overallScore >= 2.2) {
+    return "De basis is bruikbaar, maar meerdere thema’s vragen nu aandacht.";
+  }
+
+  return "De basis is nog te kwetsbaar en vraagt eerst rust, structuur en duidelijke keuzes.";
 }
 
 function buildExplanation(priorities: OutputPriorityItem[]): string {
-  const high = priorities.filter((item) => item.priority === "hoog").length;
-  const now = priorities.filter((item) => item.bucket === "now").length;
-
-  if (high >= 3) {
-    return "Begin bij de thema’s die nu zorgen voor vertraging, onduidelijkheid of beperkte sturing. Pas daarna heeft verdere optimalisatie echt zin.";
+  const top = priorities[0];
+  if (!top) {
+    return "Werk stap voor stap verder aan verbetering vanuit een stabiele basis.";
   }
 
-  if (now >= 1) {
-    return "Pak eerst de onderdelen op die direct effect hebben op rust, grip en scherpte.";
+  if (top.signals.includes("Veel handwerk")) {
+    return "Begin bij het verminderen van handmatig werk. Dat geeft vaak direct meer rust, snelheid en minder fouten.";
   }
 
-  if (high >= 1) {
-    return "Start met de hoogste prioriteiten. Daarmee maak je nu het meeste verschil.";
+  if (top.signals.includes("Foutgevoelig proces")) {
+    return "Begin bij het betrouwbaarder maken van het proces. Pas daarna heeft verdere optimalisatie echt waarde.";
   }
 
-  return "Houd de basis simpel en stabiel. Werk daarna stap voor stap verder aan verbetering.";
+  if (top.signals.includes("Beperkt inzicht")) {
+    return "Begin bij betere stuurinformatie en heldere definities, zodat vervolgkeuzes beter onderbouwd kunnen worden.";
+  }
+
+  if (top.signals.includes("Proces vraagt sturing of controle")) {
+    return "Begin bij scherper eigenaarschap, vaste besluitvorming en duidelijke verantwoordelijkheden.";
+  }
+
+  if (top.signals.includes("Veel uitzonderingen")) {
+    return "Begin bij het terugbrengen van uitzonderingen en maak de standaard weer leidend.";
+  }
+
+  if (top.signals.includes("Afhankelijk van keten of koppeling")) {
+    return "Begin bij de ketenafspraken en de stabiliteit van de integraties rondom AFAS.";
+  }
+
+  if (top.priority === "hoog") {
+    return "Pak eerst het hoogste prioriteitsthema aan. Daarmee maak je nu het meeste verschil.";
+  }
+
+  if (top.priority === "middel") {
+    return "De basis is werkbaar, maar gerichte verbetering op een paar thema’s geeft nu de meeste waarde.";
+  }
+
+  return "Houd de basis simpel en stabiel en verbeter daarna gericht verder.";
 }
 
 function buildQuickWinText(item: OutputPriorityItem): string {
@@ -575,55 +669,143 @@ function buildQuickWins(priorities: OutputPriorityItem[]): string[] {
 }
 
 function buildBiggestRisk(priorities: OutputPriorityItem[]): string {
-  const highest = priorities.find((item) => item.priority === "hoog");
-  if (!highest) {
+  const criticalTheme = priorities.find(
+    (item) =>
+      item.priority === "hoog" &&
+      (item.signals.includes("Veel handwerk") ||
+        item.signals.includes("Foutgevoelig proces") ||
+        item.signals.includes("Proces vraagt sturing of controle") ||
+        item.signals.includes("Afhankelijk van keten of koppeling"))
+  );
+
+  const top = criticalTheme ?? priorities[0];
+
+  if (!top) {
     return "Er is geen direct kritiek risico zichtbaar, maar verdere aanscherping blijft zinvol.";
   }
 
-  if (highest.signals.includes("Veel handwerk")) {
-    return `Veel handwerk binnen ${highest.title.toLowerCase()} zorgt voor vertraging en foutkans.`;
+  if (top.id === "governance") {
+    return "Onduidelijk eigenaarschap en besluitvorming kunnen verbetering vertragen en onnodige ruis veroorzaken.";
   }
 
-  if (highest.signals.includes("Foutgevoelig proces")) {
-    return `${highest.title} is nog te foutgevoelig om hier stabiel op te sturen.`;
+  if (top.id === "processes") {
+    return "Te veel uitzonderingen en onvoldoende standaardisatie maken de uitvoering kwetsbaar en onrustig.";
   }
 
-  if (highest.signals.includes("Proces vraagt sturing of controle")) {
-    return `Binnen ${highest.title.toLowerCase()} zijn rollen en besluitmomenten nog onvoldoende scherp.`;
+  if (top.id === "finance") {
+    return "Onvoldoende grip op de financiële basis kan leiden tot minder betrouwbare verwerking en stuurinformatie.";
   }
 
-  if (highest.signals.includes("Beperkt inzicht")) {
-    return `Beperkt inzicht binnen ${highest.title.toLowerCase()} belemmert gerichte sturing.`;
+  if (top.id === "ordermanagement") {
+    return "Afwijkingen in de orderroute vergroten de kans op fouten, vertraging en extra handwerk.";
   }
 
-  return highest.reason;
+  if (top.id === "crm") {
+    return "Beperkte CRM-datakwaliteit en procesdiscipline verlagen de bruikbaarheid voor commerciële sturing.";
+  }
+
+  if (top.id === "hrm") {
+    return "Kwetsbare HRM-processen en gegevenskwaliteit kunnen de stabiliteit van de uitvoering onder druk zetten.";
+  }
+
+  if (top.id === "reporting") {
+    return "Beperkte rapportagekwaliteit en onduidelijke definities maken sturing minder betrouwbaar.";
+  }
+
+  if (top.id === "integrations") {
+    return "Kwetsbare integraties en beperkt keteneigenaarschap kunnen verstoringen in meerdere processen veroorzaken.";
+  }
+
+  if (top.id === "care") {
+    return "Complexiteit in registratie, declaratie en verantwoording kan leiden tot extra herstelwerk en minder grip.";
+  }
+
+  if (top.id === "education") {
+    return "Onvoldoende afstemming tussen intake, planning en administratie kan onrust en fouten in de uitvoering geven.";
+  }
+
+  if (top.signals.includes("Veel handwerk")) {
+    return `Veel handwerk binnen ${top.title.toLowerCase()} zorgt voor vertraging en extra foutkans.`;
+  }
+
+  if (top.signals.includes("Foutgevoelig proces")) {
+    return `${top.title} is nog te foutgevoelig om hier stabiel op te sturen.`;
+  }
+
+  if (top.signals.includes("Proces vraagt sturing of controle")) {
+    return `Binnen ${top.title.toLowerCase()} zijn rollen en besluitmomenten nog onvoldoende scherp.`;
+  }
+
+  if (top.signals.includes("Beperkt inzicht")) {
+    return `Beperkt inzicht binnen ${top.title.toLowerCase()} belemmert gerichte sturing.`;
+  }
+
+  return top.reason;
 }
 
 function buildBiggestOpportunity(
   priorities: OutputPriorityItem[],
   quickWins: string[]
 ): string {
+  const opportunityTheme =
+    priorities.find(
+      (item) =>
+        item.bucket !== "later" &&
+        (item.signals.includes("Beperkt inzicht") ||
+          item.signals.includes("Veel uitzonderingen") ||
+          item.signals.includes("Proces vraagt sturing of controle") ||
+          item.signals.includes("Hoge strategische druk"))
+    ) ?? priorities[0];
+
+  if (!opportunityTheme) {
+    return "De grootste kans zit in het verder standaardiseren van de basis.";
+  }
+
+  if (opportunityTheme.id === "governance") {
+    return "Meer duidelijkheid in eigenaarschap en besluitvorming geeft snel meer rust en scherpte in het vervolg.";
+  }
+
+  if (opportunityTheme.id === "processes") {
+    return "Meer standaardisatie in processen kan snel rust, eenvoud en minder herstelwerk opleveren.";
+  }
+
+  if (opportunityTheme.id === "finance") {
+    return "Versterking van de financiële basis geeft snel meer betrouwbaarheid en bruikbare stuurinformatie.";
+  }
+
+  if (opportunityTheme.id === "ordermanagement") {
+    return "Een strakkere orderroute kan snel meer grip, minder uitzonderingen en betere doorstroming geven.";
+  }
+
+  if (opportunityTheme.id === "crm") {
+    return "Betere CRM-discipline en datakwaliteit maken commerciële sturing snel veel waardevoller.";
+  }
+
+  if (opportunityTheme.id === "hrm") {
+    return "Een sterkere HRM-basis kan snel meer stabiliteit en betere uitvoerbaarheid opleveren.";
+  }
+
+  if (opportunityTheme.id === "reporting") {
+    return "Betere definities en stuurinformatie maken beslissingen sneller en beter onderbouwd.";
+  }
+
+  if (opportunityTheme.id === "integrations") {
+    return "Meer grip op integraties en ketenafspraken kan snel verstoringen verminderen en rust brengen.";
+  }
+
+  if (opportunityTheme.id === "care") {
+    return "Versimpeling van de zorgspecifieke uitvoering kan snel meer beheersing en minder herstelwerk geven.";
+  }
+
+  if (opportunityTheme.id === "education") {
+    return "Betere afstemming in de onderwijsuitvoering kan snel meer eenduidigheid en minder overdrachtsfouten geven.";
+  }
+
   if (quickWins.length > 0) {
     return quickWins[0];
   }
 
-  const next = priorities.find(
-    (item) => item.bucket === "now" || item.bucket === "next"
-  );
-
-  if (!next) {
-    return "De grootste kans zit in het verder standaardiseren van de basis.";
-  }
-
-  if (next.signals.includes("Beperkt inzicht")) {
-    return `Meer grip op ${next.title.toLowerCase()} geeft snel betere stuurinformatie.`;
-  }
-
-  if (next.signals.includes("Veel uitzonderingen")) {
-    return `Versimpeling van ${next.title.toLowerCase()} kan snel meer rust en standaardisatie brengen.`;
-  }
-
-  return next.advice;
+  return opportunityTheme.advice;
 }
 
 function buildNextBestStep(priorities: OutputPriorityItem[]): string {
@@ -845,7 +1027,6 @@ export function buildScanOutput(scan: ScanInput): ScanOutput {
     })
     .sort((a, b) => b.score - a.score);
 
-  const highCount = priorities.filter((item) => item.priority === "hoog").length;
   const overallScore =
     typeof scan.overallScore === "number" ? scan.overallScore : null;
 
@@ -863,7 +1044,7 @@ export function buildScanOutput(scan: ScanInput): ScanOutput {
       scanId: scan.id ?? "onbekend",
     },
     summary: {
-      headline: buildHeadline(overallScore, highCount),
+      headline: buildHeadline(overallScore, priorities),
       explanation: buildExplanation(priorities),
       scoreLabel: buildScoreLabel(overallScore),
       biggestRisk,
