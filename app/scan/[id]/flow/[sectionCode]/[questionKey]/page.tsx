@@ -124,6 +124,16 @@ const PROFILE_BASIS_OVERVIEW_KEYS = [
   "expected_org_changes",
 ] as const;
 
+const PROFILE_BASIS_SKIPPED_KEYS = [
+  "sector",
+  "organization_size",
+  "administration_count",
+  "organization_type",
+  "afas_usage_duration",
+  "maintenance_quality",
+  "expected_org_changes",
+] as const;
+
 function isProfileBasisOverviewRoute(sectionCode: string, questionKey: string) {
   return sectionCode === "profile_basis" && questionKey === "customer_name";
 }
