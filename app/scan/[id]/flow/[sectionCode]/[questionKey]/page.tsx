@@ -569,11 +569,65 @@ export default function FlowQuestionPage() {
                 Type organisatie en operatie
                 <RequiredAsterisk />
               </div>
-              {renderSingleSelectGrid(
-                "organization_type_options",
-                asString(profileOverviewValues.organization_type),
-                (value) => setFieldValue("organization_type", value)
-              )}
+
+              <div className="grid gap-2 sm:grid-cols-2 justify-items-center">
+                {[...(getOptionSet("organization_type_options")?.options ?? [])]
+                  .sort((a, b) => a.order - b.order)
+                  .map((option) => {
+                    const currentValues = Array.isArray(
+                      profileOverviewValues.organization_type
+                    )
+                      ? profileOverviewValues.organization_type
+                      : [];
+
+                    const isActive = currentValues.includes(option.value);
+                    const maxSelections = 3;
+                    const disableNewSelection =
+                      !isActive && currentValues.length >= maxSelections;
+
+                    return (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => {
+                          if (!isActive && currentValues.length >= maxSelections) {
+                            return;
+                          }
+
+                          const nextValues = isActive
+                            ? currentValues.filter((value) => value !== option.value)
+                            : [...currentValues, option.value];
+
+                          setFieldValue("organization_type", nextValues);
+                        }}
+                        aria-pressed={isActive}
+                        disabled={disableNewSelection}
+                        className={
+                          isActive
+                            ? getActiveOptionButtonClass()
+                            : getBaseOptionButtonClass(disableNewSelection)
+                        }
+                      >
+                        <div className="text-[13px] font-semibold leading-5">
+                          {option.label}
+                        </div>
+                        {option.description && (
+                          <div className="mt-1 text-xs text-current/80">
+                            {option.description}
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+              </div>
+
+              <p className="text-sm text-muted-foreground">
+                Gekozen:{" "}
+                {Array.isArray(profileOverviewValues.organization_type)
+                  ? profileOverviewValues.organization_type.length
+                  : 0}{" "}
+                van maximaal 3
+              </p>
             </div>
           </div>
         ) : (
