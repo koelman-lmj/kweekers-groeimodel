@@ -119,6 +119,9 @@ const PROFILE_BASIS_OVERVIEW_KEYS = [
   "organization_size",
   "administration_count",
   "organization_type",
+  "afas_usage_duration",
+  "maintenance_quality",
+  "expected_org_changes",
 ] as const;
 
 const PROFILE_BASIS_SKIPPED_KEYS = [
@@ -183,45 +186,61 @@ export default function FlowQuestionPage() {
   const sectionCode = getParam(params.sectionCode);
   const questionKey = getParam(params.questionKey);
 
-const {
-  scan,
-  setCustomerName,
-  setSector,
-  setOrganizationSize,
-  setAdministrationCount,
-  setOrganizationType,
-  setAfasProducts,
-  setOwnershipModel,
-  setAfasUsageDuration,
-  setMaintenanceQuality,
-  setExpectedOrgChanges,
-  setStandardizationContext,
-  setPrimaryProcessChains,
-  setScanReason,
-  setBiggestBottleneck,
-  setScopeWidth,
-  setScopeFocus,
-  setScopeDepth,
-  setOwnershipClarity,
-  setChangeDecisionProcess,
-  setImprovementGovernance,
-  setProcessStandardization,
-  setExceptionControl,
-  setIssueResolution,
-  setFinanceFoundationReliability,
-  setFinanceExceptionHandling,
-  setFinanceReportingMaturity,
-  setOrderFlowStandardization,
-  setOrderExceptionComplexity,
-  setOrderSystemFit,
-  setCareRegistrationExceptions,
-  setCareAccountabilityPressure,
-  setEducationIntakePlanningConsistency,
-  setEducationProcessAdminAlignment,
-  setEducationExceptionHandling,
-  setComment,
-  markSectionVisited,
-} = useScanContext();
+  const {
+    scan,
+    setCustomerName,
+    setSector,
+    setOrganizationSize,
+    setAdministrationCount,
+    setOrganizationType,
+    setAfasProducts,
+    setOwnershipModel,
+    setAfasUsageDuration,
+    setMaintenanceQuality,
+    setExpectedOrgChanges,
+    setStandardizationContext,
+    setPrimaryProcessChains,
+    setScanReason,
+    setBiggestBottleneck,
+    setScopeWidth,
+    setScopeFocus,
+    setScopeDepth,
+    setOwnershipClarity,
+    setChangeDecisionProcess,
+    setImprovementGovernance,
+    setProcessStandardization,
+    setExceptionControl,
+    setIssueResolution,
+    setFinanceStrategicPressure,
+    setFinanceFoundationReliability,
+    setFinanceExceptionHandling,
+    setFinanceReportingMaturity,
+    setOrderStrategicPressure,
+    setOrderFlowStandardization,
+    setOrderExceptionComplexity,
+    setOrderSystemFit,
+    setCrmStrategicPressure,
+    setCrmProcessMaturity,
+    setCrmDataQuality,
+    setCrmReportingUsefulness,
+    setHrmStrategicPressure,
+    setHrmProcessMaturity,
+    setHrmDataQuality,
+    setReportingStrategicPressure,
+    setReportingDefinitionConsistency,
+    setReportingUsefulness,
+    setIntegrationStrategicPressure,
+    setIntegrationStability,
+    setIntegrationOwnership,
+    setIntegrationMonitoringMaturity,
+    setCareRegistrationExceptions,
+    setCareAccountabilityPressure,
+    setEducationIntakePlanningConsistency,
+    setEducationProcessAdminAlignment,
+    setEducationExceptionHandling,
+    setComment,
+    markSectionVisited,
+  } = useScanContext();
 
   const section = getSection(sectionCode);
   const question = getQuestion(questionKey);
@@ -348,42 +367,58 @@ const {
   const commentValue = scan.comments[questionKey] ?? "";
   const [showValidation, setShowValidation] = useState(false);
 
-const setterBag = {
-  setCustomerName,
-  setSector,
-  setOrganizationSize,
-  setAdministrationCount,
-  setOrganizationType,
-  setAfasProducts,
-  setOwnershipModel,
-  setAfasUsageDuration,
-  setMaintenanceQuality,
-  setExpectedOrgChanges,
-  setStandardizationContext,
-  setPrimaryProcessChains,
-  setScanReason,
-  setBiggestBottleneck,
-  setScopeWidth,
-  setScopeFocus,
-  setScopeDepth,
-  setOwnershipClarity,
-  setChangeDecisionProcess,
-  setImprovementGovernance,
-  setProcessStandardization,
-  setExceptionControl,
-  setIssueResolution,
-  setFinanceFoundationReliability,
-  setFinanceExceptionHandling,
-  setFinanceReportingMaturity,
-  setOrderFlowStandardization,
-  setOrderExceptionComplexity,
-  setOrderSystemFit,
-  setCareRegistrationExceptions,
-  setCareAccountabilityPressure,
-  setEducationIntakePlanningConsistency,
-  setEducationProcessAdminAlignment,
-  setEducationExceptionHandling,
-};
+  const setterBag = {
+    setCustomerName,
+    setSector,
+    setOrganizationSize,
+    setAdministrationCount,
+    setOrganizationType,
+    setAfasProducts,
+    setOwnershipModel,
+    setAfasUsageDuration,
+    setMaintenanceQuality,
+    setExpectedOrgChanges,
+    setStandardizationContext,
+    setPrimaryProcessChains,
+    setScanReason,
+    setBiggestBottleneck,
+    setScopeWidth,
+    setScopeFocus,
+    setScopeDepth,
+    setOwnershipClarity,
+    setChangeDecisionProcess,
+    setImprovementGovernance,
+    setProcessStandardization,
+    setExceptionControl,
+    setIssueResolution,
+    setFinanceStrategicPressure,
+    setFinanceFoundationReliability,
+    setFinanceExceptionHandling,
+    setFinanceReportingMaturity,
+    setOrderStrategicPressure,
+    setOrderFlowStandardization,
+    setOrderExceptionComplexity,
+    setOrderSystemFit,
+    setCrmStrategicPressure,
+    setCrmProcessMaturity,
+    setCrmDataQuality,
+    setCrmReportingUsefulness,
+    setHrmStrategicPressure,
+    setHrmProcessMaturity,
+    setHrmDataQuality,
+    setReportingStrategicPressure,
+    setReportingDefinitionConsistency,
+    setReportingUsefulness,
+    setIntegrationStrategicPressure,
+    setIntegrationStability,
+    setIntegrationOwnership,
+    setIntegrationMonitoringMaturity,
+    setCareRegistrationExceptions,
+    setCareAccountabilityPressure,
+    setEducationIntakePlanningConsistency,
+    setEducationProcessAdminAlignment,
+    setEducationExceptionHandling,
+  };
 
   const setFieldValue = (fieldKey: string, value: AnswerValue) => {
     setAnswerToScan(setterBag, fieldKey, value);
@@ -430,7 +465,9 @@ const setterBag = {
             .map((value) =>
               optionSet.options.find((option) => option.value === value)
             )
-            .filter((option): option is NonNullable<typeof option> => Boolean(option)),
+            .filter(
+              (option): option is NonNullable<typeof option> => Boolean(option)
+            ),
         })).filter((group) => group.options.length > 0)
       : [];
 
@@ -439,7 +476,8 @@ const setterBag = {
       ? answerArray
           .map(
             (value) =>
-              optionSet.options.find((option) => option.value === value)?.label ?? value
+              optionSet.options.find((option) => option.value === value)?.label ??
+              value
           )
           .filter(Boolean)
       : [];
@@ -450,6 +488,9 @@ const setterBag = {
     organization_size: getAnswerFromScan(scan, "organization_size"),
     administration_count: getAnswerFromScan(scan, "administration_count"),
     organization_type: getAnswerFromScan(scan, "organization_type"),
+    afas_usage_duration: getAnswerFromScan(scan, "afas_usage_duration"),
+    maintenance_quality: getAnswerFromScan(scan, "maintenance_quality"),
+    expected_org_changes: getAnswerFromScan(scan, "expected_org_changes"),
   };
 
   const profileOverviewComplete = PROFILE_BASIS_OVERVIEW_KEYS.every((key) =>
@@ -501,8 +542,6 @@ const setterBag = {
     );
   };
 
-  const title = isProfileBasisOverview ? "Basis van de organisatie" : question.label;
-
   const handleNext = () => {
     if (!canContinue) {
       setShowValidation(true);
@@ -511,6 +550,8 @@ const setterBag = {
 
     router.push(nextHref);
   };
+
+  const title = isProfileBasisOverview ? "Basis van de organisatie" : question.label;
 
   return (
     <div className="space-y-8">
@@ -656,6 +697,42 @@ const setterBag = {
                 van maximaal 3
               </p>
             </div>
+
+            <div className="space-y-2">
+              <div className="text-sm font-medium">
+                Sinds wanneer gebruikt de organisatie AFAS?
+                <RequiredAsterisk />
+              </div>
+              {renderSingleSelectGrid(
+                "afas_usage_duration_options",
+                asString(profileOverviewValues.afas_usage_duration),
+                (value) => setFieldValue("afas_usage_duration", value)
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <div className="text-sm font-medium">
+                Hoe goed is de inrichting de afgelopen jaren onderhouden?
+                <RequiredAsterisk />
+              </div>
+              {renderSingleSelectGrid(
+                "maintenance_quality_options",
+                asString(profileOverviewValues.maintenance_quality),
+                (value) => setFieldValue("maintenance_quality", value)
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <div className="text-sm font-medium">
+                Worden in de komende jaren fusies, overnames of afsplitsingen verwacht?
+                <RequiredAsterisk />
+              </div>
+              {renderSingleSelectGrid(
+                "expected_org_changes_options",
+                asString(profileOverviewValues.expected_org_changes),
+                (value) => setFieldValue("expected_org_changes", value)
+              )}
+            </div>
           </div>
         ) : (
           <>
@@ -764,10 +841,7 @@ const setterBag = {
 
                       <div className="mt-2 flex flex-wrap gap-2">
                         {selectedLabels.map((label) => (
-                          <span
-                            key={label}
-                            className="kweekers-chip-selected"
-                          >
+                          <span key={label} className="kweekers-chip-selected">
                             {label}
                           </span>
                         ))}
@@ -823,22 +897,22 @@ const setterBag = {
                 </div>
               )}
 
-{question.examples &&
-  question.examples.length > 0 &&
-  !optionSet?.options?.some((option) => option.description) && (
-    <div className="kweekers-help-box rounded-xl p-3">
-      <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-        Hulp bij deze vraag
-      </div>
-      <ul className="mt-1.5 space-y-1 text-xs text-muted-foreground">
-        {question.examples.map((example) => (
-          <li key={example} className="ml-5 list-disc">
-            {example}
-          </li>
-        ))}
-      </ul>
-    </div>
-  )}
+            {question.examples &&
+              question.examples.length > 0 &&
+              !optionSet?.options?.some((option) => option.description) && (
+                <div className="kweekers-help-box rounded-xl p-3">
+                  <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                    Hulp bij deze vraag
+                  </div>
+                  <ul className="mt-1.5 space-y-1 text-xs text-muted-foreground">
+                    {question.examples.map((example) => (
+                      <li key={example} className="ml-5 list-disc">
+                        {example}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
             {question.allowsComment && (
               <div className="space-y-2 border-t border-black/10 pt-4">
