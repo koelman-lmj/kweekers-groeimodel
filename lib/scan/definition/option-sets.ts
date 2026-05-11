@@ -102,41 +102,46 @@ export const optionSets: OptionSetDefinition[] = [
       { value: "overig", label: "Overig", order: 180 },
     ],
   },
-  {
-    key: "ownership_model_options",
-    options: [
-      {
-        value: "een_beheerder",
-        label: "Eén beheerder",
-        order: 10,
-      },
-      {
-        value: "klein_centraal_team",
-        label: "Klein centraal team",
-        order: 20,
-      },
-      {
-        value: "verdeeld_over_afdelingen",
-        label: "Verdeeld over afdelingen",
-        order: 30,
-      },
-      {
-        value: "management_en_beheer_gemengd",
-        label: "Beheer loopt door elkaar",
-        order: 40,
-      },
-      {
-        value: "extern_ondersteund",
-        label: "Extern ondersteund",
-        order: 50,
-      },
-      {
-        value: "formeel_belegd",
-        label: "Formeel belegd",
-        order: 60,
-      },
-    ],
-  },
+{
+  key: "ownership_model_options",
+  options: [
+    {
+      value: "extern_uitbesteed",
+      label: "Beheer uitbesteed aan externe partij",
+      description:
+        "Functioneel beheer en wijzigingen liggen vooral bij een externe partner.",
+      order: 10,
+    },
+    {
+      value: "een_beheerder",
+      label: "1 beheerder",
+      description:
+        "Er is één persoon die AFAS en procesbeheer grotendeels trekt.",
+      order: 20,
+    },
+    {
+      value: "centraal_beheerteam",
+      label: "Beheerdersteam (centraal geregeld)",
+      description:
+        "Beheer is centraal georganiseerd in een vast team of centrale beheerfunctie.",
+      order: 30,
+    },
+    {
+      value: "decentraal_key_users",
+      label: "Beheer per afdeling (key-users) zonder centraal",
+      description:
+        "Beheer ligt verspreid bij key-users of afdelingen, zonder centrale regie.",
+      order: 40,
+    },
+    {
+      value: "geen_beheer",
+      label: "Geen duidelijke beheerstructuur",
+      description:
+        "Er is geen duidelijke beheerstructuur of vast aanspreekpunt ingericht.",
+      order: 50,
+    },
+  ],
+},
   {
     key: "standardization_context_options",
     options: [
