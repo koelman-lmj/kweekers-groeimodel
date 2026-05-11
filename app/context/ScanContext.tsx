@@ -41,13 +41,33 @@ export type ScanState = {
     exceptionControl: string;
     issueResolution: string;
 
+    financeStrategicPressure: string;
     financeFoundationReliability: string;
     financeExceptionHandling: string;
     financeReportingMaturity: string;
 
+    orderStrategicPressure: string;
     orderFlowStandardization: string;
     orderExceptionComplexity: string;
     orderSystemFit: string;
+
+    crmStrategicPressure: string;
+    crmProcessMaturity: string;
+    crmDataQuality: string;
+    crmReportingUsefulness: string;
+
+    hrmStrategicPressure: string;
+    hrmProcessMaturity: string;
+    hrmDataQuality: string;
+
+    reportingStrategicPressure: string;
+    reportingDefinitionConsistency: string;
+    reportingUsefulness: string;
+
+    integrationStrategicPressure: string;
+    integrationStability: string;
+    integrationOwnership: string;
+    integrationMonitoringMaturity: string;
 
     careRegistrationExceptions: string;
     careAccountabilityPressure: string;
@@ -95,13 +115,33 @@ const INITIAL_SCAN: ScanState = {
     exceptionControl: "",
     issueResolution: "",
 
+    financeStrategicPressure: "",
     financeFoundationReliability: "",
     financeExceptionHandling: "",
     financeReportingMaturity: "",
 
+    orderStrategicPressure: "",
     orderFlowStandardization: "",
     orderExceptionComplexity: "",
     orderSystemFit: "",
+
+    crmStrategicPressure: "",
+    crmProcessMaturity: "",
+    crmDataQuality: "",
+    crmReportingUsefulness: "",
+
+    hrmStrategicPressure: "",
+    hrmProcessMaturity: "",
+    hrmDataQuality: "",
+
+    reportingStrategicPressure: "",
+    reportingDefinitionConsistency: "",
+    reportingUsefulness: "",
+
+    integrationStrategicPressure: "",
+    integrationStability: "",
+    integrationOwnership: "",
+    integrationMonitoringMaturity: "",
 
     careRegistrationExceptions: "",
     careAccountabilityPressure: "",
@@ -149,13 +189,33 @@ type ScanContextValue = {
   setExceptionControl: (value: string) => void;
   setIssueResolution: (value: string) => void;
 
+  setFinanceStrategicPressure: (value: string) => void;
   setFinanceFoundationReliability: (value: string) => void;
   setFinanceExceptionHandling: (value: string) => void;
   setFinanceReportingMaturity: (value: string) => void;
 
+  setOrderStrategicPressure: (value: string) => void;
   setOrderFlowStandardization: (value: string) => void;
   setOrderExceptionComplexity: (value: string) => void;
   setOrderSystemFit: (value: string) => void;
+
+  setCrmStrategicPressure: (value: string) => void;
+  setCrmProcessMaturity: (value: string) => void;
+  setCrmDataQuality: (value: string) => void;
+  setCrmReportingUsefulness: (value: string) => void;
+
+  setHrmStrategicPressure: (value: string) => void;
+  setHrmProcessMaturity: (value: string) => void;
+  setHrmDataQuality: (value: string) => void;
+
+  setReportingStrategicPressure: (value: string) => void;
+  setReportingDefinitionConsistency: (value: string) => void;
+  setReportingUsefulness: (value: string) => void;
+
+  setIntegrationStrategicPressure: (value: string) => void;
+  setIntegrationStability: (value: string) => void;
+  setIntegrationOwnership: (value: string) => void;
+  setIntegrationMonitoringMaturity: (value: string) => void;
 
   setCareRegistrationExceptions: (value: string) => void;
   setCareAccountabilityPressure: (value: string) => void;
@@ -230,6 +290,8 @@ function loadInitialScan(): ScanState {
         exceptionControl: parsed.diagnosis?.exceptionControl ?? "",
         issueResolution: parsed.diagnosis?.issueResolution ?? "",
 
+        financeStrategicPressure:
+          parsed.diagnosis?.financeStrategicPressure ?? "",
         financeFoundationReliability:
           parsed.diagnosis?.financeFoundationReliability ?? "",
         financeExceptionHandling:
@@ -237,11 +299,38 @@ function loadInitialScan(): ScanState {
         financeReportingMaturity:
           parsed.diagnosis?.financeReportingMaturity ?? "",
 
+        orderStrategicPressure:
+          parsed.diagnosis?.orderStrategicPressure ?? "",
         orderFlowStandardization:
           parsed.diagnosis?.orderFlowStandardization ?? "",
         orderExceptionComplexity:
           parsed.diagnosis?.orderExceptionComplexity ?? "",
         orderSystemFit: parsed.diagnosis?.orderSystemFit ?? "",
+
+        crmStrategicPressure: parsed.diagnosis?.crmStrategicPressure ?? "",
+        crmProcessMaturity: parsed.diagnosis?.crmProcessMaturity ?? "",
+        crmDataQuality: parsed.diagnosis?.crmDataQuality ?? "",
+        crmReportingUsefulness:
+          parsed.diagnosis?.crmReportingUsefulness ?? "",
+
+        hrmStrategicPressure: parsed.diagnosis?.hrmStrategicPressure ?? "",
+        hrmProcessMaturity: parsed.diagnosis?.hrmProcessMaturity ?? "",
+        hrmDataQuality: parsed.diagnosis?.hrmDataQuality ?? "",
+
+        reportingStrategicPressure:
+          parsed.diagnosis?.reportingStrategicPressure ?? "",
+        reportingDefinitionConsistency:
+          parsed.diagnosis?.reportingDefinitionConsistency ?? "",
+        reportingUsefulness: parsed.diagnosis?.reportingUsefulness ?? "",
+
+        integrationStrategicPressure:
+          parsed.diagnosis?.integrationStrategicPressure ?? "",
+        integrationStability:
+          parsed.diagnosis?.integrationStability ?? "",
+        integrationOwnership:
+          parsed.diagnosis?.integrationOwnership ?? "",
+        integrationMonitoringMaturity:
+          parsed.diagnosis?.integrationMonitoringMaturity ?? "",
 
         careRegistrationExceptions:
           parsed.diagnosis?.careRegistrationExceptions ?? "",
@@ -471,6 +560,8 @@ export function ScanProvider({ children }: { children: ReactNode }) {
   const setIssueResolution = (value: string) =>
     updateDiagnosis("issueResolution", value);
 
+  const setFinanceStrategicPressure = (value: string) =>
+    updateDiagnosis("financeStrategicPressure", value);
   const setFinanceFoundationReliability = (value: string) =>
     updateDiagnosis("financeFoundationReliability", value);
   const setFinanceExceptionHandling = (value: string) =>
@@ -478,12 +569,46 @@ export function ScanProvider({ children }: { children: ReactNode }) {
   const setFinanceReportingMaturity = (value: string) =>
     updateDiagnosis("financeReportingMaturity", value);
 
+  const setOrderStrategicPressure = (value: string) =>
+    updateDiagnosis("orderStrategicPressure", value);
   const setOrderFlowStandardization = (value: string) =>
     updateDiagnosis("orderFlowStandardization", value);
   const setOrderExceptionComplexity = (value: string) =>
     updateDiagnosis("orderExceptionComplexity", value);
   const setOrderSystemFit = (value: string) =>
     updateDiagnosis("orderSystemFit", value);
+
+  const setCrmStrategicPressure = (value: string) =>
+    updateDiagnosis("crmStrategicPressure", value);
+  const setCrmProcessMaturity = (value: string) =>
+    updateDiagnosis("crmProcessMaturity", value);
+  const setCrmDataQuality = (value: string) =>
+    updateDiagnosis("crmDataQuality", value);
+  const setCrmReportingUsefulness = (value: string) =>
+    updateDiagnosis("crmReportingUsefulness", value);
+
+  const setHrmStrategicPressure = (value: string) =>
+    updateDiagnosis("hrmStrategicPressure", value);
+  const setHrmProcessMaturity = (value: string) =>
+    updateDiagnosis("hrmProcessMaturity", value);
+  const setHrmDataQuality = (value: string) =>
+    updateDiagnosis("hrmDataQuality", value);
+
+  const setReportingStrategicPressure = (value: string) =>
+    updateDiagnosis("reportingStrategicPressure", value);
+  const setReportingDefinitionConsistency = (value: string) =>
+    updateDiagnosis("reportingDefinitionConsistency", value);
+  const setReportingUsefulness = (value: string) =>
+    updateDiagnosis("reportingUsefulness", value);
+
+  const setIntegrationStrategicPressure = (value: string) =>
+    updateDiagnosis("integrationStrategicPressure", value);
+  const setIntegrationStability = (value: string) =>
+    updateDiagnosis("integrationStability", value);
+  const setIntegrationOwnership = (value: string) =>
+    updateDiagnosis("integrationOwnership", value);
+  const setIntegrationMonitoringMaturity = (value: string) =>
+    updateDiagnosis("integrationMonitoringMaturity", value);
 
   const setCareRegistrationExceptions = (value: string) =>
     updateDiagnosis("careRegistrationExceptions", value);
@@ -540,13 +665,33 @@ export function ScanProvider({ children }: { children: ReactNode }) {
       setExceptionControl,
       setIssueResolution,
 
+      setFinanceStrategicPressure,
       setFinanceFoundationReliability,
       setFinanceExceptionHandling,
       setFinanceReportingMaturity,
 
+      setOrderStrategicPressure,
       setOrderFlowStandardization,
       setOrderExceptionComplexity,
       setOrderSystemFit,
+
+      setCrmStrategicPressure,
+      setCrmProcessMaturity,
+      setCrmDataQuality,
+      setCrmReportingUsefulness,
+
+      setHrmStrategicPressure,
+      setHrmProcessMaturity,
+      setHrmDataQuality,
+
+      setReportingStrategicPressure,
+      setReportingDefinitionConsistency,
+      setReportingUsefulness,
+
+      setIntegrationStrategicPressure,
+      setIntegrationStability,
+      setIntegrationOwnership,
+      setIntegrationMonitoringMaturity,
 
       setCareRegistrationExceptions,
       setCareAccountabilityPressure,
