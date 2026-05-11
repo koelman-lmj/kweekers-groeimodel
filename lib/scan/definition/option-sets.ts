@@ -143,6 +143,112 @@ export const optionSets: OptionSetDefinition[] = [
   ],
 },
 {
+  key: "afas_usage_duration_options",
+  options: [
+    {
+      value: "korter_dan_2_jaar",
+      label: "Minder dan 2 jaar",
+      description:
+        "AFAS is nog relatief recent in gebruik. De inrichting is waarschijnlijk nog jong.",
+      order: 10,
+    },
+    {
+      value: "tussen_2_en_5_jaar",
+      label: "2 tot 5 jaar",
+      description:
+        "AFAS is al enige tijd in gebruik, maar de inrichting is nog niet heel oud.",
+      order: 20,
+    },
+    {
+      value: "tussen_5_en_10_jaar",
+      label: "5 tot 10 jaar",
+      description:
+        "De inrichting heeft al meerdere jaren historie en waarschijnlijk meerdere wijzigingsrondes gehad.",
+      order: 30,
+    },
+    {
+      value: "10_jaar_of_langer",
+      label: "10 jaar of langer",
+      description:
+        "AFAS heeft een lange historie binnen de organisatie. De kans op opgebouwde complexiteit is groter.",
+      order: 40,
+    },
+    {
+      value: "onbekend",
+      label: "Onbekend",
+      description:
+        "Het is niet goed bekend sinds wanneer AFAS in gebruik is.",
+      order: 50,
+    },
+  ],
+},
+{
+  key: "maintenance_quality_options",
+  options: [
+    {
+      value: "goed_onderhouden",
+      label: "Goed onderhouden",
+      description:
+        "Beheer, opschoning, documentatie en wijzigingen zijn de afgelopen jaren goed bijgehouden.",
+      order: 10,
+    },
+    {
+      value: "redelijk_onderhouden",
+      label: "Redelijk onderhouden",
+      description:
+        "De basis is bijgehouden, maar niet alles is even strak of structureel onderhouden.",
+      order: 20,
+    },
+    {
+      value: "achterstallig_onderhoud",
+      label: "Achterstallig onderhoud",
+      description:
+        "Er is duidelijk achterstand in beheer, opschoning, documentatie of gecontroleerde wijzigingen.",
+      order: 30,
+    },
+    {
+      value: "moeilijk_te_beoordelen",
+      label: "Moeilijk te beoordelen",
+      description:
+        "Het is op dit moment nog niet goed vast te stellen hoe goed de inrichting is onderhouden.",
+      order: 40,
+    },
+  ],
+},
+{
+  key: "expected_org_changes_options",
+  options: [
+    {
+      value: "ja_waarschijnlijk",
+      label: "Ja, waarschijnlijk",
+      description:
+        "Er worden naar verwachting organisatieveranderingen voorzien die impact hebben op inrichting of beheer.",
+      order: 10,
+    },
+    {
+      value: "mogelijk",
+      label: "Mogelijk",
+      description:
+        "Er zijn signalen of plannen, maar nog geen harde zekerheid over de impact of timing.",
+      order: 20,
+    },
+    {
+      value: "nee",
+      label: "Nee",
+      description:
+        "Er worden op dit moment geen grote organisatieveranderingen verwacht.",
+      order: 30,
+    },
+    {
+      value: "nog_onbekend",
+      label: "Nog onbekend",
+      description:
+        "Het is nog niet duidelijk of zulke veranderingen gaan spelen.",
+      order: 40,
+    },
+  ],
+},
+  {
   key: "standardization_context_options",
   options: [
     {
