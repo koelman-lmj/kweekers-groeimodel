@@ -50,6 +50,35 @@ function RequiredAsterisk() {
   return <span className="kweekers-required ml-1">*</span>;
 }
 
+function OptionLabelWithTooltip({
+  label,
+  description,
+}: {
+  label: string;
+  description?: string;
+}) {
+  return (
+    <div className="flex items-center justify-center gap-2">
+      <span className="text-[13px] font-semibold leading-5">{label}</span>
+
+      {description && (
+        <span className="group/tooltip relative inline-flex">
+          <span
+            tabIndex={0}
+            className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-current/30 text-[10px] font-bold text-current/70 outline-none"
+          >
+            i
+          </span>
+
+          <span className="pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-20 hidden w-64 -translate-x-1/2 rounded-xl border border-black/10 bg-white px-3 py-2 text-left text-xs font-normal leading-5 text-black shadow-lg group-hover/tooltip:block group-focus-within/tooltip:block">
+            {description}
+          </span>
+        </span>
+      )}
+    </div>
+  );
+}
+
 type OptionGroup = {
   title: string;
   values: string[];
@@ -456,14 +485,10 @@ export default function FlowQuestionPage() {
                     : getBaseOptionButtonClass(false)
                 }
               >
-                <div className="text-[13px] font-semibold leading-5">
-                  {option.label}
-                </div>
-                {option.description && (
-                  <div className="mt-1 text-xs text-current/80">
-                    {option.description}
-                  </div>
-                )}
+                <OptionLabelWithTooltip
+                  label={option.label}
+                  description={option.description}
+                />
               </button>
             );
           })}
@@ -608,14 +633,10 @@ export default function FlowQuestionPage() {
                             : getBaseOptionButtonClass(disableNewSelection)
                         }
                       >
-                        <div className="text-[13px] font-semibold leading-5">
-                          {option.label}
-                        </div>
-                        {option.description && (
-                          <div className="mt-1 text-xs text-current/80">
-                            {option.description}
-                          </div>
-                        )}
+                        <OptionLabelWithTooltip
+                          label={option.label}
+                          description={option.description}
+                        />
                       </button>
                     );
                   })}
@@ -668,14 +689,10 @@ export default function FlowQuestionPage() {
                             : getBaseOptionButtonClass(false)
                         }
                       >
-                        <div className="text-[13px] font-semibold leading-5">
-                          {option.label}
-                        </div>
-                        {option.description && (
-                          <div className="mt-1 text-xs text-current/80">
-                            {option.description}
-                          </div>
-                        )}
+                        <OptionLabelWithTooltip
+                          label={option.label}
+                          description={option.description}
+                        />
                       </button>
                     );
                   })}
@@ -709,14 +726,10 @@ export default function FlowQuestionPage() {
                                 : getBaseOptionButtonClass(disableNewSelection)
                             }
                           >
-                            <div className="text-[13px] font-semibold leading-5">
-                              {option.label}
-                            </div>
-                            {option.description && (
-                              <div className="mt-1 text-xs text-current/80">
-                                {option.description}
-                              </div>
-                            )}
+                            <OptionLabelWithTooltip
+                              label={option.label}
+                              description={option.description}
+                            />
                           </button>
                         );
                       })}
@@ -781,14 +794,10 @@ export default function FlowQuestionPage() {
                                   : getBaseOptionButtonClass(disableNewSelection)
                               }
                             >
-                              <div className="text-[13px] font-semibold leading-5">
-                                {option.label}
-                              </div>
-                              {option.description && (
-                                <div className="mt-1 text-xs text-current/80">
-                                  {option.description}
-                                </div>
-                              )}
+                              <OptionLabelWithTooltip
+                                label={option.label}
+                                description={option.description}
+                              />
                             </button>
                           );
                         })}
@@ -869,3 +878,6 @@ export default function FlowQuestionPage() {
     </div>
   );
 }
+
+
+kan je checken?
