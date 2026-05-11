@@ -142,41 +142,39 @@ export const optionSets: OptionSetDefinition[] = [
     },
   ],
 },
-  {
-    key: "standardization_context_options",
-    options: [
-      {
-        value: "vooral_standaard",
-        label: "Vooral standaard",
-        order: 10,
-      },
-      {
-        value: "standaard_met_beperkte_afwijkingen",
-        label: "Beperkte afwijkingen",
-        order: 20,
-      },
-      {
-        value: "mix_standaard_specifiek",
-        label: "Mix standaard / specifiek",
-        order: 30,
-      },
-      {
-        value: "veel_afwijkingen",
-        label: "Veel uitzonderingen",
-        order: 40,
-      },
-      {
-        value: "maatwerk_zwaar",
-        label: "Sterk maatwerkafhankelijk",
-        order: 50,
-      },
-      {
-        value: "onduidelijk",
-        label: "Moeilijk te beoordelen",
-        order: 60,
-      },
-    ],
-  },
+{
+  key: "standardization_context_options",
+  options: [
+    {
+      value: "afas_standaard",
+      label: "AFAS Standaard",
+      description:
+        "De inrichting volgt grotendeels de standaard van AFAS, met weinig uitzonderingen.",
+      order: 10,
+    },
+    {
+      value: "standaard_met_beetje_maatwerk",
+      label: "Standaard met een klein beetje maatwerk",
+      description:
+        "De basis is standaard, met enkele aanvullende uitzonderingen of beperkte aanpassingen.",
+      order: 20,
+    },
+    {
+      value: "veel_maatwerk",
+      label: "Veel maatwerk",
+      description:
+        "De inrichting en werkwijze leunen sterk op maatwerk, uitzonderingen of afwijkende oplossingen.",
+      order: 30,
+    },
+    {
+      value: "moeilijk_te_beoordelen",
+      label: "Moeilijk te beoordelen",
+      description:
+        "Het is nu nog niet duidelijk in hoeverre de inrichting standaard of maatwerkgedreven is.",
+      order: 40,
+    },
+  ],
+},
   {
     key: "primary_process_chains_options",
     options: [
