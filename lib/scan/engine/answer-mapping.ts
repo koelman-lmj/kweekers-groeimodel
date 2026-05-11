@@ -57,6 +57,8 @@ export function getAnswerFromScan(
     case "issue_resolution":
       return scan.diagnosis.issueResolution;
 
+    case "finance_strategic_pressure":
+      return scan.diagnosis.financeStrategicPressure;
     case "finance_foundation_reliability":
       return scan.diagnosis.financeFoundationReliability;
     case "finance_exception_handling":
@@ -64,12 +66,46 @@ export function getAnswerFromScan(
     case "finance_reporting_maturity":
       return scan.diagnosis.financeReportingMaturity;
 
+    case "order_strategic_pressure":
+      return scan.diagnosis.orderStrategicPressure;
     case "order_flow_standardization":
       return scan.diagnosis.orderFlowStandardization;
     case "order_exception_complexity":
       return scan.diagnosis.orderExceptionComplexity;
     case "order_system_fit":
       return scan.diagnosis.orderSystemFit;
+
+    case "crm_strategic_pressure":
+      return scan.diagnosis.crmStrategicPressure;
+    case "crm_process_maturity":
+      return scan.diagnosis.crmProcessMaturity;
+    case "crm_data_quality":
+      return scan.diagnosis.crmDataQuality;
+    case "crm_reporting_usefulness":
+      return scan.diagnosis.crmReportingUsefulness;
+
+    case "hrm_strategic_pressure":
+      return scan.diagnosis.hrmStrategicPressure;
+    case "hrm_process_maturity":
+      return scan.diagnosis.hrmProcessMaturity;
+    case "hrm_data_quality":
+      return scan.diagnosis.hrmDataQuality;
+
+    case "reporting_strategic_pressure":
+      return scan.diagnosis.reportingStrategicPressure;
+    case "reporting_definition_consistency":
+      return scan.diagnosis.reportingDefinitionConsistency;
+    case "reporting_usefulness":
+      return scan.diagnosis.reportingUsefulness;
+
+    case "integration_strategic_pressure":
+      return scan.diagnosis.integrationStrategicPressure;
+    case "integration_stability":
+      return scan.diagnosis.integrationStability;
+    case "integration_ownership":
+      return scan.diagnosis.integrationOwnership;
+    case "integration_monitoring_maturity":
+      return scan.diagnosis.integrationMonitoringMaturity;
 
     case "care_registration_exceptions":
       return scan.diagnosis.careRegistrationExceptions;
@@ -116,13 +152,33 @@ export type ScanActions = {
   setExceptionControl: (value: string) => void;
   setIssueResolution: (value: string) => void;
 
+  setFinanceStrategicPressure: (value: string) => void;
   setFinanceFoundationReliability: (value: string) => void;
   setFinanceExceptionHandling: (value: string) => void;
   setFinanceReportingMaturity: (value: string) => void;
 
+  setOrderStrategicPressure: (value: string) => void;
   setOrderFlowStandardization: (value: string) => void;
   setOrderExceptionComplexity: (value: string) => void;
   setOrderSystemFit: (value: string) => void;
+
+  setCrmStrategicPressure: (value: string) => void;
+  setCrmProcessMaturity: (value: string) => void;
+  setCrmDataQuality: (value: string) => void;
+  setCrmReportingUsefulness: (value: string) => void;
+
+  setHrmStrategicPressure: (value: string) => void;
+  setHrmProcessMaturity: (value: string) => void;
+  setHrmDataQuality: (value: string) => void;
+
+  setReportingStrategicPressure: (value: string) => void;
+  setReportingDefinitionConsistency: (value: string) => void;
+  setReportingUsefulness: (value: string) => void;
+
+  setIntegrationStrategicPressure: (value: string) => void;
+  setIntegrationStability: (value: string) => void;
+  setIntegrationOwnership: (value: string) => void;
+  setIntegrationMonitoringMaturity: (value: string) => void;
 
   setCareRegistrationExceptions: (value: string) => void;
   setCareAccountabilityPressure: (value: string) => void;
@@ -231,6 +287,9 @@ export function setAnswerToScan(
       actions.setIssueResolution(ensureString(value));
       return;
 
+    case "finance_strategic_pressure":
+      actions.setFinanceStrategicPressure(ensureString(value));
+      return;
     case "finance_foundation_reliability":
       actions.setFinanceFoundationReliability(ensureString(value));
       return;
@@ -241,6 +300,9 @@ export function setAnswerToScan(
       actions.setFinanceReportingMaturity(ensureString(value));
       return;
 
+    case "order_strategic_pressure":
+      actions.setOrderStrategicPressure(ensureString(value));
+      return;
     case "order_flow_standardization":
       actions.setOrderFlowStandardization(ensureString(value));
       return;
@@ -249,6 +311,52 @@ export function setAnswerToScan(
       return;
     case "order_system_fit":
       actions.setOrderSystemFit(ensureString(value));
+      return;
+
+    case "crm_strategic_pressure":
+      actions.setCrmStrategicPressure(ensureString(value));
+      return;
+    case "crm_process_maturity":
+      actions.setCrmProcessMaturity(ensureString(value));
+      return;
+    case "crm_data_quality":
+      actions.setCrmDataQuality(ensureString(value));
+      return;
+    case "crm_reporting_usefulness":
+      actions.setCrmReportingUsefulness(ensureString(value));
+      return;
+
+    case "hrm_strategic_pressure":
+      actions.setHrmStrategicPressure(ensureString(value));
+      return;
+    case "hrm_process_maturity":
+      actions.setHrmProcessMaturity(ensureString(value));
+      return;
+    case "hrm_data_quality":
+      actions.setHrmDataQuality(ensureString(value));
+      return;
+
+    case "reporting_strategic_pressure":
+      actions.setReportingStrategicPressure(ensureString(value));
+      return;
+    case "reporting_definition_consistency":
+      actions.setReportingDefinitionConsistency(ensureString(value));
+      return;
+    case "reporting_usefulness":
+      actions.setReportingUsefulness(ensureString(value));
+      return;
+
+    case "integration_strategic_pressure":
+      actions.setIntegrationStrategicPressure(ensureString(value));
+      return;
+    case "integration_stability":
+      actions.setIntegrationStability(ensureString(value));
+      return;
+    case "integration_ownership":
+      actions.setIntegrationOwnership(ensureString(value));
+      return;
+    case "integration_monitoring_maturity":
+      actions.setIntegrationMonitoringMaturity(ensureString(value));
       return;
 
     case "care_registration_exceptions":
