@@ -66,6 +66,54 @@ function getBucketLabel(bucket: "now" | "next" | "later") {
   return "Later";
 }
 
+function ScoreBlocks({ score }: { score: number }) {
+  const filledBlocks = getFilledBlocks(score);
+
+  return (
+    <div className="flex items-center gap-[3px]">
+      {Array.from({ length: 10 }).map((_, index) => {
+        const isFilled = index < filledBlocks;
+
+        return (
+          <span
+            key={index}
+            className={
+              isFilled
+                ? "h-2.5 w-2.5 rounded-[2px] bg-black"
+                : "h-2.5 w-2.5 rounded-[2px] border border-black/20 bg-white"
+            }
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+function ScoreDots({ score }: { score: number }) {
+  const active = Math.max(1, Math.min(5, Math.round(score / 2)));
+
+  return (
+    <div className="flex items-center gap-1.5">
+      {Array.from({ length: 5 }).map((_, index) => (
+        <span
+          key={index}
+          className={
+            index < active
+              ? "h-2.5 w-2.5 rounded-full bg-black"
+              : "h-2.5 w-2.5 rounded-full border border-black/20 bg-white"
+          }
+        />
+      ))}
+    </div>
+  );
+}
+
+type DomainCardItem = {
+  title: string;
+  score: number;
+  summary: string;
+};
+
 export default function SectionSummaryPage() {
   const params = useParams<{
     id: string | string[];
@@ -147,6 +195,162 @@ export default function SectionSummaryPage() {
     window.print();
   };
 
+  const commentItems = [
+    ...getQuestionsForSection("profile_basis", scan),
+    ...getQuestionsForSection("profile_reason", scan),
+    ...getQuestionsForSection("scope", scan),
+    ...getQuestionsForSection("diagnose", scan),
+  ]
+    .filter((question) => {
+      const comment = scan.comments[question.key]?.trim() ?? "";
+      return comment !== "";
+    })
+    .map((question) => ({
+      questionKey: question.key,
+      label: question.label,
+      value: scan.comments[question.key],
+    }));
+
+  const evidenceItems = isFinalStep
+    ? [
+        ...getQuestionsForSection("profile_basis", scan),
+        ...getQuestionsForSection("profile_reason", scan),
+        ...getQuestionsForSection("scope", scan),
+        ...getQuestionsForSection("diagnose", scan),
+      ]
+        .filter((question) => {
+          const rawValue = getAnswerFromScan(scan, question.key);
+          if (Array.isArray(rawValue)) return rawValue.length > 0;
+          return rawValue.trim() !== "";
+        })
+        .map((question) => {
+          const rawValue = getAnswerFromScan(scan, question.key);
+          const optionSet = getOptionSet(question.optionSetKey);
+          const displayValue = getDisplayValue(rawValue, optionSet);
+
+          return {
+            key: question.key,
+            label: question.label,
+            value: Array.isArray(displayValue)
+              ? displayValue.join(", ")
+              : displayValue,
+          };
+        })
+    : [];
+
+  const modulesDomainItems: DomainCardItem[] = domainScores
+    .filter((domain) =>
+      [
+        "finance",
+        "crm",
+        "ordermanagement",
+        "hrm",
+        "payroll",
+        "projects",
+        "procurement",
+      ].includes(domain.code)
+    )
+    .map((domain) => ({
+      title: domain.title,
+      score: domain.score,
+      summary: `${getScoreLabel(domain.score)} — ${domain.score.toFixed(1)} van 8`,
+    }));
+
+  const integrationsDomainItems: DomainCardItem[] = domainScores
+    .filter((domain) =>
+      ["integrations", "integration", "koppelingen", "beheer"].includes(domain.code)
+    )
+    .map((domain) => ({
+      title: domain.title,
+      score: domain.score,
+      summary: `${getScoreLabel(domain.score)} — ${domain.score.toFixed(1)} van 8`,
+    }));
+
+  const reportingDomainItems: DomainCardItem[] = domainScores
+    .filter((domain) =>
+      ["reporting", "data", "rapportage", "sturing"].includes(domain.code)
+    )
+    .map((domain) => ({
+      title: domain.title,
+      score: domain.score,
+      summary: `${getScoreLabel(domain.score)} — ${domain.score.toFixed(1)} van 8`,
+    }));
+
+  const organizationDomainItems: DomainCardItem[] = domainScores
+    .filter((domain) =>
+      [
+        "organization",
+        "governance",
+        "process",
+        "adoption",
+        "organisatie",
+      ].includes(domain.code)
+    )
+    .map((domain) => ({
+      title: domain.title,
+      score: domain.score,
+      summary: `${getScoreLabel(domain.score)} — ${domain.score.toFixed(1)} van 8`,
+    }));
+
+  const fallbackDomainItems: DomainCardItem[] = domainScores.map((domain) => ({
+    title: domain.title,
+    score: domain.score,
+    summary: `${getScoreLabel(domain.score)} — ${domain.score.toFixed(1)} van 8`,
+  }));
+
+  const displayModulesDomainItems =
+    modulesDomainItems.length > 0 ? modulesDomainItems : fallbackDomainItems.slice(0, 4);
+
+  const displayIntegrationsDomainItems =
+    integrationsDomainItems.length > 0
+      ? integrationsDomainItems
+      : fallbackDomainItems.slice(0, 3);
+
+  const displayReportingDomainItems =
+    reportingDomainItems.length > 0
+      ? reportingDomainItems
+      : fallbackDomainItems.slice(0, 3);
+
+  const displayOrganizationDomainItems =
+    organizationDomainItems.length > 0
+      ? organizationDomainItems
+      : fallbackDomainItems.slice(0, 4);
+
+  const totalScore =
+    domainScores.length > 0
+      ? domainScores.reduce((sum, item) => sum + item.score, 0) / domainScores.length
+      : 0;
+
+  const biggestRisk =
+    scanOutput?.priorities.find((item) => item.priority === "hoog")?.title ??
+    "Nog geen grootste risico bepaald";
+
+  const biggestOpportunity =
+    scanOutput?.quickWins[0] ?? "Nog geen grootste kans bepaald";
+
+  const nextBestStep =
+    scanOutput?.roadmap.now[0]?.title ??
+    scanOutput?.priorities[0]?.title ??
+    "Nog geen eerstvolgende stap bepaald";
+
+  const impactItems =
+    compactContext
+      ? [
+          compactContext.bottlenecks.length > 0
+            ? "Meer grip op belangrijkste knelpunten"
+            : null,
+          compactContext.focus.length > 0
+            ? "Gerichtere sturing op gekozen focusgebieden"
+            : null,
+          compactContext.products.length > 0
+            ? "Betere benutting van AFAS-modules en inrichting"
+            : null,
+          compactContext.chains.length > 0
+            ? "Meer rust en eenduidigheid in procesketens"
+            : null,
+        ].filter((item): item is string => Boolean(item))
+      : [];
+
   return (
     <div className="space-y-8">
       <div className="space-y-2">
@@ -216,91 +420,226 @@ export default function SectionSummaryPage() {
 
       {isFinalStep && canContinue && scanOutput && (
         <>
-          <section className="rounded-3xl border border-black/10 bg-white p-5">
-            <div className="space-y-2">
+          <section className="rounded-3xl border border-black/10 bg-white p-6">
+            <div className="space-y-3">
               <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                KWEEKERS advies
+                Advies — kernbeeld
               </div>
-              <h2 className="text-2xl font-semibold tracking-tight">
-                {scanOutput.summary.headline}
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                {scanOutput.summary.explanation}
-              </p>
-              <div className="inline-flex rounded-full border border-black/10 bg-black/[0.03] px-3 py-1 text-xs font-medium">
-                {scanOutput.summary.scoreLabel}
+
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div className="space-y-2">
+                  <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+                    {scanOutput.summary.headline}
+                  </h2>
+                  <p className="max-w-3xl text-sm text-muted-foreground">
+                    {scanOutput.summary.explanation}
+                  </p>
+                </div>
+
+                <div className="inline-flex rounded-full border border-black/10 bg-black/[0.03] px-4 py-2 text-sm font-semibold">
+                  {scanOutput.summary.scoreLabel}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div className="rounded-2xl border border-black/10 bg-white p-4">
+              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Totaalscore
+              </div>
+              <div className="mt-2 text-3xl font-semibold">
+                {totalScore > 0 ? totalScore.toFixed(1) : "-"}
+              </div>
+              <div className="mt-2 flex items-center gap-3">
+                <ScoreBlocks score={totalScore} />
+                <span className="text-sm text-muted-foreground">van 8</span>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-black/10 bg-white p-4">
+              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Grootste risico
+              </div>
+              <div className="mt-2 text-sm font-medium">{biggestRisk}</div>
+            </div>
+
+            <div className="rounded-2xl border border-black/10 bg-white p-4">
+              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Grootste kans
+              </div>
+              <div className="mt-2 text-sm font-medium">{biggestOpportunity}</div>
+            </div>
+
+            <div className="rounded-2xl border border-black/10 bg-white p-4">
+              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Beste eerstvolgende stap
+              </div>
+              <div className="mt-2 text-sm font-medium">{nextBestStep}</div>
+            </div>
+          </section>
+
+          <section className="grid gap-4 xl:grid-cols-2">
+            <div className="rounded-3xl border border-black/10 bg-white p-5">
+              <div className="space-y-1">
+                <h2 className="text-lg font-semibold">AFAS Modules</h2>
+                <p className="text-sm text-muted-foreground">
+                  Hoe sterk zijn de gekozen modules nu ingericht en bruikbaar?
+                </p>
+              </div>
+
+              <div className="mt-4 space-y-4">
+                {displayModulesDomainItems.map((item) => (
+                  <div key={item.title} className="space-y-1.5">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="text-sm font-medium">{item.title}</div>
+                      <ScoreDots score={item.score} />
+                    </div>
+                    <p className="text-sm text-muted-foreground">{item.summary}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-black/10 bg-white p-5">
+              <div className="space-y-1">
+                <h2 className="text-lg font-semibold">Integraties & Beheer</h2>
+                <p className="text-sm text-muted-foreground">
+                  Hoe stabiel en beheersbaar is de keten rondom AFAS?
+                </p>
+              </div>
+
+              <div className="mt-4 space-y-4">
+                {displayIntegrationsDomainItems.map((item) => (
+                  <div key={item.title} className="space-y-1.5">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="text-sm font-medium">{item.title}</div>
+                      <ScoreDots score={item.score} />
+                    </div>
+                    <p className="text-sm text-muted-foreground">{item.summary}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-black/10 bg-white p-5">
+              <div className="space-y-1">
+                <h2 className="text-lg font-semibold">Rapportage & Data</h2>
+                <p className="text-sm text-muted-foreground">
+                  Hoe bruikbaar en betrouwbaar is informatie voor sturing?
+                </p>
+              </div>
+
+              <div className="mt-4 space-y-4">
+                {displayReportingDomainItems.map((item) => (
+                  <div key={item.title} className="space-y-1.5">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="text-sm font-medium">{item.title}</div>
+                      <ScoreDots score={item.score} />
+                    </div>
+                    <p className="text-sm text-muted-foreground">{item.summary}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-black/10 bg-white p-5">
+              <div className="space-y-1">
+                <h2 className="text-lg font-semibold">Organisatie & Beheer</h2>
+                <p className="text-sm text-muted-foreground">
+                  Hoe volwassen zijn eigenaarschap, governance en werkwijze?
+                </p>
+              </div>
+
+              <div className="mt-4 space-y-4">
+                {displayOrganizationDomainItems.map((item) => (
+                  <div key={item.title} className="space-y-1.5">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="text-sm font-medium">{item.title}</div>
+                      <ScoreDots score={item.score} />
+                    </div>
+                    <p className="text-sm text-muted-foreground">{item.summary}</p>
+                  </div>
+                ))}
               </div>
             </div>
           </section>
 
           {scanOutput.quickWins.length > 0 && (
-            <section className="space-y-3 rounded-3xl border border-black/10 bg-black/[0.01] p-5">
-              <h2 className="text-lg font-medium">Quick wins</h2>
+            <section className="rounded-3xl border border-black/10 bg-white p-5">
+              <div className="space-y-1">
+                <h2 className="text-lg font-semibold">Quick wins</h2>
+                <p className="text-sm text-muted-foreground">
+                  Kleine ingrepen die snel waarde kunnen opleveren.
+                </p>
+              </div>
 
-              <div className="rounded-2xl border border-black/10 bg-white p-4">
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  {scanOutput.quickWins.map((item) => (
-                    <li key={item} className="ml-5 list-disc">
-                      {item}
-                    </li>
-                  ))}
-                </ul>
+              <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                {scanOutput.quickWins.slice(0, 6).map((item) => (
+                  <div
+                    key={item}
+                    className="rounded-2xl border border-black/10 bg-black/[0.02] p-4 text-sm text-muted-foreground"
+                  >
+                    {item}
+                  </div>
+                ))}
               </div>
             </section>
           )}
 
-          <section className="space-y-3 rounded-3xl border border-black/10 bg-black/[0.01] p-5">
-            <h2 className="text-lg font-medium">Prioriteiten</h2>
+          <section className="rounded-3xl border border-black/10 bg-white p-5">
+            <div className="space-y-1">
+              <h2 className="text-lg font-semibold">Topprioriteiten</h2>
+              <p className="text-sm text-muted-foreground">
+                Dit zijn de belangrijkste thema’s om als eerste op te sturen.
+              </p>
+            </div>
 
-            <div className="space-y-3">
-              {scanOutput.priorities.map((item) => (
+            <div className="mt-4 space-y-3">
+              {scanOutput.priorities.slice(0, 3).map((item, index) => (
                 <div
                   key={item.id}
-                  className="rounded-2xl border border-black/10 bg-white p-4"
+                  className="rounded-2xl border border-black/10 bg-black/[0.02] p-4"
                 >
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-black/10 bg-white text-sm font-semibold">
+                      {index + 1}
+                    </div>
+
                     <div className="text-base font-semibold">{item.title}</div>
 
-                    <span className="rounded-full border border-black/10 bg-black/[0.03] px-2.5 py-1 text-[11px] font-medium">
+                    <span className="rounded-full border border-black/10 bg-white px-2.5 py-1 text-[11px] font-medium">
                       {getPriorityLabel(item.priority)}
                     </span>
 
-                    <span className="rounded-full border border-black/10 bg-black/[0.03] px-2.5 py-1 text-[11px] font-medium">
+                    <span className="rounded-full border border-black/10 bg-white px-2.5 py-1 text-[11px] font-medium">
                       {getBucketLabel(item.bucket)}
                     </span>
                   </div>
 
                   <p className="mt-3 text-sm text-muted-foreground">{item.reason}</p>
 
-                  <div className="mt-3 rounded-xl border border-black/10 bg-black/[0.02] p-3">
+                  <div className="mt-3 rounded-xl border border-black/10 bg-white p-3">
                     <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
                       Advies
                     </div>
                     <p className="mt-1 text-sm text-muted-foreground">{item.advice}</p>
                   </div>
-
-                  {item.signals.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {item.signals.map((signal) => (
-                        <span
-                          key={signal}
-                          className="rounded-full border border-black/10 bg-white px-3 py-1 text-xs text-muted-foreground"
-                        >
-                          {signal}
-                        </span>
-                      ))}
-                    </div>
-                  )}
                 </div>
               ))}
             </div>
           </section>
 
-          <section className="space-y-3 rounded-3xl border border-black/10 bg-black/[0.01] p-5">
-            <h2 className="text-lg font-medium">Roadmap</h2>
+          <section className="rounded-3xl border border-black/10 bg-white p-5">
+            <div className="space-y-1">
+              <h2 className="text-lg font-semibold">Roadmap</h2>
+              <p className="text-sm text-muted-foreground">
+                Praktische fasering van eerstvolgende verbeterstappen.
+              </p>
+            </div>
 
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="rounded-2xl border border-black/10 bg-white p-4">
+            <div className="mt-4 grid gap-4 md:grid-cols-3">
+              <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
                 <div className="text-sm font-semibold">Nu</div>
                 <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
                   {scanOutput.roadmap.now.length > 0 ? (
@@ -317,7 +656,7 @@ export default function SectionSummaryPage() {
                 </ul>
               </div>
 
-              <div className="rounded-2xl border border-black/10 bg-white p-4">
+              <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
                 <div className="text-sm font-semibold">Daarna</div>
                 <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
                   {scanOutput.roadmap.next.length > 0 ? (
@@ -334,7 +673,7 @@ export default function SectionSummaryPage() {
                 </ul>
               </div>
 
-              <div className="rounded-2xl border border-black/10 bg-white p-4">
+              <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
                 <div className="text-sm font-semibold">Later</div>
                 <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
                   {scanOutput.roadmap.later.length > 0 ? (
@@ -353,51 +692,38 @@ export default function SectionSummaryPage() {
             </div>
           </section>
 
-          <section className="space-y-4 rounded-3xl border border-black/10 bg-black/[0.01] p-5">
-            <h2 className="text-lg font-medium">Domeinscores</h2>
+          {impactItems.length > 0 && (
+            <section className="rounded-3xl border border-black/10 bg-white p-5">
+              <div className="space-y-1">
+                <h2 className="text-lg font-semibold">Verwachte impact</h2>
+                <p className="text-sm text-muted-foreground">
+                  Wat deze verbeterstappen naar verwachting opleveren.
+                </p>
+              </div>
 
-            <div className="space-y-5">
-              {domainScores.map((domain) => (
-                <div key={domain.code} className="space-y-1.5">
-                  <div className="text-base font-semibold">{domain.title}</div>
-
-                  <div className="flex items-center gap-3 text-sm">
-                    <span className="shrink-0 text-muted-foreground">
-                      {getScoreLabel(domain.score)}
-                    </span>
-
-                    <div className="flex items-center gap-[2px]">
-                      {Array.from({ length: 10 }).map((_, index) => {
-                        const filledBlocks = getFilledBlocks(domain.score);
-                        const isFilled = index < filledBlocks;
-
-                        return (
-                          <span
-                            key={index}
-                            className={
-                              isFilled
-                                ? "h-2.5 w-2.5 rounded-[2px] bg-black"
-                                : "h-2.5 w-2.5 rounded-[2px] border border-black/20 bg-white"
-                            }
-                          />
-                        );
-                      })}
-                    </div>
-
-                    <span className="shrink-0 text-sm font-medium">
-                      {domain.score.toFixed(1)}
-                    </span>
+              <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                {impactItems.map((item) => (
+                  <div
+                    key={item}
+                    className="rounded-2xl border border-black/10 bg-black/[0.02] p-4 text-sm"
+                  >
+                    {item}
                   </div>
-                </div>
-              ))}
-            </div>
-          </section>
+                ))}
+              </div>
+            </section>
+          )}
 
           {compactContext && (
-            <section className="space-y-3 rounded-3xl border border-black/10 bg-black/[0.01] p-5">
-              <h2 className="text-lg font-medium">Context van de scan</h2>
+            <section className="rounded-3xl border border-black/10 bg-white p-5">
+              <div className="space-y-1">
+                <h2 className="text-lg font-semibold">Context van de scan</h2>
+                <p className="text-sm text-muted-foreground">
+                  Relevante context die deze duiding beïnvloedt.
+                </p>
+              </div>
 
-              <div className="space-y-3 rounded-2xl border border-black/10 bg-white/80 p-4">
+              <div className="mt-4 space-y-3 rounded-2xl border border-black/10 bg-black/[0.02] p-4">
                 {compactContext.bottlenecks.length > 0 && (
                   <div className="text-sm">
                     <span className="font-semibold">Knelpunten:</span>{" "}
@@ -437,36 +763,53 @@ export default function SectionSummaryPage() {
             </section>
           )}
 
-          {Object.entries(scan.comments).filter(([, value]) => value.trim() !== "")
-            .length > 0 && (
-            <section className="space-y-3 rounded-3xl border border-black/10 bg-black/[0.01] p-5">
-              <h2 className="text-lg font-medium">Opmerkingen uit de scan</h2>
+          {commentItems.length > 0 && (
+            <section className="rounded-3xl border border-black/10 bg-white p-5">
+              <div className="space-y-1">
+                <h2 className="text-lg font-semibold">Belangrijke opmerkingen</h2>
+                <p className="text-sm text-muted-foreground">
+                  Aanvullende observaties uit de scan.
+                </p>
+              </div>
 
-              <div className="space-y-3">
-                {[
-                  ...getQuestionsForSection("profile_basis", scan),
-                  ...getQuestionsForSection("profile_reason", scan),
-                  ...getQuestionsForSection("scope", scan),
-                  ...getQuestionsForSection("diagnose", scan),
-                ]
-                  .filter((question) => {
-                    const comment = scan.comments[question.key]?.trim() ?? "";
-                    return comment !== "";
-                  })
-                  .map((question) => (
-                    <div
-                      key={question.key}
-                      className="rounded-2xl border border-black/10 bg-white/80 p-4"
-                    >
-                      <div className="text-sm font-semibold">{question.label}</div>
-                      <div className="mt-1 text-sm text-muted-foreground">
-                        {scan.comments[question.key]}
-                      </div>
+              <div className="mt-4 space-y-3">
+                {commentItems.map((item) => (
+                  <div
+                    key={item.questionKey}
+                    className="rounded-2xl border border-black/10 bg-black/[0.02] p-4"
+                  >
+                    <div className="text-sm font-semibold">{item.label}</div>
+                    <div className="mt-1 text-sm text-muted-foreground">
+                      {item.value}
                     </div>
-                  ))}
+                  </div>
+                ))}
               </div>
             </section>
           )}
+
+          <section className="rounded-3xl border border-black/10 bg-white p-5">
+            <div className="space-y-1">
+              <h2 className="text-lg font-semibold">Onderbouwing</h2>
+              <p className="text-sm text-muted-foreground">
+                Detailinformatie uit de ingevulde antwoorden.
+              </p>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              {evidenceItems.slice(0, 12).map((item) => (
+                <div
+                  key={item.key}
+                  className="rounded-2xl border border-black/10 bg-black/[0.02] p-4"
+                >
+                  <div className="text-sm font-medium">{item.label}</div>
+                  <div className="mt-1 text-sm text-muted-foreground">
+                    {item.value}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
 
           <section className="rounded-3xl border border-black/10 bg-black/[0.01] p-5">
             <div className="space-y-2">
