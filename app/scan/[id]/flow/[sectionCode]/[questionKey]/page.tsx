@@ -52,30 +52,28 @@ function RequiredAsterisk() {
 
 function OptionLabelWithTooltip({
   label,
-  description,
 }: {
   label: string;
   description?: string;
 }) {
   return (
-    <div className="flex items-center justify-center gap-2">
+    <div className="flex items-center justify-center">
       <span className="text-[13px] font-semibold leading-5">{label}</span>
-
-      {description && (
-        <span className="group/tooltip relative inline-flex">
-          <span
-            tabIndex={0}
-            className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-current/30 text-[10px] font-bold text-current/70 outline-none"
-          >
-            i
-          </span>
-
-          <span className="pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-20 hidden w-64 -translate-x-1/2 rounded-xl border border-black/10 bg-white px-3 py-2 text-left text-xs font-normal leading-5 text-black shadow-lg group-hover/tooltip:block group-focus-within/tooltip:block">
-            {description}
-          </span>
-        </span>
-      )}
     </div>
+  );
+}
+
+function OptionTooltip({
+  description,
+}: {
+  description?: string;
+}) {
+  if (!description) return null;
+
+  return (
+    <span className="pointer-events-none absolute bottom-[calc(100%+10px)] left-1/2 z-20 hidden w-64 -translate-x-1/2 rounded-xl border border-black/10 bg-white px-3 py-2 text-left text-xs font-normal leading-5 text-black shadow-lg group-hover:block group-focus-within:block">
+      {description}
+    </span>
   );
 }
 
@@ -479,22 +477,25 @@ export default function FlowQuestionPage() {
                 type="button"
                 onClick={() => onSelect(option.value)}
                 aria-pressed={isActive}
-                className={
+                className={`group relative ${
                   isActive
                     ? getActiveOptionButtonClass()
                     : getBaseOptionButtonClass(false)
-                }
+                }`}
               >
                 <OptionLabelWithTooltip
                   label={option.label}
                   description={option.description}
                 />
+                <OptionTooltip description={option.description} />
               </button>
             );
           })}
       </div>
     );
   };
+
+  const title = isProfileBasisOverview ? "Basis van de organisatie" : question.label;
 
   const handleNext = () => {
     if (!canContinue) {
@@ -504,8 +505,6 @@ export default function FlowQuestionPage() {
 
     router.push(nextHref);
   };
-
-  const title = isProfileBasisOverview ? "Basis van de organisatie" : question.label;
 
   return (
     <div className="space-y-8">
@@ -627,16 +626,17 @@ export default function FlowQuestionPage() {
                         }}
                         aria-pressed={isActive}
                         disabled={disableNewSelection}
-                        className={
+                        className={`group relative ${
                           isActive
                             ? getActiveOptionButtonClass()
                             : getBaseOptionButtonClass(disableNewSelection)
-                        }
+                        }`}
                       >
                         <OptionLabelWithTooltip
                           label={option.label}
                           description={option.description}
                         />
+                        <OptionTooltip description={option.description} />
                       </button>
                     );
                   })}
@@ -683,16 +683,17 @@ export default function FlowQuestionPage() {
                         type="button"
                         onClick={() => setAnswerValue(option.value)}
                         aria-pressed={isActive}
-                        className={
+                        className={`group relative ${
                           isActive
                             ? getActiveOptionButtonClass()
                             : getBaseOptionButtonClass(false)
-                        }
+                        }`}
                       >
                         <OptionLabelWithTooltip
                           label={option.label}
                           description={option.description}
                         />
+                        <OptionTooltip description={option.description} />
                       </button>
                     );
                   })}
@@ -720,16 +721,17 @@ export default function FlowQuestionPage() {
                             onClick={() => toggleMultiSelectValue(option.value)}
                             aria-pressed={isActive}
                             disabled={disableNewSelection}
-                            className={
+                            className={`group relative ${
                               isActive
                                 ? getActiveOptionButtonClass()
                                 : getBaseOptionButtonClass(disableNewSelection)
-                            }
+                            }`}
                           >
                             <OptionLabelWithTooltip
                               label={option.label}
                               description={option.description}
                             />
+                            <OptionTooltip description={option.description} />
                           </button>
                         );
                       })}
@@ -788,16 +790,17 @@ export default function FlowQuestionPage() {
                               onClick={() => toggleMultiSelectValue(option.value)}
                               aria-pressed={isActive}
                               disabled={disableNewSelection}
-                              className={
+                              className={`group relative ${
                                 isActive
                                   ? getActiveOptionButtonClass()
                                   : getBaseOptionButtonClass(disableNewSelection)
-                              }
+                              }`}
                             >
                               <OptionLabelWithTooltip
                                 label={option.label}
                                 description={option.description}
                               />
+                              <OptionTooltip description={option.description} />
                             </button>
                           );
                         })}
