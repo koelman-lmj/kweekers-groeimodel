@@ -329,9 +329,23 @@ export default function FlowQuestionPage() {
     questionTotal = 5;
   }
 
+  const previousQuestion =
+    [...sectionQuestions]
+      .slice(0, currentQuestionIndex)
+      .reverse()
+      .find(
+        (item) =>
+          !(
+            sectionCode === "profile_basis" &&
+            PROFILE_BASIS_SKIPPED_KEYS.includes(
+              item.key as (typeof PROFILE_BASIS_SKIPPED_KEYS)[number]
+            )
+          )
+      ) ?? null;
+
   let previousHref =
-    currentQuestionIndex > 0
-      ? `/scan/${scanId}/flow/${sectionCode}/${sectionQuestions[currentQuestionIndex - 1].key}`
+    previousQuestion
+      ? `/scan/${scanId}/flow/${sectionCode}/${previousQuestion.key}`
       : previousSection && previousSectionQuestions.length > 0
         ? `/scan/${scanId}/flow/${previousSection.code}/${previousSectionQuestions[previousSectionQuestions.length - 1].key}`
         : `/scan/${scanId}/flow/profile_basis/customer_name`;
@@ -344,10 +358,23 @@ export default function FlowQuestionPage() {
     previousHref = `/scan/${scanId}/flow/profile_basis/customer_name`;
   }
 
-  const nextQuestion = sectionQuestions[currentQuestionIndex + 1];
+  const nextQuestion =
+    sectionQuestions
+      .slice(currentQuestionIndex + 1)
+      .find(
+        (item) =>
+          !(
+            sectionCode === "profile_basis" &&
+            PROFILE_BASIS_SKIPPED_KEYS.includes(
+              item.key as (typeof PROFILE_BASIS_SKIPPED_KEYS)[number]
+            )
+          )
+      ) ?? null;
+
   const nextSection = section.nextSectionCode
     ? getSection(section.nextSectionCode)
     : undefined;
+
   const nextSectionQuestions = nextSection
     ? getQuestionsForSection(nextSection.code, scan)
     : [];
