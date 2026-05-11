@@ -53,21 +53,22 @@ export const questions: QuestionDefinition[] = [
       "Kies alleen wat binnen deze scan valt",
     ],
   },
-{
-  key: "organization_type",
-  sectionCode: "profile_basis",
-  order: 45,
-  label: "Type organisatie en operatie",
-  helpText: "Kies maximaal 3 omschrijvingen die passen bij de manier waarop de organisatie werkt.",
-  inputType: "multi_select",
-  required: true,
-  optionSetKey: "organization_type_options",
-  maxSelections: 3,
-  examples: [
-    "Kies meerdere opties als de organisatie op meerdere manieren werkt",
-    "Selecteer alleen wat echt iets zegt over structuur en operatie",
-  ],
-},
+  {
+    key: "organization_type",
+    sectionCode: "profile_basis",
+    order: 45,
+    label: "Type organisatie en operatie",
+    helpText:
+      "Kies maximaal 3 omschrijvingen die passen bij de manier waarop de organisatie werkt.",
+    inputType: "multi_select",
+    required: true,
+    optionSetKey: "organization_type_options",
+    maxSelections: 3,
+    examples: [
+      "Kies meerdere opties als de organisatie op meerdere manieren werkt",
+      "Selecteer alleen wat echt iets zegt over structuur en operatie",
+    ],
+  },
   {
     key: "afas_products",
     sectionCode: "profile_basis",
@@ -82,76 +83,80 @@ export const questions: QuestionDefinition[] = [
       "Kies ook onderdelen die relevant zijn voor deze scan",
     ],
   },
-{
-  key: "ownership_model",
-  sectionCode: "profile_basis",
-  order: 60,
-  label: "Hoe is beheer van AFAS en processen georganiseerd?",
-  helpText: "Kies de situatie die het best past bij hoe beheer en wijzigingen nu zijn geregeld.",
-  inputType: "single_select",
-  required: true,
-  optionSetKey: "ownership_model_options",
-  examples: [
-    "Kijk naar wie nu wijzigingen oppakt, afstemt en bewaakt",
-    "Denk aan centraal beheer, key-users per afdeling of uitbesteed beheer",
-  ],
-},
-{
-  key: "afas_usage_duration",
-  sectionCode: "profile_basis",
-  order: 65,
-  label: "Sinds wanneer gebruikt de organisatie AFAS?",
-  helpText: "Kies hoe lang AFAS al in gebruik is binnen de organisatie.",
-  inputType: "single_select",
-  required: true,
-  optionSetKey: "afas_usage_duration_options",
-  examples: [
-    "Een oudere inrichting kent vaak andere keuzes en meer historie",
-    "Kijk naar het moment waarop AFAS echt in gebruik is genomen",
-  ],
-},
-{
-  key: "maintenance_quality",
-  sectionCode: "profile_basis",
-  order: 67,
-  label: "Hoe goed is de inrichting de afgelopen jaren onderhouden?",
-  helpText: "Kies hoe goed beheer, opschoning en wijzigingen de afgelopen jaren zijn bijgehouden.",
-  inputType: "single_select",
-  required: true,
-  optionSetKey: "maintenance_quality_options",
-  examples: [
-    "Denk aan beheer, documentatie, opschoning en gecontroleerde wijzigingen",
-    "Kijk niet alleen naar techniek, maar ook naar procesafspraken en discipline",
-  ],
-},
-{
-  key: "expected_org_changes",
-  sectionCode: "profile_basis",
-  order: 68,
-  label: "Worden in de komende jaren fusies, overnames of afsplitsingen verwacht?",
-  helpText: "Kies of er verwachte organisatieveranderingen zijn die impact kunnen hebben op inrichting, beheer of administraties.",
-  inputType: "single_select",
-  required: true,
-  optionSetKey: "expected_org_changes_options",
-  examples: [
-    "Denk aan fusies, overnames, afsplitsingen of sterke groei in entiteiten",
-    "Kijk vooral naar veranderingen die invloed hebben op structuur en inrichting",
-  ],
-},
   {
-  key: "standardization_context",
-  sectionCode: "profile_basis",
-  order: 70,
-  label: "Mate van standaardisatie",
-  helpText: "Kies in hoeverre de inrichting en werkwijze vooral standaard of maatwerkgedreven zijn.",
-  inputType: "single_select",
-  required: true,
-  optionSetKey: "standardization_context_options",
-  examples: [
-    "Denk aan hoe sterk de inrichting afwijkt van AFAS standaard",
-    "Kijk vooral naar uitzonderingen, maatwerk en afwijkende routes",
-  ],
-},
+    key: "ownership_model",
+    sectionCode: "profile_basis",
+    order: 60,
+    label: "Hoe is beheer van AFAS en processen georganiseerd?",
+    helpText:
+      "Kies de situatie die het best past bij hoe beheer en wijzigingen nu zijn geregeld.",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "ownership_model_options",
+    examples: [
+      "Kijk naar wie nu wijzigingen oppakt, afstemt en bewaakt",
+      "Denk aan centraal beheer, key-users per afdeling of uitbesteed beheer",
+    ],
+  },
+  {
+    key: "afas_usage_duration",
+    sectionCode: "profile_basis",
+    order: 65,
+    label: "Sinds wanneer gebruikt de organisatie AFAS?",
+    helpText: "Kies hoe lang AFAS al in gebruik is binnen de organisatie.",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "afas_usage_duration_options",
+    examples: [
+      "Een oudere inrichting kent vaak andere keuzes en meer historie",
+      "Kijk naar het moment waarop AFAS echt in gebruik is genomen",
+    ],
+  },
+  {
+    key: "maintenance_quality",
+    sectionCode: "profile_basis",
+    order: 67,
+    label: "Hoe goed is de inrichting de afgelopen jaren onderhouden?",
+    helpText:
+      "Kies hoe goed beheer, opschoning en wijzigingen de afgelopen jaren zijn bijgehouden.",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "maintenance_quality_options",
+    examples: [
+      "Denk aan beheer, documentatie, opschoning en gecontroleerde wijzigingen",
+      "Kijk niet alleen naar techniek, maar ook naar procesafspraken en discipline",
+    ],
+  },
+  {
+    key: "expected_org_changes",
+    sectionCode: "profile_basis",
+    order: 68,
+    label: "Worden in de komende jaren fusies, overnames of afsplitsingen verwacht?",
+    helpText:
+      "Kies of er verwachte organisatieveranderingen zijn die impact kunnen hebben op inrichting, beheer of administraties.",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "expected_org_changes_options",
+    examples: [
+      "Denk aan fusies, overnames, afsplitsingen of sterke groei in entiteiten",
+      "Kijk vooral naar veranderingen die invloed hebben op structuur en inrichting",
+    ],
+  },
+  {
+    key: "standardization_context",
+    sectionCode: "profile_basis",
+    order: 70,
+    label: "Mate van standaardisatie",
+    helpText:
+      "Kies in hoeverre de inrichting en werkwijze vooral standaard of maatwerkgedreven zijn.",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "standardization_context_options",
+    examples: [
+      "Denk aan hoe sterk de inrichting afwijkt van AFAS standaard",
+      "Kijk vooral naar uitzonderingen, maatwerk en afwijkende routes",
+    ],
+  },
   {
     key: "primary_process_chains",
     sectionCode: "profile_basis",
@@ -167,6 +172,7 @@ export const questions: QuestionDefinition[] = [
       "Kies alleen de ketens die echt centraal staan",
     ],
   },
+
   {
     key: "scan_reason",
     sectionCode: "profile_reason",
@@ -196,6 +202,7 @@ export const questions: QuestionDefinition[] = [
       "Kies alleen wat nu echt de meeste druk geeft",
     ],
   },
+
   {
     key: "scope",
     sectionCode: "scope",
@@ -239,6 +246,7 @@ export const questions: QuestionDefinition[] = [
       "Verbeterplan = meer detail en houvast",
     ],
   },
+
   {
     key: "ownership_clarity",
     sectionCode: "diagnose",
@@ -319,7 +327,8 @@ export const questions: QuestionDefinition[] = [
     sectionCode: "diagnose",
     order: 60,
     label: "Structureel oplossen van knelpunten",
-    helpText: "Kies hoe terugkerende problemen meestal worden aangepakt.",
+    helpText:
+      "Kies hoe terugkerende problemen meestal worden aangepakt.",
     inputType: "single_select",
     required: true,
     optionSetKey: "maturity_3level_issue_resolution_options",
@@ -330,7 +339,31 @@ export const questions: QuestionDefinition[] = [
     ],
   },
 
-  // Conditioneel - Financieel
+  // Financieel
+  {
+    key: "finance_strategic_pressure",
+    sectionCode: "diagnose",
+    order: 101,
+    label: "Waar zit binnen financieel nu de grootste opgave?",
+    helpText:
+      "Kies waar binnen financieel nu de meeste druk of verbeterbehoefte zit.",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "finance_strategic_pressure_options",
+    allowsComment: true,
+    examples: [
+      "Denk aan betrouwbaarheid van de basis, uitzonderingen of stuurinformatie",
+      "Kies het punt dat nu het meeste effect heeft op rust en sturing",
+    ],
+    visibleWhen: [
+      { field: "afas_products", operator: "includes", value: "financieel" },
+      {
+        field: "scope_depth",
+        operator: "one_of",
+        value: ["gericht_verdiepen", "verbeterplan"],
+      },
+    ],
+  },
   {
     key: "finance_foundation_reliability",
     sectionCode: "diagnose",
@@ -396,7 +429,31 @@ export const questions: QuestionDefinition[] = [
     ],
   },
 
-  // Conditioneel - Ordermanagement
+  // Ordermanagement
+  {
+    key: "order_strategic_pressure",
+    sectionCode: "diagnose",
+    order: 205,
+    label: "Waar zit binnen ordermanagement nu de grootste opgave?",
+    helpText:
+      "Kies waar binnen ordermanagement nu de meeste druk of verbeterbehoefte zit.",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "order_strategic_pressure_options",
+    allowsComment: true,
+    examples: [
+      "Denk aan orderinvoer, levering, blokkades of facturatie",
+      "Kies het punt dat nu het meeste effect heeft op rust en doorstroming",
+    ],
+    visibleWhen: [
+      { field: "afas_products", operator: "includes", value: "ordermanagement" },
+      {
+        field: "scope_depth",
+        operator: "one_of",
+        value: ["gericht_verdiepen", "verbeterplan"],
+      },
+    ],
+  },
   {
     key: "order_flow_standardization",
     sectionCode: "diagnose",
@@ -420,7 +477,8 @@ export const questions: QuestionDefinition[] = [
     sectionCode: "diagnose",
     order: 220,
     label: "Afwijkingen in orderafhandeling",
-    helpText: "Kies hoe vaak het orderproces afwijkt en hoe beheersbaar dat is.",
+    helpText:
+      "Kies hoe vaak het orderproces afwijkt en hoe beheersbaar dat is.",
     inputType: "single_select",
     required: true,
     optionSetKey: "maturity_3level_exception_control_options",
@@ -462,7 +520,7 @@ export const questions: QuestionDefinition[] = [
     ],
   },
 
-  // Conditioneel - Zorg
+  // Zorg
   {
     key: "care_registration_exceptions",
     sectionCode: "diagnose",
@@ -484,7 +542,8 @@ export const questions: QuestionDefinition[] = [
     sectionCode: "diagnose",
     order: 320,
     label: "Ondersteuning van verantwoording en controle",
-    helpText: "Kies hoe goed processen verantwoording nu ondersteunen.",
+    helpText:
+      "Kies hoe goed processen verantwoording nu ondersteunen.",
     inputType: "single_select",
     required: true,
     optionSetKey: "maturity_3level_usefulness_options",
@@ -503,13 +562,14 @@ export const questions: QuestionDefinition[] = [
     ],
   },
 
-  // Conditioneel - Onderwijs
+  // Onderwijs
   {
     key: "education_intake_planning_consistency",
     sectionCode: "diagnose",
     order: 410,
     label: "Eenduidigheid van intake en planning",
-    helpText: "Kies hoe eenduidig intake, planning en verwerking verlopen.",
+    helpText:
+      "Kies hoe eenduidig intake, planning en verwerking verlopen.",
     inputType: "single_select",
     required: true,
     optionSetKey: "maturity_3level_standardization_options",
@@ -525,7 +585,8 @@ export const questions: QuestionDefinition[] = [
     sectionCode: "diagnose",
     order: 420,
     label: "Aansluiting tussen onderwijsproces en administratie",
-    helpText: "Kies hoe goed uitvoering en administratie op elkaar aansluiten.",
+    helpText:
+      "Kies hoe goed uitvoering en administratie op elkaar aansluiten.",
     inputType: "single_select",
     required: true,
     optionSetKey: "maturity_3level_fit_options",
@@ -558,5 +619,318 @@ export const questions: QuestionDefinition[] = [
       "Zijn afwijkingen voorzien of vooral ad hoc opgelost?",
     ],
     visibleWhen: [{ field: "sector", operator: "equals", value: "onderwijs" }],
+  },
+
+  // CRM
+  {
+    key: "crm_strategic_pressure",
+    sectionCode: "diagnose",
+    order: 510,
+    label: "Waar zit binnen CRM nu de grootste opgave?",
+    helpText: "Kies waar binnen CRM nu de meeste druk of verbeterbehoefte zit.",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "crm_strategic_pressure_options",
+    allowsComment: true,
+    examples: [
+      "Denk aan leadbeheer, pipeline, relatiebeheer of commerciële discipline",
+      "Kies het punt dat nu het meeste effect heeft op structuur en sturing",
+    ],
+    visibleWhen: [
+      { field: "afas_products", operator: "includes", value: "crm" },
+      {
+        field: "scope_depth",
+        operator: "one_of",
+        value: ["gericht_verdiepen", "verbeterplan"],
+      },
+    ],
+  },
+  {
+    key: "crm_process_maturity",
+    sectionCode: "diagnose",
+    order: 520,
+    label: "Eenduidigheid van CRM-werkwijze",
+    helpText: "Kies hoe eenduidig CRM nu wordt gebruikt in de organisatie.",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "maturity_3level_standardization_options",
+    allowsComment: true,
+    examples: [
+      "Denk aan vastleggen van leads, contactmomenten en kansen",
+      "Werkt iedereen op dezelfde manier of sterk verschillend?",
+    ],
+    visibleWhen: [
+      { field: "afas_products", operator: "includes", value: "crm" },
+    ],
+  },
+  {
+    key: "crm_data_quality",
+    sectionCode: "diagnose",
+    order: 530,
+    label: "Kwaliteit van CRM-gegevens",
+    helpText: "Kies hoe betrouwbaar en bruikbaar de CRM-gegevens nu zijn.",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "maturity_3level_usefulness_options",
+    allowsComment: true,
+    examples: [
+      "Denk aan volledigheid, actualiteit en eenduidigheid van relaties en kansen",
+      "Kun je op de gegevens vertrouwen voor opvolging en sturing?",
+    ],
+    visibleWhen: [
+      { field: "afas_products", operator: "includes", value: "crm" },
+    ],
+  },
+  {
+    key: "crm_reporting_usefulness",
+    sectionCode: "diagnose",
+    order: 540,
+    label: "Bruikbaarheid van commerciële stuurinformatie",
+    helpText: "Kies hoe bruikbaar CRM-informatie nu is voor commerciële sturing.",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "maturity_3level_usefulness_options",
+    allowsComment: true,
+    examples: [
+      "Denk aan pipeline, forecast en inzicht in commerciële voortgang",
+      "Kun je hier echt op sturen?",
+    ],
+    visibleWhen: [
+      { field: "afas_products", operator: "includes", value: "crm" },
+      {
+        field: "scope_focus",
+        operator: "includes",
+        value: "rapportage_sturing",
+      },
+    ],
+  },
+
+  // HRM
+  {
+    key: "hrm_strategic_pressure",
+    sectionCode: "diagnose",
+    order: 710,
+    label: "Waar zit binnen HRM nu de grootste opgave?",
+    helpText: "Kies waar binnen HRM nu de meeste druk of verbeterbehoefte zit.",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "hrm_strategic_pressure_options",
+    allowsComment: true,
+    examples: [
+      "Denk aan mutaties, dossieropbouw, processen of selfservice",
+      "Kies het punt dat nu het meeste effect heeft op rust en kwaliteit",
+    ],
+    visibleWhen: [
+      { field: "afas_products", operator: "includes", value: "hrm" },
+      {
+        field: "scope_depth",
+        operator: "one_of",
+        value: ["gericht_verdiepen", "verbeterplan"],
+      },
+    ],
+  },
+  {
+    key: "hrm_process_maturity",
+    sectionCode: "diagnose",
+    order: 720,
+    label: "Eenduidigheid van HRM-processen",
+    helpText: "Kies hoe eenduidig HRM-processen nu verlopen.",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "maturity_3level_standardization_options",
+    allowsComment: true,
+    examples: [
+      "Denk aan in-, door- en uitstroom en mutatieverwerking",
+      "Werkt iedereen vanuit dezelfde route?",
+    ],
+    visibleWhen: [
+      { field: "afas_products", operator: "includes", value: "hrm" },
+    ],
+  },
+  {
+    key: "hrm_data_quality",
+    sectionCode: "diagnose",
+    order: 730,
+    label: "Kwaliteit van HRM-vastlegging",
+    helpText:
+      "Kies hoe betrouwbaar en volledig HRM-gegevens en dossiers nu zijn.",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "maturity_3level_usefulness_options",
+    allowsComment: true,
+    examples: [
+      "Denk aan volledigheid van gegevens, dossiers en mutaties",
+      "Is de vastlegging bruikbaar voor proces en controle?",
+    ],
+    visibleWhen: [
+      { field: "afas_products", operator: "includes", value: "hrm" },
+    ],
+  },
+
+  // Rapportage / dashboards
+  {
+    key: "reporting_strategic_pressure",
+    sectionCode: "diagnose",
+    order: 810,
+    label: "Waar zit binnen rapportage en dashboards nu de grootste opgave?",
+    helpText: "Kies waar nu de meeste druk zit in rapportage en stuurinformatie.",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "reporting_strategic_pressure_options",
+    allowsComment: true,
+    examples: [
+      "Denk aan definities, betrouwbaarheid, snelheid of bruikbaarheid",
+      "Kies het punt dat nu de meeste invloed heeft op sturing",
+    ],
+    visibleWhen: [
+      {
+        field: "afas_products",
+        operator: "includes",
+        value: "rapportage_dashboards",
+      },
+      {
+        field: "scope_depth",
+        operator: "one_of",
+        value: ["gericht_verdiepen", "verbeterplan"],
+      },
+    ],
+  },
+  {
+    key: "reporting_definition_consistency",
+    sectionCode: "diagnose",
+    order: 820,
+    label: "Eenduidigheid van definities en KPI’s",
+    helpText:
+      "Kies hoe eenduidig KPI’s, definities en rapportagelogica nu zijn.",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "maturity_3level_clarity_options",
+    allowsComment: true,
+    examples: [
+      "Denk aan omzet, marge, forecast en andere stuurgetallen",
+      "Is duidelijk wat iedereen onder dezelfde cijfers verstaat?",
+    ],
+    visibleWhen: [
+      {
+        field: "afas_products",
+        operator: "includes",
+        value: "rapportage_dashboards",
+      },
+      {
+        field: "scope_focus",
+        operator: "includes",
+        value: "rapportage_sturing",
+      },
+    ],
+  },
+  {
+    key: "reporting_usefulness",
+    sectionCode: "diagnose",
+    order: 830,
+    label: "Bruikbaarheid van rapportage voor sturing",
+    helpText:
+      "Kies hoe bruikbaar rapportages nu zijn voor besluitvorming en sturing.",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "maturity_3level_usefulness_options",
+    allowsComment: true,
+    examples: [
+      "Denk aan actualiteit, betrouwbaarheid en gebruik in de praktijk",
+      "Kun je hier echt op sturen?",
+    ],
+    visibleWhen: [
+      {
+        field: "afas_products",
+        operator: "includes",
+        value: "rapportage_dashboards",
+      },
+    ],
+  },
+
+  // Integraties
+  {
+    key: "integration_strategic_pressure",
+    sectionCode: "diagnose",
+    order: 910,
+    label: "Waar zit binnen integraties nu de grootste opgave?",
+    helpText:
+      "Kies waar nu de meeste druk zit in koppelingen en gegevensuitwisseling.",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "integration_strategic_pressure_options",
+    allowsComment: true,
+    examples: [
+      "Denk aan stabiliteit, eigenaarschap, monitoring of handmatig herstel",
+      "Kies het punt dat nu de meeste impact heeft op proces en beheersing",
+    ],
+    visibleWhen: [
+      { field: "afas_products", operator: "includes", value: "integraties" },
+      {
+        field: "scope_depth",
+        operator: "one_of",
+        value: ["gericht_verdiepen", "verbeterplan"],
+      },
+    ],
+  },
+  {
+    key: "integration_stability",
+    sectionCode: "diagnose",
+    order: 920,
+    label: "Stabiliteit van koppelingen",
+    helpText:
+      "Kies hoe stabiel koppelingen en gegevensuitwisseling nu zijn.",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "maturity_3level_strength_options",
+    allowsComment: true,
+    examples: [
+      "Denk aan uitval, verstoringen en handmatig herstel",
+      "Is de keten stabiel genoeg voor de operatie?",
+    ],
+    visibleWhen: [
+      { field: "afas_products", operator: "includes", value: "integraties" },
+    ],
+  },
+  {
+    key: "integration_ownership",
+    sectionCode: "diagnose",
+    order: 930,
+    label: "Duidelijkheid van eigenaarschap op integraties",
+    helpText:
+      "Kies hoe duidelijk eigenaarschap en verantwoordelijkheid op koppelingen nu is.",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "maturity_3level_clarity_options",
+    allowsComment: true,
+    examples: [
+      "Denk aan wie eigenaar is van werking, wijzigingen en opvolging",
+      "Is duidelijk wie moet handelen bij uitval of wijziging?",
+    ],
+    visibleWhen: [
+      { field: "afas_products", operator: "includes", value: "integraties" },
+    ],
+  },
+  {
+    key: "integration_monitoring_maturity",
+    sectionCode: "diagnose",
+    order: 940,
+    label: "Monitoring en opvolging van koppelingen",
+    helpText: "Kies hoe goed koppelingen nu worden bewaakt en opgevolgd.",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "maturity_3level_improvement_options",
+    allowsComment: true,
+    examples: [
+      "Denk aan signalering, logging en opvolging van fouten",
+      "Worden problemen actief bewaakt en opgepakt?",
+    ],
+    visibleWhen: [
+      { field: "afas_products", operator: "includes", value: "integraties" },
+      {
+        field: "scope_focus",
+        operator: "includes",
+        value: "beheer_doorontwikkeling",
+      },
+    ],
   },
 ];
