@@ -235,7 +235,36 @@ function getRelevantEvidenceKeysForPriority(priorityId: string): string[] {
   }
 }
 
-function buildPriorityConclusion(priorityId: string, priorityTitle: string): string {
+function buildPriorityConclusion(
+  priorityId: string,
+  priorityTitle: string,
+  reason: string,
+  signals: string[]
+): string {
+  if (signals.includes("Veel handwerk")) {
+    return `Binnen ${priorityTitle.toLowerCase()} is nog veel handmatig werk nodig. Dat maakt de uitvoering trager en foutgevoeliger.`;
+  }
+
+  if (signals.includes("Foutgevoelig proces")) {
+    return `${priorityTitle} is nog onvoldoende robuust ingericht, waardoor fouten of herstelacties sneller ontstaan.`;
+  }
+
+  if (signals.includes("Beperkt inzicht")) {
+    return `Binnen ${priorityTitle.toLowerCase()} ontbreekt nog voldoende inzicht om strak en onderbouwd te kunnen sturen.`;
+  }
+
+  if (signals.includes("Proces vraagt sturing of controle")) {
+    return `Binnen ${priorityTitle.toLowerCase()} zijn eigenaarschap, besluitvorming of controles nog niet scherp genoeg ingericht.`;
+  }
+
+  if (signals.includes("Veel uitzonderingen")) {
+    return `Binnen ${priorityTitle.toLowerCase()} drukken uitzonderingen nog te zwaar op de standaard werkwijze.`;
+  }
+
+  if (signals.includes("Afhankelijk van keten of koppeling")) {
+    return `${priorityTitle} hangt sterk samen met andere stappen in de keten, waardoor verstoringen sneller doorwerken.`;
+  }
+
   switch (priorityId) {
     case "governance":
       return "Eigenaarschap en besluitvorming zijn nog niet scherp genoeg georganiseerd om verbeteringen strak aan te sturen.";
@@ -258,12 +287,17 @@ function buildPriorityConclusion(priorityId: string, priorityTitle: string): str
     case "education":
       return "De onderwijsspecifieke uitvoering vraagt nog meer eenduidigheid in intake, planning en administratie.";
     default:
-      return `${priorityTitle} vraagt nog gerichte aanscherping.`;
+      return reason || `${priorityTitle} vraagt nog gerichte aanscherping.`;
   }
 }
 
 function buildGroupedEvidence(
-  topPriorities: { id: string; title: string }[],
+  topPriorities: {
+    id: string;
+    title: string;
+    reason: string;
+    signals: string[];
+  }[],
   allEvidenceItems: EvidenceItem[]
 ): GroupedEvidence[] {
   return topPriorities
@@ -276,7 +310,12 @@ function buildGroupedEvidence(
       return {
         priorityId: priority.id,
         priorityTitle: priority.title,
-        conclusion: buildPriorityConclusion(priority.id, priority.title),
+        conclusion: buildPriorityConclusion(
+          priority.id,
+          priority.title,
+          priority.reason,
+          priority.signals
+        ),
         items,
       };
     })
@@ -388,6 +427,8 @@ export default function SectionSummaryPage() {
           scanOutput.priorities.slice(0, 3).map((item) => ({
             id: item.id,
             title: item.title,
+            reason: item.reason,
+            signals: item.signals,
           })),
           allEvidenceItems
         )
