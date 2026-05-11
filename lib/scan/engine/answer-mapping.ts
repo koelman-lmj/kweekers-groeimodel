@@ -87,7 +87,7 @@ export type ScanActions = {
   setSector: (value: string) => void;
   setOrganizationSize: (value: string) => void;
   setAdministrationCount: (value: string) => void;
-  setOrganizationType: (value: string) => void;
+  setOrganizationType: (value: string[]) => void;
   setAfasProducts: (value: string[]) => void;
   setOwnershipModel: (value: string) => void;
   setStandardizationContext: (value: string) => void;
@@ -162,7 +162,7 @@ export function setAnswerToScan(
       actions.setAdministrationCount(ensureString(value));
       return;
     case "organization_type":
-      actions.setOrganizationType(ensureString(value));
+      actions.setOrganizationType(ensureStringArray(value));
       return;
     case "afas_products":
       actions.setAfasProducts(ensureStringArray(value));
