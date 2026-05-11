@@ -168,29 +168,6 @@ export default function SectionSummaryPage() {
   const domainScores = isFinalStep ? buildDomainScores(scan) : [];
   const scanOutput = isFinalStep ? buildScanOutput(normalizeScanForOutput(scan)) : null;
 
-  const compactContext = isFinalStep
-    ? {
-        bottlenecks: scan.profile.biggestBottleneck.map((item) => {
-          const optionSet = getOptionSet("biggest_bottleneck_options");
-          return (
-            optionSet?.options.find((option) => option.value === item)?.label ?? item
-          );
-        }),
-        focus: scan.scope.focus.map((item) => {
-          const optionSet = getOptionSet("scope_focus_options");
-          return optionSet?.options.find((option) => option.value === item)?.label ?? item;
-        }),
-        products: scan.profile.afasProducts.map((item) => {
-          const optionSet = getOptionSet("afas_products_options");
-          return optionSet?.options.find((option) => option.value === item)?.label ?? item;
-        }),
-        chains: scan.profile.primaryProcessChains.map((item) => {
-          const optionSet = getOptionSet("primary_process_chains_options");
-          return optionSet?.options.find((option) => option.value === item)?.label ?? item;
-        }),
-      }
-    : null;
-
   const handlePrint = () => {
     window.print();
   };
@@ -238,6 +215,29 @@ export default function SectionSummaryPage() {
         })
     : [];
 
+  const compactContext = isFinalStep
+    ? {
+        bottlenecks: scan.profile.biggestBottleneck.map((item) => {
+          const optionSet = getOptionSet("biggest_bottleneck_options");
+          return (
+            optionSet?.options.find((option) => option.value === item)?.label ?? item
+          );
+        }),
+        focus: scan.scope.focus.map((item) => {
+          const optionSet = getOptionSet("scope_focus_options");
+          return optionSet?.options.find((option) => option.value === item)?.label ?? item;
+        }),
+        products: scan.profile.afasProducts.map((item) => {
+          const optionSet = getOptionSet("afas_products_options");
+          return optionSet?.options.find((option) => option.value === item)?.label ?? item;
+        }),
+        chains: scan.profile.primaryProcessChains.map((item) => {
+          const optionSet = getOptionSet("primary_process_chains_options");
+          return optionSet?.options.find((option) => option.value === item)?.label ?? item;
+        }),
+      }
+    : null;
+
   const modulesDomainItems: DomainCardItem[] = domainScores
     .filter((domain) =>
       [
@@ -278,13 +278,9 @@ export default function SectionSummaryPage() {
 
   const organizationDomainItems: DomainCardItem[] = domainScores
     .filter((domain) =>
-      [
-        "organization",
-        "governance",
-        "process",
-        "adoption",
-        "organisatie",
-      ].includes(domain.code)
+      ["organization", "governance", "process", "adoption", "organisatie"].includes(
+        domain.code
+      )
     )
     .map((domain) => ({
       title: domain.title,
@@ -320,36 +316,6 @@ export default function SectionSummaryPage() {
     domainScores.length > 0
       ? domainScores.reduce((sum, item) => sum + item.score, 0) / domainScores.length
       : 0;
-
-  const biggestRisk =
-    scanOutput?.priorities.find((item) => item.priority === "hoog")?.title ??
-    "Nog geen grootste risico bepaald";
-
-  const biggestOpportunity =
-    scanOutput?.quickWins[0] ?? "Nog geen grootste kans bepaald";
-
-  const nextBestStep =
-    scanOutput?.roadmap.now[0]?.title ??
-    scanOutput?.priorities[0]?.title ??
-    "Nog geen eerstvolgende stap bepaald";
-
-  const impactItems =
-    compactContext
-      ? [
-          compactContext.bottlenecks.length > 0
-            ? "Meer grip op belangrijkste knelpunten"
-            : null,
-          compactContext.focus.length > 0
-            ? "Gerichtere sturing op gekozen focusgebieden"
-            : null,
-          compactContext.products.length > 0
-            ? "Betere benutting van AFAS-modules en inrichting"
-            : null,
-          compactContext.chains.length > 0
-            ? "Meer rust en eenduidigheid in procesketens"
-            : null,
-        ].filter((item): item is string => Boolean(item))
-      : [];
 
   return (
     <div className="space-y-8">
@@ -461,21 +427,27 @@ export default function SectionSummaryPage() {
               <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Grootste risico
               </div>
-              <div className="mt-2 text-sm font-medium">{biggestRisk}</div>
+              <div className="mt-2 text-sm font-medium">
+                {scanOutput.summary.biggestRisk}
+              </div>
             </div>
 
             <div className="rounded-2xl border border-black/10 bg-white p-4">
               <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Grootste kans
               </div>
-              <div className="mt-2 text-sm font-medium">{biggestOpportunity}</div>
+              <div className="mt-2 text-sm font-medium">
+                {scanOutput.summary.biggestOpportunity}
+              </div>
             </div>
 
             <div className="rounded-2xl border border-black/10 bg-white p-4">
               <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Beste eerstvolgende stap
               </div>
-              <div className="mt-2 text-sm font-medium">{nextBestStep}</div>
+              <div className="mt-2 text-sm font-medium">
+                {scanOutput.summary.nextBestStep}
+              </div>
             </div>
           </section>
 
@@ -692,7 +664,7 @@ export default function SectionSummaryPage() {
             </div>
           </section>
 
-          {impactItems.length > 0 && (
+          {scanOutput.impact.length > 0 && (
             <section className="rounded-3xl border border-black/10 bg-white p-5">
               <div className="space-y-1">
                 <h2 className="text-lg font-semibold">Verwachte impact</h2>
@@ -702,7 +674,7 @@ export default function SectionSummaryPage() {
               </div>
 
               <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                {impactItems.map((item) => (
+                {scanOutput.impact.map((item) => (
                   <div
                     key={item}
                     className="rounded-2xl border border-black/10 bg-black/[0.02] p-4 text-sm"
