@@ -823,20 +823,22 @@ const setterBag = {
                 </div>
               )}
 
-            {question.examples && question.examples.length > 0 && (
-              <div className="kweekers-help-box rounded-xl p-3">
-                <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                  Hulp bij deze vraag
-                </div>
-                <ul className="mt-1.5 space-y-1 text-xs text-muted-foreground">
-                  {question.examples.map((example) => (
-                    <li key={example} className="ml-5 list-disc">
-                      {example}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+{question.examples &&
+  question.examples.length > 0 &&
+  !optionSet?.options?.some((option) => option.description) && (
+    <div className="kweekers-help-box rounded-xl p-3">
+      <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+        Hulp bij deze vraag
+      </div>
+      <ul className="mt-1.5 space-y-1 text-xs text-muted-foreground">
+        {question.examples.map((example) => (
+          <li key={example} className="ml-5 list-disc">
+            {example}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )}
 
             {question.allowsComment && (
               <div className="space-y-2 border-t border-black/10 pt-4">
