@@ -30,41 +30,47 @@ export const optionSets: OptionSetDefinition[] = [
       { value: "10+", label: "10+ administraties", order: 40 },
     ],
   },
-  {
-    key: "organization_type_options",
-    options: [
-      {
-        value: "centraal_operationeel",
-        label: "Centraal aangestuurd",
-        order: 10,
-      },
-      {
-        value: "meerdere_teams_locaties",
-        label: "Meerdere teams / locaties",
-        order: 20,
-      },
-      {
-        value: "meerdere_entiteiten",
-        label: "Meerdere entiteiten",
-        order: 30,
-      },
-      {
-        value: "projectmatig",
-        label: "Projectmatig",
-        order: 40,
-      },
-      {
-        value: "transactiegedreven",
-        label: "Transactiegedreven",
-        order: 50,
-      },
-      {
-        value: "hybride",
-        label: "Hybride",
-        order: 60,
-      },
-    ],
-  },
+{
+  key: "organization_type_options",
+  options: [
+    {
+      value: "centraal_operationeel",
+      label: "Centraal aangestuurd",
+      description: "Belangrijke keuzes, inrichting en werkwijze worden vooral centraal bepaald.",
+      order: 10,
+    },
+    {
+      value: "meerdere_teams_locaties",
+      label: "Meerdere teams / locaties",
+      description: "De organisatie werkt vanuit meerdere teams, vestigingen of locaties.",
+      order: 20,
+    },
+    {
+      value: "meerdere_entiteiten",
+      label: "Meerdere entiteiten",
+      description: "Er zijn meerdere bv’s, administraties of organisatorische eenheden.",
+      order: 30,
+    },
+    {
+      value: "projectmatig",
+      label: "Projectmatig",
+      description: "Werk wordt voor een belangrijk deel uitgevoerd en gestuurd per project.",
+      order: 40,
+    },
+    {
+      value: "transactiegedreven",
+      label: "Transactiegedreven",
+      description: "De operatie draait vooral om repeterende transacties, volume en verwerking.",
+      order: 50,
+    },
+    {
+      value: "hybride",
+      label: "Hybride",
+      description: "De organisatie combineert meerdere werkvormen naast elkaar.",
+      order: 60,
+    },
+  ],
+},
   {
     key: "afas_products_options",
     options: [
