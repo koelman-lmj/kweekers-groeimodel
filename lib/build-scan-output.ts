@@ -149,7 +149,74 @@ function pickAnswers(allAnswers: ScanAnswers, keys: string[]): ScanAnswers {
   );
 }
 
-function toMaturityScore(value: ScanAnswerValue): number {
+function fallbackMaturityScore(value: string): number {
+  const scoreMap: Record<string, number> = {
+    onvoldoende_duidelijk: 1,
+    gedeeltelijk_duidelijk: 2,
+    duidelijk_belegd: 3,
+
+    ad_hoc: 1,
+    deels_afgestemd: 2,
+    vast_proces: 3,
+
+    nauwelijks: 1,
+    af_en_toe: 2,
+    structureel: 3,
+
+    sterk_verschillend: 1,
+    redelijk_eenduidig: 2,
+    gestandaardiseerd: 3,
+
+    uitzondering_is_norm: 1,
+    deels_beheersbaar: 2,
+    beperkt_en_beheerst: 3,
+
+    handmatig_herstellen: 1,
+    mix_ad_hoc_structureel: 2,
+    meestal_structureel: 3,
+
+    kwetsbaar: 1,
+    redelijk: 2,
+    sterk: 3,
+
+    beperkt_bruikbaar: 1,
+    deels_bruikbaar: 2,
+    goed_bruikbaar: 3,
+
+    sluit_beperkt_aan: 1,
+    sluit_deels_aan: 2,
+    sluit_goed_aan: 3,
+
+    vooral_handmatig: 1,
+    goed_beheerst: 3,
+  };
+
+  return scoreMap[value] ?? 0;
+}
+
+function toMaturityScore(questionKey: string, value: ScanAnswerValue): number {
+  const raw = typeof value === "string" ? value : "";
+  if (!raw) return 0;
+
+  const question = questions.find((item) => item.key === questionKey);
+
+  if (!question || question.scoreEnabled !== true) {
+    return 0;
+  }
+
+  if (!question.optionSetKey) {
+    return fallbackMaturityScore(raw);
+  }
+
+  const optionSet = getOptionSet(question.optionSetKey);
+  const option = optionSet?.options.find((item) => item.value === raw);
+
+  if (typeof option?.score === "number") {
+    return option.score;
+  }
+
+  return fallbackMaturityScore(raw);
+}
   const raw = typeof value === "string" ? value : "";
 
   const scoreMap: Record<string, number> = {
