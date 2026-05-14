@@ -278,7 +278,16 @@ function average(scores: number[]): number {
   );
 }
 
-function themeScoreTo100(answers: ScanAnswers): number {
+function themeScoreTo100(theme: ThemeInput): number {
+  const values = Object.entries(theme.answers)
+    .map(([questionKey, value]) => toMaturityScore(questionKey, value))
+    .filter((score) => score > 0);
+
+  if (values.length === 0) return 50;
+
+  const avg = average(values);
+  return clamp(Math.round(((avg - 1) / 2) * 100), 0, 100);
+}
   const values = Object.values(answers).map(toMaturityScore).filter((v) => v > 0);
   if (values.length === 0) return 50;
 
@@ -389,7 +398,7 @@ function deriveSignals(theme: ThemeInput): string[] {
 }
 
 function calculatePriorityScore(theme: ThemeInput, signals: string[]): number {
-  const baseScore = themeScoreTo100(theme.answers);
+const baseScore = themeScoreTo100(theme.answers);
   let priorityScore = 100 - baseScore;
 
   if (signals.includes("Veel handwerk")) priorityScore += 15;
