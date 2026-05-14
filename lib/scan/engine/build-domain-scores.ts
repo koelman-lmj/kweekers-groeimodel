@@ -12,6 +12,14 @@ type DomainScore = {
   summary: string;
 };
 
+type OptionWithScore = {
+  value: string;
+  label: string;
+  description?: string;
+  order: number;
+  score?: number;
+};
+
 function fallbackScoreMap(value: string): number {
   const scoreMap: Record<string, number> = {
     onvoldoende_duidelijk: 1,
@@ -100,7 +108,9 @@ function getScoreFromOptionSet(
   }
 
   const optionSet = getOptionSet(optionSetKey);
-  const option = optionSet?.options.find((item) => item.value === value);
+  const option = optionSet?.options.find((item) => item.value === value) as
+    | OptionWithScore
+    | undefined;
 
   if (typeof option?.score === "number") {
     return option.score;
