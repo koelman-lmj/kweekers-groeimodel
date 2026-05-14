@@ -2,10 +2,30 @@
 
 import { useState } from "react";
 
+type CheckResult = {
+  sheetName: string;
+  exists: boolean;
+  ok: boolean;
+  rowCount: number;
+  columnCount: number;
+  headers: string[];
+  missingColumns: string[];
+};
+
+type ImportPreviewResult = {
+  ok: boolean;
+  fileName?: string;
+  message?: string;
+  checks?: CheckResult[];
+  preview?: {
+    questions?: Record<string, string>[];
+  };
+};
+
 export default function ImportPreviewPage() {
   const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState("Nog geen bestand gekozen.");
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<ImportPreviewResult | null>(null);
 
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const selectedFile = event.target.files?.[0] ?? null;
@@ -27,7 +47,11 @@ export default function ImportPreviewPage() {
 
   async function handleCheckFile() {
     if (!file) {
-      setResult({ ok: false, message: "Kies eerst een bestand.", checks: [] });
+      setResult({
+        ok: false,
+        message: "Kies eerst een bestand.",
+        checks: [],
+      });
       return;
     }
 
@@ -42,19 +66,22 @@ export default function ImportPreviewPage() {
       body: formData,
     });
 
-    const data = await response.json();
+    const data = (await response.json()) as ImportPreviewResult;
 
     setStatus("Controle afgerond.");
     setResult(data);
   }
 
+  const questionPreview = result?.preview?.questions ?? [];
+
   return (
     <main className="min-h-screen bg-gray-50 p-8">
-      <div className="mx-auto max-w-4xl rounded-2xl bg-white p-8 shadow">
+      <div className="mx-auto max-w-5xl rounded-2xl bg-white p-8 shadow">
         <h1 className="text-2xl font-bold">Import-preview definitie</h1>
 
         <p className="mt-3 text-gray-600">
-          Upload hier een Excel-template. In deze stap controleren we het bestand alleen.
+          Upload hier een Excel-template. In deze stap controleren we het bestand
+          alleen.
         </p>
 
         <div className="mt-8 rounded-xl border border-dashed border-gray-300 p-6">
@@ -78,7 +105,7 @@ export default function ImportPreviewPage() {
           </button>
 
           {result && (
-            <div className="mt-6 space-y-4">
+            <div className="mt-6 space-y-6">
               <div
                 className={`rounded-xl p-4 text-sm font-medium ${
                   result.ok
@@ -90,13 +117,15 @@ export default function ImportPreviewPage() {
               </div>
 
               <div className="space-y-4">
-                {result.checks?.map((check: any) => (
+                {result.checks?.map((check) => (
                   <div
                     key={check.sheetName}
                     className="rounded-xl border border-gray-200 p-4"
                   >
                     <div className="flex items-center justify-between">
-                      <h2 className="text-lg font-semibold">{check.sheetName}</h2>
+                      <h2 className="text-lg font-semibold">
+                        {check.sheetName}
+                      </h2>
 
                       <span
                         className={`rounded-full px-3 py-1 text-xs font-medium ${
@@ -117,7 +146,7 @@ export default function ImportPreviewPage() {
                       <div className="text-sm font-medium">Headers:</div>
 
                       <div className="mt-2 flex flex-wrap gap-2">
-                        {check.headers?.map((header: string) => (
+                        {check.headers?.map((header) => (
                           <span
                             key={header}
                             className="rounded-lg bg-gray-100 px-2 py-1 text-xs"
@@ -135,7 +164,7 @@ export default function ImportPreviewPage() {
                         </div>
 
                         <div className="mt-2 flex flex-wrap gap-2">
-                          {check.missingColumns.map((column: string) => (
+                          {check.missingColumns.map((column) => (
                             <span
                               key={column}
                               className="rounded-lg bg-red-100 px-2 py-1 text-xs text-red-700"
@@ -149,6 +178,65 @@ export default function ImportPreviewPage() {
                   </div>
                 ))}
               </div>
+
+              {questionPreview.length > 0 && (
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <h2 className="text-lg font-semibold">
+                    Preview eerste vragen
+                  </h2>
+
+                  <p className="mt-2 text-sm text-gray-600">
+                    Dit zijn de eerste 5 regels uit het tabblad{" "}
+                    <strong>questions</strong>.
+                  </p>
+
+                  <div className="mt-4 overflow-auto rounded-lg border border-gray-200">
+                    <table className="min-w-full text-left text-xs">
+                      <thead className="bg-gray-100">
+                        <tr>
+                          <th className="whitespace-nowrap px-3 py-2">
+                            key
+                          </th>
+                          <th className="whitespace-nowrap px-3 py-2">
+                            label
+                          </th>
+                          <th className="whitespace-nowrap px-3 py-2">
+                            inputType
+                          </th>
+                          <th className="whitespace-nowrap px-3 py-2">
+                            category
+                          </th>
+                          <th className="whitespace-nowrap px-3 py-2">
+                            dimensionCode
+                          </th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        {questionPreview.map((question, index) => (
+                          <tr key={`${question.key}-${index}`} className="border-t">
+                            <td className="max-w-xs px-3 py-2 align-top">
+                              {question.key}
+                            </td>
+                            <td className="max-w-md px-3 py-2 align-top">
+                              {question.label}
+                            </td>
+                            <td className="px-3 py-2 align-top">
+                              {question.inputType}
+                            </td>
+                            <td className="px-3 py-2 align-top">
+                              {question.category}
+                            </td>
+                            <td className="px-3 py-2 align-top">
+                              {question.dimensionCode}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
