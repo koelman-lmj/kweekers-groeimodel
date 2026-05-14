@@ -15,6 +15,7 @@ import {
 import { buildScanOutput } from "@/lib/build-scan-output";
 import { normalizeScanForOutput } from "@/lib/scan/normalize-scan-for-output";
 import { questions } from "@/lib/scan/definition/questions";
+import { getCategoryDefinition } from "@/lib/scan/definition/categories";
 
 function getParam(value: string | string[] | undefined): string {
   if (Array.isArray(value)) return value[0] ?? "";
@@ -143,42 +144,6 @@ function ThemeCard({
   );
 }
 
-function getCategoryDescription(category: string): string {
-  switch (category) {
-    case "AFAS Modules":
-      return "Hoe sterk zijn de gekozen modules nu ingericht en bruikbaar?";
-
-    case "Integraties & Beheer":
-      return "Hoe stabiel en beheersbaar is de keten rondom AFAS?";
-
-    case "Rapportage & Data":
-      return "Hoe bruikbaar en betrouwbaar is informatie voor sturing?";
-
-    case "Organisatie & Beheer":
-      return "Hoe volwassen zijn eigenaarschap, governance en werkwijze?";
-
-    case "Branchespecifiek":
-    case "Branche":
-      return "Thema’s die specifiek samenhangen met de sector van deze organisatie.";
-
-    default:
-      return "Relevante aandachtspunten binnen deze categorie.";
-  }
-}
-
-function getCategoryOrder(category: string): number {
-  const order: Record<string, number> = {
-    "AFAS Modules": 10,
-    "Integraties & Beheer": 20,
-    "Rapportage & Data": 30,
-    "Organisatie & Beheer": 40,
-    Branchespecifiek: 50,
-    Branche: 50,
-  };
-
-  return order[category] ?? 999;
-}
-
 function buildThemeCardGroups(items: ThemeCardItem[]): ThemeCardGroup[] {
   const grouped = items.reduce<Record<string, ThemeCardItem[]>>((acc, item) => {
     const category = item.category ?? "Overig";
@@ -190,20 +155,30 @@ function buildThemeCardGroups(items: ThemeCardItem[]): ThemeCardGroup[] {
   }, {});
 
   return Object.entries(grouped)
-    .map(([category, categoryItems]) => ({
-      title: category,
-      description: getCategoryDescription(category),
-      items: categoryItems,
-    }))
+    .map(([category, categoryItems]) => {
+      const categoryDefinition = getCategoryDefinition(category);
+
+      return {
+        title: categoryDefinition.title,
+        description: categoryDefinition.description,
+        order: categoryDefinition.order,
+        items: categoryItems,
+      };
+    })
     .sort((a, b) => {
-      const orderDifference = getCategoryOrder(a.title) - getCategoryOrder(b.title);
+      const orderDifference = a.order - b.order;
 
       if (orderDifference !== 0) {
         return orderDifference;
       }
 
       return a.title.localeCompare(b.title);
-    });
+    })
+    .map(({ title, description, items }) => ({
+      title,
+      description,
+      items,
+    }));
 }
 
 function getRelevantEvidenceKeysForPriority(priorityId: string): string[] {
@@ -654,13 +629,17 @@ export default function SectionSummaryPage() {
                     )}
                   </div>
 
-                  <p className="mt-3 text-sm text-muted-foreground">{item.reason}</p>
+                  <p className="mt-3 text-sm text-muted-foreground">
+                    {item.reason}
+                  </p>
 
                   <div className="mt-3 rounded-xl border border-black/10 bg-white p-3">
                     <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
                       Advies
                     </div>
-                    <p className="mt-1 text-sm text-muted-foreground">{item.advice}</p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {item.advice}
+                    </p>
                   </div>
                 </div>
               ))}
