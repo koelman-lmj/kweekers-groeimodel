@@ -1,6 +1,7 @@
 import type { ScanState } from "@/app/context/ScanContext";
 import { dimensions } from "@/lib/scan/definition/dimensions";
 import { questions } from "@/lib/scan/definition/questions";
+import { getOptionSet } from "@/lib/scan/engine/definition-helpers";
 import { getAnswerFromScan } from "@/lib/scan/engine/answer-mapping";
 
 type DomainScore = {
@@ -11,7 +12,7 @@ type DomainScore = {
   summary: string;
 };
 
-function toScore(value: string): number {
+function fallbackScoreMap(value: string): number {
   const scoreMap: Record<string, number> = {
     onvoldoende_duidelijk: 1,
     gedeeltelijk_duidelijk: 2,
@@ -90,15 +91,40 @@ function buildSummary(title: string, label: string): string {
   return `${title} is overwegend beheerst ingericht en ondersteunt de organisatie voldoende stabiel.`;
 }
 
-function getScoreForQuestion(scan: ScanState, questionKey: string): number {
+function getScoreFromOptionSet(
+  optionSetKey: string | undefined,
+  value: string
+): number {
+  if (!optionSetKey) {
+    return fallbackScoreMap(value);
+  }
+
+  const optionSet = getOptionSet(optionSetKey);
+  const option = optionSet?.options.find((item) => item.value === value);
+
+  if (typeof option?.score === "number") {
+    return option.score;
+  }
+
+  return fallbackScoreMap(value);
+}
+
+function getScoreForQuestion(
+  scan: ScanState,
+  questionKey: string,
+  optionSetKey?: string
+): number {
   const answer = getAnswerFromScan(scan, questionKey);
 
   if (Array.isArray(answer)) {
-    const scores = answer.map((value) => toScore(value));
+    const scores = answer.map((value) =>
+      getScoreFromOptionSet(optionSetKey, value)
+    );
+
     return average(scores);
   }
 
-  return toScore(answer);
+  return getScoreFromOptionSet(optionSetKey, answer);
 }
 
 export function buildDomainScores(scan: ScanState): DomainScore[] {
@@ -114,7 +140,12 @@ export function buildDomainScores(scan: ScanState): DomainScore[] {
       });
 
       const weightedScores = dimensionQuestions.flatMap((question) => {
-        const score = getScoreForQuestion(scan, question.key);
+        const score = getScoreForQuestion(
+          scan,
+          question.key,
+          question.optionSetKey
+        );
+
         const weight = question.scoreWeight ?? 1;
 
         if (score <= 0) {
