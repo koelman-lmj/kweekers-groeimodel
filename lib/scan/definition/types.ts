@@ -11,12 +11,7 @@ export type QuestionInputType = "text" | "single_select" | "multi_select";
 
 export type VisibleWhenCondition = {
   field: string;
-  operator:
-    | "equals"
-    | "not_equals"
-    | "includes"
-    | "not_includes"
-    | "one_of";
+  operator: "equals" | "includes" | "one_of";
   value: string | string[];
 };
 
