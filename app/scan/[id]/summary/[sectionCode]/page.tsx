@@ -93,6 +93,12 @@ type ThemeCardItem = {
   category?: string;
 };
 
+type ThemeCardGroup = {
+  title: string;
+  description: string;
+  items: ThemeCardItem[];
+};
+
 type EvidenceItem = {
   key: string;
   label: string;
@@ -110,12 +116,10 @@ function ThemeCard({
   title,
   description,
   items,
-  emptyText,
 }: {
   title: string;
   description: string;
   items: ThemeCardItem[];
-  emptyText: string;
 }) {
   return (
     <div className="rounded-3xl border border-black/10 bg-white p-5">
@@ -125,22 +129,81 @@ function ThemeCard({
       </div>
 
       <div className="mt-4 space-y-4">
-        {items.length > 0 ? (
-          items.map((item) => (
-            <div key={item.id} className="space-y-1.5">
-              <div className="flex items-center justify-between gap-3">
-                <div className="text-sm font-medium">{item.title}</div>
-                <ScoreDots priorityScore={item.score} />
-              </div>
-              <p className="text-sm text-muted-foreground">{item.reason}</p>
+        {items.map((item) => (
+          <div key={item.id} className="space-y-1.5">
+            <div className="flex items-center justify-between gap-3">
+              <div className="text-sm font-medium">{item.title}</div>
+              <ScoreDots priorityScore={item.score} />
             </div>
-          ))
-        ) : (
-          <p className="text-sm text-muted-foreground">{emptyText}</p>
-        )}
+            <p className="text-sm text-muted-foreground">{item.reason}</p>
+          </div>
+        ))}
       </div>
     </div>
   );
+}
+
+function getCategoryDescription(category: string): string {
+  switch (category) {
+    case "AFAS Modules":
+      return "Hoe sterk zijn de gekozen modules nu ingericht en bruikbaar?";
+
+    case "Integraties & Beheer":
+      return "Hoe stabiel en beheersbaar is de keten rondom AFAS?";
+
+    case "Rapportage & Data":
+      return "Hoe bruikbaar en betrouwbaar is informatie voor sturing?";
+
+    case "Organisatie & Beheer":
+      return "Hoe volwassen zijn eigenaarschap, governance en werkwijze?";
+
+    case "Branchespecifiek":
+    case "Branche":
+      return "Thema’s die specifiek samenhangen met de sector van deze organisatie.";
+
+    default:
+      return "Relevante aandachtspunten binnen deze categorie.";
+  }
+}
+
+function getCategoryOrder(category: string): number {
+  const order: Record<string, number> = {
+    "AFAS Modules": 10,
+    "Integraties & Beheer": 20,
+    "Rapportage & Data": 30,
+    "Organisatie & Beheer": 40,
+    Branchespecifiek: 50,
+    Branche: 50,
+  };
+
+  return order[category] ?? 999;
+}
+
+function buildThemeCardGroups(items: ThemeCardItem[]): ThemeCardGroup[] {
+  const grouped = items.reduce<Record<string, ThemeCardItem[]>>((acc, item) => {
+    const category = item.category ?? "Overig";
+
+    return {
+      ...acc,
+      [category]: [...(acc[category] ?? []), item],
+    };
+  }, {});
+
+  return Object.entries(grouped)
+    .map(([category, categoryItems]) => ({
+      title: category,
+      description: getCategoryDescription(category),
+      items: categoryItems,
+    }))
+    .sort((a, b) => {
+      const orderDifference = getCategoryOrder(a.title) - getCategoryOrder(b.title);
+
+      if (orderDifference !== 0) {
+        return orderDifference;
+      }
+
+      return a.title.localeCompare(b.title);
+    });
 }
 
 function getRelevantEvidenceKeysForPriority(priorityId: string): string[] {
@@ -373,26 +436,12 @@ export default function SectionSummaryPage() {
       category: item.category,
     })) ?? [];
 
-  const displayModulesItems = themeItems.filter(
-    (item) => item.category === "AFAS Modules"
-  );
+  const themeCardGroups = buildThemeCardGroups(themeItems);
 
-  const displayIntegrationItems = themeItems.filter(
-    (item) => item.category === "Integraties & Beheer"
-  );
-
-  const displayReportingItems = themeItems.filter(
-    (item) => item.category === "Rapportage & Data"
-  );
-
-  const displayOrganizationItems = themeItems.filter(
-    (item) => item.category === "Organisatie & Beheer"
-  );
-
-  const displayBranchItems = themeItems.filter(
-    (item) =>
-      item.category === "Branchespecifiek" || item.category === "Branche"
-  );
+  const themeGridClassName =
+    themeCardGroups.length === 1
+      ? "grid gap-4"
+      : "grid gap-4 xl:grid-cols-2";
 
   const totalScore =
     scanOutput && scanOutput.priorities.length > 0
@@ -402,40 +451,6 @@ export default function SectionSummaryPage() {
           }, 0) / scanOutput.priorities.length
         ).toFixed(1)
       : "-";
-
-  const themeCards = [
-    {
-      title: "AFAS Modules",
-      description: "Hoe sterk zijn de gekozen modules nu ingericht en bruikbaar?",
-      items: displayModulesItems,
-      emptyText: "Geen relevante modulethema’s geselecteerd in deze scan.",
-    },
-    {
-      title: "Integraties & Beheer",
-      description: "Hoe stabiel en beheersbaar is de keten rondom AFAS?",
-      items: displayIntegrationItems,
-      emptyText: "Geen integratiethema’s meegenomen in deze scan.",
-    },
-    {
-      title: "Rapportage & Data",
-      description: "Hoe bruikbaar en betrouwbaar is informatie voor sturing?",
-      items: displayReportingItems,
-      emptyText: "Geen rapportage- of datathema’s meegenomen in deze scan.",
-    },
-    {
-      title: "Organisatie & Beheer",
-      description: "Hoe volwassen zijn eigenaarschap, governance en werkwijze?",
-      items: displayOrganizationItems,
-      emptyText: "Geen organisatie- of beheerthema’s meegenomen in deze scan.",
-    },
-  ];
-
-  const visibleThemeCards = themeCards.filter((card) => card.items.length > 0);
-
-  const themeGridClassName =
-    visibleThemeCards.length === 1
-      ? "grid gap-4"
-      : "grid gap-4 xl:grid-cols-2";
 
   return (
     <div className="space-y-8">
@@ -568,42 +583,16 @@ export default function SectionSummaryPage() {
             </div>
           </section>
 
-          {visibleThemeCards.length > 0 && (
+          {themeCardGroups.length > 0 && (
             <section className={themeGridClassName}>
-              {visibleThemeCards.map((card) => (
+              {themeCardGroups.map((group) => (
                 <ThemeCard
-                  key={card.title}
-                  title={card.title}
-                  description={card.description}
-                  items={card.items}
-                  emptyText={card.emptyText}
+                  key={group.title}
+                  title={group.title}
+                  description={group.description}
+                  items={group.items}
                 />
               ))}
-            </section>
-          )}
-
-          {displayBranchItems.length > 0 && (
-            <section className="rounded-3xl border border-black/10 bg-white p-5">
-              <div className="space-y-1">
-                <h2 className="text-lg font-semibold">
-                  Branchespecifieke aandachtspunten
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  Thema’s die specifiek samenhangen met de sector van deze organisatie.
-                </p>
-              </div>
-
-              <div className="mt-4 space-y-4">
-                {displayBranchItems.map((item) => (
-                  <div key={item.id} className="space-y-1.5">
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="text-sm font-medium">{item.title}</div>
-                      <ScoreDots priorityScore={item.score} />
-                    </div>
-                    <p className="text-sm text-muted-foreground">{item.reason}</p>
-                  </div>
-                ))}
-              </div>
             </section>
           )}
 
