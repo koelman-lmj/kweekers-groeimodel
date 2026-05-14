@@ -257,6 +257,11 @@ export const questions: QuestionDefinition[] = [
     required: true,
     optionSetKey: "maturity_3level_clarity_options",
     allowsComment: true,
+    dimensionCode: "governance",
+    category: "Organisatie & Beheer",
+    outputRole: "score",
+    scoreEnabled: true,
+    scoreWeight: 1,
     examples: [
       "Is duidelijk wie beslist over wijzigingen?",
       "Is helder wie eigenaar is van een proces?",
@@ -302,6 +307,11 @@ export const questions: QuestionDefinition[] = [
     required: true,
     optionSetKey: "maturity_3level_standardization_options",
     allowsComment: true,
+    dimensionCode: "processes",
+    category: "Organisatie & Beheer",
+    outputRole: "score",
+    scoreEnabled: true,
+    scoreWeight: 1,
     examples: [
       "Werken teams op dezelfde manier?",
       "Of verschilt dit sterk per persoon of afdeling?",
@@ -327,8 +337,7 @@ export const questions: QuestionDefinition[] = [
     sectionCode: "diagnose",
     order: 60,
     label: "Structureel oplossen van knelpunten",
-    helpText:
-      "Kies hoe terugkerende problemen meestal worden aangepakt.",
+    helpText: "Kies hoe terugkerende problemen meestal worden aangepakt.",
     inputType: "single_select",
     required: true,
     optionSetKey: "maturity_3level_issue_resolution_options",
@@ -339,7 +348,6 @@ export const questions: QuestionDefinition[] = [
     ],
   },
 
-  // Financieel
   {
     key: "finance_strategic_pressure",
     sectionCode: "diagnose",
@@ -429,7 +437,6 @@ export const questions: QuestionDefinition[] = [
     ],
   },
 
-  // Ordermanagement
   {
     key: "order_strategic_pressure",
     sectionCode: "diagnose",
@@ -477,8 +484,7 @@ export const questions: QuestionDefinition[] = [
     sectionCode: "diagnose",
     order: 220,
     label: "Afwijkingen in orderafhandeling",
-    helpText:
-      "Kies hoe vaak het orderproces afwijkt en hoe beheersbaar dat is.",
+    helpText: "Kies hoe vaak het orderproces afwijkt en hoe beheersbaar dat is.",
     inputType: "single_select",
     required: true,
     optionSetKey: "maturity_3level_exception_control_options",
@@ -520,7 +526,6 @@ export const questions: QuestionDefinition[] = [
     ],
   },
 
-  // Zorg
   {
     key: "care_registration_exceptions",
     sectionCode: "diagnose",
@@ -542,8 +547,7 @@ export const questions: QuestionDefinition[] = [
     sectionCode: "diagnose",
     order: 320,
     label: "Ondersteuning van verantwoording en controle",
-    helpText:
-      "Kies hoe goed processen verantwoording nu ondersteunen.",
+    helpText: "Kies hoe goed processen verantwoording nu ondersteunen.",
     inputType: "single_select",
     required: true,
     optionSetKey: "maturity_3level_usefulness_options",
@@ -562,14 +566,12 @@ export const questions: QuestionDefinition[] = [
     ],
   },
 
-  // Onderwijs
   {
     key: "education_intake_planning_consistency",
     sectionCode: "diagnose",
     order: 410,
     label: "Eenduidigheid van intake en planning",
-    helpText:
-      "Kies hoe eenduidig intake, planning en verwerking verlopen.",
+    helpText: "Kies hoe eenduidig intake, planning en verwerking verlopen.",
     inputType: "single_select",
     required: true,
     optionSetKey: "maturity_3level_standardization_options",
@@ -585,8 +587,7 @@ export const questions: QuestionDefinition[] = [
     sectionCode: "diagnose",
     order: 420,
     label: "Aansluiting tussen onderwijsproces en administratie",
-    helpText:
-      "Kies hoe goed uitvoering en administratie op elkaar aansluiten.",
+    helpText: "Kies hoe goed uitvoering en administratie op elkaar aansluiten.",
     inputType: "single_select",
     required: true,
     optionSetKey: "maturity_3level_fit_options",
@@ -621,7 +622,6 @@ export const questions: QuestionDefinition[] = [
     visibleWhen: [{ field: "sector", operator: "equals", value: "onderwijs" }],
   },
 
-  // CRM
   {
     key: "crm_strategic_pressure",
     sectionCode: "diagnose",
@@ -673,6 +673,11 @@ export const questions: QuestionDefinition[] = [
     required: true,
     optionSetKey: "maturity_3level_usefulness_options",
     allowsComment: true,
+    dimensionCode: "crm",
+    category: "AFAS Modules",
+    outputRole: "score",
+    scoreEnabled: true,
+    scoreWeight: 1,
     examples: [
       "Denk aan volledigheid, actualiteit en eenduidigheid van relaties en kansen",
       "Kun je op de gegevens vertrouwen voor opvolging en sturing?",
@@ -705,7 +710,6 @@ export const questions: QuestionDefinition[] = [
     ],
   },
 
-  // HRM
   {
     key: "hrm_strategic_pressure",
     sectionCode: "diagnose",
@@ -752,8 +756,7 @@ export const questions: QuestionDefinition[] = [
     sectionCode: "diagnose",
     order: 730,
     label: "Kwaliteit van HRM-vastlegging",
-    helpText:
-      "Kies hoe betrouwbaar en volledig HRM-gegevens en dossiers nu zijn.",
+    helpText: "Kies hoe betrouwbaar en volledig HRM-gegevens en dossiers nu zijn.",
     inputType: "single_select",
     required: true,
     optionSetKey: "maturity_3level_usefulness_options",
@@ -767,7 +770,6 @@ export const questions: QuestionDefinition[] = [
     ],
   },
 
-  // Rapportage / dashboards
   {
     key: "reporting_strategic_pressure",
     sectionCode: "diagnose",
@@ -800,8 +802,7 @@ export const questions: QuestionDefinition[] = [
     sectionCode: "diagnose",
     order: 820,
     label: "Eenduidigheid van definities en KPI’s",
-    helpText:
-      "Kies hoe eenduidig KPI’s, definities en rapportagelogica nu zijn.",
+    helpText: "Kies hoe eenduidig KPI’s, definities en rapportagelogica nu zijn.",
     inputType: "single_select",
     required: true,
     optionSetKey: "maturity_3level_clarity_options",
@@ -828,8 +829,7 @@ export const questions: QuestionDefinition[] = [
     sectionCode: "diagnose",
     order: 830,
     label: "Bruikbaarheid van rapportage voor sturing",
-    helpText:
-      "Kies hoe bruikbaar rapportages nu zijn voor besluitvorming en sturing.",
+    helpText: "Kies hoe bruikbaar rapportages nu zijn voor besluitvorming en sturing.",
     inputType: "single_select",
     required: true,
     optionSetKey: "maturity_3level_usefulness_options",
@@ -847,7 +847,6 @@ export const questions: QuestionDefinition[] = [
     ],
   },
 
-  // Integraties
   {
     key: "integration_strategic_pressure",
     sectionCode: "diagnose",
@@ -877,8 +876,7 @@ export const questions: QuestionDefinition[] = [
     sectionCode: "diagnose",
     order: 920,
     label: "Stabiliteit van koppelingen",
-    helpText:
-      "Kies hoe stabiel koppelingen en gegevensuitwisseling nu zijn.",
+    helpText: "Kies hoe stabiel koppelingen en gegevensuitwisseling nu zijn.",
     inputType: "single_select",
     required: true,
     optionSetKey: "maturity_3level_strength_options",
