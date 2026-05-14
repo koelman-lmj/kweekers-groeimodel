@@ -102,29 +102,8 @@ function getScoreFromOptionSet(
   const optionSet = getOptionSet(optionSetKey);
   const option = optionSet?.options.find((item) => item.value === value);
 
-  const optionWithScore = option as
-    | (typeof option & { score?: number })
-    | undefined;
-
-  if (typeof optionWithScore?.score === "number") {
-    return optionWithScore.score;
-  }
-
-  return fallbackScoreMap(value);
-}
-  if (!optionSetKey) {
-    return fallbackScoreMap(value);
-  }
-
-  const optionSet = getOptionSet(optionSetKey);
-  const option = optionSet?.options.find((item) => item.value === value);
-
-  const optionWithScore = option as
-    | (typeof option & { score?: number })
-    | undefined;
-
-  if (typeof optionWithScore?.score === "number") {
-    return optionWithScore.score;
+  if (typeof option?.score === "number") {
+    return option.score;
   }
 
   return fallbackScoreMap(value);
