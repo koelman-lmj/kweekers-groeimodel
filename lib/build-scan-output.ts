@@ -1,3 +1,4 @@
+import { dimensions } from "@/lib/scan/definition/dimensions";
 import { questions } from "@/lib/scan/definition/questions";
 import { getOptionSet } from "@/lib/scan/engine/definition-helpers";
 
@@ -73,7 +74,6 @@ type ThemeDefinition = {
   title: string;
   category: string;
   keys: string[];
-  enabledWhen?: (answers: ScanAnswers) => boolean;
 };
 
 type ThemeInput = {
@@ -91,6 +91,14 @@ type OptionWithScore = {
   score?: number;
 };
 
+type DimensionForOutput = {
+  code: string;
+  title: string;
+  category?: string;
+  order: number;
+  isActive?: boolean;
+};
+
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
@@ -99,18 +107,6 @@ function normalizeText(value: ScanAnswerValue): string {
   if (value === null || value === undefined) return "";
   if (Array.isArray(value)) return value.join(" ").toLowerCase();
   return String(value).toLowerCase();
-}
-
-function asArray(value: ScanAnswerValue): string[] {
-  if (Array.isArray(value)) {
-    return value.map(String);
-  }
-
-  if (typeof value === "string" && value.trim() !== "") {
-    return [value];
-  }
-
-  return [];
 }
 
 function hasValue(value: ScanAnswerValue): boolean {
@@ -130,22 +126,6 @@ function hasAnySignalInAnswers(
 ): boolean {
   if (!answers) return false;
   return Object.values(answers).some((value) => hasSignal(value, words));
-}
-
-function answerEquals(
-  answers: ScanAnswers,
-  key: string,
-  expected: string
-): boolean {
-  return normalizeText(answers[key]) === expected.toLowerCase();
-}
-
-function answerIncludes(
-  answers: ScanAnswers,
-  key: string,
-  expected: string
-): boolean {
-  return asArray(answers[key]).includes(expected);
 }
 
 function pickAnswers(allAnswers: ScanAnswers, keys: string[]): ScanAnswers {
@@ -898,124 +878,32 @@ function mergeAllAnswers(sections: ScanSectionInput[]): ScanAnswers {
   }, {});
 }
 
+function getQuestionKeysForDimension(dimensionCode: string): string[] {
+  return questions
+    .filter((question) => question.dimensionCode === dimensionCode)
+    .sort((a, b) => a.order - b.order)
+    .map((question) => question.key);
+}
+
+function getCategoryForDimension(dimensionCode: string): string {
+  const firstQuestion = questions.find(
+    (question) => question.dimensionCode === dimensionCode && question.category
+  );
+
+  return firstQuestion?.category ?? "Overig";
+}
+
 function buildThemeDefinitions(): ThemeDefinition[] {
-  return [
-    {
-      id: "governance",
-      title: "Eigenaarschap & governance",
-      category: "Organisatie & Beheer",
-      keys: [
-        "ownership_clarity",
-        "change_decision_process",
-        "improvement_governance",
-      ],
-    },
-    {
-      id: "processes",
-      title: "Processen & standaardisatie",
-      category: "Organisatie & Beheer",
-      keys: [
-        "process_standardization",
-        "exception_control",
-        "issue_resolution",
-        "standardization_context",
-      ],
-    },
-    {
-      id: "finance",
-      title: "Financieel",
-      category: "AFAS Modules",
-      keys: [
-        "finance_strategic_pressure",
-        "finance_foundation_reliability",
-        "finance_exception_handling",
-        "finance_reporting_maturity",
-      ],
-      enabledWhen: (answers) => answerIncludes(answers, "afas_products", "financieel"),
-    },
-    {
-      id: "ordermanagement",
-      title: "Ordermanagement",
-      category: "AFAS Modules",
-      keys: [
-        "order_strategic_pressure",
-        "order_flow_standardization",
-        "order_exception_complexity",
-        "order_system_fit",
-      ],
-      enabledWhen: (answers) =>
-        answerIncludes(answers, "afas_products", "ordermanagement"),
-    },
-    {
-      id: "crm",
-      title: "CRM",
-      category: "AFAS Modules",
-      keys: [
-        "crm_strategic_pressure",
-        "crm_process_maturity",
-        "crm_data_quality",
-        "crm_reporting_usefulness",
-      ],
-      enabledWhen: (answers) => answerIncludes(answers, "afas_products", "crm"),
-    },
-    {
-      id: "hrm",
-      title: "HRM",
-      category: "AFAS Modules",
-      keys: [
-        "hrm_strategic_pressure",
-        "hrm_process_maturity",
-        "hrm_data_quality",
-      ],
-      enabledWhen: (answers) =>
-        answerIncludes(answers, "afas_products", "hrm") ||
-        answerIncludes(answers, "afas_products", "payroll"),
-    },
-    {
-      id: "reporting",
-      title: "Rapportage & data",
-      category: "Rapportage & Data",
-      keys: [
-        "reporting_strategic_pressure",
-        "reporting_definition_consistency",
-        "reporting_usefulness",
-      ],
-      enabledWhen: (answers) =>
-        answerIncludes(answers, "scope_focus", "rapportage_sturing") ||
-        answerIncludes(answers, "afas_products", "rapportage_dashboards"),
-    },
-    {
-      id: "integrations",
-      title: "Integraties & keten",
-      category: "Integraties & Beheer",
-      keys: [
-        "integration_strategic_pressure",
-        "integration_stability",
-        "integration_ownership",
-        "integration_monitoring_maturity",
-      ],
-      enabledWhen: (answers) =>
-        answerIncludes(answers, "afas_products", "integraties"),
-    },
-    {
-      id: "care",
-      title: "Zorgspecifieke uitvoering",
-      category: "Branchespecifiek",
-      keys: ["care_registration_exceptions", "care_accountability_pressure"],
-      enabledWhen: (answers) => answerEquals(answers, "sector", "zorg"),
-    },
-    {
-      id: "education",
-      title: "Onderwijsspecifieke uitvoering",
-      category: "Branchespecifiek",
-      keys: [
-        "education_intake_planning_consistency",
-        "education_process_admin_alignment",
-        "education_exception_handling",
-      ],
-      enabledWhen: (answers) => answerEquals(answers, "sector", "onderwijs"),
-    },
-  ];
+  return [...(dimensions as DimensionForOutput[])]
+    .filter((dimension) => dimension.isActive !== false)
+    .sort((a, b) => a.order - b.order)
+    .map((dimension) => ({
+      id: dimension.code,
+      title: dimension.title,
+      category: dimension.category ?? getCategoryForDimension(dimension.code),
+      keys: getQuestionKeysForDimension(dimension.code),
+    }))
+    .filter((theme) => theme.keys.length > 0);
 }
 
 function buildThemeInputs(sections: ScanSectionInput[]): ThemeInput[] {
@@ -1023,7 +911,6 @@ function buildThemeInputs(sections: ScanSectionInput[]): ThemeInput[] {
   const definitions = buildThemeDefinitions();
 
   return definitions
-    .filter((theme) => (theme.enabledWhen ? theme.enabledWhen(allAnswers) : true))
     .map((theme) => ({
       id: theme.id,
       title: theme.title,
