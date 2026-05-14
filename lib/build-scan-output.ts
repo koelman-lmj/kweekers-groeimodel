@@ -1,4 +1,3 @@
-import { dimensions } from "@/lib/scan/definition/dimensions";
 import { questions } from "@/lib/scan/definition/questions";
 import { getOptionSet } from "@/lib/scan/engine/definition-helpers";
 
@@ -217,55 +216,6 @@ function toMaturityScore(questionKey: string, value: ScanAnswerValue): number {
 
   return fallbackMaturityScore(raw);
 }
-  const raw = typeof value === "string" ? value : "";
-
-  const scoreMap: Record<string, number> = {
-    onvoldoende_duidelijk: 1,
-    gedeeltelijk_duidelijk: 2,
-    duidelijk_belegd: 3,
-
-    ad_hoc: 1,
-    deels_afgestemd: 2,
-    vast_proces: 3,
-
-    nauwelijks: 1,
-    af_en_toe: 2,
-    structureel: 3,
-
-    sterk_verschillend: 1,
-    redelijk_eenduidig: 2,
-    gestandaardiseerd: 3,
-
-    uitzondering_is_norm: 1,
-    deels_beheersbaar: 2,
-    beperkt_en_beheerst: 3,
-
-    handmatig_herstellen: 1,
-    mix_ad_hoc_structureel: 2,
-    meestal_structureel: 3,
-
-    kwetsbaar: 1,
-    redelijk: 2,
-    sterk: 3,
-
-    beperkt_bruikbaar: 1,
-    deels_bruikbaar: 2,
-    goed_bruikbaar: 3,
-
-    sluit_beperkt_aan: 1,
-    sluit_deels_aan: 2,
-    sluit_goed_aan: 3,
-
-    vooral_handmatig: 1,
-    goed_beheerst: 3,
-
-    lage_druk: 1,
-    middel_druk: 2,
-    hoge_druk: 3,
-  };
-
-  return scoreMap[raw] ?? 0;
-}
 
 function average(scores: number[]): number {
   const validScores = scores.filter((score) => score > 0);
@@ -283,12 +233,6 @@ function themeScoreTo100(theme: ThemeInput): number {
     .map(([questionKey, value]) => toMaturityScore(questionKey, value))
     .filter((score) => score > 0);
 
-  if (values.length === 0) return 50;
-
-  const avg = average(values);
-  return clamp(Math.round(((avg - 1) / 2) * 100), 0, 100);
-}
-  const values = Object.values(answers).map(toMaturityScore).filter((v) => v > 0);
   if (values.length === 0) return 50;
 
   const avg = average(values);
@@ -398,7 +342,7 @@ function deriveSignals(theme: ThemeInput): string[] {
 }
 
 function calculatePriorityScore(theme: ThemeInput, signals: string[]): number {
-const baseScore = themeScoreTo100(theme.answers);
+  const baseScore = themeScoreTo100(theme);
   let priorityScore = 100 - baseScore;
 
   if (signals.includes("Veel handwerk")) priorityScore += 15;
@@ -1046,7 +990,7 @@ function buildThemeDefinitions(): ThemeDefinition[] {
     {
       id: "care",
       title: "Zorgspecifieke uitvoering",
-      category: "Branche",
+      category: "Branchespecifiek",
       keys: [
         "care_registration_exceptions",
         "care_accountability_pressure",
@@ -1056,7 +1000,7 @@ function buildThemeDefinitions(): ThemeDefinition[] {
     {
       id: "education",
       title: "Onderwijsspecifieke uitvoering",
-      category: "Branche",
+      category: "Branchespecifiek",
       keys: [
         "education_intake_planning_consistency",
         "education_process_admin_alignment",
