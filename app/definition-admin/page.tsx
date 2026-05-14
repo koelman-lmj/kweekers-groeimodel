@@ -120,16 +120,46 @@ export default function DefinitionAdminPage() {
         ))}
       </section>
 
-      <section className="rounded-3xl border border-black/10 bg-black/[0.02] p-6">
-        <div className="space-y-2">
-          <h2 className="text-lg font-semibold">Aanpak richting Key Users</h2>
-          <p className="text-sm text-muted-foreground">
-            Deze pagina is bedoeld als tussenstap richting beheer buiten code.
-            Eerst zorgen we dat export, template en controle stabiel zijn.
-            Daarna kan import of beheer via een scherm veilig worden toegevoegd.
-          </p>
-        </div>
-      </section>
+<section className="rounded-3xl border border-black/10 bg-black/[0.02] p-6">
+  <div className="space-y-2">
+    <h2 className="text-lg font-semibold">Conclusie voor MT en Key Users</h2>
+
+    <p className="text-sm text-muted-foreground">
+      De app is op dit moment technisch voorbereid op beheer door Key Users,
+      maar nog niet volledig self-service. De definitie van categorieën,
+      dimensies, vragen, antwoordopties en scores staat nu centraal en kan
+      gecontroleerd en geëxporteerd worden.
+    </p>
+  </div>
+
+  <div className="mt-5 grid gap-4 md:grid-cols-3">
+    <div className="rounded-2xl border border-black/10 bg-white p-4">
+      <div className="text-sm font-semibold">Wat kan nu al?</div>
+      <p className="mt-2 text-sm text-muted-foreground">
+        De huidige definitie kan worden gecontroleerd, bekeken en als Excel
+        worden geëxporteerd. Ook is er een Excel-template beschikbaar als
+        basis voor toekomstig beheer.
+      </p>
+    </div>
+
+    <div className="rounded-2xl border border-black/10 bg-white p-4">
+      <div className="text-sm font-semibold">Wat kan nog niet?</div>
+      <p className="mt-2 text-sm text-muted-foreground">
+        Key Users kunnen nog niet zelf wijzigingen uploaden of rechtstreeks
+        via een beheerscherm aanpassen. Daarvoor is nog een importfunctie of
+        beheerinterface nodig.
+      </p>
+    </div>
+
+    <div className="rounded-2xl border border-black/10 bg-white p-4">
+      <div className="text-sm font-semibold">Volgende bouwstap</div>
+      <p className="mt-2 text-sm text-muted-foreground">
+        De volgende stap is een veilige importcontrole: eerst Excel inlezen,
+        controleren op fouten en pas daarna wijzigingen kunnen toepassen.
+      </p>
+    </div>
+  </div>
+</section>
     </main>
   );
 }
