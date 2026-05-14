@@ -49,6 +49,67 @@ function getHeaderValues(sheet: ExcelJS.Worksheet): string[] {
   return headers.filter(Boolean);
 }
 
+function getCellValueAsString(value: ExcelJS.CellValue): string {
+  if (value === null || value === undefined) {
+    return "";
+  }
+
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+
+  if (typeof value === "object") {
+    if ("text" in value && typeof value.text === "string") {
+      return value.text;
+    }
+
+    if ("result" in value) {
+      return String(value.result ?? "");
+    }
+
+    if ("richText" in value && Array.isArray(value.richText)) {
+      return value.richText.map((part) => part.text).join("");
+    }
+
+    return JSON.stringify(value);
+  }
+
+  return String(value);
+}
+
+function getSheetPreview(
+  sheet: ExcelJS.Worksheet,
+  maxRows = 5
+): Record<string, string>[] {
+  const headers = getHeaderValues(sheet);
+  const rows: Record<string, string>[] = [];
+
+  sheet.eachRow((row, rowNumber) => {
+    if (rowNumber === 1) {
+      return;
+    }
+
+    if (rows.length >= maxRows) {
+      return;
+    }
+
+    const record: Record<string, string> = {};
+
+    headers.forEach((header, index) => {
+      const cell = row.getCell(index + 1);
+      record[header] = getCellValueAsString(cell.value);
+    });
+
+    const hasValue = Object.values(record).some((value) => value.trim() !== "");
+
+    if (hasValue) {
+      rows.push(record);
+    }
+  });
+
+  return rows;
+}
+
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
@@ -109,6 +170,12 @@ export async function POST(request: Request) {
 
     const ok = checks.every((check) => check.ok);
 
+    const questionsSheet = workbook.getWorksheet("questions");
+
+    const preview = {
+      questions: questionsSheet ? getSheetPreview(questionsSheet, 5) : [],
+    };
+
     return NextResponse.json({
       ok,
       fileName: file.name,
@@ -116,6 +183,7 @@ export async function POST(request: Request) {
         ? "Excelbestand is geschikt voor import."
         : "Excelbestand bevat nog fouten.",
       checks,
+      preview,
     });
   } catch (error) {
     return NextResponse.json(
