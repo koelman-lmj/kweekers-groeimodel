@@ -19,12 +19,21 @@ export default function DefinitionTemplatePage() {
           </p>
         </div>
 
-        <a
-          href="/api/definition-template"
-          className="inline-flex rounded-2xl border border-black/10 bg-black px-5 py-3 text-sm font-medium text-white"
-        >
-          Download Excel-template
-        </a>
+<div className="flex flex-wrap gap-3">
+  <a
+    href="/api/definition-template"
+    className="inline-flex rounded-2xl border border-black/10 bg-black px-5 py-3 text-sm font-medium text-white"
+  >
+    Download Excel-template
+  </a>
+
+  <a
+    href="/api/definition-export"
+    className="inline-flex rounded-2xl border border-black/10 bg-white px-5 py-3 text-sm font-medium text-black"
+  >
+    Download huidige definitie
+  </a>
+</div>
       </div>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
