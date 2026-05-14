@@ -47,6 +47,58 @@ export default function DefinitionAdminPage() {
         </p>
       </div>
 
+      <div className="mt-6 rounded-3xl border border-black/10 bg-black/[0.02] p-6">
+  <div className="space-y-2">
+    <h2 className="text-lg font-semibold">Status richting beheer door Key Users</h2>
+    <p className="text-sm text-muted-foreground">
+      De app is technisch voorbereid op beheer buiten code. De echte importfunctie
+      en een volledig beheerscherm moeten nog gebouwd worden.
+    </p>
+  </div>
+
+  <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+    <div className="rounded-2xl border border-black/10 bg-white p-4">
+      <div className="text-sm font-semibold">Fase 1</div>
+      <div className="mt-1 text-sm text-muted-foreground">
+        Definitie centraal maken
+      </div>
+      <div className="mt-3 inline-flex rounded-full border border-black/10 bg-black px-2.5 py-1 text-xs font-medium text-white">
+        Gereed
+      </div>
+    </div>
+
+    <div className="rounded-2xl border border-black/10 bg-white p-4">
+      <div className="text-sm font-semibold">Fase 2</div>
+      <div className="mt-1 text-sm text-muted-foreground">
+        Export, template en controle
+      </div>
+      <div className="mt-3 inline-flex rounded-full border border-black/10 bg-black px-2.5 py-1 text-xs font-medium text-white">
+        Gereed
+      </div>
+    </div>
+
+    <div className="rounded-2xl border border-black/10 bg-white p-4">
+      <div className="text-sm font-semibold">Fase 3</div>
+      <div className="mt-1 text-sm text-muted-foreground">
+        Import vanuit Excel
+      </div>
+      <div className="mt-3 inline-flex rounded-full border border-black/10 bg-white px-2.5 py-1 text-xs font-medium text-black">
+        Nog te bouwen
+      </div>
+    </div>
+
+    <div className="rounded-2xl border border-black/10 bg-white p-4">
+      <div className="text-sm font-semibold">Fase 4</div>
+      <div className="mt-1 text-sm text-muted-foreground">
+        Beheerscherm voor Key Users
+      </div>
+      <div className="mt-3 inline-flex rounded-full border border-black/10 bg-white px-2.5 py-1 text-xs font-medium text-black">
+        Later
+      </div>
+    </div>
+  </div>
+</div>
+      
       <section className="grid gap-4 md:grid-cols-2">
         {adminLinks.map((item) => (
           <a
