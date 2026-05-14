@@ -1,4 +1,4 @@
-import type { OptionSetDefinition } from "../types";
+import type { OptionSetDefinition } from "./types";
 
 export const optionSets: OptionSetDefinition[] = [
   {
@@ -413,6 +413,7 @@ export const optionSets: OptionSetDefinition[] = [
       },
     ],
   },
+
   {
     key: "maturity_3level_clarity_options",
     options: [
@@ -420,33 +421,46 @@ export const optionSets: OptionSetDefinition[] = [
         value: "onvoldoende_duidelijk",
         label: "Onduidelijk",
         order: 10,
+        score: 1,
       },
       {
         value: "gedeeltelijk_duidelijk",
         label: "Deels duidelijk",
         order: 20,
+        score: 2,
       },
       {
         value: "duidelijk_belegd",
         label: "Duidelijk belegd",
         order: 30,
+        score: 3,
       },
     ],
   },
   {
     key: "maturity_3level_change_governance_options",
     options: [
-      { value: "ad_hoc", label: "Ad hoc", order: 10 },
-      { value: "deels_afgestemd", label: "Deels afgestemd", order: 20 },
-      { value: "vast_proces", label: "Vast proces", order: 30 },
+      { value: "ad_hoc", label: "Ad hoc", order: 10, score: 1 },
+      {
+        value: "deels_afgestemd",
+        label: "Deels afgestemd",
+        order: 20,
+        score: 2,
+      },
+      {
+        value: "vast_proces",
+        label: "Vast proces",
+        order: 30,
+        score: 3,
+      },
     ],
   },
   {
     key: "maturity_3level_improvement_options",
     options: [
-      { value: "nauwelijks", label: "Nauwelijks", order: 10 },
-      { value: "af_en_toe", label: "Af en toe", order: 20 },
-      { value: "structureel", label: "Structureel", order: 30 },
+      { value: "nauwelijks", label: "Nauwelijks", order: 10, score: 1 },
+      { value: "af_en_toe", label: "Af en toe", order: 20, score: 2 },
+      { value: "structureel", label: "Structureel", order: 30, score: 3 },
     ],
   },
   {
@@ -456,16 +470,19 @@ export const optionSets: OptionSetDefinition[] = [
         value: "sterk_verschillend",
         label: "Sterk verschillend",
         order: 10,
+        score: 1,
       },
       {
         value: "redelijk_eenduidig",
         label: "Redelijk eenduidig",
         order: 20,
+        score: 2,
       },
       {
         value: "gestandaardiseerd",
         label: "Grotendeels gestandaardiseerd",
         order: 30,
+        score: 3,
       },
     ],
   },
@@ -476,16 +493,19 @@ export const optionSets: OptionSetDefinition[] = [
         value: "uitzondering_is_norm",
         label: "Uitzonderingen zijn de norm",
         order: 10,
+        score: 1,
       },
       {
         value: "deels_beheersbaar",
         label: "Regelmatig maar beheersbaar",
         order: 20,
+        score: 2,
       },
       {
         value: "beperkt_en_beheerst",
         label: "Beperkt en beheerst",
         order: 30,
+        score: 3,
       },
     ],
   },
@@ -496,25 +516,28 @@ export const optionSets: OptionSetDefinition[] = [
         value: "handmatig_herstellen",
         label: "Vooral handmatig herstellen",
         order: 10,
+        score: 1,
       },
       {
         value: "mix_ad_hoc_structureel",
         label: "Soms structureel, soms ad hoc",
         order: 20,
+        score: 2,
       },
       {
         value: "meestal_structureel",
         label: "Meestal structureel opgelost",
         order: 30,
+        score: 3,
       },
     ],
   },
   {
     key: "maturity_3level_strength_options",
     options: [
-      { value: "kwetsbaar", label: "Kwetsbaar", order: 10 },
-      { value: "redelijk", label: "Redelijk", order: 20 },
-      { value: "sterk", label: "Sterk", order: 30 },
+      { value: "kwetsbaar", label: "Kwetsbaar", order: 10, score: 1 },
+      { value: "redelijk", label: "Redelijk", order: 20, score: 2 },
+      { value: "sterk", label: "Sterk", order: 30, score: 3 },
     ],
   },
   {
@@ -524,16 +547,19 @@ export const optionSets: OptionSetDefinition[] = [
         value: "beperkt_bruikbaar",
         label: "Beperkt bruikbaar",
         order: 10,
+        score: 1,
       },
       {
         value: "deels_bruikbaar",
         label: "Deels bruikbaar",
         order: 20,
+        score: 2,
       },
       {
         value: "goed_bruikbaar",
         label: "Goed bruikbaar",
         order: 30,
+        score: 3,
       },
     ],
   },
@@ -544,29 +570,43 @@ export const optionSets: OptionSetDefinition[] = [
         value: "sluit_beperkt_aan",
         label: "Sluit beperkt aan",
         order: 10,
+        score: 1,
       },
       {
         value: "sluit_deels_aan",
         label: "Sluit deels aan",
         order: 20,
+        score: 2,
       },
       {
         value: "sluit_goed_aan",
         label: "Sluit goed aan",
         order: 30,
+        score: 3,
       },
     ],
   },
   {
     key: "maturity_3level_exception_practical_options",
     options: [
-      { value: "vooral_handmatig", label: "Vooral handmatig", order: 10 },
+      {
+        value: "vooral_handmatig",
+        label: "Vooral handmatig",
+        order: 10,
+        score: 1,
+      },
       {
         value: "deels_beheersbaar",
         label: "Deels beheersbaar",
         order: 20,
+        score: 2,
       },
-      { value: "goed_beheerst", label: "Goed beheerst", order: 30 },
+      {
+        value: "goed_beheerst",
+        label: "Goed beheerst",
+        order: 30,
+        score: 3,
+      },
     ],
   },
 
