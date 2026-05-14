@@ -12,15 +12,76 @@ type CheckResult = {
   missingColumns: string[];
 };
 
+type PreviewData = Record<string, Record<string, string>[]>;
+
 type ImportPreviewResult = {
   ok: boolean;
   fileName?: string;
   message?: string;
   checks?: CheckResult[];
-  preview?: {
-    questions?: Record<string, string>[];
-  };
+  preview?: PreviewData;
 };
+
+const previewConfig: Record<string, string[]> = {
+  categories: ["code", "title", "description", "order"],
+  dimensions: ["code", "title", "category", "order", "isActive"],
+  questions: ["key", "label", "inputType", "category", "dimensionCode"],
+  optionSets: ["key", "description"],
+  options: ["optionSetKey", "value", "label", "order", "score"],
+};
+
+function PreviewTable({
+  title,
+  rows,
+  columns,
+}: {
+  title: string;
+  rows: Record<string, string>[];
+  columns: string[];
+}) {
+  if (!rows || rows.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="rounded-xl border border-gray-200 p-4">
+      <h2 className="text-lg font-semibold">Preview {title}</h2>
+
+      <p className="mt-2 text-sm text-gray-600">
+        Dit zijn de eerste 5 regels uit het tabblad <strong>{title}</strong>.
+      </p>
+
+      <div className="mt-4 overflow-auto rounded-lg border border-gray-200">
+        <table className="min-w-full text-left text-xs">
+          <thead className="bg-gray-100">
+            <tr>
+              {columns.map((column) => (
+                <th key={column} className="whitespace-nowrap px-3 py-2">
+                  {column}
+                </th>
+              ))}
+            </tr>
+          </thead>
+
+          <tbody>
+            {rows.map((row, index) => (
+              <tr key={`${title}-${index}`} className="border-t">
+                {columns.map((column) => (
+                  <td
+                    key={`${title}-${index}-${column}`}
+                    className="max-w-md px-3 py-2 align-top"
+                  >
+                    {row[column]}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
 
 export default function ImportPreviewPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -51,6 +112,7 @@ export default function ImportPreviewPage() {
         ok: false,
         message: "Kies eerst een bestand.",
         checks: [],
+        preview: {},
       });
       return;
     }
@@ -72,16 +134,14 @@ export default function ImportPreviewPage() {
     setResult(data);
   }
 
-  const questionPreview = result?.preview?.questions ?? [];
-
   return (
     <main className="min-h-screen bg-gray-50 p-8">
-      <div className="mx-auto max-w-5xl rounded-2xl bg-white p-8 shadow">
+      <div className="mx-auto max-w-6xl rounded-2xl bg-white p-8 shadow">
         <h1 className="text-2xl font-bold">Import-preview definitie</h1>
 
         <p className="mt-3 text-gray-600">
-          Upload hier een Excel-template. In deze stap controleren we het bestand
-          alleen.
+          Upload hier een Excel-template. In deze stap controleren we het
+          bestand en tonen we een eerste preview van de inhoud.
         </p>
 
         <div className="mt-8 rounded-xl border border-dashed border-gray-300 p-6">
@@ -179,62 +239,26 @@ export default function ImportPreviewPage() {
                 ))}
               </div>
 
-              {questionPreview.length > 0 && (
-                <div className="rounded-xl border border-gray-200 p-4">
-                  <h2 className="text-lg font-semibold">
-                    Preview eerste vragen
-                  </h2>
-
-                  <p className="mt-2 text-sm text-gray-600">
-                    Dit zijn de eerste 5 regels uit het tabblad{" "}
-                    <strong>questions</strong>.
-                  </p>
-
-                  <div className="mt-4 overflow-auto rounded-lg border border-gray-200">
-                    <table className="min-w-full text-left text-xs">
-                      <thead className="bg-gray-100">
-                        <tr>
-                          <th className="whitespace-nowrap px-3 py-2">
-                            key
-                          </th>
-                          <th className="whitespace-nowrap px-3 py-2">
-                            label
-                          </th>
-                          <th className="whitespace-nowrap px-3 py-2">
-                            inputType
-                          </th>
-                          <th className="whitespace-nowrap px-3 py-2">
-                            category
-                          </th>
-                          <th className="whitespace-nowrap px-3 py-2">
-                            dimensionCode
-                          </th>
-                        </tr>
-                      </thead>
-
-                      <tbody>
-                        {questionPreview.map((question, index) => (
-                          <tr key={`${question.key}-${index}`} className="border-t">
-                            <td className="max-w-xs px-3 py-2 align-top">
-                              {question.key}
-                            </td>
-                            <td className="max-w-md px-3 py-2 align-top">
-                              {question.label}
-                            </td>
-                            <td className="px-3 py-2 align-top">
-                              {question.inputType}
-                            </td>
-                            <td className="px-3 py-2 align-top">
-                              {question.category}
-                            </td>
-                            <td className="px-3 py-2 align-top">
-                              {question.dimensionCode}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+              {result.ok && result.preview && (
+                <div className="space-y-4">
+                  <div className="rounded-xl bg-gray-100 p-4">
+                    <h2 className="text-lg font-semibold">
+                      Inhoudelijke preview
+                    </h2>
+                    <p className="mt-1 text-sm text-gray-600">
+                      Hieronder zie je per tabblad de eerste 5 regels die straks
+                      geïmporteerd kunnen worden.
+                    </p>
                   </div>
+
+                  {Object.entries(previewConfig).map(([sheetName, columns]) => (
+                    <PreviewTable
+                      key={sheetName}
+                      title={sheetName}
+                      rows={result.preview?.[sheetName] ?? []}
+                      columns={columns}
+                    />
+                  ))}
                 </div>
               )}
             </div>
