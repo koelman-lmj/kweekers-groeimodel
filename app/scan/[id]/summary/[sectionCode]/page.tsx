@@ -391,8 +391,7 @@ export default function SectionSummaryPage() {
 
   const displayBranchItems = themeItems.filter(
     (item) =>
-      item.category === "Branchespecifiek" ||
-      item.category === "Branche"
+      item.category === "Branchespecifiek" || item.category === "Branche"
   );
 
   const totalScore =
@@ -403,6 +402,40 @@ export default function SectionSummaryPage() {
           }, 0) / scanOutput.priorities.length
         ).toFixed(1)
       : "-";
+
+  const themeCards = [
+    {
+      title: "AFAS Modules",
+      description: "Hoe sterk zijn de gekozen modules nu ingericht en bruikbaar?",
+      items: displayModulesItems,
+      emptyText: "Geen relevante modulethema’s geselecteerd in deze scan.",
+    },
+    {
+      title: "Integraties & Beheer",
+      description: "Hoe stabiel en beheersbaar is de keten rondom AFAS?",
+      items: displayIntegrationItems,
+      emptyText: "Geen integratiethema’s meegenomen in deze scan.",
+    },
+    {
+      title: "Rapportage & Data",
+      description: "Hoe bruikbaar en betrouwbaar is informatie voor sturing?",
+      items: displayReportingItems,
+      emptyText: "Geen rapportage- of datathema’s meegenomen in deze scan.",
+    },
+    {
+      title: "Organisatie & Beheer",
+      description: "Hoe volwassen zijn eigenaarschap, governance en werkwijze?",
+      items: displayOrganizationItems,
+      emptyText: "Geen organisatie- of beheerthema’s meegenomen in deze scan.",
+    },
+  ];
+
+  const visibleThemeCards = themeCards.filter((card) => card.items.length > 0);
+
+  const themeGridClassName =
+    visibleThemeCards.length === 1
+      ? "grid gap-4"
+      : "grid gap-4 xl:grid-cols-2";
 
   return (
     <div className="space-y-8">
@@ -502,7 +535,9 @@ export default function SectionSummaryPage() {
                 Totaalbeeld
               </div>
               <div className="mt-2 text-3xl font-semibold">{totalScore}</div>
-              <div className="mt-2 text-sm text-muted-foreground">op schaal 1–5</div>
+              <div className="mt-2 text-sm text-muted-foreground">
+                op schaal 1–5
+              </div>
             </div>
 
             <div className="rounded-2xl border border-black/10 bg-white p-4">
@@ -533,102 +568,19 @@ export default function SectionSummaryPage() {
             </div>
           </section>
 
-{[
-  {
-    title: "AFAS Modules",
-    description: "Hoe sterk zijn de gekozen modules nu ingericht en bruikbaar?",
-    items: displayModulesItems,
-    emptyText: "Geen relevante modulethema’s geselecteerd in deze scan.",
-  },
-  {
-    title: "Integraties & Beheer",
-    description: "Hoe stabiel en beheersbaar is de keten rondom AFAS?",
-    items: displayIntegrationItems,
-    emptyText: "Geen integratiethema’s meegenomen in deze scan.",
-  },
-  {
-    title: "Rapportage & Data",
-    description: "Hoe bruikbaar en betrouwbaar is informatie voor sturing?",
-    items: displayReportingItems,
-    emptyText: "Geen rapportage- of datathema’s meegenomen in deze scan.",
-  },
-  {
-    title: "Organisatie & Beheer",
-    description: "Hoe volwassen zijn eigenaarschap, governance en werkwijze?",
-    items: displayOrganizationItems,
-    emptyText: "Geen organisatie- of beheerthema’s meegenomen in deze scan.",
-  },
-].filter((card) => card.items.length > 0).length > 0 && (
-  <section
-    className={
-      [
-        {
-          title: "AFAS Modules",
-          description: "Hoe sterk zijn de gekozen modules nu ingericht en bruikbaar?",
-          items: displayModulesItems,
-          emptyText: "Geen relevante modulethema’s geselecteerd in deze scan.",
-        },
-        {
-          title: "Integraties & Beheer",
-          description: "Hoe stabiel en beheersbaar is de keten rondom AFAS?",
-          items: displayIntegrationItems,
-          emptyText: "Geen integratiethema’s meegenomen in deze scan.",
-        },
-        {
-          title: "Rapportage & Data",
-          description: "Hoe bruikbaar en betrouwbaar is informatie voor sturing?",
-          items: displayReportingItems,
-          emptyText: "Geen rapportage- of datathema’s meegenomen in deze scan.",
-        },
-        {
-          title: "Organisatie & Beheer",
-          description: "Hoe volwassen zijn eigenaarschap, governance en werkwijze?",
-          items: displayOrganizationItems,
-          emptyText: "Geen organisatie- of beheerthema’s meegenomen in deze scan.",
-        },
-      ].filter((card) => card.items.length > 0).length === 1
-        ? "grid gap-4"
-        : "grid gap-4 xl:grid-cols-2"
-    }
-  >
-    {[
-      {
-        title: "AFAS Modules",
-        description: "Hoe sterk zijn de gekozen modules nu ingericht en bruikbaar?",
-        items: displayModulesItems,
-        emptyText: "Geen relevante modulethema’s geselecteerd in deze scan.",
-      },
-      {
-        title: "Integraties & Beheer",
-        description: "Hoe stabiel en beheersbaar is de keten rondom AFAS?",
-        items: displayIntegrationItems,
-        emptyText: "Geen integratiethema’s meegenomen in deze scan.",
-      },
-      {
-        title: "Rapportage & Data",
-        description: "Hoe bruikbaar en betrouwbaar is informatie voor sturing?",
-        items: displayReportingItems,
-        emptyText: "Geen rapportage- of datathema’s meegenomen in deze scan.",
-      },
-      {
-        title: "Organisatie & Beheer",
-        description: "Hoe volwassen zijn eigenaarschap, governance en werkwijze?",
-        items: displayOrganizationItems,
-        emptyText: "Geen organisatie- of beheerthema’s meegenomen in deze scan.",
-      },
-    ]
-      .filter((card) => card.items.length > 0)
-      .map((card) => (
-        <ThemeCard
-          key={card.title}
-          title={card.title}
-          description={card.description}
-          items={card.items}
-          emptyText={card.emptyText}
-        />
-      ))}
-  </section>
-)}
+          {visibleThemeCards.length > 0 && (
+            <section className={themeGridClassName}>
+              {visibleThemeCards.map((card) => (
+                <ThemeCard
+                  key={card.title}
+                  title={card.title}
+                  description={card.description}
+                  items={card.items}
+                  emptyText={card.emptyText}
+                />
+              ))}
+            </section>
+          )}
 
           {displayBranchItems.length > 0 && (
             <section className="rounded-3xl border border-black/10 bg-white p-5">
