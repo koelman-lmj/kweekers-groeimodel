@@ -48,7 +48,7 @@ export type OptionDefinition = {
 
 export type OptionSetDefinition = {
   key: string;
-  title: string;
+  title?: string;
   options: OptionDefinition[];
 };
 
