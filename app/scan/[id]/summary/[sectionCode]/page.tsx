@@ -14,6 +14,7 @@ import {
 } from "@/lib/scan/engine/answer-mapping";
 import { buildScanOutput } from "@/lib/build-scan-output";
 import { normalizeScanForOutput } from "@/lib/scan/normalize-scan-for-output";
+import { questions } from "@/lib/scan/definition/questions";
 
 function getParam(value: string | string[] | undefined): string {
   if (Array.isArray(value)) return value[0] ?? "";
@@ -40,7 +41,8 @@ function getDisplayValue(
   if (!optionSet) return rawValue;
 
   return (
-    optionSet.options.find((option) => option.value === rawValue)?.label ?? rawValue
+    optionSet.options.find((option) => option.value === rawValue)?.label ??
+    rawValue
   );
 }
 
@@ -56,54 +58,6 @@ function getBucketLabel(bucket: "now" | "next" | "later") {
   return "Later";
 }
 
-function getPriorityBadgeClass(priority: "hoog" | "middel" | "laag") {
-  switch (priority) {
-    case "hoog":
-      return "border-orange-300 bg-orange-50 text-orange-900";
-    case "middel":
-      return "border-amber-300 bg-amber-50 text-amber-900";
-    case "laag":
-      return "border-emerald-300 bg-emerald-50 text-emerald-900";
-    default:
-      return "border-slate-200 bg-slate-50 text-slate-900";
-  }
-}
-
-function getScoreLabelClass(scoreLabel: string) {
-  const label = scoreLabel.toLowerCase();
-
-  if (label.includes("direct verbeteren")) {
-    return "border-orange-300 bg-orange-50 text-orange-900";
-  }
-
-  if (label.includes("basis vraagt aandacht")) {
-    return "border-amber-300 bg-amber-50 text-amber-900";
-  }
-
-  if (label.includes("redelijke basis")) {
-    return "border-blue-300 bg-blue-50 text-blue-900";
-  }
-
-  if (label.includes("sterke basis")) {
-    return "border-emerald-300 bg-emerald-50 text-emerald-900";
-  }
-
-  return "border-slate-200 bg-slate-50 text-slate-900";
-}
-
-function getRoadmapBucketClass(bucket: "now" | "next" | "later") {
-  switch (bucket) {
-    case "now":
-      return "border-orange-200 bg-orange-50";
-    case "next":
-      return "border-amber-200 bg-amber-50";
-    case "later":
-      return "border-slate-200 bg-slate-50";
-    default:
-      return "border-slate-200 bg-slate-50";
-  }
-}
-
 function scoreToFiveDots(priorityScore: number) {
   if (priorityScore >= 85) return 1;
   if (priorityScore >= 70) return 2;
@@ -112,38 +66,20 @@ function scoreToFiveDots(priorityScore: number) {
   return 5;
 }
 
-function getDotClass(priorityScore: number, index: number) {
-  const active = scoreToFiveDots(priorityScore);
-  const isFilled = index < active;
-
-  if (!isFilled) {
-    return "h-2.5 w-2.5 rounded-full border border-black/20 bg-white";
-  }
-
-  if (priorityScore >= 85) {
-    return "h-2.5 w-2.5 rounded-full bg-orange-500";
-  }
-
-  if (priorityScore >= 70) {
-    return "h-2.5 w-2.5 rounded-full bg-amber-500";
-  }
-
-  if (priorityScore >= 55) {
-    return "h-2.5 w-2.5 rounded-full bg-yellow-500";
-  }
-
-  if (priorityScore >= 40) {
-    return "h-2.5 w-2.5 rounded-full bg-lime-500";
-  }
-
-  return "h-2.5 w-2.5 rounded-full bg-emerald-500";
-}
-
 function ScoreDots({ priorityScore }: { priorityScore: number }) {
+  const active = scoreToFiveDots(priorityScore);
+
   return (
     <div className="flex items-center gap-1.5">
       {Array.from({ length: 5 }).map((_, index) => (
-        <span key={index} className={getDotClass(priorityScore, index)} />
+        <span
+          key={index}
+          className={
+            index < active
+              ? "h-2.5 w-2.5 rounded-full bg-black"
+              : "h-2.5 w-2.5 rounded-full border border-black/20 bg-white"
+          }
+        />
       ))}
     </div>
   );
@@ -174,10 +110,12 @@ function ThemeCard({
   title,
   description,
   items,
+  emptyText,
 }: {
   title: string;
   description: string;
   items: ThemeCardItem[];
+  emptyText: string;
 }) {
   return (
     <div className="rounded-3xl border border-black/10 bg-white p-5">
@@ -187,177 +125,74 @@ function ThemeCard({
       </div>
 
       <div className="mt-4 space-y-4">
-        {items.map((item) => (
-          <div key={item.id} className="space-y-1.5">
-            <div className="flex items-center justify-between gap-3">
-              <div className="text-sm font-medium">{item.title}</div>
-              <ScoreDots priorityScore={item.score} />
+        {items.length > 0 ? (
+          items.map((item) => (
+            <div key={item.id} className="space-y-1.5">
+              <div className="flex items-center justify-between gap-3">
+                <div className="text-sm font-medium">{item.title}</div>
+                <ScoreDots priorityScore={item.score} />
+              </div>
+              <p className="text-sm text-muted-foreground">{item.reason}</p>
             </div>
-            <p className="text-sm text-muted-foreground">{item.reason}</p>
-          </div>
-        ))}
+          ))
+        ) : (
+          <p className="text-sm text-muted-foreground">{emptyText}</p>
+        )}
       </div>
     </div>
   );
 }
 
 function getRelevantEvidenceKeysForPriority(priorityId: string): string[] {
-  switch (priorityId) {
-    case "governance":
-      return [
-        "ownership_clarity",
-        "change_decision_process",
-        "improvement_governance",
-        "ownership_model",
-      ];
-
-    case "processes":
-      return [
-        "process_standardization",
-        "exception_control",
-        "issue_resolution",
-        "standardization_context",
-        "primary_process_chains",
-      ];
-
-    case "finance":
-      return [
-        "finance_strategic_pressure",
-        "finance_foundation_reliability",
-        "finance_exception_handling",
-        "finance_reporting_maturity",
-        "afas_products",
-        "scope_focus",
-      ];
-
-    case "ordermanagement":
-      return [
-        "order_strategic_pressure",
-        "order_flow_standardization",
-        "order_exception_complexity",
-        "order_system_fit",
-        "primary_process_chains",
-      ];
-
-    case "crm":
-      return [
-        "crm_strategic_pressure",
-        "crm_process_maturity",
-        "crm_data_quality",
-        "crm_reporting_usefulness",
-        "afas_products",
-      ];
-
-    case "hrm":
-      return [
-        "hrm_strategic_pressure",
-        "hrm_process_maturity",
-        "hrm_data_quality",
-        "afas_products",
-      ];
-
-    case "reporting":
-      return [
-        "reporting_strategic_pressure",
-        "reporting_definition_consistency",
-        "reporting_usefulness",
-        "scope_focus",
-        "biggest_bottleneck",
-      ];
-
-    case "integrations":
-      return [
-        "integration_strategic_pressure",
-        "integration_stability",
-        "integration_ownership",
-        "integration_monitoring_maturity",
-        "afas_products",
-        "primary_process_chains",
-      ];
-
-    case "care":
-      return [
-        "care_registration_exceptions",
-        "care_accountability_pressure",
-        "sector",
-      ];
-
-    case "education":
-      return [
-        "education_intake_planning_consistency",
-        "education_process_admin_alignment",
-        "education_exception_handling",
-        "sector",
-      ];
-
-    default:
-      return [];
-  }
+  return questions
+    .filter((question) => {
+      return (
+        question.dimensionCode === priorityId &&
+        question.outputRole !== "context"
+      );
+    })
+    .sort((a, b) => a.order - b.order)
+    .map((question) => question.key);
 }
 
 function buildPriorityConclusion(
   priorityId: string,
   priorityTitle: string,
-  reason: string,
   signals: string[]
 ): string {
   if (signals.includes("Veel handwerk")) {
-    return `Binnen ${priorityTitle.toLowerCase()} is nog veel handmatig werk nodig. Dat maakt de uitvoering trager en foutgevoeliger.`;
+    return `${priorityTitle} vraagt aandacht omdat er nog te veel handmatige stappen of losse acties in zitten.`;
   }
 
   if (signals.includes("Foutgevoelig proces")) {
-    return `${priorityTitle} is nog onvoldoende robuust ingericht, waardoor fouten of herstelacties sneller ontstaan.`;
+    return `${priorityTitle} is nog kwetsbaar doordat de uitvoering foutgevoelig of onvoldoende betrouwbaar is.`;
   }
 
   if (signals.includes("Beperkt inzicht")) {
-    return `Binnen ${priorityTitle.toLowerCase()} ontbreekt nog voldoende inzicht om strak en onderbouwd te kunnen sturen.`;
+    return `${priorityTitle} vraagt aanscherping omdat inzicht, rapportage of stuurinformatie nog onvoldoende bruikbaar is.`;
   }
 
   if (signals.includes("Proces vraagt sturing of controle")) {
-    return `Binnen ${priorityTitle.toLowerCase()} zijn eigenaarschap, besluitvorming of controles nog niet scherp genoeg ingericht.`;
+    return `${priorityTitle} vraagt meer duidelijkheid in eigenaarschap, controle en besluitvorming.`;
   }
 
   if (signals.includes("Veel uitzonderingen")) {
-    return `Binnen ${priorityTitle.toLowerCase()} drukken uitzonderingen nog te zwaar op de standaard werkwijze.`;
+    return `${priorityTitle} wordt nu te veel belast door uitzonderingen en afwijkende werkwijzen.`;
   }
 
   if (signals.includes("Afhankelijk van keten of koppeling")) {
-    return `${priorityTitle} hangt sterk samen met andere stappen in de keten, waardoor verstoringen sneller doorwerken.`;
+    return `${priorityTitle} hangt sterk samen met ketenafspraken, koppelingen of gegevensuitwisseling.`;
   }
 
-  switch (priorityId) {
-    case "governance":
-      return "Eigenaarschap en besluitvorming zijn nog niet scherp genoeg georganiseerd om verbeteringen strak aan te sturen.";
-    case "processes":
-      return "De werkwijze is nog niet eenduidig genoeg en uitzonderingen drukken te zwaar op de uitvoering.";
-    case "finance":
-      return "De financiële basis of stuurinformatie vraagt nog aanscherping om betrouwbaar te kunnen sturen.";
-    case "ordermanagement":
-      return "De orderroute kent nog afwijkingen of sluit nog niet strak genoeg aan op de gewenste werkwijze.";
-    case "crm":
-      return "CRM-data en procesdiscipline zijn nog niet sterk genoeg om CRM echt als stuurmiddel te gebruiken.";
-    case "hrm":
-      return "HRM-processen of datakwaliteit zijn nog niet stabiel genoeg voor een strakke uitvoering.";
-    case "reporting":
-      return "Rapportage en definities zijn nog niet scherp genoeg om goed en eenduidig te sturen.";
-    case "integrations":
-      return "Integraties en ketenafspraken missen nog voldoende stabiliteit, monitoring of eigenaarschap.";
-    case "care":
-      return "De zorgspecifieke uitvoering vraagt nog meer beheersing in registratie, declaratie en verantwoording.";
-    case "education":
-      return "De onderwijsspecifieke uitvoering vraagt nog meer eenduidigheid in intake, planning en administratie.";
-    default:
-      return reason || `${priorityTitle} vraagt nog gerichte aanscherping.`;
+  if (signals.includes("Hoge strategische druk")) {
+    return `${priorityTitle} heeft hoge prioriteit omdat hier duidelijke druk of urgentie zichtbaar is.`;
   }
+
+  return `${priorityTitle} vraagt gerichte aanscherping op basis van de ingevulde antwoorden.`;
 }
 
 function buildGroupedEvidence(
-  topPriorities: {
-    id: string;
-    title: string;
-    reason: string;
-    signals: string[];
-  }[],
+  topPriorities: { id: string; title: string; signals: string[] }[],
   allEvidenceItems: EvidenceItem[]
 ): GroupedEvidence[] {
   return topPriorities
@@ -373,7 +208,6 @@ function buildGroupedEvidence(
         conclusion: buildPriorityConclusion(
           priority.id,
           priority.title,
-          priority.reason,
           priority.signals
         ),
         items,
@@ -394,7 +228,7 @@ export default function SectionSummaryPage() {
   const { scan, resetScan } = useScanContext();
 
   const section = getSection(sectionCode);
-  const questions = getQuestionsForSection(sectionCode, scan);
+  const sectionQuestions = getQuestionsForSection(sectionCode, scan);
 
   if (!section) {
     return (
@@ -408,8 +242,10 @@ export default function SectionSummaryPage() {
   }
 
   const previousHref =
-    questions.length > 0
-      ? `/scan/${scanId}/flow/${sectionCode}/${questions[questions.length - 1].key}`
+    sectionQuestions.length > 0
+      ? `/scan/${scanId}/flow/${sectionCode}/${
+          sectionQuestions[sectionQuestions.length - 1].key
+        }`
       : `/scan/${scanId}/summary/profile_basis`;
 
   const nextSectionCode = section.nextSectionCode ?? "";
@@ -423,7 +259,7 @@ export default function SectionSummaryPage() {
     ? `/scan/${scanId}/flow/${nextSectionCode}/${nextQuestionKey}`
     : "";
 
-  const canContinue = questions.every((question) => {
+  const canContinue = sectionQuestions.every((question) => {
     if (!question.required) return true;
 
     const answer = getAnswerFromScan(scan, question.key);
@@ -440,12 +276,14 @@ export default function SectionSummaryPage() {
     window.print();
   };
 
-  const commentItems = [
+  const allSectionQuestions = [
     ...getQuestionsForSection("profile_basis", scan),
     ...getQuestionsForSection("profile_reason", scan),
     ...getQuestionsForSection("scope", scan),
     ...getQuestionsForSection("diagnose", scan),
-  ]
+  ];
+
+  const commentItems = allSectionQuestions
     .filter((question) => {
       const comment = scan.comments[question.key]?.trim() ?? "";
       return comment !== "";
@@ -457,12 +295,7 @@ export default function SectionSummaryPage() {
     }));
 
   const allEvidenceItems: EvidenceItem[] = isFinalStep
-    ? [
-        ...getQuestionsForSection("profile_basis", scan),
-        ...getQuestionsForSection("profile_reason", scan),
-        ...getQuestionsForSection("scope", scan),
-        ...getQuestionsForSection("diagnose", scan),
-      ]
+    ? allSectionQuestions
         .filter((question) => {
           const rawValue = getAnswerFromScan(scan, question.key);
           if (Array.isArray(rawValue)) return rawValue.length > 0;
@@ -489,7 +322,6 @@ export default function SectionSummaryPage() {
           scanOutput.priorities.slice(0, 3).map((item) => ({
             id: item.id,
             title: item.title,
-            reason: item.reason,
             signals: item.signals,
           })),
           allEvidenceItems
@@ -504,25 +336,29 @@ export default function SectionSummaryPage() {
         bottlenecks: scan.profile.biggestBottleneck.map((item) => {
           const optionSet = getOptionSet("biggest_bottleneck_options");
           return (
-            optionSet?.options.find((option) => option.value === item)?.label ?? item
+            optionSet?.options.find((option) => option.value === item)?.label ??
+            item
           );
         }),
         focus: scan.scope.focus.map((item) => {
           const optionSet = getOptionSet("scope_focus_options");
           return (
-            optionSet?.options.find((option) => option.value === item)?.label ?? item
+            optionSet?.options.find((option) => option.value === item)?.label ??
+            item
           );
         }),
         products: scan.profile.afasProducts.map((item) => {
           const optionSet = getOptionSet("afas_products_options");
           return (
-            optionSet?.options.find((option) => option.value === item)?.label ?? item
+            optionSet?.options.find((option) => option.value === item)?.label ??
+            item
           );
         }),
         chains: scan.profile.primaryProcessChains.map((item) => {
           const optionSet = getOptionSet("primary_process_chains_options");
           return (
-            optionSet?.options.find((option) => option.value === item)?.label ?? item
+            optionSet?.options.find((option) => option.value === item)?.label ??
+            item
           );
         }),
       }
@@ -537,52 +373,27 @@ export default function SectionSummaryPage() {
       category: item.category,
     })) ?? [];
 
-  const displayModulesItems = themeItems.filter((item) =>
-    ["finance", "ordermanagement", "crm", "hrm"].includes(item.id)
+  const displayModulesItems = themeItems.filter(
+    (item) => item.category === "AFAS Modules"
   );
 
   const displayIntegrationItems = themeItems.filter(
-    (item) => item.id === "integrations"
+    (item) => item.category === "Integraties & Beheer"
   );
 
   const displayReportingItems = themeItems.filter(
-    (item) => item.id === "reporting"
+    (item) => item.category === "Rapportage & Data"
   );
 
-  const displayOrganizationItems = themeItems.filter((item) =>
-    ["governance", "processes"].includes(item.id)
+  const displayOrganizationItems = themeItems.filter(
+    (item) => item.category === "Organisatie & Beheer"
   );
 
-  const displayBranchItems = themeItems.filter((item) =>
-    ["care", "education"].includes(item.id)
+  const displayBranchItems = themeItems.filter(
+    (item) =>
+      item.category === "Branchespecifiek" ||
+      item.category === "Branche"
   );
-
-  const visibleThemeCards = [
-    {
-      key: "modules",
-      title: "AFAS Modules",
-      description: "Hoe sterk zijn de gekozen modules nu ingericht en bruikbaar?",
-      items: displayModulesItems,
-    },
-    {
-      key: "integrations",
-      title: "Integraties & Beheer",
-      description: "Hoe stabiel en beheersbaar is de keten rondom AFAS?",
-      items: displayIntegrationItems,
-    },
-    {
-      key: "reporting",
-      title: "Rapportage & Data",
-      description: "Hoe bruikbaar en betrouwbaar is informatie voor sturing?",
-      items: displayReportingItems,
-    },
-    {
-      key: "organization",
-      title: "Organisatie & Beheer",
-      description: "Hoe volwassen zijn eigenaarschap, governance en werkwijze?",
-      items: displayOrganizationItems,
-    },
-  ].filter((card) => card.items.length > 0);
 
   const totalScore =
     scanOutput && scanOutput.priorities.length > 0
@@ -610,7 +421,7 @@ export default function SectionSummaryPage() {
           <h2 className="text-lg font-medium">Overzicht</h2>
 
           <div className="space-y-3">
-            {questions.map((question) => {
+            {sectionQuestions.map((question) => {
               const rawValue = getAnswerFromScan(scan, question.key);
               const optionSet = getOptionSet(question.optionSetKey);
               const comment = scan.comments[question.key]?.trim() ?? "";
@@ -678,11 +489,7 @@ export default function SectionSummaryPage() {
                   </p>
                 </div>
 
-                <div
-                  className={`inline-flex rounded-full border px-4 py-2 text-sm font-semibold ${getScoreLabelClass(
-                    scanOutput.summary.scoreLabel
-                  )}`}
-                >
+                <div className="inline-flex rounded-full border border-black/10 bg-black/[0.03] px-4 py-2 text-sm font-semibold">
                   {scanOutput.summary.scoreLabel}
                 </div>
               </div>
@@ -690,56 +497,71 @@ export default function SectionSummaryPage() {
           </section>
 
           <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <div className="text-xs font-medium uppercase tracking-wide text-slate-600">
+            <div className="rounded-2xl border border-black/10 bg-white p-4">
+              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Totaalbeeld
               </div>
-              <div className="mt-2 text-3xl font-semibold text-slate-900">
-                {totalScore}
-              </div>
-              <div className="mt-2 text-sm text-slate-700">op schaal 1–5</div>
+              <div className="mt-2 text-3xl font-semibold">{totalScore}</div>
+              <div className="mt-2 text-sm text-muted-foreground">op schaal 1–5</div>
             </div>
 
-            <div className="rounded-2xl border border-orange-200 bg-orange-50 p-4">
-              <div className="text-xs font-medium uppercase tracking-wide text-orange-700">
+            <div className="rounded-2xl border border-black/10 bg-white p-4">
+              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Grootste risico
               </div>
-              <div className="mt-2 text-sm font-medium text-orange-950">
+              <div className="mt-2 text-sm font-medium">
                 {scanOutput.summary.biggestRisk}
               </div>
             </div>
 
-            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-              <div className="text-xs font-medium uppercase tracking-wide text-emerald-700">
+            <div className="rounded-2xl border border-black/10 bg-white p-4">
+              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Grootste kans
               </div>
-              <div className="mt-2 text-sm font-medium text-emerald-950">
+              <div className="mt-2 text-sm font-medium">
                 {scanOutput.summary.biggestOpportunity}
               </div>
             </div>
 
-            <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4">
-              <div className="text-xs font-medium uppercase tracking-wide text-blue-700">
+            <div className="rounded-2xl border border-black/10 bg-white p-4">
+              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Beste eerstvolgende stap
               </div>
-              <div className="mt-2 text-sm font-medium text-blue-950">
+              <div className="mt-2 text-sm font-medium">
                 {scanOutput.summary.nextBestStep}
               </div>
             </div>
           </section>
 
-          {visibleThemeCards.length > 0 && (
-            <section className="grid gap-4 md:grid-cols-2">
-              {visibleThemeCards.map((card) => (
-                <ThemeCard
-                  key={card.key}
-                  title={card.title}
-                  description={card.description}
-                  items={card.items}
-                />
-              ))}
-            </section>
-          )}
+          <section className="grid gap-4 xl:grid-cols-2">
+            <ThemeCard
+              title="AFAS Modules"
+              description="Hoe sterk zijn de gekozen modules nu ingericht en bruikbaar?"
+              items={displayModulesItems}
+              emptyText="Geen relevante modulethema’s geselecteerd in deze scan."
+            />
+
+            <ThemeCard
+              title="Integraties & Beheer"
+              description="Hoe stabiel en beheersbaar is de keten rondom AFAS?"
+              items={displayIntegrationItems}
+              emptyText="Geen integratiethema’s meegenomen in deze scan."
+            />
+
+            <ThemeCard
+              title="Rapportage & Data"
+              description="Hoe bruikbaar en betrouwbaar is informatie voor sturing?"
+              items={displayReportingItems}
+              emptyText="Geen rapportage- of datathema’s meegenomen in deze scan."
+            />
+
+            <ThemeCard
+              title="Organisatie & Beheer"
+              description="Hoe volwassen zijn eigenaarschap, governance en werkwijze?"
+              items={displayOrganizationItems}
+              emptyText="Geen organisatie- of beheerthema’s meegenomen in deze scan."
+            />
+          </section>
 
           {displayBranchItems.length > 0 && (
             <section className="rounded-3xl border border-black/10 bg-white p-5">
@@ -809,11 +631,7 @@ export default function SectionSummaryPage() {
 
                     <div className="text-base font-semibold">{item.title}</div>
 
-                    <span
-                      className={`rounded-full border px-2.5 py-1 text-[11px] font-medium ${getPriorityBadgeClass(
-                        item.priority
-                      )}`}
-                    >
+                    <span className="rounded-full border border-black/10 bg-white px-2.5 py-1 text-[11px] font-medium">
                       {getPriorityLabel(item.priority)}
                     </span>
 
@@ -850,7 +668,7 @@ export default function SectionSummaryPage() {
             </div>
 
             <div className="mt-4 grid gap-4 md:grid-cols-3">
-              <div className={`rounded-2xl border p-4 ${getRoadmapBucketClass("now")}`}>
+              <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
                 <div className="text-sm font-semibold">Nu</div>
                 <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
                   {scanOutput.roadmap.now.length > 0 ? (
@@ -867,7 +685,7 @@ export default function SectionSummaryPage() {
                 </ul>
               </div>
 
-              <div className={`rounded-2xl border p-4 ${getRoadmapBucketClass("next")}`}>
+              <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
                 <div className="text-sm font-semibold">Daarna</div>
                 <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
                   {scanOutput.roadmap.next.length > 0 ? (
@@ -884,7 +702,7 @@ export default function SectionSummaryPage() {
                 </ul>
               </div>
 
-              <div className={`rounded-2xl border p-4 ${getRoadmapBucketClass("later")}`}>
+              <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
                 <div className="text-sm font-semibold">Later</div>
                 <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
                   {scanOutput.roadmap.later.length > 0 ? (
