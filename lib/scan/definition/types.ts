@@ -14,11 +14,12 @@ export type QuestionInputType =
 
 export type VisibleWhenCondition = {
   field: string;
-  operator:
-    | "equals"
-    | "not_equals"
-    | "includes"
-    | "not_includes";
+operator:
+  | "equals"
+  | "not_equals"
+  | "includes"
+  | "not_includes"
+  | "one_of";
   value: string | string[];
 };
 
