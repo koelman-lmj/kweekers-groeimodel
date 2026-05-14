@@ -83,6 +83,14 @@ type ThemeInput = {
   answers: ScanAnswers;
 };
 
+type OptionWithScore = {
+  value: string;
+  label: string;
+  description?: string;
+  order: number;
+  score?: number;
+};
+
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
@@ -208,7 +216,9 @@ function toMaturityScore(questionKey: string, value: ScanAnswerValue): number {
   }
 
   const optionSet = getOptionSet(question.optionSetKey);
-  const option = optionSet?.options.find((item) => item.value === raw);
+  const option = optionSet?.options.find((item) => item.value === raw) as
+    | OptionWithScore
+    | undefined;
 
   if (typeof option?.score === "number") {
     return option.score;
@@ -991,10 +1001,7 @@ function buildThemeDefinitions(): ThemeDefinition[] {
       id: "care",
       title: "Zorgspecifieke uitvoering",
       category: "Branchespecifiek",
-      keys: [
-        "care_registration_exceptions",
-        "care_accountability_pressure",
-      ],
+      keys: ["care_registration_exceptions", "care_accountability_pressure"],
       enabledWhen: (answers) => answerEquals(answers, "sector", "zorg"),
     },
     {
