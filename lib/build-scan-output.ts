@@ -1,3 +1,7 @@
+import { dimensions } from "@/lib/scan/definition/dimensions";
+import { questions } from "@/lib/scan/definition/questions";
+import { getOptionSet } from "@/lib/scan/engine/definition-helpers";
+
 export type PriorityLevel = "hoog" | "middel" | "laag";
 export type RoadmapBucket = "now" | "next" | "later";
 
