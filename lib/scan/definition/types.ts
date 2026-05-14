@@ -27,7 +27,7 @@ export type QuestionDefinition = {
   label: string;
   helpText?: string;
   inputType: QuestionInputType;
-  required?: boolean;
+required: boolean;
   optionSetKey?: string;
   placeholder?: string;
   examples?: string[];
