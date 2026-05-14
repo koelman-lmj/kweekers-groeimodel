@@ -533,35 +533,102 @@ export default function SectionSummaryPage() {
             </div>
           </section>
 
-          <section className="grid gap-4 xl:grid-cols-2">
-            <ThemeCard
-              title="AFAS Modules"
-              description="Hoe sterk zijn de gekozen modules nu ingericht en bruikbaar?"
-              items={displayModulesItems}
-              emptyText="Geen relevante modulethema’s geselecteerd in deze scan."
-            />
-
-            <ThemeCard
-              title="Integraties & Beheer"
-              description="Hoe stabiel en beheersbaar is de keten rondom AFAS?"
-              items={displayIntegrationItems}
-              emptyText="Geen integratiethema’s meegenomen in deze scan."
-            />
-
-            <ThemeCard
-              title="Rapportage & Data"
-              description="Hoe bruikbaar en betrouwbaar is informatie voor sturing?"
-              items={displayReportingItems}
-              emptyText="Geen rapportage- of datathema’s meegenomen in deze scan."
-            />
-
-            <ThemeCard
-              title="Organisatie & Beheer"
-              description="Hoe volwassen zijn eigenaarschap, governance en werkwijze?"
-              items={displayOrganizationItems}
-              emptyText="Geen organisatie- of beheerthema’s meegenomen in deze scan."
-            />
-          </section>
+{[
+  {
+    title: "AFAS Modules",
+    description: "Hoe sterk zijn de gekozen modules nu ingericht en bruikbaar?",
+    items: displayModulesItems,
+    emptyText: "Geen relevante modulethema’s geselecteerd in deze scan.",
+  },
+  {
+    title: "Integraties & Beheer",
+    description: "Hoe stabiel en beheersbaar is de keten rondom AFAS?",
+    items: displayIntegrationItems,
+    emptyText: "Geen integratiethema’s meegenomen in deze scan.",
+  },
+  {
+    title: "Rapportage & Data",
+    description: "Hoe bruikbaar en betrouwbaar is informatie voor sturing?",
+    items: displayReportingItems,
+    emptyText: "Geen rapportage- of datathema’s meegenomen in deze scan.",
+  },
+  {
+    title: "Organisatie & Beheer",
+    description: "Hoe volwassen zijn eigenaarschap, governance en werkwijze?",
+    items: displayOrganizationItems,
+    emptyText: "Geen organisatie- of beheerthema’s meegenomen in deze scan.",
+  },
+].filter((card) => card.items.length > 0).length > 0 && (
+  <section
+    className={
+      [
+        {
+          title: "AFAS Modules",
+          description: "Hoe sterk zijn de gekozen modules nu ingericht en bruikbaar?",
+          items: displayModulesItems,
+          emptyText: "Geen relevante modulethema’s geselecteerd in deze scan.",
+        },
+        {
+          title: "Integraties & Beheer",
+          description: "Hoe stabiel en beheersbaar is de keten rondom AFAS?",
+          items: displayIntegrationItems,
+          emptyText: "Geen integratiethema’s meegenomen in deze scan.",
+        },
+        {
+          title: "Rapportage & Data",
+          description: "Hoe bruikbaar en betrouwbaar is informatie voor sturing?",
+          items: displayReportingItems,
+          emptyText: "Geen rapportage- of datathema’s meegenomen in deze scan.",
+        },
+        {
+          title: "Organisatie & Beheer",
+          description: "Hoe volwassen zijn eigenaarschap, governance en werkwijze?",
+          items: displayOrganizationItems,
+          emptyText: "Geen organisatie- of beheerthema’s meegenomen in deze scan.",
+        },
+      ].filter((card) => card.items.length > 0).length === 1
+        ? "grid gap-4"
+        : "grid gap-4 xl:grid-cols-2"
+    }
+  >
+    {[
+      {
+        title: "AFAS Modules",
+        description: "Hoe sterk zijn de gekozen modules nu ingericht en bruikbaar?",
+        items: displayModulesItems,
+        emptyText: "Geen relevante modulethema’s geselecteerd in deze scan.",
+      },
+      {
+        title: "Integraties & Beheer",
+        description: "Hoe stabiel en beheersbaar is de keten rondom AFAS?",
+        items: displayIntegrationItems,
+        emptyText: "Geen integratiethema’s meegenomen in deze scan.",
+      },
+      {
+        title: "Rapportage & Data",
+        description: "Hoe bruikbaar en betrouwbaar is informatie voor sturing?",
+        items: displayReportingItems,
+        emptyText: "Geen rapportage- of datathema’s meegenomen in deze scan.",
+      },
+      {
+        title: "Organisatie & Beheer",
+        description: "Hoe volwassen zijn eigenaarschap, governance en werkwijze?",
+        items: displayOrganizationItems,
+        emptyText: "Geen organisatie- of beheerthema’s meegenomen in deze scan.",
+      },
+    ]
+      .filter((card) => card.items.length > 0)
+      .map((card) => (
+        <ThemeCard
+          key={card.title}
+          title={card.title}
+          description={card.description}
+          items={card.items}
+          emptyText={card.emptyText}
+        />
+      ))}
+  </section>
+)}
 
           {displayBranchItems.length > 0 && (
             <section className="rounded-3xl border border-black/10 bg-white p-5">
