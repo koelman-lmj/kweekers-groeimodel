@@ -27,6 +27,16 @@ type RequiredFieldIssue = {
   message: string;
 };
 
+type RelationIssue = {
+  sheetName: string;
+  field: string;
+  value: string;
+  row: number;
+  targetSheet: string;
+  targetField: string;
+  message: string;
+};
+
 type PreviewData = Record<string, Record<string, string>[]>;
 
 type ImportPreviewResult = {
@@ -36,6 +46,7 @@ type ImportPreviewResult = {
   checks?: CheckResult[];
   duplicateIssues?: DuplicateIssue[];
   requiredFieldIssues?: RequiredFieldIssue[];
+  relationIssues?: RelationIssue[];
   preview?: PreviewData;
 };
 
@@ -131,6 +142,7 @@ export default function ImportPreviewPage() {
         checks: [],
         duplicateIssues: [],
         requiredFieldIssues: [],
+        relationIssues: [],
         preview: {},
       });
       return;
@@ -155,6 +167,7 @@ export default function ImportPreviewPage() {
 
   const duplicateIssues = result?.duplicateIssues ?? [];
   const requiredFieldIssues = result?.requiredFieldIssues ?? [];
+  const relationIssues = result?.relationIssues ?? [];
 
   return (
     <main className="min-h-screen bg-gray-50 p-8">
@@ -356,6 +369,83 @@ export default function ImportPreviewPage() {
                             </td>
                             <td className="px-3 py-2 align-top">
                               {issue.row}
+                            </td>
+                            <td className="px-3 py-2 align-top">
+                              {issue.message}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+              <div className="rounded-xl border border-gray-200 p-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold">Relatiecontrole</h2>
+
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-medium ${
+                      relationIssues.length === 0
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-700"
+                    }`}
+                  >
+                    {relationIssues.length === 0 ? "OK" : "Fouten"}
+                  </span>
+                </div>
+
+                {relationIssues.length === 0 ? (
+                  <p className="mt-3 text-sm text-gray-600">
+                    Alle verwijzingen kloppen.
+                  </p>
+                ) : (
+                  <div className="mt-4 overflow-auto rounded-lg border border-red-200">
+                    <table className="min-w-full text-left text-xs">
+                      <thead className="bg-red-50 text-red-800">
+                        <tr>
+                          <th className="whitespace-nowrap px-3 py-2">
+                            Sheet
+                          </th>
+                          <th className="whitespace-nowrap px-3 py-2">
+                            Veld
+                          </th>
+                          <th className="whitespace-nowrap px-3 py-2">
+                            Waarde
+                          </th>
+                          <th className="whitespace-nowrap px-3 py-2">
+                            Rij
+                          </th>
+                          <th className="whitespace-nowrap px-3 py-2">
+                            Verwijst naar
+                          </th>
+                          <th className="whitespace-nowrap px-3 py-2">
+                            Melding
+                          </th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        {relationIssues.map((issue, index) => (
+                          <tr
+                            key={`${issue.sheetName}-${issue.field}-${issue.value}-${issue.row}-${index}`}
+                            className="border-t border-red-100"
+                          >
+                            <td className="px-3 py-2 align-top">
+                              {issue.sheetName}
+                            </td>
+                            <td className="px-3 py-2 align-top">
+                              {issue.field}
+                            </td>
+                            <td className="px-3 py-2 align-top">
+                              {issue.value}
+                            </td>
+                            <td className="px-3 py-2 align-top">
+                              {issue.row}
+                            </td>
+                            <td className="px-3 py-2 align-top">
+                              {issue.targetSheet}.{issue.targetField}
                             </td>
                             <td className="px-3 py-2 align-top">
                               {issue.message}
