@@ -34,13 +34,9 @@ const requiredSheets: Record<string, string[]> = {
 
 const requiredFields: Record<string, string[]> = {
   categories: ["code", "title"],
-
   dimensions: ["code", "title", "category"],
-
   questions: ["key", "sectionCode", "label", "inputType"],
-
   optionSets: ["key"],
-
   options: ["optionSetKey", "value", "label"],
 };
 
@@ -51,6 +47,11 @@ const previewSheets = [
   "optionSets",
   "options",
 ];
+
+type RowRecord = {
+  rowNumber: number;
+  record: Record<string, string>;
+};
 
 type DuplicateIssue = {
   sheetName: string;
@@ -64,6 +65,16 @@ type RequiredFieldIssue = {
   sheetName: string;
   field: string;
   row: number;
+  message: string;
+};
+
+type RelationIssue = {
+  sheetName: string;
+  field: string;
+  value: string;
+  row: number;
+  targetSheet: string;
+  targetField: string;
   message: string;
 };
 
@@ -112,11 +123,9 @@ function getCellValueAsString(value: ExcelJS.CellValue): string {
   return String(value);
 }
 
-function getSheetRecords(
-  sheet: ExcelJS.Worksheet
-): { rowNumber: number; record: Record<string, string> }[] {
+function getSheetRecords(sheet: ExcelJS.Worksheet): RowRecord[] {
   const headers = getHeaderValues(sheet);
-  const rows: { rowNumber: number; record: Record<string, string> }[] = [];
+  const rows: RowRecord[] = [];
 
   sheet.eachRow((row, rowNumber) => {
     if (rowNumber === 1) {
@@ -151,7 +160,7 @@ function getSheetPreview(
 
 function findDuplicatesInField(
   sheetName: string,
-  rows: { rowNumber: number; record: Record<string, string> }[],
+  rows: RowRecord[],
   field: string
 ): DuplicateIssue[] {
   const seen = new Map<string, number[]>();
@@ -164,8 +173,8 @@ function findDuplicatesInField(
     }
 
     const normalizedValue = value.toLowerCase();
-
     const existingRows = seen.get(normalizedValue) ?? [];
+
     existingRows.push(rowNumber);
     seen.set(normalizedValue, existingRows);
   });
@@ -185,7 +194,7 @@ function findDuplicatesInField(
 
 function findDuplicatesInCombinedFields(
   sheetName: string,
-  rows: { rowNumber: number; record: Record<string, string> }[],
+  rows: RowRecord[],
   fields: string[]
 ): DuplicateIssue[] {
   const seen = new Map<string, number[]>();
@@ -199,8 +208,8 @@ function findDuplicatesInCombinedFields(
 
     const combinedValue = values.join(" + ");
     const normalizedValue = combinedValue.toLowerCase();
-
     const existingRows = seen.get(normalizedValue) ?? [];
+
     existingRows.push(rowNumber);
     seen.set(normalizedValue, existingRows);
   });
@@ -218,80 +227,63 @@ function findDuplicatesInCombinedFields(
     }));
 }
 
-function getDuplicateIssues(workbook: ExcelJS.Workbook): DuplicateIssue[] {
+function getRecordsBySheet(workbook: ExcelJS.Workbook): Record<string, RowRecord[]> {
+  const recordsBySheet: Record<string, RowRecord[]> = {};
+
+  previewSheets.forEach((sheetName) => {
+    const sheet = workbook.getWorksheet(sheetName);
+    recordsBySheet[sheetName] = sheet ? getSheetRecords(sheet) : [];
+  });
+
+  return recordsBySheet;
+}
+
+function getValueSet(rows: RowRecord[], field: string): Set<string> {
+  return new Set(
+    rows
+      .map(({ record }) => record[field]?.trim())
+      .filter((value): value is string => Boolean(value))
+      .map((value) => value.toLowerCase())
+  );
+}
+
+function getDuplicateIssues(recordsBySheet: Record<string, RowRecord[]>): DuplicateIssue[] {
   const issues: DuplicateIssue[] = [];
 
-  const categoriesSheet = workbook.getWorksheet("categories");
-  if (categoriesSheet) {
-    issues.push(
-      ...findDuplicatesInField(
-        "categories",
-        getSheetRecords(categoriesSheet),
-        "code"
-      )
-    );
-  }
+  issues.push(
+    ...findDuplicatesInField("categories", recordsBySheet.categories ?? [], "code")
+  );
 
-  const dimensionsSheet = workbook.getWorksheet("dimensions");
-  if (dimensionsSheet) {
-    issues.push(
-      ...findDuplicatesInField(
-        "dimensions",
-        getSheetRecords(dimensionsSheet),
-        "code"
-      )
-    );
-  }
+  issues.push(
+    ...findDuplicatesInField("dimensions", recordsBySheet.dimensions ?? [], "code")
+  );
 
-  const questionsSheet = workbook.getWorksheet("questions");
-  if (questionsSheet) {
-    issues.push(
-      ...findDuplicatesInField(
-        "questions",
-        getSheetRecords(questionsSheet),
-        "key"
-      )
-    );
-  }
+  issues.push(
+    ...findDuplicatesInField("questions", recordsBySheet.questions ?? [], "key")
+  );
 
-  const optionSetsSheet = workbook.getWorksheet("optionSets");
-  if (optionSetsSheet) {
-    issues.push(
-      ...findDuplicatesInField(
-        "optionSets",
-        getSheetRecords(optionSetsSheet),
-        "key"
-      )
-    );
-  }
+  issues.push(
+    ...findDuplicatesInField("optionSets", recordsBySheet.optionSets ?? [], "key")
+  );
 
-  const optionsSheet = workbook.getWorksheet("options");
-  if (optionsSheet) {
-    issues.push(
-      ...findDuplicatesInCombinedFields(
-        "options",
-        getSheetRecords(optionsSheet),
-        ["optionSetKey", "value"]
-      )
-    );
-  }
+  issues.push(
+    ...findDuplicatesInCombinedFields(
+      "options",
+      recordsBySheet.options ?? [],
+      ["optionSetKey", "value"]
+    )
+  );
 
   return issues;
 }
 
 function getRequiredFieldIssues(
-  workbook: ExcelJS.Workbook
+  recordsBySheet: Record<string, RowRecord[]>
 ): RequiredFieldIssue[] {
   const issues: RequiredFieldIssue[] = [];
 
   Object.entries(requiredFields).forEach(([sheetName, fields]) => {
-    const sheet = workbook.getWorksheet(sheetName);
-
-    if (!sheet) {
-      return;
-    }
-
-    const rows = getSheetRecords(sheet);
+    const rows = recordsBySheet[sheetName] ?? [];
 
     rows.forEach(({ rowNumber, record }) => {
       fields.forEach((field) => {
@@ -307,6 +299,80 @@ function getRequiredFieldIssues(
         }
       });
     });
+  });
+
+  return issues;
+}
+
+function getRelationIssues(
+  recordsBySheet: Record<string, RowRecord[]>
+): RelationIssue[] {
+  const issues: RelationIssue[] = [];
+
+  const categoryCodes = getValueSet(recordsBySheet.categories ?? [], "code");
+  const dimensionCodes = getValueSet(recordsBySheet.dimensions ?? [], "code");
+  const optionSetKeys = getValueSet(recordsBySheet.optionSets ?? [], "key");
+
+  (recordsBySheet.dimensions ?? []).forEach(({ rowNumber, record }) => {
+    const value = record.category?.trim();
+
+    if (value && !categoryCodes.has(value.toLowerCase())) {
+      issues.push({
+        sheetName: "dimensions",
+        field: "category",
+        value,
+        row: rowNumber,
+        targetSheet: "categories",
+        targetField: "code",
+        message: `Verwijzing klopt niet: dimensions.category "${value}" op rij ${rowNumber} bestaat niet in categories.code.`,
+      });
+    }
+  });
+
+  (recordsBySheet.questions ?? []).forEach(({ rowNumber, record }) => {
+    const dimensionCode = record.dimensionCode?.trim();
+
+    if (dimensionCode && !dimensionCodes.has(dimensionCode.toLowerCase())) {
+      issues.push({
+        sheetName: "questions",
+        field: "dimensionCode",
+        value: dimensionCode,
+        row: rowNumber,
+        targetSheet: "dimensions",
+        targetField: "code",
+        message: `Verwijzing klopt niet: questions.dimensionCode "${dimensionCode}" op rij ${rowNumber} bestaat niet in dimensions.code.`,
+      });
+    }
+
+    const optionSetKey = record.optionSetKey?.trim();
+
+    if (optionSetKey && !optionSetKeys.has(optionSetKey.toLowerCase())) {
+      issues.push({
+        sheetName: "questions",
+        field: "optionSetKey",
+        value: optionSetKey,
+        row: rowNumber,
+        targetSheet: "optionSets",
+        targetField: "key",
+        message: `Verwijzing klopt niet: questions.optionSetKey "${optionSetKey}" op rij ${rowNumber} bestaat niet in optionSets.key.`,
+      });
+    }
+  });
+
+  (recordsBySheet.options ?? []).forEach(({ rowNumber, record }) => {
+    const optionSetKey = record.optionSetKey?.trim();
+
+    if (optionSetKey && !optionSetKeys.has(optionSetKey.toLowerCase())) {
+      issues.push({
+        sheetName: "options",
+        field: "optionSetKey",
+        value: optionSetKey,
+        row: rowNumber,
+        targetSheet: "optionSets",
+        targetField: "key",
+        message: `Verwijzing klopt niet: options.optionSetKey "${optionSetKey}" op rij ${rowNumber} bestaat niet in optionSets.key.`,
+      });
+    }
   });
 
   return issues;
@@ -370,14 +436,18 @@ export async function POST(request: Request) {
       }
     );
 
-    const duplicateIssues = getDuplicateIssues(workbook);
-    const requiredFieldIssues = getRequiredFieldIssues(workbook);
+    const recordsBySheet = getRecordsBySheet(workbook);
+
+    const duplicateIssues = getDuplicateIssues(recordsBySheet);
+    const requiredFieldIssues = getRequiredFieldIssues(recordsBySheet);
+    const relationIssues = getRelationIssues(recordsBySheet);
 
     const sheetsOk = checks.every((check) => check.ok);
     const duplicatesOk = duplicateIssues.length === 0;
     const requiredFieldsOk = requiredFieldIssues.length === 0;
+    const relationsOk = relationIssues.length === 0;
 
-    const ok = sheetsOk && duplicatesOk && requiredFieldsOk;
+    const ok = sheetsOk && duplicatesOk && requiredFieldsOk && relationsOk;
 
     const preview = previewSheets.reduce<Record<string, Record<string, string>[]>>(
       (acc, sheetName) => {
@@ -397,6 +467,7 @@ export async function POST(request: Request) {
       checks,
       duplicateIssues,
       requiredFieldIssues,
+      relationIssues,
       preview,
     });
   } catch (error) {
