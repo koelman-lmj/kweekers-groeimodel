@@ -12,6 +12,14 @@ type CheckResult = {
   missingColumns: string[];
 };
 
+type DuplicateIssue = {
+  sheetName: string;
+  field: string;
+  value: string;
+  rows: number[];
+  message: string;
+};
+
 type PreviewData = Record<string, Record<string, string>[]>;
 
 type ImportPreviewResult = {
@@ -19,6 +27,7 @@ type ImportPreviewResult = {
   fileName?: string;
   message?: string;
   checks?: CheckResult[];
+  duplicateIssues?: DuplicateIssue[];
   preview?: PreviewData;
 };
 
@@ -112,6 +121,7 @@ export default function ImportPreviewPage() {
         ok: false,
         message: "Kies eerst een bestand.",
         checks: [],
+        duplicateIssues: [],
         preview: {},
       });
       return;
@@ -133,6 +143,8 @@ export default function ImportPreviewPage() {
     setStatus("Controle afgerond.");
     setResult(data);
   }
+
+  const duplicateIssues = result?.duplicateIssues ?? [];
 
   return (
     <main className="min-h-screen bg-gray-50 p-8">
@@ -237,6 +249,46 @@ export default function ImportPreviewPage() {
                     )}
                   </div>
                 ))}
+              </div>
+
+              <div className="rounded-xl border border-gray-200 p-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold">Duplicate-controle</h2>
+
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-medium ${
+                      duplicateIssues.length === 0
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-700"
+                    }`}
+                  >
+                    {duplicateIssues.length === 0 ? "OK" : "Fouten"}
+                  </span>
+                </div>
+
+                {duplicateIssues.length === 0 ? (
+                  <p className="mt-3 text-sm text-gray-600">
+                    Geen dubbele codes, keys of optiecombinaties gevonden.
+                  </p>
+                ) : (
+                  <div className="mt-4 space-y-3">
+                    {duplicateIssues.map((issue, index) => (
+                      <div
+                        key={`${issue.sheetName}-${issue.field}-${issue.value}-${index}`}
+                        className="rounded-lg bg-red-50 p-3 text-sm text-red-800"
+                      >
+                        <div className="font-medium">{issue.message}</div>
+
+                        <div className="mt-1 text-xs">
+                          Sheet: <strong>{issue.sheetName}</strong> | Veld:{" "}
+                          <strong>{issue.field}</strong> | Waarde:{" "}
+                          <strong>{issue.value}</strong> | Rijen:{" "}
+                          <strong>{issue.rows.join(", ")}</strong>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {result.ok && result.preview && (
