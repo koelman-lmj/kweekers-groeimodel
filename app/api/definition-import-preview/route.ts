@@ -32,6 +32,14 @@ const requiredSheets: Record<string, string[]> = {
   options: ["optionSetKey", "value", "label", "description", "order", "score"],
 };
 
+const previewSheets = [
+  "categories",
+  "dimensions",
+  "questions",
+  "optionSets",
+  "options",
+];
+
 function getHeaderValues(sheet: ExcelJS.Worksheet): string[] {
   const headerRow = sheet.getRow(1);
   const headers: string[] = [];
@@ -170,11 +178,14 @@ export async function POST(request: Request) {
 
     const ok = checks.every((check) => check.ok);
 
-    const questionsSheet = workbook.getWorksheet("questions");
-
-    const preview = {
-      questions: questionsSheet ? getSheetPreview(questionsSheet, 5) : [],
-    };
+    const preview = previewSheets.reduce<Record<string, Record<string, string>[]>>(
+      (acc, sheetName) => {
+        const sheet = workbook.getWorksheet(sheetName);
+        acc[sheetName] = sheet ? getSheetPreview(sheet, 5) : [];
+        return acc;
+      },
+      {}
+    );
 
     return NextResponse.json({
       ok,
