@@ -20,6 +20,13 @@ type DuplicateIssue = {
   message: string;
 };
 
+type RequiredFieldIssue = {
+  sheetName: string;
+  field: string;
+  row: number;
+  message: string;
+};
+
 type PreviewData = Record<string, Record<string, string>[]>;
 
 type ImportPreviewResult = {
@@ -28,6 +35,7 @@ type ImportPreviewResult = {
   message?: string;
   checks?: CheckResult[];
   duplicateIssues?: DuplicateIssue[];
+  requiredFieldIssues?: RequiredFieldIssue[];
   preview?: PreviewData;
 };
 
@@ -122,6 +130,7 @@ export default function ImportPreviewPage() {
         message: "Kies eerst een bestand.",
         checks: [],
         duplicateIssues: [],
+        requiredFieldIssues: [],
         preview: {},
       });
       return;
@@ -145,6 +154,7 @@ export default function ImportPreviewPage() {
   }
 
   const duplicateIssues = result?.duplicateIssues ?? [];
+  const requiredFieldIssues = result?.requiredFieldIssues ?? [];
 
   return (
     <main className="min-h-screen bg-gray-50 p-8">
@@ -287,6 +297,73 @@ export default function ImportPreviewPage() {
                         </div>
                       </div>
                     ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="rounded-xl border border-gray-200 p-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold">
+                    Verplichte velden-controle
+                  </h2>
+
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-medium ${
+                      requiredFieldIssues.length === 0
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-700"
+                    }`}
+                  >
+                    {requiredFieldIssues.length === 0 ? "OK" : "Fouten"}
+                  </span>
+                </div>
+
+                {requiredFieldIssues.length === 0 ? (
+                  <p className="mt-3 text-sm text-gray-600">
+                    Alle verplichte velden zijn gevuld.
+                  </p>
+                ) : (
+                  <div className="mt-4 overflow-auto rounded-lg border border-red-200">
+                    <table className="min-w-full text-left text-xs">
+                      <thead className="bg-red-50 text-red-800">
+                        <tr>
+                          <th className="whitespace-nowrap px-3 py-2">
+                            Sheet
+                          </th>
+                          <th className="whitespace-nowrap px-3 py-2">
+                            Veld
+                          </th>
+                          <th className="whitespace-nowrap px-3 py-2">
+                            Rij
+                          </th>
+                          <th className="whitespace-nowrap px-3 py-2">
+                            Melding
+                          </th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        {requiredFieldIssues.map((issue, index) => (
+                          <tr
+                            key={`${issue.sheetName}-${issue.field}-${issue.row}-${index}`}
+                            className="border-t border-red-100"
+                          >
+                            <td className="px-3 py-2 align-top">
+                              {issue.sheetName}
+                            </td>
+                            <td className="px-3 py-2 align-top">
+                              {issue.field}
+                            </td>
+                            <td className="px-3 py-2 align-top">
+                              {issue.row}
+                            </td>
+                            <td className="px-3 py-2 align-top">
+                              {issue.message}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 )}
               </div>
