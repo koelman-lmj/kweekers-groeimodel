@@ -1,16 +1,44 @@
-"use client";
+import { NextResponse } from "next/server";
+import ExcelJS from "exceljs";
 
-import { useState } from "react";
+const requiredSheets: Record<string, string[]> = {
+  categories: ["code", "title", "description", "order"],
 
-type CheckResult = {
-  sheetName: string;
-  exists: boolean;
-  ok: boolean;
-  rowCount: number;
-  columnCount: number;
-  headers: string[];
-  missingColumns: string[];
+  dimensions: ["code", "title", "category", "order", "isActive"],
+
+  questions: [
+    "key",
+    "sectionCode",
+    "order",
+    "label",
+    "helpText",
+    "inputType",
+    "required",
+    "optionSetKey",
+    "dimensionCode",
+    "category",
+    "outputRisk",
+    "scoreEnabled",
+    "scoreWeight",
+    "maxSelections",
+    "allowComment",
+    "placeholder",
+    "visibleWhen",
+    "startplan",
+  ],
+
+  optionSets: ["key", "description"],
+
+  options: ["optionSetKey", "value", "label", "description", "order", "score"],
 };
+
+const previewSheets = [
+  "categories",
+  "dimensions",
+  "questions",
+  "optionSets",
+  "options",
+];
 
 type DuplicateIssue = {
   sheetName: string;
@@ -20,303 +48,308 @@ type DuplicateIssue = {
   message: string;
 };
 
-type PreviewData = Record<string, Record<string, string>[]>;
+function getHeaderValues(sheet: ExcelJS.Worksheet): string[] {
+  const headerRow = sheet.getRow(1);
+  const headers: string[] = [];
 
-type ImportPreviewResult = {
-  ok: boolean;
-  fileName?: string;
-  message?: string;
-  checks?: CheckResult[];
-  duplicateIssues?: DuplicateIssue[];
-  preview?: PreviewData;
-};
+  headerRow.eachCell((cell) => {
+    const value = cell.value;
 
-const previewConfig: Record<string, string[]> = {
-  categories: ["code", "title", "description", "order"],
-  dimensions: ["code", "title", "category", "order", "isActive"],
-  questions: ["key", "label", "inputType", "category", "dimensionCode"],
-  optionSets: ["key", "description"],
-  options: ["optionSetKey", "value", "label", "order", "score"],
-};
+    if (value === null || value === undefined) {
+      return;
+    }
 
-function PreviewTable({
-  title,
-  rows,
-  columns,
-}: {
-  title: string;
-  rows: Record<string, string>[];
-  columns: string[];
-}) {
-  if (!rows || rows.length === 0) {
-    return null;
-  }
+    headers.push(String(value).trim());
+  });
 
-  return (
-    <div className="rounded-xl border border-gray-200 p-4">
-      <h2 className="text-lg font-semibold">Preview {title}</h2>
-
-      <p className="mt-2 text-sm text-gray-600">
-        Dit zijn de eerste 5 regels uit het tabblad <strong>{title}</strong>.
-      </p>
-
-      <div className="mt-4 overflow-auto rounded-lg border border-gray-200">
-        <table className="min-w-full text-left text-xs">
-          <thead className="bg-gray-100">
-            <tr>
-              {columns.map((column) => (
-                <th key={column} className="whitespace-nowrap px-3 py-2">
-                  {column}
-                </th>
-              ))}
-            </tr>
-          </thead>
-
-          <tbody>
-            {rows.map((row, index) => (
-              <tr key={`${title}-${index}`} className="border-t">
-                {columns.map((column) => (
-                  <td
-                    key={`${title}-${index}-${column}`}
-                    className="max-w-md px-3 py-2 align-top"
-                  >
-                    {row[column]}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
+  return headers.filter(Boolean);
 }
 
-export default function ImportPreviewPage() {
-  const [file, setFile] = useState<File | null>(null);
-  const [status, setStatus] = useState("Nog geen bestand gekozen.");
-  const [result, setResult] = useState<ImportPreviewResult | null>(null);
-
-  function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const selectedFile = event.target.files?.[0] ?? null;
-    setFile(selectedFile);
-    setResult(null);
-
-    if (!selectedFile) {
-      setStatus("Nog geen bestand gekozen.");
-      return;
-    }
-
-    if (!selectedFile.name.toLowerCase().endsWith(".xlsx")) {
-      setStatus("Fout: kies een Excel-bestand met .xlsx");
-      return;
-    }
-
-    setStatus("Bestand gekozen. Preview-controle kan worden gestart.");
+function getCellValueAsString(value: ExcelJS.CellValue): string {
+  if (value === null || value === undefined) {
+    return "";
   }
 
-  async function handleCheckFile() {
-    if (!file) {
-      setResult({
-        ok: false,
-        message: "Kies eerst een bestand.",
-        checks: [],
-        duplicateIssues: [],
-        preview: {},
-      });
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+
+  if (typeof value === "object") {
+    if ("text" in value && typeof value.text === "string") {
+      return value.text;
+    }
+
+    if ("result" in value) {
+      return String(value.result ?? "");
+    }
+
+    if ("richText" in value && Array.isArray(value.richText)) {
+      return value.richText.map((part) => part.text).join("");
+    }
+
+    return JSON.stringify(value);
+  }
+
+  return String(value);
+}
+
+function getSheetRecords(
+  sheet: ExcelJS.Worksheet
+): { rowNumber: number; record: Record<string, string> }[] {
+  const headers = getHeaderValues(sheet);
+  const rows: { rowNumber: number; record: Record<string, string> }[] = [];
+
+  sheet.eachRow((row, rowNumber) => {
+    if (rowNumber === 1) {
       return;
     }
 
-    const formData = new FormData();
-    formData.append("file", file);
+    const record: Record<string, string> = {};
 
-    setStatus("Bestand wordt gecontroleerd...");
-    setResult(null);
-
-    const response = await fetch("/api/definition-import-preview", {
-      method: "POST",
-      body: formData,
+    headers.forEach((header, index) => {
+      const cell = row.getCell(index + 1);
+      record[header] = getCellValueAsString(cell.value).trim();
     });
 
-    const data = (await response.json()) as ImportPreviewResult;
+    const hasValue = Object.values(record).some((value) => value !== "");
 
-    setStatus("Controle afgerond.");
-    setResult(data);
+    if (hasValue) {
+      rows.push({ rowNumber, record });
+    }
+  });
+
+  return rows;
+}
+
+function getSheetPreview(
+  sheet: ExcelJS.Worksheet,
+  maxRows = 5
+): Record<string, string>[] {
+  return getSheetRecords(sheet)
+    .slice(0, maxRows)
+    .map((row) => row.record);
+}
+
+function findDuplicatesInField(
+  sheetName: string,
+  rows: { rowNumber: number; record: Record<string, string> }[],
+  field: string
+): DuplicateIssue[] {
+  const seen = new Map<string, number[]>();
+
+  rows.forEach(({ rowNumber, record }) => {
+    const value = record[field]?.trim();
+
+    if (!value) {
+      return;
+    }
+
+    const normalizedValue = value.toLowerCase();
+
+    const existingRows = seen.get(normalizedValue) ?? [];
+    existingRows.push(rowNumber);
+    seen.set(normalizedValue, existingRows);
+  });
+
+  return Array.from(seen.entries())
+    .filter(([, rowNumbers]) => rowNumbers.length > 1)
+    .map(([value, rowNumbers]) => ({
+      sheetName,
+      field,
+      value,
+      rows: rowNumbers,
+      message: `Dubbele waarde gevonden in ${sheetName}.${field}: "${value}" op rijen ${rowNumbers.join(
+        ", "
+      )}.`,
+    }));
+}
+
+function findDuplicatesInCombinedFields(
+  sheetName: string,
+  rows: { rowNumber: number; record: Record<string, string> }[],
+  fields: string[]
+): DuplicateIssue[] {
+  const seen = new Map<string, number[]>();
+
+  rows.forEach(({ rowNumber, record }) => {
+    const values = fields.map((field) => record[field]?.trim() ?? "");
+
+    if (values.every((value) => value === "")) {
+      return;
+    }
+
+    const combinedValue = values.join(" + ");
+    const normalizedValue = combinedValue.toLowerCase();
+
+    const existingRows = seen.get(normalizedValue) ?? [];
+    existingRows.push(rowNumber);
+    seen.set(normalizedValue, existingRows);
+  });
+
+  return Array.from(seen.entries())
+    .filter(([, rowNumbers]) => rowNumbers.length > 1)
+    .map(([value, rowNumbers]) => ({
+      sheetName,
+      field: fields.join(" + "),
+      value,
+      rows: rowNumbers,
+      message: `Dubbele combinatie gevonden in ${sheetName}.${fields.join(
+        " + "
+      )}: "${value}" op rijen ${rowNumbers.join(", ")}.`,
+    }));
+}
+
+function getDuplicateIssues(workbook: ExcelJS.Workbook): DuplicateIssue[] {
+  const issues: DuplicateIssue[] = [];
+
+  const categoriesSheet = workbook.getWorksheet("categories");
+  if (categoriesSheet) {
+    issues.push(
+      ...findDuplicatesInField(
+        "categories",
+        getSheetRecords(categoriesSheet),
+        "code"
+      )
+    );
   }
 
-  const duplicateIssues = result?.duplicateIssues ?? [];
+  const dimensionsSheet = workbook.getWorksheet("dimensions");
+  if (dimensionsSheet) {
+    issues.push(
+      ...findDuplicatesInField(
+        "dimensions",
+        getSheetRecords(dimensionsSheet),
+        "code"
+      )
+    );
+  }
 
-  return (
-    <main className="min-h-screen bg-gray-50 p-8">
-      <div className="mx-auto max-w-6xl rounded-2xl bg-white p-8 shadow">
-        <h1 className="text-2xl font-bold">Import-preview definitie</h1>
+  const questionsSheet = workbook.getWorksheet("questions");
+  if (questionsSheet) {
+    issues.push(
+      ...findDuplicatesInField(
+        "questions",
+        getSheetRecords(questionsSheet),
+        "key"
+      )
+    );
+  }
 
-        <p className="mt-3 text-gray-600">
-          Upload hier een Excel-template. In deze stap controleren we het
-          bestand en tonen we een eerste preview van de inhoud.
-        </p>
+  const optionSetsSheet = workbook.getWorksheet("optionSets");
+  if (optionSetsSheet) {
+    issues.push(
+      ...findDuplicatesInField(
+        "optionSets",
+        getSheetRecords(optionSetsSheet),
+        "key"
+      )
+    );
+  }
 
-        <div className="mt-8 rounded-xl border border-dashed border-gray-300 p-6">
-          <input type="file" accept=".xlsx" onChange={handleFileChange} />
+  const optionsSheet = workbook.getWorksheet("options");
+  if (optionsSheet) {
+    issues.push(
+      ...findDuplicatesInCombinedFields(
+        "options",
+        getSheetRecords(optionsSheet),
+        ["optionSetKey", "value"]
+      )
+    );
+  }
 
-          {file && (
-            <p className="mt-4 text-sm">
-              Bestand: <strong>{file.name}</strong>
-            </p>
-          )}
+  return issues;
+}
 
-          <div className="mt-4 rounded-lg bg-gray-100 p-4 text-sm">
-            {status}
-          </div>
+export async function POST(request: Request) {
+  try {
+    const formData = await request.formData();
+    const file = formData.get("file");
 
-          <button
-            onClick={handleCheckFile}
-            className="mt-4 rounded-lg bg-black px-4 py-2 text-sm font-medium text-white"
-          >
-            Controleer bestand
-          </button>
+    if (!file || !(file instanceof File)) {
+      return NextResponse.json(
+        { ok: false, error: "Geen bestand ontvangen." },
+        { status: 400 }
+      );
+    }
 
-          {result && (
-            <div className="mt-6 space-y-6">
-              <div
-                className={`rounded-xl p-4 text-sm font-medium ${
-                  result.ok
-                    ? "bg-green-100 text-green-800"
-                    : "bg-red-100 text-red-800"
-                }`}
-              >
-                {result.message}
-              </div>
+    if (!file.name.toLowerCase().endsWith(".xlsx")) {
+      return NextResponse.json(
+        { ok: false, error: "Upload een geldig .xlsx-bestand." },
+        { status: 400 }
+      );
+    }
 
-              <div className="space-y-4">
-                {result.checks?.map((check) => (
-                  <div
-                    key={check.sheetName}
-                    className="rounded-xl border border-gray-200 p-4"
-                  >
-                    <div className="flex items-center justify-between">
-                      <h2 className="text-lg font-semibold">
-                        {check.sheetName}
-                      </h2>
+    const arrayBuffer = await file.arrayBuffer();
 
-                      <span
-                        className={`rounded-full px-3 py-1 text-xs font-medium ${
-                          check.ok
-                            ? "bg-green-100 text-green-700"
-                            : "bg-red-100 text-red-700"
-                        }`}
-                      >
-                        {check.ok ? "OK" : "Fouten"}
-                      </span>
-                    </div>
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(arrayBuffer);
 
-                    <div className="mt-3 text-sm text-gray-600">
-                      Rijen: {check.rowCount} | Kolommen: {check.columnCount}
-                    </div>
+    const checks = Object.entries(requiredSheets).map(
+      ([sheetName, requiredColumns]) => {
+        const sheet = workbook.getWorksheet(sheetName);
 
-                    <div className="mt-4">
-                      <div className="text-sm font-medium">Headers:</div>
+        if (!sheet) {
+          return {
+            sheetName,
+            exists: false,
+            ok: false,
+            rowCount: 0,
+            columnCount: 0,
+            headers: [],
+            missingColumns: requiredColumns,
+          };
+        }
 
-                      <div className="mt-2 flex flex-wrap gap-2">
-                        {check.headers?.map((header) => (
-                          <span
-                            key={header}
-                            className="rounded-lg bg-gray-100 px-2 py-1 text-xs"
-                          >
-                            {header}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
+        const headers = getHeaderValues(sheet);
 
-                    {check.missingColumns?.length > 0 && (
-                      <div className="mt-4">
-                        <div className="text-sm font-medium text-red-700">
-                          Ontbrekende kolommen
-                        </div>
+        const missingColumns = requiredColumns.filter(
+          (column) => !headers.includes(column)
+        );
 
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          {check.missingColumns.map((column) => (
-                            <span
-                              key={column}
-                              className="rounded-lg bg-red-100 px-2 py-1 text-xs text-red-700"
-                            >
-                              {column}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+        return {
+          sheetName,
+          exists: true,
+          ok: missingColumns.length === 0,
+          rowCount: sheet.rowCount,
+          columnCount: sheet.columnCount,
+          headers,
+          missingColumns,
+        };
+      }
+    );
 
-              <div className="rounded-xl border border-gray-200 p-4">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold">Duplicate-controle</h2>
+    const duplicateIssues = getDuplicateIssues(workbook);
 
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-medium ${
-                      duplicateIssues.length === 0
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
-                    }`}
-                  >
-                    {duplicateIssues.length === 0 ? "OK" : "Fouten"}
-                  </span>
-                </div>
+    const sheetsOk = checks.every((check) => check.ok);
+    const duplicatesOk = duplicateIssues.length === 0;
+    const ok = sheetsOk && duplicatesOk;
 
-                {duplicateIssues.length === 0 ? (
-                  <p className="mt-3 text-sm text-gray-600">
-                    Geen dubbele codes, keys of optiecombinaties gevonden.
-                  </p>
-                ) : (
-                  <div className="mt-4 space-y-3">
-                    {duplicateIssues.map((issue, index) => (
-                      <div
-                        key={`${issue.sheetName}-${issue.field}-${issue.value}-${index}`}
-                        className="rounded-lg bg-red-50 p-3 text-sm text-red-800"
-                      >
-                        <div className="font-medium">{issue.message}</div>
+    const preview = previewSheets.reduce<Record<string, Record<string, string>[]>>(
+      (acc, sheetName) => {
+        const sheet = workbook.getWorksheet(sheetName);
+        acc[sheetName] = sheet ? getSheetPreview(sheet, 5) : [];
+        return acc;
+      },
+      {}
+    );
 
-                        <div className="mt-1 text-xs">
-                          Sheet: <strong>{issue.sheetName}</strong> | Veld:{" "}
-                          <strong>{issue.field}</strong> | Waarde:{" "}
-                          <strong>{issue.value}</strong> | Rijen:{" "}
-                          <strong>{issue.rows.join(", ")}</strong>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {result.ok && result.preview && (
-                <div className="space-y-4">
-                  <div className="rounded-xl bg-gray-100 p-4">
-                    <h2 className="text-lg font-semibold">
-                      Inhoudelijke preview
-                    </h2>
-                    <p className="mt-1 text-sm text-gray-600">
-                      Hieronder zie je per tabblad de eerste 5 regels die straks
-                      geïmporteerd kunnen worden.
-                    </p>
-                  </div>
-
-                  {Object.entries(previewConfig).map(([sheetName, columns]) => (
-                    <PreviewTable
-                      key={sheetName}
-                      title={sheetName}
-                      rows={result.preview?.[sheetName] ?? []}
-                      columns={columns}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-    </main>
-  );
+    return NextResponse.json({
+      ok,
+      fileName: file.name,
+      message: ok
+        ? "Excelbestand is geschikt voor import."
+        : "Excelbestand bevat nog fouten.",
+      checks,
+      duplicateIssues,
+      preview,
+    });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: error instanceof Error ? error.message : "Onbekende fout",
+      },
+      { status: 500 }
+    );
+  }
 }
