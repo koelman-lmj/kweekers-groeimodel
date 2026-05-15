@@ -20,6 +20,9 @@ type ActiveDefinition = {
 
 type AnswerValue = string | string[];
 
+const ANSWERS_STORAGE_KEY = "kweekers-active-test-answers";
+const CURRENT_INDEX_STORAGE_KEY = "kweekers-active-test-current-index";
+
 function getBooleanLabel(value?: string) {
   if (!value) {
     return "Nee";
@@ -49,25 +52,62 @@ function getOptionsForQuestion(
     .sort((a, b) => Number(a.order || 0) - Number(b.order || 0));
 }
 
+function downloadJson(fileName: string, data: unknown) {
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  link.click();
+
+  URL.revokeObjectURL(url);
+}
+
 export default function ActiveTestScanPage() {
   const [activeDefinition, setActiveDefinition] =
     useState<ActiveDefinition | null>(null);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, AnswerValue>>({});
+  const [saveStatus, setSaveStatus] = useState("");
+  const [downloadStatus, setDownloadStatus] = useState("");
 
   useEffect(() => {
-    const raw = localStorage.getItem("kweekers-active-definition");
+    const rawDefinition = localStorage.getItem("kweekers-active-definition");
 
-    if (!raw) {
-      return;
+    if (rawDefinition) {
+      try {
+        const parsed = JSON.parse(rawDefinition) as ActiveDefinition;
+        setActiveDefinition(parsed);
+      } catch {
+        setActiveDefinition(null);
+      }
     }
 
-    try {
-      const parsed = JSON.parse(raw) as ActiveDefinition;
-      setActiveDefinition(parsed);
-    } catch {
-      setActiveDefinition(null);
+    const rawAnswers = localStorage.getItem(ANSWERS_STORAGE_KEY);
+
+    if (rawAnswers) {
+      try {
+        const parsedAnswers = JSON.parse(rawAnswers) as Record<
+          string,
+          AnswerValue
+        >;
+        setAnswers(parsedAnswers);
+      } catch {
+        setAnswers({});
+      }
+    }
+
+    const rawCurrentIndex = localStorage.getItem(CURRENT_INDEX_STORAGE_KEY);
+
+    if (rawCurrentIndex) {
+      const parsedIndex = Number(rawCurrentIndex);
+
+      if (!Number.isNaN(parsedIndex) && parsedIndex >= 0) {
+        setCurrentIndex(parsedIndex);
+      }
     }
   }, []);
 
@@ -87,6 +127,20 @@ export default function ActiveTestScanPage() {
     });
   }, [activeDefinition]);
 
+  useEffect(() => {
+    if (questions.length === 0) {
+      return;
+    }
+
+    if (currentIndex > questions.length - 1) {
+      setCurrentIndex(questions.length - 1);
+      localStorage.setItem(
+        CURRENT_INDEX_STORAGE_KEY,
+        String(questions.length - 1)
+      );
+    }
+  }, [currentIndex, questions.length]);
+
   const options = activeDefinition?.data?.options ?? [];
   const currentQuestion = questions[currentIndex];
 
@@ -98,15 +152,23 @@ export default function ActiveTestScanPage() {
     ? getOptionsForQuestion(currentQuestion, options)
     : [];
 
+  function saveAnswers(nextAnswers: Record<string, AnswerValue>) {
+    setAnswers(nextAnswers);
+    localStorage.setItem(ANSWERS_STORAGE_KEY, JSON.stringify(nextAnswers));
+    setSaveStatus("Antwoord opgeslagen.");
+  }
+
   function handleSingleAnswer(value: string) {
     if (!currentQuestion?.key) {
       return;
     }
 
-    setAnswers((previous) => ({
-      ...previous,
+    const nextAnswers = {
+      ...answers,
       [currentQuestion.key]: value,
-    }));
+    };
+
+    saveAnswers(nextAnswers);
   }
 
   function handleMultiAnswer(value: string) {
@@ -120,20 +182,66 @@ export default function ActiveTestScanPage() {
       ? existing.filter((item) => item !== value)
       : [...existing, value];
 
-    setAnswers((previous) => ({
-      ...previous,
+    const nextAnswers = {
+      ...answers,
       [currentQuestion.key]: nextValue,
-    }));
+    };
+
+    saveAnswers(nextAnswers);
   }
 
   function goToPrevious() {
-    setCurrentIndex((previous) => Math.max(previous - 1, 0));
+    const nextIndex = Math.max(currentIndex - 1, 0);
+    setCurrentIndex(nextIndex);
+    localStorage.setItem(CURRENT_INDEX_STORAGE_KEY, String(nextIndex));
+    setSaveStatus("");
+    setDownloadStatus("");
   }
 
   function goToNext() {
-    setCurrentIndex((previous) =>
-      Math.min(previous + 1, Math.max(questions.length - 1, 0))
+    const nextIndex = Math.min(
+      currentIndex + 1,
+      Math.max(questions.length - 1, 0)
     );
+
+    setCurrentIndex(nextIndex);
+    localStorage.setItem(CURRENT_INDEX_STORAGE_KEY, String(nextIndex));
+    setSaveStatus("");
+    setDownloadStatus("");
+  }
+
+  function handleClearAnswers() {
+    localStorage.removeItem(ANSWERS_STORAGE_KEY);
+    localStorage.removeItem(CURRENT_INDEX_STORAGE_KEY);
+
+    setAnswers({});
+    setCurrentIndex(0);
+    setSaveStatus("Antwoorden zijn gewist.");
+    setDownloadStatus("");
+  }
+
+  function handleDownloadAnswers() {
+    const exportPayload = {
+      exportType: "kweekers-active-test-answers",
+      exportedAt: new Date().toISOString(),
+      sourceDefinition: {
+        fileName: activeDefinition?.fileName,
+        publishedAt: activeDefinition?.publishedAt,
+        source: activeDefinition?.source,
+      },
+      progress: {
+        answered: Object.keys(answers).length,
+        totalQuestions: questions.length,
+        currentIndex,
+      },
+      answers,
+    };
+
+    const datePart = new Date().toISOString().slice(0, 10);
+    const fileName = `kweekers-active-test-answers-${datePart}.json`;
+
+    downloadJson(fileName, exportPayload);
+    setDownloadStatus(`Antwoorden geëxporteerd: ${fileName}`);
   }
 
   if (!activeDefinition) {
@@ -192,6 +300,8 @@ export default function ActiveTestScanPage() {
     ((currentIndex + 1) / questions.length) * 100
   );
 
+  const answeredCount = Object.keys(answers).length;
+
   return (
     <main className="min-h-screen bg-gray-50 p-8">
       <div className="mx-auto max-w-4xl rounded-2xl bg-white p-8 shadow">
@@ -201,7 +311,7 @@ export default function ActiveTestScanPage() {
 
             <p className="mt-3 text-gray-600">
               Deze testflow leest vragen uit de actieve definitie in
-              localStorage. De bestaande scanflow blijft ongemoeid.
+              localStorage. Antwoorden worden nu ook lokaal opgeslagen.
             </p>
           </div>
 
@@ -237,6 +347,15 @@ export default function ActiveTestScanPage() {
             <div>
               <span className="font-medium">Huidige vraag:</span>{" "}
               {currentIndex + 1} van {questions.length}
+            </div>
+
+            <div>
+              <span className="font-medium">Beantwoord:</span> {answeredCount}{" "}
+              van {questions.length}
+            </div>
+
+            <div>
+              <span className="font-medium">Opslag:</span> localStorage
             </div>
           </div>
         </div>
@@ -383,6 +502,12 @@ export default function ActiveTestScanPage() {
             )}
           </div>
 
+          {saveStatus && (
+            <div className="mt-4 rounded-lg bg-green-50 p-3 text-sm text-green-800">
+              {saveStatus}
+            </div>
+          )}
+
           <div className="mt-8 flex items-center justify-between gap-3">
             <button
               type="button"
@@ -394,7 +519,7 @@ export default function ActiveTestScanPage() {
             </button>
 
             <div className="text-sm text-gray-500">
-              Beantwoord: {Object.keys(answers).length} van {questions.length}
+              Beantwoord: {answeredCount} van {questions.length}
             </div>
 
             <button
@@ -409,15 +534,36 @@ export default function ActiveTestScanPage() {
         </div>
 
         <div className="mt-6 rounded-xl border border-blue-200 bg-blue-50 p-4">
-          <h2 className="text-lg font-semibold text-blue-900">
-            Teststatus
-          </h2>
+          <h2 className="text-lg font-semibold text-blue-900">Teststatus</h2>
 
           <p className="mt-2 text-sm text-blue-800">
-            Antwoorden worden nu alleen in het geheugen van deze pagina bewaard.
-            In de volgende stap slaan we antwoorden op in localStorage, zodat je
-            kunt refreshen zonder antwoorden kwijt te raken.
+            Antwoorden worden opgeslagen in localStorage. Na refresh blijven de
+            antwoorden en de huidige vraag behouden.
           </p>
+
+          <div className="mt-4 flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={handleDownloadAnswers}
+              className="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white"
+            >
+              Download antwoorden als JSON
+            </button>
+
+            <button
+              type="button"
+              onClick={handleClearAnswers}
+              className="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-700"
+            >
+              Antwoorden wissen
+            </button>
+          </div>
+
+          {downloadStatus && (
+            <div className="mt-3 rounded-lg bg-white p-3 text-sm text-blue-900">
+              {downloadStatus}
+            </div>
+          )}
         </div>
       </div>
     </main>
