@@ -15,22 +15,43 @@ type StoredConcept = {
   };
 };
 
+type ActiveDefinition = {
+  status: "active";
+  publishedAt: string;
+  source: "localStorage-import-concept";
+  fileName?: string;
+  importSummary?: Record<string, number>;
+  data: Record<string, Record<string, string>[]>;
+};
+
 export default function ImportConceptPage() {
   const [storedConcept, setStoredConcept] = useState<StoredConcept | null>(null);
   const [downloadStatus, setDownloadStatus] = useState("");
+  const [publishStatus, setPublishStatus] = useState("");
+  const [activeDefinition, setActiveDefinition] =
+    useState<ActiveDefinition | null>(null);
 
   useEffect(() => {
-    const raw = localStorage.getItem("kweekers-definition-import-concept");
+    const rawConcept = localStorage.getItem("kweekers-definition-import-concept");
 
-    if (!raw) {
-      return;
+    if (rawConcept) {
+      try {
+        const parsed = JSON.parse(rawConcept) as StoredConcept;
+        setStoredConcept(parsed);
+      } catch {
+        setStoredConcept(null);
+      }
     }
 
-    try {
-      const parsed = JSON.parse(raw) as StoredConcept;
-      setStoredConcept(parsed);
-    } catch {
-      setStoredConcept(null);
+    const rawActive = localStorage.getItem("kweekers-active-definition");
+
+    if (rawActive) {
+      try {
+        const parsedActive = JSON.parse(rawActive) as ActiveDefinition;
+        setActiveDefinition(parsedActive);
+      } catch {
+        setActiveDefinition(null);
+      }
     }
   }, []);
 
@@ -38,6 +59,7 @@ export default function ImportConceptPage() {
     localStorage.removeItem("kweekers-definition-import-concept");
     setStoredConcept(null);
     setDownloadStatus("");
+    setPublishStatus("");
   }
 
   function handleDownloadJson() {
@@ -71,6 +93,32 @@ export default function ImportConceptPage() {
     setDownloadStatus(`JSON-export aangemaakt: ${fileName}`);
   }
 
+  function handlePublishConcept() {
+    if (!storedConcept?.concept?.data) {
+      setPublishStatus("Geen geldig concept beschikbaar om te publiceren.");
+      return;
+    }
+
+    const definitionToPublish: ActiveDefinition = {
+      status: "active",
+      publishedAt: new Date().toISOString(),
+      source: "localStorage-import-concept",
+      fileName: storedConcept.fileName,
+      importSummary: storedConcept.importSummary,
+      data: storedConcept.concept.data,
+    };
+
+    localStorage.setItem(
+      "kweekers-active-definition",
+      JSON.stringify(definitionToPublish)
+    );
+
+    setActiveDefinition(definitionToPublish);
+    setPublishStatus(
+      "Concept is gepubliceerd als actieve definitie in deze browser."
+    );
+  }
+
   if (!storedConcept) {
     return (
       <main className="min-h-screen bg-gray-50 p-8">
@@ -80,6 +128,23 @@ export default function ImportConceptPage() {
           <p className="mt-3 text-gray-600">
             Er is nog geen importconcept opgeslagen in deze browser.
           </p>
+
+          {activeDefinition && (
+            <div className="mt-6 rounded-xl border border-green-200 bg-green-50 p-4">
+              <h2 className="text-lg font-semibold text-green-900">
+                Actieve definitie aanwezig
+              </h2>
+
+              <p className="mt-2 text-sm text-green-800">
+                Er staat al een actieve definitie in deze browser.
+              </p>
+
+              <div className="mt-3 text-sm">
+                <span className="font-medium">Gepubliceerd:</span>{" "}
+                {activeDefinition.publishedAt}
+              </div>
+            </div>
+          )}
 
           <Link
             href="/definition-template/import-preview"
@@ -104,7 +169,7 @@ export default function ImportConceptPage() {
 
             <p className="mt-3 text-gray-600">
               Dit concept staat tijdelijk opgeslagen in je browser. Er is nog
-              niets definitief gepubliceerd.
+              niets definitief gepubliceerd totdat je op publiceren klikt.
             </p>
           </div>
 
@@ -115,6 +180,26 @@ export default function ImportConceptPage() {
             Terug
           </Link>
         </div>
+
+        {activeDefinition && (
+          <div className="mt-6 rounded-xl border border-green-200 bg-green-50 p-4">
+            <h2 className="text-lg font-semibold text-green-900">
+              Huidige actieve definitie
+            </h2>
+
+            <div className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
+              <div>
+                <span className="font-medium">Bestand:</span>{" "}
+                {activeDefinition.fileName ?? "Onbekend"}
+              </div>
+
+              <div>
+                <span className="font-medium">Gepubliceerd:</span>{" "}
+                {activeDefinition.publishedAt}
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="mt-8 rounded-xl border border-green-200 bg-green-50 p-4">
           <h2 className="text-lg font-semibold text-green-900">
@@ -145,9 +230,7 @@ export default function ImportConceptPage() {
         </div>
 
         <div className="mt-6 rounded-xl border border-blue-200 bg-blue-50 p-4">
-          <h2 className="text-lg font-semibold text-blue-900">
-            JSON-export
-          </h2>
+          <h2 className="text-lg font-semibold text-blue-900">JSON-export</h2>
 
           <p className="mt-2 text-sm text-blue-800">
             Download het concept als JSON-bestand. Dit publiceert nog niets, maar
@@ -165,6 +248,33 @@ export default function ImportConceptPage() {
           {downloadStatus && (
             <div className="mt-3 rounded-lg bg-white p-3 text-sm text-blue-900">
               {downloadStatus}
+            </div>
+          )}
+        </div>
+
+        <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4">
+          <h2 className="text-lg font-semibold text-amber-900">
+            Concept publiceren
+          </h2>
+
+          <p className="mt-2 text-sm text-amber-800">
+            Hiermee maak je dit concept de actieve definitie in deze browser.
+            Dit overschrijft geen database en wijzigt niets in GitHub. Het wordt
+            opgeslagen onder <strong>kweekers-active-definition</strong> in
+            localStorage.
+          </p>
+
+          <button
+            type="button"
+            onClick={handlePublishConcept}
+            className="mt-4 rounded-lg bg-black px-4 py-2 text-sm font-medium text-white"
+          >
+            Concept publiceren als actieve definitie
+          </button>
+
+          {publishStatus && (
+            <div className="mt-3 rounded-lg bg-white p-3 text-sm text-amber-900">
+              {publishStatus}
             </div>
           )}
         </div>
@@ -237,10 +347,10 @@ export default function ImportConceptPage() {
         <div className="mt-8 flex flex-wrap gap-3">
           <button
             type="button"
-            disabled
-            className="rounded-lg bg-gray-300 px-4 py-2 text-sm font-medium text-gray-600"
+            onClick={handlePublishConcept}
+            className="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white"
           >
-            Concept publiceren — volgt later
+            Concept publiceren
           </button>
 
           <button
