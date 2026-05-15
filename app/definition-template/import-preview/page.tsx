@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 type CheckResult = {
@@ -128,6 +129,8 @@ function PreviewTable({
 }
 
 export default function ImportPreviewPage() {
+  const router = useRouter();
+
   const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState("Nog geen bestand gekozen.");
   const [result, setResult] = useState<ImportPreviewResult | null>(null);
@@ -215,6 +218,23 @@ export default function ImportPreviewPage() {
 
       setConceptResult(data);
       setConceptStatus("Conceptcontrole afgerond.");
+
+      if (data.ok && data.concept) {
+        const conceptPayload = {
+          fileName: data.fileName,
+          message: data.message,
+          importSummary: data.importSummary,
+          concept: data.concept,
+          savedAt: new Date().toISOString(),
+        };
+
+        localStorage.setItem(
+          "kweekers-definition-import-concept",
+          JSON.stringify(conceptPayload)
+        );
+
+        router.push("/definition-template/import-concept");
+      }
     } catch {
       setConceptResult({
         ok: false,
@@ -339,41 +359,16 @@ export default function ImportPreviewPage() {
               <div className="rounded-xl border border-gray-200 p-4">
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-semibold">Duplicate-controle</h2>
-
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-medium ${
-                      duplicateIssues.length === 0
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
-                    }`}
-                  >
+                  <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
                     {duplicateIssues.length === 0 ? "OK" : "Fouten"}
                   </span>
                 </div>
 
-                {duplicateIssues.length === 0 ? (
-                  <p className="mt-3 text-sm text-gray-600">
-                    Geen dubbele codes, keys of optiecombinaties gevonden.
-                  </p>
-                ) : (
-                  <div className="mt-4 space-y-3">
-                    {duplicateIssues.map((issue, index) => (
-                      <div
-                        key={`${issue.sheetName}-${issue.field}-${issue.value}-${index}`}
-                        className="rounded-lg bg-red-50 p-3 text-sm text-red-800"
-                      >
-                        <div className="font-medium">{issue.message}</div>
-
-                        <div className="mt-1 text-xs">
-                          Sheet: <strong>{issue.sheetName}</strong> | Veld:{" "}
-                          <strong>{issue.field}</strong> | Waarde:{" "}
-                          <strong>{issue.value}</strong> | Rijen:{" "}
-                          <strong>{issue.rows.join(", ")}</strong>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <p className="mt-3 text-sm text-gray-600">
+                  {duplicateIssues.length === 0
+                    ? "Geen dubbele codes, keys of optiecombinaties gevonden."
+                    : "Er zijn dubbele waarden gevonden."}
+                </p>
               </div>
 
               <div className="rounded-xl border border-gray-200 p-4">
@@ -381,135 +376,31 @@ export default function ImportPreviewPage() {
                   <h2 className="text-lg font-semibold">
                     Verplichte velden-controle
                   </h2>
-
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-medium ${
-                      requiredFieldIssues.length === 0
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
-                    }`}
-                  >
+                  <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
                     {requiredFieldIssues.length === 0 ? "OK" : "Fouten"}
                   </span>
                 </div>
 
-                {requiredFieldIssues.length === 0 ? (
-                  <p className="mt-3 text-sm text-gray-600">
-                    Alle verplichte velden zijn gevuld.
-                  </p>
-                ) : (
-                  <div className="mt-4 overflow-auto rounded-lg border border-red-200">
-                    <table className="min-w-full text-left text-xs">
-                      <thead className="bg-red-50 text-red-800">
-                        <tr>
-                          <th className="whitespace-nowrap px-3 py-2">
-                            Sheet
-                          </th>
-                          <th className="whitespace-nowrap px-3 py-2">Veld</th>
-                          <th className="whitespace-nowrap px-3 py-2">Rij</th>
-                          <th className="whitespace-nowrap px-3 py-2">
-                            Melding
-                          </th>
-                        </tr>
-                      </thead>
-
-                      <tbody>
-                        {requiredFieldIssues.map((issue, index) => (
-                          <tr
-                            key={`${issue.sheetName}-${issue.field}-${issue.row}-${index}`}
-                            className="border-t border-red-100"
-                          >
-                            <td className="px-3 py-2 align-top">
-                              {issue.sheetName}
-                            </td>
-                            <td className="px-3 py-2 align-top">
-                              {issue.field}
-                            </td>
-                            <td className="px-3 py-2 align-top">
-                              {issue.row}
-                            </td>
-                            <td className="px-3 py-2 align-top">
-                              {issue.message}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
+                <p className="mt-3 text-sm text-gray-600">
+                  {requiredFieldIssues.length === 0
+                    ? "Alle verplichte velden zijn gevuld."
+                    : "Er ontbreken verplichte velden."}
+                </p>
               </div>
 
               <div className="rounded-xl border border-gray-200 p-4">
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-semibold">Relatiecontrole</h2>
-
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-medium ${
-                      relationIssues.length === 0
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
-                    }`}
-                  >
+                  <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
                     {relationIssues.length === 0 ? "OK" : "Fouten"}
                   </span>
                 </div>
 
-                {relationIssues.length === 0 ? (
-                  <p className="mt-3 text-sm text-gray-600">
-                    Alle verwijzingen kloppen.
-                  </p>
-                ) : (
-                  <div className="mt-4 overflow-auto rounded-lg border border-red-200">
-                    <table className="min-w-full text-left text-xs">
-                      <thead className="bg-red-50 text-red-800">
-                        <tr>
-                          <th className="whitespace-nowrap px-3 py-2">
-                            Sheet
-                          </th>
-                          <th className="whitespace-nowrap px-3 py-2">Veld</th>
-                          <th className="whitespace-nowrap px-3 py-2">
-                            Waarde
-                          </th>
-                          <th className="whitespace-nowrap px-3 py-2">Rij</th>
-                          <th className="whitespace-nowrap px-3 py-2">
-                            Verwijst naar
-                          </th>
-                          <th className="whitespace-nowrap px-3 py-2">
-                            Melding
-                          </th>
-                        </tr>
-                      </thead>
-
-                      <tbody>
-                        {relationIssues.map((issue, index) => (
-                          <tr
-                            key={`${issue.sheetName}-${issue.field}-${issue.value}-${issue.row}-${index}`}
-                            className="border-t border-red-100"
-                          >
-                            <td className="px-3 py-2 align-top">
-                              {issue.sheetName}
-                            </td>
-                            <td className="px-3 py-2 align-top">
-                              {issue.field}
-                            </td>
-                            <td className="px-3 py-2 align-top">
-                              {issue.value}
-                            </td>
-                            <td className="px-3 py-2 align-top">
-                              {issue.row}
-                            </td>
-                            <td className="px-3 py-2 align-top">
-                              {issue.targetSheet}.{issue.targetField}
-                            </td>
-                            <td className="px-3 py-2 align-top">
-                              {issue.message}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
+                <p className="mt-3 text-sm text-gray-600">
+                  {relationIssues.length === 0
+                    ? "Alle verwijzingen kloppen."
+                    : "Er zijn verwijzingen die niet kloppen."}
+                </p>
               </div>
 
               {result.ok && (
@@ -548,7 +439,7 @@ export default function ImportPreviewPage() {
                     className="mt-4 rounded-lg bg-black px-4 py-2 text-sm font-medium text-white disabled:bg-gray-300 disabled:text-gray-600"
                   >
                     {isSavingConcept
-                      ? "Concept wordt voorbereid..."
+                      ? "Concept wordt opgeslagen..."
                       : "Import opslaan als concept"}
                   </button>
 
@@ -567,35 +458,6 @@ export default function ImportPreviewPage() {
                       }`}
                     >
                       {conceptResult.message ?? conceptResult.error}
-                    </div>
-                  )}
-
-                  {conceptResult?.ok && conceptResult.importSummary && (
-                    <div className="mt-4 rounded-xl bg-white p-4">
-                      <h3 className="text-sm font-semibold text-gray-900">
-                        Concept-samenvatting
-                      </h3>
-
-                      <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-                        {Object.entries(conceptResult.importSummary).map(
-                          ([sheetName, count]) => (
-                            <div
-                              key={sheetName}
-                              className="rounded-lg border border-gray-200 p-3"
-                            >
-                              <div className="text-xs text-gray-500">
-                                {sheetName}
-                              </div>
-                              <div className="text-xl font-bold">{count}</div>
-                            </div>
-                          )
-                        )}
-                      </div>
-
-                      <p className="mt-3 text-xs text-gray-500">
-                        Status: concept. Persistent opslaan volgt in de volgende
-                        stap.
-                      </p>
                     </div>
                   )}
                 </div>
