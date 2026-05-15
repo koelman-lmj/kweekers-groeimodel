@@ -17,6 +17,7 @@ type StoredConcept = {
 
 export default function ImportConceptPage() {
   const [storedConcept, setStoredConcept] = useState<StoredConcept | null>(null);
+  const [downloadStatus, setDownloadStatus] = useState("");
 
   useEffect(() => {
     const raw = localStorage.getItem("kweekers-definition-import-concept");
@@ -36,6 +37,38 @@ export default function ImportConceptPage() {
   function handleClearConcept() {
     localStorage.removeItem("kweekers-definition-import-concept");
     setStoredConcept(null);
+    setDownloadStatus("");
+  }
+
+  function handleDownloadJson() {
+    if (!storedConcept) {
+      setDownloadStatus("Geen concept beschikbaar om te downloaden.");
+      return;
+    }
+
+    const exportPayload = {
+      exportType: "kweekers-definition-import-concept",
+      exportedAt: new Date().toISOString(),
+      fileName: storedConcept.fileName,
+      importSummary: storedConcept.importSummary,
+      concept: storedConcept.concept,
+    };
+
+    const json = JSON.stringify(exportPayload, null, 2);
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const datePart = new Date().toISOString().slice(0, 10);
+    const fileName = `kweekers-definition-import-concept-${datePart}.json`;
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+    link.click();
+
+    URL.revokeObjectURL(url);
+
+    setDownloadStatus(`JSON-export aangemaakt: ${fileName}`);
   }
 
   if (!storedConcept) {
@@ -111,6 +144,31 @@ export default function ImportConceptPage() {
           </div>
         </div>
 
+        <div className="mt-6 rounded-xl border border-blue-200 bg-blue-50 p-4">
+          <h2 className="text-lg font-semibold text-blue-900">
+            JSON-export
+          </h2>
+
+          <p className="mt-2 text-sm text-blue-800">
+            Download het concept als JSON-bestand. Dit publiceert nog niets, maar
+            geeft je wel een controleerbare technische export van de conceptdata.
+          </p>
+
+          <button
+            type="button"
+            onClick={handleDownloadJson}
+            className="mt-4 rounded-lg bg-black px-4 py-2 text-sm font-medium text-white"
+          >
+            Download concept als JSON
+          </button>
+
+          {downloadStatus && (
+            <div className="mt-3 rounded-lg bg-white p-3 text-sm text-blue-900">
+              {downloadStatus}
+            </div>
+          )}
+        </div>
+
         <div className="mt-6 rounded-xl border border-gray-200 p-4">
           <h2 className="text-lg font-semibold">Concept-samenvatting</h2>
 
@@ -176,7 +234,7 @@ export default function ImportConceptPage() {
           ))}
         </div>
 
-        <div className="mt-8 flex gap-3">
+        <div className="mt-8 flex flex-wrap gap-3">
           <button
             type="button"
             disabled
