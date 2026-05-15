@@ -378,6 +378,18 @@ function getRelationIssues(
   return issues;
 }
 
+function getImportSummary(
+  recordsBySheet: Record<string, RowRecord[]>
+): Record<string, number> {
+  return {
+    categories: recordsBySheet.categories?.length ?? 0,
+    dimensions: recordsBySheet.dimensions?.length ?? 0,
+    questions: recordsBySheet.questions?.length ?? 0,
+    optionSets: recordsBySheet.optionSets?.length ?? 0,
+    options: recordsBySheet.options?.length ?? 0,
+  };
+}
+
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
@@ -441,6 +453,7 @@ export async function POST(request: Request) {
     const duplicateIssues = getDuplicateIssues(recordsBySheet);
     const requiredFieldIssues = getRequiredFieldIssues(recordsBySheet);
     const relationIssues = getRelationIssues(recordsBySheet);
+    const importSummary = getImportSummary(recordsBySheet);
 
     const sheetsOk = checks.every((check) => check.ok);
     const duplicatesOk = duplicateIssues.length === 0;
@@ -468,6 +481,7 @@ export async function POST(request: Request) {
       duplicateIssues,
       requiredFieldIssues,
       relationIssues,
+      importSummary,
       preview,
     });
   } catch (error) {
