@@ -52,6 +52,20 @@ type ImportPreviewResult = {
   preview?: PreviewData;
 };
 
+type ConceptResult = {
+  ok: boolean;
+  message?: string;
+  stored?: boolean;
+  fileName?: string;
+  importSummary?: ImportSummary;
+  concept?: {
+    status: string;
+    createdAt: string;
+    data: Record<string, Record<string, string>[]>;
+  };
+  error?: string;
+};
+
 const previewConfig: Record<string, string[]> = {
   categories: ["code", "title", "description", "order"],
   dimensions: ["code", "title", "category", "order", "isActive"],
@@ -117,11 +131,16 @@ export default function ImportPreviewPage() {
   const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState("Nog geen bestand gekozen.");
   const [result, setResult] = useState<ImportPreviewResult | null>(null);
+  const [conceptStatus, setConceptStatus] = useState("");
+  const [conceptResult, setConceptResult] = useState<ConceptResult | null>(null);
+  const [isSavingConcept, setIsSavingConcept] = useState(false);
 
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const selectedFile = event.target.files?.[0] ?? null;
     setFile(selectedFile);
     setResult(null);
+    setConceptResult(null);
+    setConceptStatus("");
 
     if (!selectedFile) {
       setStatus("Nog geen bestand gekozen.");
@@ -156,6 +175,8 @@ export default function ImportPreviewPage() {
 
     setStatus("Bestand wordt gecontroleerd...");
     setResult(null);
+    setConceptResult(null);
+    setConceptStatus("");
 
     const response = await fetch("/api/definition-import-preview", {
       method: "POST",
@@ -166,6 +187,43 @@ export default function ImportPreviewPage() {
 
     setStatus("Controle afgerond.");
     setResult(data);
+  }
+
+  async function handleSaveConcept() {
+    if (!file) {
+      setConceptResult({
+        ok: false,
+        message: "Kies eerst een bestand.",
+      });
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    setIsSavingConcept(true);
+    setConceptStatus("Concept wordt voorbereid...");
+    setConceptResult(null);
+
+    try {
+      const response = await fetch("/api/definition-import-concept", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = (await response.json()) as ConceptResult;
+
+      setConceptResult(data);
+      setConceptStatus("Conceptcontrole afgerond.");
+    } catch {
+      setConceptResult({
+        ok: false,
+        message: "Concept kon niet worden voorbereid.",
+      });
+      setConceptStatus("Conceptcontrole mislukt.");
+    } finally {
+      setIsSavingConcept(false);
+    }
   }
 
   const duplicateIssues = result?.duplicateIssues ?? [];
@@ -179,8 +237,8 @@ export default function ImportPreviewPage() {
         <h1 className="text-2xl font-bold">Import-preview definitie</h1>
 
         <p className="mt-3 text-gray-600">
-          Upload hier een Excel-template. In deze stap controleren we het
-          bestand en tonen we een eerste preview van de inhoud.
+          Upload hier een Excel-template. In deze stap controleren we het bestand
+          en tonen we een eerste preview van de inhoud.
         </p>
 
         <div className="mt-8 rounded-xl border border-dashed border-gray-300 p-6">
@@ -347,12 +405,8 @@ export default function ImportPreviewPage() {
                           <th className="whitespace-nowrap px-3 py-2">
                             Sheet
                           </th>
-                          <th className="whitespace-nowrap px-3 py-2">
-                            Veld
-                          </th>
-                          <th className="whitespace-nowrap px-3 py-2">
-                            Rij
-                          </th>
+                          <th className="whitespace-nowrap px-3 py-2">Veld</th>
+                          <th className="whitespace-nowrap px-3 py-2">Rij</th>
                           <th className="whitespace-nowrap px-3 py-2">
                             Melding
                           </th>
@@ -412,15 +466,11 @@ export default function ImportPreviewPage() {
                           <th className="whitespace-nowrap px-3 py-2">
                             Sheet
                           </th>
-                          <th className="whitespace-nowrap px-3 py-2">
-                            Veld
-                          </th>
+                          <th className="whitespace-nowrap px-3 py-2">Veld</th>
                           <th className="whitespace-nowrap px-3 py-2">
                             Waarde
                           </th>
-                          <th className="whitespace-nowrap px-3 py-2">
-                            Rij
-                          </th>
+                          <th className="whitespace-nowrap px-3 py-2">Rij</th>
                           <th className="whitespace-nowrap px-3 py-2">
                             Verwijst naar
                           </th>
@@ -470,7 +520,8 @@ export default function ImportPreviewPage() {
 
                   <p className="mt-2 text-sm text-green-800">
                     Het bestand is gecontroleerd en kan veilig worden voorbereid
-                    voor import. Er wordt in deze stap nog niets opgeslagen.
+                    voor import. Er wordt in deze stap nog niets definitief
+                    gepubliceerd.
                   </p>
 
                   <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
@@ -492,11 +543,61 @@ export default function ImportPreviewPage() {
 
                   <button
                     type="button"
-                    disabled
-                    className="mt-4 rounded-lg bg-gray-300 px-4 py-2 text-sm font-medium text-gray-600"
+                    onClick={handleSaveConcept}
+                    disabled={isSavingConcept}
+                    className="mt-4 rounded-lg bg-black px-4 py-2 text-sm font-medium text-white disabled:bg-gray-300 disabled:text-gray-600"
                   >
-                    Import uitvoeren — volgt later
+                    {isSavingConcept
+                      ? "Concept wordt voorbereid..."
+                      : "Import opslaan als concept"}
                   </button>
+
+                  {conceptStatus && (
+                    <div className="mt-3 rounded-lg bg-white p-3 text-sm text-gray-700">
+                      {conceptStatus}
+                    </div>
+                  )}
+
+                  {conceptResult && (
+                    <div
+                      className={`mt-3 rounded-lg p-3 text-sm font-medium ${
+                        conceptResult.ok
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
+                    >
+                      {conceptResult.message ?? conceptResult.error}
+                    </div>
+                  )}
+
+                  {conceptResult?.ok && conceptResult.importSummary && (
+                    <div className="mt-4 rounded-xl bg-white p-4">
+                      <h3 className="text-sm font-semibold text-gray-900">
+                        Concept-samenvatting
+                      </h3>
+
+                      <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                        {Object.entries(conceptResult.importSummary).map(
+                          ([sheetName, count]) => (
+                            <div
+                              key={sheetName}
+                              className="rounded-lg border border-gray-200 p-3"
+                            >
+                              <div className="text-xs text-gray-500">
+                                {sheetName}
+                              </div>
+                              <div className="text-xl font-bold">{count}</div>
+                            </div>
+                          )
+                        )}
+                      </div>
+
+                      <p className="mt-3 text-xs text-gray-500">
+                        Status: concept. Persistent opslaan volgt in de volgende
+                        stap.
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
 
