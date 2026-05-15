@@ -38,6 +38,7 @@ type RelationIssue = {
 };
 
 type PreviewData = Record<string, Record<string, string>[]>;
+type ImportSummary = Record<string, number>;
 
 type ImportPreviewResult = {
   ok: boolean;
@@ -47,6 +48,7 @@ type ImportPreviewResult = {
   duplicateIssues?: DuplicateIssue[];
   requiredFieldIssues?: RequiredFieldIssue[];
   relationIssues?: RelationIssue[];
+  importSummary?: ImportSummary;
   preview?: PreviewData;
 };
 
@@ -143,6 +145,7 @@ export default function ImportPreviewPage() {
         duplicateIssues: [],
         requiredFieldIssues: [],
         relationIssues: [],
+        importSummary: {},
         preview: {},
       });
       return;
@@ -168,6 +171,7 @@ export default function ImportPreviewPage() {
   const duplicateIssues = result?.duplicateIssues ?? [];
   const requiredFieldIssues = result?.requiredFieldIssues ?? [];
   const relationIssues = result?.relationIssues ?? [];
+  const importSummary = result?.importSummary ?? {};
 
   return (
     <main className="min-h-screen bg-gray-50 p-8">
@@ -457,6 +461,44 @@ export default function ImportPreviewPage() {
                   </div>
                 )}
               </div>
+
+              {result.ok && (
+                <div className="rounded-xl border border-green-200 bg-green-50 p-4">
+                  <h2 className="text-lg font-semibold text-green-900">
+                    Importvoorstel / dry-run
+                  </h2>
+
+                  <p className="mt-2 text-sm text-green-800">
+                    Het bestand is gecontroleerd en kan veilig worden voorbereid
+                    voor import. Er wordt in deze stap nog niets opgeslagen.
+                  </p>
+
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                    {Object.entries(importSummary).map(([sheetName, count]) => (
+                      <div
+                        key={sheetName}
+                        className="rounded-xl bg-white p-4 shadow-sm"
+                      >
+                        <div className="text-xs font-medium text-gray-500">
+                          {sheetName}
+                        </div>
+                        <div className="mt-1 text-2xl font-bold text-gray-900">
+                          {count}
+                        </div>
+                        <div className="text-xs text-gray-500">records</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <button
+                    type="button"
+                    disabled
+                    className="mt-4 rounded-lg bg-gray-300 px-4 py-2 text-sm font-medium text-gray-600"
+                  >
+                    Import uitvoeren — volgt later
+                  </button>
+                </div>
+              )}
 
               {result.ok && result.preview && (
                 <div className="space-y-4">
