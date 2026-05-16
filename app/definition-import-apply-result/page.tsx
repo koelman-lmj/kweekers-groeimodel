@@ -27,6 +27,12 @@ type ApplyResult = {
   sheets?: ApplyResultSheet[];
 };
 
+type ImportRows = Record<string, Record<string, string>[]>;
+
+type ImportConcept = {
+  importRows?: ImportRows;
+};
+
 type DefinitionFileKey =
   | "categories.ts"
   | "dimensions.ts"
@@ -40,6 +46,7 @@ type DefinitionFileOutput = {
   title: string;
   description: string;
   sheets: ApplyResultSheet[];
+  rows: Record<string, string>[];
   counts: Counts;
 };
 
@@ -71,6 +78,164 @@ function addCounts(base: Counts, extra: Counts): Counts {
     possiblyRemoved: base.possiblyRemoved + extra.possiblyRemoved,
     invalid: base.invalid + extra.invalid,
   };
+}
+
+function normalizeKey(value: string) {
+  return value.toLowerCase().replace(/[\s_\-.]/g, "");
+}
+
+function getField(row: Record<string, string>, candidates: string[]) {
+  const normalizedCandidates = candidates.map(normalizeKey);
+
+  for (const [key, value] of Object.entries(row)) {
+    if (normalizedCandidates.includes(normalizeKey(key))) {
+      return value;
+    }
+  }
+
+  return "";
+}
+
+function getOptionalString(row: Record<string, string>, candidates: string[]) {
+  const value = getField(row, candidates).trim();
+  return value.length > 0 ? value : undefined;
+}
+
+function getString(
+  row: Record<string, string>,
+  candidates: string[],
+  fallback = ""
+) {
+  return getOptionalString(row, candidates) ?? fallback;
+}
+
+function getNumber(
+  row: Record<string, string>,
+  candidates: string[],
+  fallback = 0
+) {
+  const value = getField(row, candidates).trim();
+
+  if (!value) return fallback;
+
+  const parsed = Number(value.replace(",", "."));
+
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function getBoolean(
+  row: Record<string, string>,
+  candidates: string[],
+  fallback = false
+) {
+  const value = getField(row, candidates).trim().toLowerCase();
+
+  if (!value) return fallback;
+
+  if (["true", "ja", "yes", "1", "waar"].includes(value)) return true;
+  if (["false", "nee", "no", "0", "onwaar"].includes(value)) return false;
+
+  return fallback;
+}
+
+function getStringArray(row: Record<string, string>, candidates: string[]) {
+  const value = getField(row, candidates).trim();
+
+  if (!value) return undefined;
+
+  if (value.startsWith("[") && value.endsWith("]")) {
+    try {
+      const parsed = JSON.parse(value);
+
+      if (Array.isArray(parsed)) {
+        const values = parsed
+          .map((item) => String(item).trim())
+          .filter(Boolean);
+
+        return values.length > 0 ? values : undefined;
+      }
+    } catch {
+      // fallback naar split hieronder
+    }
+  }
+
+  const values = value
+    .split(/\r?\n|;|\|/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  return values.length > 0 ? values : undefined;
+}
+
+function parseVisibleWhen(row: Record<string, string>) {
+  const raw = getField(row, ["visibleWhen", "visible_when", "zichtbaarAls"]);
+
+  if (raw.trim()) {
+    try {
+      const parsed = JSON.parse(raw);
+
+      if (Array.isArray(parsed)) {
+        return parsed;
+      }
+    } catch {
+      // fallback hieronder
+    }
+  }
+
+  const field = getOptionalString(row, [
+    "visibleWhenField",
+    "visible_when_field",
+    "conditionField",
+    "field",
+  ]);
+
+  const operator = getOptionalString(row, [
+    "visibleWhenOperator",
+    "visible_when_operator",
+    "conditionOperator",
+    "operator",
+  ]);
+
+  const valueRaw = getOptionalString(row, [
+    "visibleWhenValue",
+    "visible_when_value",
+    "conditionValue",
+    "condition_value",
+  ]);
+
+  if (!field || !operator || !valueRaw) return undefined;
+
+  const value =
+    valueRaw.includes("|") || valueRaw.includes(";")
+      ? valueRaw
+          .split(/\||;/)
+          .map((item) => item.trim())
+          .filter(Boolean)
+      : valueRaw;
+
+  return [
+    {
+      field,
+      operator,
+      value,
+    },
+  ];
+}
+
+function compactObject<T extends Record<string, unknown>>(object: T) {
+  return Object.fromEntries(
+    Object.entries(object).filter(([, value]) => {
+      if (value === undefined || value === null) return false;
+      if (Array.isArray(value) && value.length === 0) return false;
+      if (typeof value === "string" && value.trim() === "") return false;
+
+      return true;
+    })
+  );
+}
+
+function stringifyTs(value: unknown) {
+  return JSON.stringify(value, null, 2);
 }
 
 function getDefinitionFileForSheet(sheetName: string): DefinitionFileKey {
@@ -125,7 +290,6 @@ function getFileMeta(fileName: DefinitionFileKey) {
       title: "Categorieën",
       description:
         "Bevat de hoofdindeling of classificatie die gebruikt wordt in de scan-definitie.",
-      exportName: "categories",
     };
   }
 
@@ -134,7 +298,6 @@ function getFileMeta(fileName: DefinitionFileKey) {
       title: "Dimensies",
       description:
         "Bevat de inhoudelijke domeinen of beoordelingsgebieden van het groeimodel.",
-      exportName: "dimensions",
     };
   }
 
@@ -143,7 +306,6 @@ function getFileMeta(fileName: DefinitionFileKey) {
       title: "Antwoordsets",
       description:
         "Bevat herbruikbare antwoordopties, scores en keuzelijsten voor vragen.",
-      exportName: "optionSets",
     };
   }
 
@@ -152,7 +314,6 @@ function getFileMeta(fileName: DefinitionFileKey) {
       title: "Vragen",
       description:
         "Bevat de concrete vragen, teksten, koppelingen en scoring binnen de scan.",
-      exportName: "questions",
     };
   }
 
@@ -161,7 +322,6 @@ function getFileMeta(fileName: DefinitionFileKey) {
       title: "Secties",
       description:
         "Bevat de hoofdstukken of stappen waarin vragen in de scan worden gegroepeerd.",
-      exportName: "sections",
     };
   }
 
@@ -169,12 +329,21 @@ function getFileMeta(fileName: DefinitionFileKey) {
     title: "Niet gekoppeld",
     description:
       "Deze sheet kon nog niet automatisch aan een doelbestand worden gekoppeld.",
-    exportName: "unknownDefinitionOutput",
   };
 }
 
+function getRowsForSheets(
+  sheets: ApplyResultSheet[],
+  importRows: ImportRows | null
+) {
+  if (!importRows) return [];
+
+  return sheets.flatMap((sheet) => importRows[sheet.sheetName] ?? []);
+}
+
 function buildDefinitionFileOutputs(
-  sheets: ApplyResultSheet[]
+  sheets: ApplyResultSheet[],
+  importRows: ImportRows | null
 ): DefinitionFileOutput[] {
   const fileOrder: DefinitionFileKey[] = [
     "categories.ts",
@@ -196,6 +365,7 @@ function buildDefinitionFileOutputs(
   return fileOrder.map((fileName) => {
     const fileSheets = grouped.get(fileName) ?? [];
     const meta = getFileMeta(fileName);
+    const rows = getRowsForSheets(fileSheets, importRows);
 
     const counts = fileSheets.reduce(
       (total, sheet) => addCounts(total, sheet.counts),
@@ -207,9 +377,132 @@ function buildDefinitionFileOutputs(
       title: meta.title,
       description: meta.description,
       sheets: fileSheets,
+      rows,
       counts,
     };
   });
+}
+
+function buildCategories(rows: Record<string, string>[]) {
+  return rows.map((row, index) => ({
+    code: getString(row, ["code", "categoryCode", "categorieCode"]),
+    title: getString(row, ["title", "titel", "name", "naam"]),
+    description: getString(row, ["description", "omschrijving", "beschrijving"]),
+    order: getNumber(row, ["order", "volgorde"], (index + 1) * 10),
+  }));
+}
+
+function buildDimensions(rows: Record<string, string>[]) {
+  return rows.map((row, index) => ({
+    code: getString(row, ["code", "dimensionCode", "dimensieCode"]),
+    title: getString(row, ["title", "titel", "name", "naam"]),
+    category: getString(row, ["category", "categorie"], "Overig"),
+    description: getString(row, ["description", "omschrijving", "beschrijving"]),
+    order: getNumber(row, ["order", "volgorde"], (index + 1) * 10),
+    isActive: getBoolean(row, ["isActive", "actief"], true),
+  }));
+}
+
+function buildSections(rows: Record<string, string>[]) {
+  return rows.map((row, index) =>
+    compactObject({
+      code: getString(row, ["code", "sectionCode", "sectieCode"]),
+      title: getString(row, ["title", "titel", "name", "naam"]),
+      shortTitle: getOptionalString(row, ["shortTitle", "korteTitel"]),
+      phase: getOptionalString(row, ["phase", "fase"]),
+      order: getNumber(row, ["order", "volgorde"], (index + 1) * 10),
+      summaryEnabled: getBoolean(
+        row,
+        ["summaryEnabled", "samenvatting", "samenvattingActief"],
+        false
+      ),
+      nextSectionCode: getOptionalString(row, [
+        "nextSectionCode",
+        "volgendeSectie",
+        "next",
+      ]),
+    })
+  );
+}
+
+function buildOptionSets(rows: Record<string, string>[]) {
+  const grouped = new Map<
+    string,
+    {
+      key: string;
+      title?: string;
+      options: Record<string, unknown>[];
+    }
+  >();
+
+  for (const row of rows) {
+    const key = getString(row, ["key", "optionSetKey", "option_set_key"]);
+    if (!key) continue;
+
+    const title = getOptionalString(row, ["title", "titel"]);
+    const current = grouped.get(key) ?? {
+      key,
+      title,
+      options: [],
+    };
+
+    const option = compactObject({
+      value: getString(row, ["value", "waarde"]),
+      label: getString(row, ["label", "tekst"]),
+      description: getOptionalString(row, [
+        "description",
+        "omschrijving",
+        "beschrijving",
+      ]),
+      order: getNumber(row, ["order", "volgorde"], current.options.length * 10 + 10),
+      score: getOptionalString(row, ["score"])
+        ? getNumber(row, ["score"], 0)
+        : undefined,
+      adviceSignal: getOptionalString(row, [
+        "adviceSignal",
+        "adviesSignaal",
+        "signal",
+      ]),
+    });
+
+    current.options.push(option);
+    grouped.set(key, current);
+  }
+
+  return Array.from(grouped.values()).map((set) => compactObject(set));
+}
+
+function buildQuestions(rows: Record<string, string>[]) {
+  return rows.map((row, index) =>
+    compactObject({
+      key: getString(row, ["key", "questionKey", "vraagKey"]),
+      sectionCode: getString(row, ["sectionCode", "sectieCode"]),
+      order: getNumber(row, ["order", "volgorde"], (index + 1) * 10),
+      label: getString(row, ["label", "vraag", "title", "titel"]),
+      helpText: getOptionalString(row, ["helpText", "help", "toelichting"]),
+      inputType: getString(row, ["inputType", "type"], "text"),
+      required: getBoolean(row, ["required", "verplicht"], false),
+      optionSetKey: getOptionalString(row, ["optionSetKey", "option_set_key"]),
+      placeholder: getOptionalString(row, ["placeholder"]),
+      examples: getStringArray(row, ["examples", "voorbeelden"]),
+      allowsComment: getOptionalString(row, ["allowsComment", "toelichtingToestaan"])
+        ? getBoolean(row, ["allowsComment", "toelichtingToestaan"], false)
+        : undefined,
+      maxSelections: getOptionalString(row, ["maxSelections", "maxSelecties"])
+        ? getNumber(row, ["maxSelections", "maxSelecties"], 0)
+        : undefined,
+      visibleWhen: parseVisibleWhen(row),
+      dimensionCode: getOptionalString(row, ["dimensionCode", "dimensieCode"]),
+      category: getOptionalString(row, ["category", "categorie"]),
+      outputRole: getOptionalString(row, ["outputRole", "rol"]),
+      scoreEnabled: getOptionalString(row, ["scoreEnabled", "scoreActief"])
+        ? getBoolean(row, ["scoreEnabled", "scoreActief"], false)
+        : undefined,
+      scoreWeight: getOptionalString(row, ["scoreWeight", "scoreGewicht"])
+        ? getNumber(row, ["scoreWeight", "scoreGewicht"], 0)
+        : undefined,
+    })
+  );
 }
 
 function buildTechnicalProposal(result: ApplyResult) {
@@ -247,29 +540,82 @@ function buildDefinitionFileProposal(output: DefinitionFileOutput) {
       title: sheet.title,
       counts: sheet.counts,
     })),
+    rows: output.rows,
     note:
-      "Dit is nog geen echte TypeScript-output. Dit is de veilige tussenlaag om te bepalen welke importonderdelen naar welk definitiebestand gaan.",
+      "Dit is de veilige tussenlaag om te bepalen welke importonderdelen naar welk definitiebestand gaan.",
   };
 }
 
 function buildTypeScriptPreview(output: DefinitionFileOutput) {
-  const meta = getFileMeta(output.fileName);
-  const exportName = meta.exportName;
+  if (output.fileName === "categories.ts") {
+    const data = buildCategories(output.rows);
 
-  const proposal = buildDefinitionFileProposal(output);
+    return `export type CategoryDefinition = {
+  code: string;
+  title: string;
+  description: string;
+  order: number;
+};
 
-  return `// Auto-generated preview voor ${output.fileName}
-// Let op: dit is nog geen definitieve productiecode.
-// Deze preview is bedoeld om veilig te controleren welke importonderdelen
-// naar dit doelbestand zouden gaan.
-//
-// Gegenereerd op: ${new Date().toISOString()}
+export const categories: CategoryDefinition[] = ${stringifyTs(data)};
 
-export const ${exportName}ImportProposal = ${JSON.stringify(
-    proposal,
-    null,
-    2
-  )} as const;
+export function getCategoryDefinition(code: string): CategoryDefinition {
+  return (
+    categories.find((category) => category.code === code) ??
+    categories.find((category) => category.code === "Overig")!
+  );
+}
+`;
+  }
+
+  if (output.fileName === "dimensions.ts") {
+    const data = buildDimensions(output.rows);
+
+    return `import type { DimensionCategory } from "./types";
+
+export type DimensionDefinition = {
+  code: string;
+  title: string;
+  category: DimensionCategory;
+  description: string;
+  order: number;
+  isActive: boolean;
+};
+
+export const dimensions: DimensionDefinition[] = ${stringifyTs(data)};
+`;
+  }
+
+  if (output.fileName === "option-sets.ts") {
+    const data = buildOptionSets(output.rows);
+
+    return `import type { OptionSetDefinition } from "./types";
+
+export const optionSets: OptionSetDefinition[] = ${stringifyTs(data)};
+`;
+  }
+
+  if (output.fileName === "questions.ts") {
+    const data = buildQuestions(output.rows);
+
+    return `import type { QuestionDefinition } from "./types";
+
+export const questions: QuestionDefinition[] = ${stringifyTs(data)};
+`;
+  }
+
+  if (output.fileName === "sections.ts") {
+    const data = buildSections(output.rows);
+
+    return `import type { SectionDefinition } from "../types";
+
+export const sections: SectionDefinition[] = ${stringifyTs(data)};
+`;
+  }
+
+  return `// Geen doelbestand gekoppeld.
+// Ruwe importregels:
+export const unknownDefinitionRows = ${stringifyTs(output.rows)} as const;
 `;
 }
 
@@ -304,13 +650,7 @@ function DefinitionFileCard({
   onCopyTypeScript: (output: DefinitionFileOutput) => void;
   onDownloadTypeScript: (output: DefinitionFileOutput) => void;
 }) {
-  const hasContent =
-    output.sheets.length > 0 ||
-    output.counts.new > 0 ||
-    output.counts.changed > 0 ||
-    output.counts.unchanged > 0 ||
-    output.counts.possiblyRemoved > 0 ||
-    output.counts.invalid > 0;
+  const hasContent = output.rows.length > 0 || output.sheets.length > 0;
 
   const proposalJson = JSON.stringify(
     buildDefinitionFileProposal(output),
@@ -332,6 +672,11 @@ function DefinitionFileCard({
 
           <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
             {output.description}
+          </p>
+
+          <p className="text-sm text-muted-foreground">
+            Importregels gekoppeld:{" "}
+            <span className="font-medium text-black">{output.rows.length}</span>
           </p>
         </div>
 
@@ -439,10 +784,10 @@ function DefinitionFileCard({
 
           <details className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
             <summary className="cursor-pointer text-sm font-medium">
-              TypeScript-preview voor {output.fileName}
+              TypeScript-output voor {output.fileName}
             </summary>
 
-            <pre className="mt-4 max-h-[420px] overflow-auto rounded-2xl border border-black/10 bg-white p-4 text-xs">
+            <pre className="mt-4 max-h-[520px] overflow-auto rounded-2xl border border-black/10 bg-white p-4 text-xs">
               {typeScriptPreview}
             </pre>
           </details>
@@ -454,26 +799,38 @@ function DefinitionFileCard({
 
 export default function DefinitionImportApplyResultPage() {
   const [result, setResult] = useState<ApplyResult | null>(null);
+  const [importRows, setImportRows] = useState<ImportRows | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [copyMessage, setCopyMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    const raw = window.localStorage.getItem("definitionImportApplyResult");
+    const resultRaw = window.localStorage.getItem("definitionImportApplyResult");
+    const conceptRaw = window.localStorage.getItem("definitionImportConcept");
 
-    if (!raw) {
+    if (!resultRaw) {
       setResult(null);
+      setImportRows(null);
       setIsLoaded(true);
       return;
     }
 
     try {
-      const parsed = JSON.parse(raw) as ApplyResult;
-      setResult(parsed);
+      const parsedResult = JSON.parse(resultRaw) as ApplyResult;
+      setResult(parsedResult);
     } catch {
       setResult(null);
-    } finally {
-      setIsLoaded(true);
     }
+
+    try {
+      if (conceptRaw) {
+        const parsedConcept = JSON.parse(conceptRaw) as ImportConcept;
+        setImportRows(parsedConcept.importRows ?? null);
+      }
+    } catch {
+      setImportRows(null);
+    }
+
+    setIsLoaded(true);
   }, []);
 
   const totals = useMemo(() => {
@@ -483,8 +840,8 @@ export default function DefinitionImportApplyResultPage() {
   const sheets = result?.sheets ?? [];
 
   const definitionFileOutputs = useMemo(() => {
-    return buildDefinitionFileOutputs(sheets);
-  }, [sheets]);
+    return buildDefinitionFileOutputs(sheets, importRows);
+  }, [sheets, importRows]);
 
   const technicalProposal = useMemo(() => {
     if (!result) return null;
@@ -499,6 +856,7 @@ export default function DefinitionImportApplyResultPage() {
   const clearResult = () => {
     window.localStorage.removeItem("definitionImportApplyResult");
     setResult(null);
+    setImportRows(null);
   };
 
   const copyText = async (text: string, successMessage: string) => {
@@ -584,7 +942,7 @@ export default function DefinitionImportApplyResultPage() {
 
     await copyText(
       typeScriptPreview,
-      `TypeScript-preview voor ${output.fileName} is gekopieerd naar het klembord.`
+      `TypeScript-output voor ${output.fileName} is gekopieerd naar het klembord.`
     );
   };
 
@@ -594,7 +952,7 @@ export default function DefinitionImportApplyResultPage() {
 
     downloadText(
       typeScriptPreview,
-      `definition-file-preview-${safeName}-${getTimestamp()}.ts`,
+      `definition-file-output-${safeName}-${getTimestamp()}.ts`,
       "text/typescript;charset=utf-8"
     );
   };
@@ -698,6 +1056,13 @@ export default function DefinitionImportApplyResultPage() {
                 {formatDate(result.createdAt)}
               </span>
             </div>
+
+            <div className="text-sm text-muted-foreground">
+              Importregels beschikbaar:{" "}
+              <span className="font-medium text-black">
+                {importRows ? "ja" : "nee"}
+              </span>
+            </div>
           </div>
 
           <span
@@ -716,11 +1081,9 @@ export default function DefinitionImportApplyResultPage() {
         <h2 className="text-lg font-semibold text-amber-950">Belangrijk</h2>
 
         <p className="mt-2 max-w-4xl text-sm leading-6 text-amber-950">
-          Dit is nog geen echte live-import. Deze stap is bedoeld als veilig
-          importvoorstel. De actieve definitie in de app is nog niet aangepast.
-          De JSON- en TypeScript-preview hieronder zijn bedoeld om te bewaren,
-          controleren of later te gebruiken als basis voor een echte
-          verwerkingsstap.
+          Dit is nog geen echte live-import. Deze stap maakt TypeScript-output
+          die aansluit op de huidige definitiebestanden. Controleer de output
+          altijd voordat je iets overneemt in Git.
         </p>
       </section>
 
@@ -798,13 +1161,13 @@ export default function DefinitionImportApplyResultPage() {
       <section className="space-y-6">
         <div className="space-y-1">
           <h2 className="text-lg font-semibold">
-            Definitie-output per doelbestand
+            Echte TypeScript-output per doelbestand
           </h2>
 
           <p className="max-w-4xl text-sm leading-6 text-muted-foreground">
-            Dit is een veilige mapping van importsheets naar de bestanden in
-            lib/scan/definition. Je ziet nu zowel JSON als een eerste
-            TypeScript-preview per doelbestand. Er wordt niets weggeschreven.
+            Deze output gebruikt nu dezelfde exportstructuur als je huidige
+            definitiebestanden. Dit blijft een preview: er wordt niets
+            weggeschreven.
           </p>
         </div>
 
@@ -870,10 +1233,9 @@ export default function DefinitionImportApplyResultPage() {
           <h2 className="text-lg font-semibold">Volgende stap</h2>
 
           <p className="max-w-4xl text-sm leading-6 text-muted-foreground">
-            De volgende uitbreiding is echte TypeScript-output genereren die
-            aansluit op de huidige types en exports in lib/scan/definition.
-            Daarna kunnen we bepalen of we dit als handmatige copy/paste-stap of
-            als gecontroleerde importstap willen gebruiken.
+            De volgende stap is controleren of de kolomnamen uit de Excel-export
+            exact goed worden gemapt naar de juiste velden. Daarna kunnen we per
+            bestand de output verder aanscherpen.
           </p>
         </div>
 
