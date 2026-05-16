@@ -2265,28 +2265,28 @@ export default function DefinitionImportApplyResultPage() {
         ))}
       </section>
 
-      <section className="space-y-6">
-        <MappingStatusSummaryCard summary={mappingStatusSummary} />
+<section className="space-y-6">
+  <MappingStatusSummaryCard summary={mappingStatusSummary} />
 
-        <div className="space-y-1">
-          <h2 className="text-lg font-semibold">Kolom-mapping controle</h2>
+  <div className="space-y-1">
+    <h2 className="text-lg font-semibold">Kolom-mapping controle</h2>
 
-          <p className="max-w-4xl text-sm leading-6 text-muted-foreground">
-            Hier zie je of de kolommen uit de Excel-import goed worden gekoppeld
-            aan de velden van de TypeScript-output. Dit is de controlelaag vóór
-            we de mapping verder aanscherpen.
-          </p>
-        </div>
+    <p className="max-w-4xl text-sm leading-6 text-muted-foreground">
+      Hier zie je of de kolommen uit de Excel-import goed worden gekoppeld
+      aan de velden van de TypeScript-output. Dit is de controlelaag vóór
+      we de mapping verder aanscherpen.
+    </p>
+  </div>
 
-        <div className="space-y-5">
-          {definitionFileOutputs.map((output) => (
-            <MappingCheckCard
-              key={`mapping-${output.fileName}`}
-              output={output}
-            />
-          ))}
-        </div>
-      </section>
+  <div className="space-y-5">
+    {definitionFileOutputs.map((output) => (
+      <MappingCheckCard
+        key={`mapping-${output.fileName}`}
+        output={output}
+      />
+    ))}
+  </div>
+</section>
 
       <section className="space-y-6">
         <div className="space-y-1">
