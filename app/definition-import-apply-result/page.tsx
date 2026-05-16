@@ -3,16 +3,18 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
+type Counts = {
+  new: number;
+  changed: number;
+  unchanged: number;
+  possiblyRemoved: number;
+  invalid: number;
+};
+
 type ApplyResultSheet = {
   sheetName: string;
   title: string;
-  counts: {
-    new: number;
-    changed: number;
-    unchanged: number;
-    possiblyRemoved: number;
-    invalid: number;
-  };
+  counts: Counts;
 };
 
 type ApplyResult = {
@@ -21,14 +23,32 @@ type ApplyResult = {
   message?: string;
   error?: string;
   createdAt?: string;
-  totals?: {
-    new: number;
-    changed: number;
-    unchanged: number;
-    possiblyRemoved: number;
-    invalid: number;
-  };
+  totals?: Counts;
   sheets?: ApplyResultSheet[];
+};
+
+type DefinitionFileKey =
+  | "categories.ts"
+  | "dimensions.ts"
+  | "option-sets.ts"
+  | "questions.ts"
+  | "sections.ts"
+  | "unknown";
+
+type DefinitionFileOutput = {
+  fileName: DefinitionFileKey;
+  title: string;
+  description: string;
+  sheets: ApplyResultSheet[];
+  counts: Counts;
+};
+
+const EMPTY_COUNTS: Counts = {
+  new: 0,
+  changed: 0,
+  unchanged: 0,
+  possiblyRemoved: 0,
+  invalid: 0,
 };
 
 function formatDate(value?: string) {
@@ -43,34 +63,147 @@ function formatDate(value?: string) {
   return date.toLocaleString("nl-NL");
 }
 
-function SummaryCard({
-  label,
-  value,
-}: {
-  label: string;
-  value: number;
-}) {
-  return (
-    <div className="rounded-2xl border border-black/10 bg-white p-5">
-      <div className="text-sm text-muted-foreground">{label}</div>
-      <div className="mt-2 text-2xl font-semibold">{value}</div>
-    </div>
-  );
+function addCounts(base: Counts, extra: Counts): Counts {
+  return {
+    new: base.new + extra.new,
+    changed: base.changed + extra.changed,
+    unchanged: base.unchanged + extra.unchanged,
+    possiblyRemoved: base.possiblyRemoved + extra.possiblyRemoved,
+    invalid: base.invalid + extra.invalid,
+  };
 }
 
-function SheetCountCard({
-  label,
-  value,
-}: {
-  label: string;
-  value: number;
-}) {
-  return (
-    <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
-      <div className="text-xs text-muted-foreground">{label}</div>
-      <div className="mt-1 text-xl font-semibold">{value}</div>
-    </div>
-  );
+function getDefinitionFileForSheet(sheetName: string): DefinitionFileKey {
+  const normalized = sheetName.toLowerCase().trim();
+
+  if (
+    normalized.includes("categorie") ||
+    normalized.includes("category") ||
+    normalized === "categories"
+  ) {
+    return "categories.ts";
+  }
+
+  if (
+    normalized.includes("dimensie") ||
+    normalized.includes("dimension") ||
+    normalized === "dimensions"
+  ) {
+    return "dimensions.ts";
+  }
+
+  if (
+    normalized.includes("option") ||
+    normalized.includes("optie") ||
+    normalized.includes("set")
+  ) {
+    return "option-sets.ts";
+  }
+
+  if (
+    normalized.includes("vraag") ||
+    normalized.includes("question") ||
+    normalized === "questions"
+  ) {
+    return "questions.ts";
+  }
+
+  if (
+    normalized.includes("sectie") ||
+    normalized.includes("section") ||
+    normalized === "sections"
+  ) {
+    return "sections.ts";
+  }
+
+  return "unknown";
+}
+
+function getFileMeta(fileName: DefinitionFileKey) {
+  if (fileName === "categories.ts") {
+    return {
+      title: "Categorieën",
+      description:
+        "Bevat de hoofdindeling of classificatie die gebruikt wordt in de scan-definitie.",
+    };
+  }
+
+  if (fileName === "dimensions.ts") {
+    return {
+      title: "Dimensies",
+      description:
+        "Bevat de inhoudelijke domeinen of beoordelingsgebieden van het groeimodel.",
+    };
+  }
+
+  if (fileName === "option-sets.ts") {
+    return {
+      title: "Antwoordsets",
+      description:
+        "Bevat herbruikbare antwoordopties, scores en keuzelijsten voor vragen.",
+    };
+  }
+
+  if (fileName === "questions.ts") {
+    return {
+      title: "Vragen",
+      description:
+        "Bevat de concrete vragen, teksten, koppelingen en scoring binnen de scan.",
+    };
+  }
+
+  if (fileName === "sections.ts") {
+    return {
+      title: "Secties",
+      description:
+        "Bevat de hoofdstukken of stappen waarin vragen in de scan worden gegroepeerd.",
+    };
+  }
+
+  return {
+    title: "Niet gekoppeld",
+    description:
+      "Deze sheet kon nog niet automatisch aan een doelbestand worden gekoppeld.",
+  };
+}
+
+function buildDefinitionFileOutputs(
+  sheets: ApplyResultSheet[]
+): DefinitionFileOutput[] {
+  const fileOrder: DefinitionFileKey[] = [
+    "categories.ts",
+    "dimensions.ts",
+    "option-sets.ts",
+    "questions.ts",
+    "sections.ts",
+    "unknown",
+  ];
+
+  const grouped = new Map<DefinitionFileKey, ApplyResultSheet[]>();
+
+  for (const sheet of sheets) {
+    const fileName = getDefinitionFileForSheet(sheet.sheetName);
+    const current = grouped.get(fileName) ?? [];
+    grouped.set(fileName, [...current, sheet]);
+  }
+
+  return fileOrder.map((fileName) => {
+    const fileSheets = grouped.get(fileName) ?? [];
+    const meta = getFileMeta(fileName);
+
+    const counts = fileSheets.reduce(
+      (total, sheet) => addCounts(total, sheet.counts),
+      { ...EMPTY_COUNTS }
+    );
+
+    return {
+      fileName,
+      title: meta.title,
+      description: meta.description,
+      sheets: fileSheets,
+      counts,
+    };
+  });
 }
 
 function buildTechnicalProposal(result: ApplyResult) {
@@ -87,17 +220,165 @@ function buildTechnicalProposal(result: ApplyResult) {
       message: result.message ?? null,
       error: result.error ?? null,
     },
-    totals: result.totals ?? {
-      new: 0,
-      changed: 0,
-      unchanged: 0,
-      possiblyRemoved: 0,
-      invalid: 0,
-    },
+    totals: result.totals ?? EMPTY_COUNTS,
     sheets: result.sheets ?? [],
     note:
       "Dit is een technisch importvoorstel. De actieve definitie is hiermee nog niet aangepast.",
   };
+}
+
+function buildDefinitionFileProposal(output: DefinitionFileOutput) {
+  return {
+    proposalType: "definition-file-proposal",
+    proposalVersion: 1,
+    generatedAt: new Date().toISOString(),
+    targetFile: output.fileName,
+    title: output.title,
+    description: output.description,
+    counts: output.counts,
+    sourceSheets: output.sheets.map((sheet) => ({
+      sheetName: sheet.sheetName,
+      title: sheet.title,
+      counts: sheet.counts,
+    })),
+    note:
+      "Dit is nog geen echte TypeScript-output. Dit is de veilige tussenlaag om te bepalen welke importonderdelen naar welk definitiebestand gaan.",
+  };
+}
+
+function SummaryCard({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-2xl border border-black/10 bg-white p-5">
+      <div className="text-sm text-muted-foreground">{label}</div>
+      <div className="mt-2 text-2xl font-semibold">{value}</div>
+    </div>
+  );
+}
+
+function SheetCountCard({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
+      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className="mt-1 text-xl font-semibold">{value}</div>
+    </div>
+  );
+}
+
+function DefinitionFileCard({
+  output,
+  onCopy,
+  onDownload,
+}: {
+  output: DefinitionFileOutput;
+  onCopy: (output: DefinitionFileOutput) => void;
+  onDownload: (output: DefinitionFileOutput) => void;
+}) {
+  const hasContent =
+    output.sheets.length > 0 ||
+    output.counts.new > 0 ||
+    output.counts.changed > 0 ||
+    output.counts.unchanged > 0 ||
+    output.counts.possiblyRemoved > 0 ||
+    output.counts.invalid > 0;
+
+  const proposalJson = JSON.stringify(
+    buildDefinitionFileProposal(output),
+    null,
+    2
+  );
+
+  return (
+    <div className="rounded-3xl border border-black/10 bg-white p-5">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="space-y-2">
+          <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            {output.fileName}
+          </div>
+
+          <h3 className="text-lg font-semibold">{output.title}</h3>
+
+          <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
+            {output.description}
+          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={() => onCopy(output)}
+            disabled={!hasContent}
+            className={
+              hasContent
+                ? "inline-flex rounded-2xl border border-black/10 bg-black px-5 py-3 text-sm font-medium text-white"
+                : "inline-flex cursor-not-allowed rounded-2xl border border-black/10 bg-black/10 px-5 py-3 text-sm font-medium text-muted-foreground"
+            }
+          >
+            JSON kopiëren
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onDownload(output)}
+            disabled={!hasContent}
+            className={
+              hasContent
+                ? "inline-flex rounded-2xl border border-black/10 bg-white px-5 py-3 text-sm font-medium text-black"
+                : "inline-flex cursor-not-allowed rounded-2xl border border-black/10 bg-black/10 px-5 py-3 text-sm font-medium text-muted-foreground"
+            }
+          >
+            JSON downloaden
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-5 grid gap-3 md:grid-cols-5">
+        <SheetCountCard label="Nieuw" value={output.counts.new} />
+        <SheetCountCard label="Gewijzigd" value={output.counts.changed} />
+        <SheetCountCard label="Ongewijzigd" value={output.counts.unchanged} />
+        <SheetCountCard
+          label="Mogelijk verwijderd"
+          value={output.counts.possiblyRemoved}
+        />
+        <SheetCountCard label="Ongeldig" value={output.counts.invalid} />
+      </div>
+
+      <div className="mt-5 rounded-2xl border border-black/10 bg-black/[0.02] p-4">
+        <div className="text-sm font-medium">Gekoppelde sheets</div>
+
+        {output.sheets.length === 0 ? (
+          <p className="mt-2 text-sm text-muted-foreground">
+            Geen sheets gekoppeld aan dit doelbestand.
+          </p>
+        ) : (
+          <div className="mt-3 space-y-2">
+            {output.sheets.map((sheet) => (
+              <div
+                key={`${output.fileName}-${sheet.sheetName}`}
+                className="rounded-xl border border-black/10 bg-white p-3"
+              >
+                <div className="text-sm font-medium">{sheet.title}</div>
+                <div className="mt-1 text-xs text-muted-foreground">
+                  Sheet: {sheet.sheetName}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {hasContent && (
+        <details className="mt-5 rounded-2xl border border-black/10 bg-black/[0.02] p-4">
+          <summary className="cursor-pointer text-sm font-medium">
+            JSON-preview voor {output.fileName}
+          </summary>
+
+          <pre className="mt-4 max-h-[360px] overflow-auto rounded-2xl border border-black/10 bg-white p-4 text-xs">
+            {proposalJson}
+          </pre>
+        </details>
+      )}
+    </div>
+  );
 }
 
 export default function DefinitionImportApplyResultPage() {
@@ -125,18 +406,14 @@ export default function DefinitionImportApplyResultPage() {
   }, []);
 
   const totals = useMemo(() => {
-    return (
-      result?.totals ?? {
-        new: 0,
-        changed: 0,
-        unchanged: 0,
-        possiblyRemoved: 0,
-        invalid: 0,
-      }
-    );
+    return result?.totals ?? EMPTY_COUNTS;
   }, [result]);
 
   const sheets = result?.sheets ?? [];
+
+  const definitionFileOutputs = useMemo(() => {
+    return buildDefinitionFileOutputs(sheets);
+  }, [sheets]);
 
   const technicalProposal = useMemo(() => {
     if (!result) return null;
@@ -153,12 +430,12 @@ export default function DefinitionImportApplyResultPage() {
     setResult(null);
   };
 
-  const copyJson = async () => {
-    if (!technicalProposalJson) return;
+  const copyText = async (text: string, successMessage: string) => {
+    if (!text) return;
 
     try {
-      await navigator.clipboard.writeText(technicalProposalJson);
-      setCopyMessage("JSON is gekopieerd naar het klembord.");
+      await navigator.clipboard.writeText(text);
+      setCopyMessage(successMessage);
     } catch {
       setCopyMessage(
         "Kopiëren is niet gelukt. Selecteer de JSON handmatig en kopieer deze."
@@ -170,28 +447,63 @@ export default function DefinitionImportApplyResultPage() {
     }, 3000);
   };
 
-  const downloadJson = () => {
-    if (!technicalProposalJson) return;
+  const downloadText = (text: string, fileName: string) => {
+    if (!text) return;
 
-    const blob = new Blob([technicalProposalJson], {
+    const blob = new Blob([text], {
       type: "application/json;charset=utf-8",
     });
 
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
 
-    const timestamp = new Date()
-      .toISOString()
-      .replaceAll(":", "-")
-      .replaceAll(".", "-");
-
     link.href = url;
-    link.download = `definition-import-proposal-${timestamp}.json`;
+    link.download = fileName;
     document.body.appendChild(link);
     link.click();
     link.remove();
 
     window.URL.revokeObjectURL(url);
+  };
+
+  const getTimestamp = () => {
+    return new Date()
+      .toISOString()
+      .replaceAll(":", "-")
+      .replaceAll(".", "-");
+  };
+
+  const copyJson = async () => {
+    await copyText(
+      technicalProposalJson,
+      "Volledig importvoorstel is gekopieerd naar het klembord."
+    );
+  };
+
+  const downloadJson = () => {
+    downloadText(
+      technicalProposalJson,
+      `definition-import-proposal-${getTimestamp()}.json`
+    );
+  };
+
+  const copyDefinitionFileJson = async (output: DefinitionFileOutput) => {
+    const json = JSON.stringify(buildDefinitionFileProposal(output), null, 2);
+
+    await copyText(
+      json,
+      `JSON voor ${output.fileName} is gekopieerd naar het klembord.`
+    );
+  };
+
+  const downloadDefinitionFileJson = (output: DefinitionFileOutput) => {
+    const json = JSON.stringify(buildDefinitionFileProposal(output), null, 2);
+    const safeName = output.fileName.replace(".ts", "").replaceAll(".", "-");
+
+    downloadText(
+      json,
+      `definition-file-proposal-${safeName}-${getTimestamp()}.json`
+    );
   };
 
   if (!isLoaded) {
@@ -389,6 +701,37 @@ export default function DefinitionImportApplyResultPage() {
         ))}
       </section>
 
+      <section className="space-y-6">
+        <div className="space-y-1">
+          <h2 className="text-lg font-semibold">
+            Definitie-output per doelbestand
+          </h2>
+
+          <p className="max-w-4xl text-sm leading-6 text-muted-foreground">
+            Dit is een veilige mapping van importsheets naar de bestanden in
+            lib/scan/definition. Er wordt nog geen TypeScript-code gegenereerd
+            en er wordt niets weggeschreven.
+          </p>
+        </div>
+
+        {copyMessage && (
+          <div className="rounded-2xl border border-green-200 bg-green-50 p-4 text-sm text-green-950">
+            {copyMessage}
+          </div>
+        )}
+
+        <div className="space-y-5">
+          {definitionFileOutputs.map((output) => (
+            <DefinitionFileCard
+              key={output.fileName}
+              output={output}
+              onCopy={copyDefinitionFileJson}
+              onDownload={downloadDefinitionFileJson}
+            />
+          ))}
+        </div>
+      </section>
+
       <section className="rounded-3xl border border-black/10 bg-white p-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-2">
@@ -397,10 +740,8 @@ export default function DefinitionImportApplyResultPage() {
             </h2>
 
             <p className="max-w-4xl text-sm leading-6 text-muted-foreground">
-              Dit JSON-bestand is het technische voorstel op basis van de
-              gecontroleerde import. Het is bedoeld om veilig te bewaren,
-              controleren of later als basis te gebruiken voor een echte
-              verwerkingsstap.
+              Dit JSON-bestand is het volledige technische voorstel op basis van
+              de gecontroleerde import. Dit blijft de overkoepelende export.
             </p>
           </div>
 
@@ -423,12 +764,6 @@ export default function DefinitionImportApplyResultPage() {
           </div>
         </div>
 
-        {copyMessage && (
-          <div className="mt-4 rounded-2xl border border-green-200 bg-green-50 p-4 text-sm text-green-950">
-            {copyMessage}
-          </div>
-        )}
-
         <pre className="mt-5 max-h-[520px] overflow-auto rounded-2xl border border-black/10 bg-black/[0.02] p-4 text-xs">
           {technicalProposalJson}
         </pre>
@@ -439,10 +774,9 @@ export default function DefinitionImportApplyResultPage() {
           <h2 className="text-lg font-semibold">Volgende stap</h2>
 
           <p className="max-w-4xl text-sm leading-6 text-muted-foreground">
-            De volgende uitbreiding is het genereren van echte
-            definitie-output per onderdeel. Denk aan een JSON-structuur of
-            TypeScript-output die één-op-één aansluit op de bestanden in
-            lib/scan/definition.
+            De volgende uitbreiding is TypeScript-output per bestand genereren.
+            Dan tonen we niet alleen JSON, maar ook codeblokken voor bijvoorbeeld
+            questions.ts, option-sets.ts en sections.ts.
           </p>
         </div>
 
