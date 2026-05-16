@@ -52,10 +52,15 @@ export type OptionSetDefinition = {
   options: OptionDefinition[];
 };
 
+export type SectionPhase = "profile" | "scope" | "diagnose" | "advies";
+
 export type SectionDefinition = {
   code: string;
   title: string;
+  shortTitle?: string;
   description?: string;
+  phase?: SectionPhase;
   order: number;
+  summaryEnabled?: boolean;
   nextSectionCode?: string;
 };
