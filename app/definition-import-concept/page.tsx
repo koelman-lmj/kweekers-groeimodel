@@ -249,6 +249,233 @@ function DiffDetails({ diff }: { diff: ImportDiffResult }) {
   );
 }
 
+function ImportApplyConfirmation({
+  concept,
+  diff,
+  hasIssues,
+}: {
+  concept: ImportConcept;
+  diff: ImportDiffResult | null;
+  hasIssues: boolean;
+}) {
+  const [checked, setChecked] = useState(false);
+  const [confirmText, setConfirmText] = useState("");
+  const [testMessage, setTestMessage] = useState<string | null>(null);
+  const [testError, setTestError] = useState<string | null>(null);
+  const [isTesting, setIsTesting] = useState(false);
+
+  const hasBlockingState =
+    !concept.ok || hasIssues || !diff || !concept.importRows;
+
+  const confirmTextIsValid = confirmText.trim().toUpperCase() === "TOEPASSEN";
+
+  const canConfirm =
+    !hasBlockingState && checked && confirmTextIsValid && !isTesting;
+
+  const runServerSideSafeTest = async () => {
+    if (!canConfirm || !diff || !concept.importRows) return;
+
+    setIsTesting(true);
+    setTestMessage(null);
+    setTestError(null);
+
+    try {
+      const response = await fetch("/api/definition-import-apply", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          confirmed: checked,
+          confirmText,
+          importRows: concept.importRows,
+        }),
+      });
+
+      const result = (await response.json()) as {
+        ok?: boolean;
+        message?: string;
+        error?: string;
+        totals?: {
+          new: number;
+          changed: number;
+          unchanged: number;
+          possiblyRemoved: number;
+          invalid: number;
+        };
+      };
+
+      if (!response.ok || !result.ok) {
+        setTestError(
+          result.error ??
+            "Server-side veilige test is niet gelukt. Controleer de importgegevens."
+        );
+        return;
+      }
+
+      const totals = result.totals ?? diff.totals;
+
+      setTestMessage(
+        `${
+          result.message ?? "Server-side veilige test geslaagd."
+        } Samenvatting: ${totals.new} nieuw, ${totals.changed} gewijzigd, ${
+          totals.unchanged
+        } ongewijzigd, ${totals.possiblyRemoved} mogelijk verwijderd en ${
+          totals.invalid
+        } ongeldig.`
+      );
+    } catch {
+      setTestError(
+        "Server-side veilige test kon niet worden uitgevoerd. Controleer of de lokale server draait."
+      );
+    } finally {
+      setIsTesting(false);
+    }
+  };
+
+  return (
+    <section className="rounded-3xl border border-black/10 bg-white p-5">
+      <div className="space-y-2">
+        <h2 className="text-lg font-semibold">Bevestiging vóór toepassen</h2>
+
+        <p className="max-w-3xl text-sm text-muted-foreground">
+          Dit is de extra beveiligingslaag vóór echte import. De knop hieronder
+          voert nu een server-side veilige test uit via de API-route. Er wordt
+          nog niets aangepast in de definitie.
+        </p>
+      </div>
+
+      <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+        <div className="text-sm font-semibold text-amber-950">Let op</div>
+
+        <p className="mt-2 text-sm leading-6 text-amber-950">
+          Deze stap controleert aan de serverkant of het importconcept technisch
+          toepasbaar is. De definitieve import bouwen we pas daarna.
+        </p>
+      </div>
+
+      {diff && (
+        <div className="mt-5 grid gap-3 md:grid-cols-5">
+          <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
+            <div className="text-xs text-muted-foreground">Nieuw</div>
+            <div className="mt-1 text-xl font-semibold">{diff.totals.new}</div>
+          </div>
+
+          <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
+            <div className="text-xs text-muted-foreground">Gewijzigd</div>
+            <div className="mt-1 text-xl font-semibold">
+              {diff.totals.changed}
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
+            <div className="text-xs text-muted-foreground">Ongewijzigd</div>
+            <div className="mt-1 text-xl font-semibold">
+              {diff.totals.unchanged}
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
+            <div className="text-xs text-muted-foreground">
+              Mogelijk verwijderd
+            </div>
+            <div className="mt-1 text-xl font-semibold">
+              {diff.totals.possiblyRemoved}
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
+            <div className="text-xs text-muted-foreground">Ongeldig</div>
+            <div className="mt-1 text-xl font-semibold">
+              {diff.totals.invalid}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {hasBlockingState && (
+        <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-4">
+          <div className="text-sm font-semibold text-red-950">
+            Toepassen is geblokkeerd
+          </div>
+
+          <p className="mt-2 text-sm leading-6 text-red-950">
+            Het concept is niet geschikt om toe te passen. Controleer eerst de
+            foutmeldingen, ontbrekende velden, verwijzingen, sheetcontroles of
+            ontbrekende importregels.
+          </p>
+        </div>
+      )}
+
+      <div className="mt-5 space-y-4">
+        <label className="flex items-start gap-3 rounded-2xl border border-black/10 bg-black/[0.02] p-4">
+          <input
+            type="checkbox"
+            checked={checked}
+            onChange={(event) => setChecked(event.target.checked)}
+            disabled={hasBlockingState || isTesting}
+            className="mt-1"
+          />
+
+          <span className="text-sm text-muted-foreground">
+            Ik heb de wijzigingsanalyse, sheetcontrole en eventuele meldingen
+            gecontroleerd.
+          </span>
+        </label>
+
+        <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
+          <label className="text-sm font-medium">
+            Typ <span className="font-semibold">TOEPASSEN</span> om de knop
+            vrij te geven
+          </label>
+
+          <input
+            type="text"
+            value={confirmText}
+            onChange={(event) => setConfirmText(event.target.value)}
+            disabled={hasBlockingState || isTesting}
+            placeholder="TOEPASSEN"
+            className="mt-3 w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm outline-none"
+          />
+        </div>
+      </div>
+
+      <div className="mt-5 flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onClick={runServerSideSafeTest}
+          disabled={!canConfirm}
+          className={
+            canConfirm
+              ? "inline-flex rounded-2xl border border-black/10 bg-black px-5 py-3 text-sm font-medium text-white"
+              : "inline-flex cursor-not-allowed rounded-2xl border border-black/10 bg-black/10 px-5 py-3 text-sm font-medium text-muted-foreground"
+          }
+        >
+          {isTesting
+            ? "Server-side test uitvoeren..."
+            : "Bevestig toepassen — server-side veilige test"}
+        </button>
+
+        <span className="text-sm text-muted-foreground">
+          Deze knop importeert nu nog niet echt.
+        </span>
+      </div>
+
+      {testMessage && (
+        <div className="mt-5 rounded-2xl border border-green-200 bg-green-50 p-4 text-sm leading-6 text-green-950">
+          {testMessage}
+        </div>
+      )}
+
+      {testError && (
+        <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-950">
+          {testError}
+        </div>
+      )}
+    </section>
+  );
+}
+
 export default function DefinitionImportConceptPage() {
   const [concept, setConcept] = useState<ImportConcept | null>(null);
   const [diff, setDiff] = useState<ImportDiffResult | null>(null);
@@ -542,6 +769,12 @@ export default function DefinitionImportConceptPage() {
           ))}
         </section>
       )}
+
+      <ImportApplyConfirmation
+        concept={concept}
+        diff={diff}
+        hasIssues={hasIssues}
+      />
     </main>
   );
 }
