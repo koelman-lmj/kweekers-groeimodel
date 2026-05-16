@@ -50,12 +50,495 @@ type DefinitionFileOutput = {
   counts: Counts;
 };
 
+type MappingFieldConfig = {
+  outputField: string;
+  candidates: string[];
+  required: boolean;
+  type: "string" | "number" | "boolean" | "array" | "json";
+};
+
+type MappingFieldCheck = {
+  outputField: string;
+  candidates: string[];
+  required: boolean;
+  type: MappingFieldConfig["type"];
+  matchedColumn: string | null;
+  filledRows: number;
+  emptyRows: number;
+};
+
+type MappingCheck = {
+  fileName: DefinitionFileKey;
+  rowCount: number;
+  rawColumns: string[];
+  fields: MappingFieldCheck[];
+  missingRequiredFields: MappingFieldCheck[];
+};
+
 const EMPTY_COUNTS: Counts = {
   new: 0,
   changed: 0,
   unchanged: 0,
   possiblyRemoved: 0,
   invalid: 0,
+};
+
+const MAPPING_CONFIG: Record<DefinitionFileKey, MappingFieldConfig[]> = {
+  "categories.ts": [
+    {
+      outputField: "code",
+      candidates: [
+        "code",
+        "categoryCode",
+        "category_code",
+        "categorieCode",
+        "categorie_code",
+      ],
+      required: true,
+      type: "string",
+    },
+    {
+      outputField: "title",
+      candidates: ["title", "title_nl", "titel", "name", "naam", "label"],
+      required: true,
+      type: "string",
+    },
+    {
+      outputField: "description",
+      candidates: [
+        "description",
+        "description_nl",
+        "omschrijving",
+        "beschrijving",
+        "helpText",
+        "help_text",
+      ],
+      required: false,
+      type: "string",
+    },
+    {
+      outputField: "order",
+      candidates: ["order", "sortOrder", "sort_order", "volgorde"],
+      required: true,
+      type: "number",
+    },
+  ],
+
+  "dimensions.ts": [
+    {
+      outputField: "code",
+      candidates: [
+        "code",
+        "dimensionCode",
+        "dimension_code",
+        "dimensieCode",
+        "dimensie_code",
+      ],
+      required: true,
+      type: "string",
+    },
+    {
+      outputField: "title",
+      candidates: ["title", "title_nl", "titel", "name", "naam", "label"],
+      required: true,
+      type: "string",
+    },
+    {
+      outputField: "category",
+      candidates: [
+        "category",
+        "categoryCode",
+        "category_code",
+        "categorie",
+        "categorieCode",
+        "categorie_code",
+      ],
+      required: true,
+      type: "string",
+    },
+    {
+      outputField: "description",
+      candidates: [
+        "description",
+        "description_nl",
+        "omschrijving",
+        "beschrijving",
+        "helpText",
+        "help_text",
+      ],
+      required: false,
+      type: "string",
+    },
+    {
+      outputField: "order",
+      candidates: ["order", "sortOrder", "sort_order", "volgorde"],
+      required: true,
+      type: "number",
+    },
+    {
+      outputField: "isActive",
+      candidates: ["isActive", "is_active", "active", "actief"],
+      required: false,
+      type: "boolean",
+    },
+  ],
+
+  "sections.ts": [
+    {
+      outputField: "code",
+      candidates: [
+        "code",
+        "sectionCode",
+        "section_code",
+        "section",
+        "sectionKey",
+        "section_key",
+        "sectieCode",
+        "sectie_code",
+        "sectie",
+      ],
+      required: true,
+      type: "string",
+    },
+    {
+      outputField: "title",
+      candidates: ["title", "title_nl", "titel", "name", "naam", "label"],
+      required: true,
+      type: "string",
+    },
+    {
+      outputField: "shortTitle",
+      candidates: ["shortTitle", "short_title", "korteTitel", "korte_titel"],
+      required: false,
+      type: "string",
+    },
+    {
+      outputField: "phase",
+      candidates: ["phase", "fase", "step", "stap"],
+      required: false,
+      type: "string",
+    },
+    {
+      outputField: "order",
+      candidates: ["order", "sortOrder", "sort_order", "volgorde"],
+      required: true,
+      type: "number",
+    },
+    {
+      outputField: "summaryEnabled",
+      candidates: [
+        "summaryEnabled",
+        "summary_enabled",
+        "samenvatting",
+        "samenvattingActief",
+        "samenvatting_actief",
+      ],
+      required: false,
+      type: "boolean",
+    },
+    {
+      outputField: "nextSectionCode",
+      candidates: [
+        "nextSectionCode",
+        "next_section_code",
+        "volgendeSectie",
+        "volgende_sectie",
+        "next",
+      ],
+      required: false,
+      type: "string",
+    },
+  ],
+
+  "option-sets.ts": [
+    {
+      outputField: "key",
+      candidates: [
+        "key",
+        "optionSet",
+        "option_set",
+        "optionSetKey",
+        "option_set_key",
+        "set",
+        "setKey",
+        "set_key",
+        "optionGroup",
+        "option_group",
+      ],
+      required: true,
+      type: "string",
+    },
+    {
+      outputField: "title",
+      candidates: ["title", "title_nl", "titel", "name", "naam"],
+      required: false,
+      type: "string",
+    },
+    {
+      outputField: "value",
+      candidates: [
+        "value",
+        "waarde",
+        "optionValue",
+        "option_value",
+        "optionKey",
+        "option_key",
+        "answerValue",
+        "answer_value",
+      ],
+      required: true,
+      type: "string",
+    },
+    {
+      outputField: "label",
+      candidates: [
+        "label",
+        "label_nl",
+        "tekst",
+        "text",
+        "title",
+        "title_nl",
+        "answerLabel",
+        "answer_label",
+        "optionLabel",
+        "option_label",
+      ],
+      required: true,
+      type: "string",
+    },
+    {
+      outputField: "description",
+      candidates: [
+        "description",
+        "description_nl",
+        "omschrijving",
+        "beschrijving",
+        "helpText",
+        "help_text",
+      ],
+      required: false,
+      type: "string",
+    },
+    {
+      outputField: "order",
+      candidates: ["order", "sortOrder", "sort_order", "volgorde"],
+      required: true,
+      type: "number",
+    },
+    {
+      outputField: "score",
+      candidates: ["score", "points", "punten"],
+      required: false,
+      type: "number",
+    },
+    {
+      outputField: "adviceSignal",
+      candidates: [
+        "adviceSignal",
+        "advice_signal",
+        "adviesSignaal",
+        "advies_signaal",
+        "signal",
+      ],
+      required: false,
+      type: "string",
+    },
+  ],
+
+  "questions.ts": [
+    {
+      outputField: "key",
+      candidates: [
+        "key",
+        "questionKey",
+        "question_key",
+        "vraagKey",
+        "vraag_key",
+      ],
+      required: true,
+      type: "string",
+    },
+    {
+      outputField: "sectionCode",
+      candidates: [
+        "sectionCode",
+        "section_code",
+        "section",
+        "sectionKey",
+        "section_key",
+        "sectieCode",
+        "sectie_code",
+        "sectie",
+      ],
+      required: true,
+      type: "string",
+    },
+    {
+      outputField: "order",
+      candidates: ["order", "sortOrder", "sort_order", "volgorde"],
+      required: true,
+      type: "number",
+    },
+    {
+      outputField: "label",
+      candidates: [
+        "label",
+        "label_nl",
+        "vraag",
+        "question",
+        "title",
+        "title_nl",
+        "titel",
+      ],
+      required: true,
+      type: "string",
+    },
+    {
+      outputField: "helpText",
+      candidates: [
+        "helpText",
+        "help_text",
+        "help",
+        "toelichting",
+        "description",
+        "description_nl",
+      ],
+      required: false,
+      type: "string",
+    },
+    {
+      outputField: "inputType",
+      candidates: [
+        "inputType",
+        "input_type",
+        "type",
+        "questionType",
+        "question_type",
+      ],
+      required: true,
+      type: "string",
+    },
+    {
+      outputField: "required",
+      candidates: ["required", "isRequired", "is_required", "verplicht"],
+      required: true,
+      type: "boolean",
+    },
+    {
+      outputField: "optionSetKey",
+      candidates: [
+        "optionSetKey",
+        "option_set_key",
+        "optionsKey",
+        "options_key",
+      ],
+      required: false,
+      type: "string",
+    },
+    {
+      outputField: "placeholder",
+      candidates: ["placeholder", "placeholder_nl"],
+      required: false,
+      type: "string",
+    },
+    {
+      outputField: "examples",
+      candidates: ["examples", "examples_nl", "voorbeelden"],
+      required: false,
+      type: "array",
+    },
+    {
+      outputField: "allowsComment",
+      candidates: [
+        "allowsComment",
+        "allows_comment",
+        "commentAllowed",
+        "comment_allowed",
+        "toelichtingToestaan",
+        "toelichting_toestaan",
+      ],
+      required: false,
+      type: "boolean",
+    },
+    {
+      outputField: "maxSelections",
+      candidates: [
+        "maxSelections",
+        "max_selections",
+        "maxSelecties",
+        "max_selecties",
+      ],
+      required: false,
+      type: "number",
+    },
+    {
+      outputField: "visibleWhen",
+      candidates: [
+        "visibleWhen",
+        "visible_when",
+        "zichtbaarAls",
+        "zichtbaar_als",
+      ],
+      required: false,
+      type: "json",
+    },
+    {
+      outputField: "dimensionCode",
+      candidates: [
+        "dimensionCode",
+        "dimension_code",
+        "dimensieCode",
+        "dimensie_code",
+      ],
+      required: false,
+      type: "string",
+    },
+    {
+      outputField: "category",
+      candidates: [
+        "category",
+        "categoryCode",
+        "category_code",
+        "categorie",
+        "categorieCode",
+        "categorie_code",
+      ],
+      required: false,
+      type: "string",
+    },
+    {
+      outputField: "outputRole",
+      candidates: ["outputRole", "output_role", "rol", "role"],
+      required: false,
+      type: "string",
+    },
+    {
+      outputField: "scoreEnabled",
+      candidates: [
+        "scoreEnabled",
+        "score_enabled",
+        "scoreActief",
+        "score_actief",
+      ],
+      required: false,
+      type: "boolean",
+    },
+    {
+      outputField: "scoreWeight",
+      candidates: [
+        "scoreWeight",
+        "score_weight",
+        "scoreGewicht",
+        "score_gewicht",
+        "weight",
+        "gewicht",
+      ],
+      required: false,
+      type: "number",
+    },
+  ],
+
+  unknown: [],
 };
 
 function formatDate(value?: string) {
@@ -82,6 +565,68 @@ function addCounts(base: Counts, extra: Counts): Counts {
 
 function normalizeKey(value: string) {
   return value.toLowerCase().replace(/[\s_\-.]/g, "");
+}
+
+function getRawColumns(rows: Record<string, string>[]) {
+  const columns = new Set<string>();
+
+  for (const row of rows) {
+    for (const column of Object.keys(row)) {
+      columns.add(column);
+    }
+  }
+
+  return Array.from(columns).sort((a, b) => a.localeCompare(b));
+}
+
+function findMatchedColumn(
+  rawColumns: string[],
+  candidates: string[]
+): string | null {
+  const normalizedCandidates = candidates.map(normalizeKey);
+
+  return (
+    rawColumns.find((column) =>
+      normalizedCandidates.includes(normalizeKey(column))
+    ) ?? null
+  );
+}
+
+function buildMappingCheck(output: DefinitionFileOutput): MappingCheck {
+  const rawColumns = getRawColumns(output.rows);
+  const config = MAPPING_CONFIG[output.fileName] ?? [];
+
+  const fields = config.map((field): MappingFieldCheck => {
+    const matchedColumn = findMatchedColumn(rawColumns, field.candidates);
+
+    const filledRows = matchedColumn
+      ? output.rows.filter((row) => {
+          const value = row[matchedColumn];
+          return typeof value === "string" && value.trim().length > 0;
+        }).length
+      : 0;
+
+    return {
+      outputField: field.outputField,
+      candidates: field.candidates,
+      required: field.required,
+      type: field.type,
+      matchedColumn,
+      filledRows,
+      emptyRows: output.rows.length - filledRows,
+    };
+  });
+
+  return {
+    fileName: output.fileName,
+    rowCount: output.rows.length,
+    rawColumns,
+    fields,
+    missingRequiredFields: fields.filter(
+      (field) =>
+        field.required && (!field.matchedColumn || field.filledRows === 0)
+    ),
+  };
 }
 
 function getField(row: Record<string, string>, candidates: string[]) {
@@ -385,40 +930,137 @@ function buildDefinitionFileOutputs(
 
 function buildCategories(rows: Record<string, string>[]) {
   return rows.map((row, index) => ({
-    code: getString(row, ["code", "categoryCode", "categorieCode"]),
-    title: getString(row, ["title", "titel", "name", "naam"]),
-    description: getString(row, ["description", "omschrijving", "beschrijving"]),
-    order: getNumber(row, ["order", "volgorde"], (index + 1) * 10),
+    code: getString(row, [
+      "code",
+      "categoryCode",
+      "category_code",
+      "categorieCode",
+      "categorie_code",
+    ]),
+    title: getString(row, [
+      "title",
+      "title_nl",
+      "titel",
+      "name",
+      "naam",
+      "label",
+    ]),
+    description: getString(row, [
+      "description",
+      "description_nl",
+      "omschrijving",
+      "beschrijving",
+      "helpText",
+      "help_text",
+    ]),
+    order: getNumber(
+      row,
+      ["order", "sortOrder", "sort_order", "volgorde"],
+      (index + 1) * 10
+    ),
   }));
 }
 
 function buildDimensions(rows: Record<string, string>[]) {
   return rows.map((row, index) => ({
-    code: getString(row, ["code", "dimensionCode", "dimensieCode"]),
-    title: getString(row, ["title", "titel", "name", "naam"]),
-    category: getString(row, ["category", "categorie"], "Overig"),
-    description: getString(row, ["description", "omschrijving", "beschrijving"]),
-    order: getNumber(row, ["order", "volgorde"], (index + 1) * 10),
-    isActive: getBoolean(row, ["isActive", "actief"], true),
+    code: getString(row, [
+      "code",
+      "dimensionCode",
+      "dimension_code",
+      "dimensieCode",
+      "dimensie_code",
+    ]),
+    title: getString(row, [
+      "title",
+      "title_nl",
+      "titel",
+      "name",
+      "naam",
+      "label",
+    ]),
+    category: getString(
+      row,
+      [
+        "category",
+        "categoryCode",
+        "category_code",
+        "categorie",
+        "categorieCode",
+        "categorie_code",
+      ],
+      "Overig"
+    ),
+    description: getString(row, [
+      "description",
+      "description_nl",
+      "omschrijving",
+      "beschrijving",
+      "helpText",
+      "help_text",
+    ]),
+    order: getNumber(
+      row,
+      ["order", "sortOrder", "sort_order", "volgorde"],
+      (index + 1) * 10
+    ),
+    isActive: getBoolean(
+      row,
+      ["isActive", "is_active", "active", "actief"],
+      true
+    ),
   }));
 }
 
 function buildSections(rows: Record<string, string>[]) {
   return rows.map((row, index) =>
     compactObject({
-      code: getString(row, ["code", "sectionCode", "sectieCode"]),
-      title: getString(row, ["title", "titel", "name", "naam"]),
-      shortTitle: getOptionalString(row, ["shortTitle", "korteTitel"]),
-      phase: getOptionalString(row, ["phase", "fase"]),
-      order: getNumber(row, ["order", "volgorde"], (index + 1) * 10),
+      code: getString(row, [
+        "code",
+        "sectionCode",
+        "section_code",
+        "section",
+        "sectionKey",
+        "section_key",
+        "sectieCode",
+        "sectie_code",
+        "sectie",
+      ]),
+      title: getString(row, [
+        "title",
+        "title_nl",
+        "titel",
+        "name",
+        "naam",
+        "label",
+      ]),
+      shortTitle: getOptionalString(row, [
+        "shortTitle",
+        "short_title",
+        "korteTitel",
+        "korte_titel",
+      ]),
+      phase: getOptionalString(row, ["phase", "fase", "step", "stap"]),
+      order: getNumber(
+        row,
+        ["order", "sortOrder", "sort_order", "volgorde"],
+        (index + 1) * 10
+      ),
       summaryEnabled: getBoolean(
         row,
-        ["summaryEnabled", "samenvatting", "samenvattingActief"],
+        [
+          "summaryEnabled",
+          "summary_enabled",
+          "samenvatting",
+          "samenvattingActief",
+          "samenvatting_actief",
+        ],
         false
       ),
       nextSectionCode: getOptionalString(row, [
         "nextSectionCode",
+        "next_section_code",
         "volgendeSectie",
+        "volgende_sectie",
         "next",
       ]),
     })
@@ -436,10 +1078,29 @@ function buildOptionSets(rows: Record<string, string>[]) {
   >();
 
   for (const row of rows) {
-    const key = getString(row, ["key", "optionSetKey", "option_set_key"]);
+    const key = getString(row, [
+      "key",
+      "optionSet",
+      "option_set",
+      "optionSetKey",
+      "option_set_key",
+      "set",
+      "setKey",
+      "set_key",
+      "optionGroup",
+      "option_group",
+    ]);
+
     if (!key) continue;
 
-    const title = getOptionalString(row, ["title", "titel"]);
+    const title = getOptionalString(row, [
+      "title",
+      "title_nl",
+      "titel",
+      "name",
+      "naam",
+    ]);
+
     const current = grouped.get(key) ?? {
       key,
       title,
@@ -447,20 +1108,49 @@ function buildOptionSets(rows: Record<string, string>[]) {
     };
 
     const option = compactObject({
-      value: getString(row, ["value", "waarde"]),
-      label: getString(row, ["label", "tekst"]),
+      value: getString(row, [
+        "value",
+        "waarde",
+        "optionValue",
+        "option_value",
+        "optionKey",
+        "option_key",
+        "answerValue",
+        "answer_value",
+      ]),
+      label: getString(row, [
+        "label",
+        "label_nl",
+        "tekst",
+        "text",
+        "title",
+        "title_nl",
+        "answerLabel",
+        "answer_label",
+        "optionLabel",
+        "option_label",
+      ]),
       description: getOptionalString(row, [
         "description",
+        "description_nl",
         "omschrijving",
         "beschrijving",
+        "helpText",
+        "help_text",
       ]),
-      order: getNumber(row, ["order", "volgorde"], current.options.length * 10 + 10),
-      score: getOptionalString(row, ["score"])
-        ? getNumber(row, ["score"], 0)
+      order: getNumber(
+        row,
+        ["order", "sortOrder", "sort_order", "volgorde"],
+        current.options.length * 10 + 10
+      ),
+      score: getOptionalString(row, ["score", "points", "punten"])
+        ? getNumber(row, ["score", "points", "punten"], 0)
         : undefined,
       adviceSignal: getOptionalString(row, [
         "adviceSignal",
+        "advice_signal",
         "adviesSignaal",
+        "advies_signaal",
         "signal",
       ]),
     });
@@ -475,31 +1165,153 @@ function buildOptionSets(rows: Record<string, string>[]) {
 function buildQuestions(rows: Record<string, string>[]) {
   return rows.map((row, index) =>
     compactObject({
-      key: getString(row, ["key", "questionKey", "vraagKey"]),
-      sectionCode: getString(row, ["sectionCode", "sectieCode"]),
-      order: getNumber(row, ["order", "volgorde"], (index + 1) * 10),
-      label: getString(row, ["label", "vraag", "title", "titel"]),
-      helpText: getOptionalString(row, ["helpText", "help", "toelichting"]),
-      inputType: getString(row, ["inputType", "type"], "text"),
-      required: getBoolean(row, ["required", "verplicht"], false),
-      optionSetKey: getOptionalString(row, ["optionSetKey", "option_set_key"]),
-      placeholder: getOptionalString(row, ["placeholder"]),
-      examples: getStringArray(row, ["examples", "voorbeelden"]),
-      allowsComment: getOptionalString(row, ["allowsComment", "toelichtingToestaan"])
-        ? getBoolean(row, ["allowsComment", "toelichtingToestaan"], false)
+      key: getString(row, [
+        "key",
+        "questionKey",
+        "question_key",
+        "vraagKey",
+        "vraag_key",
+      ]),
+      sectionCode: getString(row, [
+        "sectionCode",
+        "section_code",
+        "section",
+        "sectionKey",
+        "section_key",
+        "sectieCode",
+        "sectie_code",
+        "sectie",
+      ]),
+      order: getNumber(
+        row,
+        ["order", "sortOrder", "sort_order", "volgorde"],
+        (index + 1) * 10
+      ),
+      label: getString(row, [
+        "label",
+        "label_nl",
+        "vraag",
+        "question",
+        "title",
+        "title_nl",
+        "titel",
+      ]),
+      helpText: getOptionalString(row, [
+        "helpText",
+        "help_text",
+        "help",
+        "toelichting",
+        "description",
+        "description_nl",
+      ]),
+      inputType: getString(
+        row,
+        ["inputType", "input_type", "type", "questionType", "question_type"],
+        "text"
+      ),
+      required: getBoolean(
+        row,
+        ["required", "isRequired", "is_required", "verplicht"],
+        false
+      ),
+      optionSetKey: getOptionalString(row, [
+        "optionSetKey",
+        "option_set_key",
+        "optionsKey",
+        "options_key",
+      ]),
+      placeholder: getOptionalString(row, ["placeholder", "placeholder_nl"]),
+      examples: getStringArray(row, [
+        "examples",
+        "examples_nl",
+        "voorbeelden",
+      ]),
+      allowsComment: getOptionalString(row, [
+        "allowsComment",
+        "allows_comment",
+        "commentAllowed",
+        "comment_allowed",
+        "toelichtingToestaan",
+        "toelichting_toestaan",
+      ])
+        ? getBoolean(
+            row,
+            [
+              "allowsComment",
+              "allows_comment",
+              "commentAllowed",
+              "comment_allowed",
+              "toelichtingToestaan",
+              "toelichting_toestaan",
+            ],
+            false
+          )
         : undefined,
-      maxSelections: getOptionalString(row, ["maxSelections", "maxSelecties"])
-        ? getNumber(row, ["maxSelections", "maxSelecties"], 0)
+      maxSelections: getOptionalString(row, [
+        "maxSelections",
+        "max_selections",
+        "maxSelecties",
+        "max_selecties",
+      ])
+        ? getNumber(
+            row,
+            ["maxSelections", "max_selections", "maxSelecties", "max_selecties"],
+            0
+          )
         : undefined,
       visibleWhen: parseVisibleWhen(row),
-      dimensionCode: getOptionalString(row, ["dimensionCode", "dimensieCode"]),
-      category: getOptionalString(row, ["category", "categorie"]),
-      outputRole: getOptionalString(row, ["outputRole", "rol"]),
-      scoreEnabled: getOptionalString(row, ["scoreEnabled", "scoreActief"])
-        ? getBoolean(row, ["scoreEnabled", "scoreActief"], false)
+      dimensionCode: getOptionalString(row, [
+        "dimensionCode",
+        "dimension_code",
+        "dimensieCode",
+        "dimensie_code",
+      ]),
+      category: getOptionalString(row, [
+        "category",
+        "categoryCode",
+        "category_code",
+        "categorie",
+        "categorieCode",
+        "categorie_code",
+      ]),
+      outputRole: getOptionalString(row, [
+        "outputRole",
+        "output_role",
+        "rol",
+        "role",
+      ]),
+      scoreEnabled: getOptionalString(row, [
+        "scoreEnabled",
+        "score_enabled",
+        "scoreActief",
+        "score_actief",
+      ])
+        ? getBoolean(
+            row,
+            ["scoreEnabled", "score_enabled", "scoreActief", "score_actief"],
+            false
+          )
         : undefined,
-      scoreWeight: getOptionalString(row, ["scoreWeight", "scoreGewicht"])
-        ? getNumber(row, ["scoreWeight", "scoreGewicht"], 0)
+      scoreWeight: getOptionalString(row, [
+        "scoreWeight",
+        "score_weight",
+        "scoreGewicht",
+        "score_gewicht",
+        "weight",
+        "gewicht",
+      ])
+        ? getNumber(
+            row,
+            [
+              "scoreWeight",
+              "score_weight",
+              "scoreGewicht",
+              "score_gewicht",
+              "weight",
+              "gewicht",
+            ],
+            0
+          )
         : undefined,
     })
   );
@@ -633,6 +1445,167 @@ function SheetCountCard({ label, value }: { label: string; value: number }) {
     <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
       <div className="text-xs text-muted-foreground">{label}</div>
       <div className="mt-1 text-xl font-semibold">{value}</div>
+    </div>
+  );
+}
+
+function MappingCheckCard({ output }: { output: DefinitionFileOutput }) {
+  const check = buildMappingCheck(output);
+
+  const hasRows = check.rowCount > 0;
+  const hasMissingRequiredFields = check.missingRequiredFields.length > 0;
+
+  return (
+    <div className="rounded-3xl border border-black/10 bg-white p-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-2">
+          <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            {check.fileName}
+          </div>
+
+          <h3 className="text-lg font-semibold">Kolom-mapping controle</h3>
+
+          <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
+            Controle of de kolommen uit Excel goed worden herkend en gekoppeld
+            aan de velden van dit doelbestand.
+          </p>
+        </div>
+
+        <span
+          className={
+            !hasRows
+              ? "rounded-full border border-black/10 bg-white px-3 py-1.5 text-xs font-medium text-black"
+              : hasMissingRequiredFields
+                ? "rounded-full border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-950"
+                : "rounded-full border border-green-200 bg-green-50 px-3 py-1.5 text-xs font-medium text-green-950"
+          }
+        >
+          {!hasRows
+            ? "Geen regels"
+            : hasMissingRequiredFields
+              ? "Mapping aandacht"
+              : "Mapping OK"}
+        </span>
+      </div>
+
+      <div className="mt-5 grid gap-4 md:grid-cols-3">
+        <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
+          <div className="text-sm text-muted-foreground">Importregels</div>
+          <div className="mt-2 text-2xl font-semibold">{check.rowCount}</div>
+        </div>
+
+        <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
+          <div className="text-sm text-muted-foreground">Gevonden kolommen</div>
+          <div className="mt-2 text-2xl font-semibold">
+            {check.rawColumns.length}
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
+          <div className="text-sm text-muted-foreground">
+            Ontbrekend verplicht
+          </div>
+          <div className="mt-2 text-2xl font-semibold">
+            {check.missingRequiredFields.length}
+          </div>
+        </div>
+      </div>
+
+      {hasRows && (
+        <>
+          <details className="mt-5 rounded-2xl border border-black/10 bg-black/[0.02] p-4">
+            <summary className="cursor-pointer text-sm font-medium">
+              Gevonden Excel-kolommen tonen
+            </summary>
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              {check.rawColumns.map((column) => (
+                <span
+                  key={`${check.fileName}-${column}`}
+                  className="rounded-full border border-black/10 bg-white px-3 py-1 text-xs"
+                >
+                  {column}
+                </span>
+              ))}
+            </div>
+          </details>
+
+          <div className="mt-5 overflow-auto rounded-2xl border border-black/10">
+            <table className="w-full border-collapse text-left text-sm">
+              <thead className="bg-black/[0.03]">
+                <tr>
+                  <th className="border-b border-black/10 px-4 py-3">
+                    Doelveld
+                  </th>
+                  <th className="border-b border-black/10 px-4 py-3">Type</th>
+                  <th className="border-b border-black/10 px-4 py-3">
+                    Verplicht
+                  </th>
+                  <th className="border-b border-black/10 px-4 py-3">
+                    Gekoppelde kolom
+                  </th>
+                  <th className="border-b border-black/10 px-4 py-3">
+                    Gevuld
+                  </th>
+                  <th className="border-b border-black/10 px-4 py-3">Leeg</th>
+                  <th className="border-b border-black/10 px-4 py-3">
+                    Gezochte namen
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {check.fields.map((field) => {
+                  const hasProblem =
+                    field.required &&
+                    (!field.matchedColumn || field.filledRows === 0);
+
+                  return (
+                    <tr
+                      key={`${check.fileName}-${field.outputField}`}
+                      className={
+                        hasProblem
+                          ? "border-b border-red-100 bg-red-50"
+                          : "border-b border-black/5"
+                      }
+                    >
+                      <td className="px-4 py-3 font-medium">
+                        {field.outputField}
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground">
+                        {field.type}
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground">
+                        {field.required ? "Ja" : "Nee"}
+                      </td>
+                      <td className="px-4 py-3">
+                        {field.matchedColumn ? (
+                          <span className="rounded-full border border-green-200 bg-green-50 px-2.5 py-1 text-xs font-medium text-green-950">
+                            {field.matchedColumn}
+                          </span>
+                        ) : (
+                          <span className="rounded-full border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-medium text-red-950">
+                            Niet gevonden
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground">
+                        {field.filledRows}
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground">
+                        {field.emptyRows}
+                      </td>
+                      <td className="max-w-[320px] px-4 py-3 text-xs text-muted-foreground">
+                        {field.candidates.join(", ")}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -1160,6 +2133,27 @@ export default function DefinitionImportApplyResultPage() {
 
       <section className="space-y-6">
         <div className="space-y-1">
+          <h2 className="text-lg font-semibold">Kolom-mapping controle</h2>
+
+          <p className="max-w-4xl text-sm leading-6 text-muted-foreground">
+            Hier zie je of de kolommen uit de Excel-import goed worden gekoppeld
+            aan de velden van de TypeScript-output. Dit is de controlelaag vóór
+            we de mapping verder aanscherpen.
+          </p>
+        </div>
+
+        <div className="space-y-5">
+          {definitionFileOutputs.map((output) => (
+            <MappingCheckCard
+              key={`mapping-${output.fileName}`}
+              output={output}
+            />
+          ))}
+        </div>
+      </section>
+
+      <section className="space-y-6">
+        <div className="space-y-1">
           <h2 className="text-lg font-semibold">
             Echte TypeScript-output per doelbestand
           </h2>
@@ -1233,9 +2227,9 @@ export default function DefinitionImportApplyResultPage() {
           <h2 className="text-lg font-semibold">Volgende stap</h2>
 
           <p className="max-w-4xl text-sm leading-6 text-muted-foreground">
-            De volgende stap is controleren of de kolomnamen uit de Excel-export
-            exact goed worden gemapt naar de juiste velden. Daarna kunnen we per
-            bestand de output verder aanscherpen.
+            Controleer nu welke velden rood worden in de kolom-mapping. Daarna
+            kunnen we gericht extra kolomnamen toevoegen of de Excel-template
+            aanscherpen.
           </p>
         </div>
 
