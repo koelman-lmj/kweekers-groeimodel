@@ -2,6 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import {
+  buildImportDiff,
+  type ImportDiffResult,
+  type ImportDiffStatus,
+} from "@/lib/scan/definition/import-diff";
 
 type SheetCheck = {
   sheetName: string;
@@ -28,6 +33,7 @@ type ImportConcept = {
   relationIssues?: Issue[];
   importSummary?: Record<string, number>;
   preview?: Record<string, Record<string, string>[]>;
+  importRows?: Record<string, Record<string, string>[]>;
   createdAt?: string;
 };
 
@@ -45,13 +51,26 @@ function StatusBadge({ ok }: { ok: boolean }) {
   );
 }
 
-function IssueBlock({
-  title,
-  items,
-}: {
-  title: string;
-  items: Issue[];
-}) {
+function DiffStatusBadge({ status }: { status: ImportDiffStatus }) {
+  const label =
+    status === "new"
+      ? "Nieuw"
+      : status === "changed"
+        ? "Gewijzigd"
+        : status === "unchanged"
+          ? "Ongewijzigd"
+          : status === "possiblyRemoved"
+            ? "Mogelijk verwijderd"
+            : "Ongeldig";
+
+  return (
+    <span className="rounded-full border border-black/10 bg-white px-2.5 py-1 text-xs font-medium">
+      {label}
+    </span>
+  );
+}
+
+function IssueBlock({ title, items }: { title: string; items: Issue[] }) {
   if (items.length === 0) return null;
 
   return (
@@ -72,27 +91,196 @@ function IssueBlock({
   );
 }
 
+function DiffOverview({ diff }: { diff: ImportDiffResult }) {
+  return (
+    <section className="rounded-3xl border border-black/10 bg-white p-5">
+      <div className="space-y-1">
+        <h2 className="text-lg font-semibold">Wijzigingsanalyse</h2>
+        <p className="text-sm text-muted-foreground">
+          Vergelijking tussen de huidige definitie in de app en het opgeslagen
+          importconcept.
+        </p>
+      </div>
+
+      <div className="mt-5 grid gap-4 md:grid-cols-5">
+        <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
+          <div className="text-sm text-muted-foreground">Nieuw</div>
+          <div className="mt-2 text-2xl font-semibold">{diff.totals.new}</div>
+        </div>
+
+        <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
+          <div className="text-sm text-muted-foreground">Gewijzigd</div>
+          <div className="mt-2 text-2xl font-semibold">
+            {diff.totals.changed}
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
+          <div className="text-sm text-muted-foreground">Ongewijzigd</div>
+          <div className="mt-2 text-2xl font-semibold">
+            {diff.totals.unchanged}
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
+          <div className="text-sm text-muted-foreground">
+            Mogelijk verwijderd
+          </div>
+          <div className="mt-2 text-2xl font-semibold">
+            {diff.totals.possiblyRemoved}
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
+          <div className="text-sm text-muted-foreground">Ongeldig</div>
+          <div className="mt-2 text-2xl font-semibold">
+            {diff.totals.invalid}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function DiffDetails({ diff }: { diff: ImportDiffResult }) {
+  return (
+    <section className="space-y-6">
+      {diff.sheets.map((sheet) => {
+        const visibleItems = sheet.items.filter(
+          (item) => item.status !== "unchanged"
+        );
+
+        return (
+          <div
+            key={sheet.sheetName}
+            className="rounded-3xl border border-black/10 bg-white p-5"
+          >
+            <div className="space-y-1">
+              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                {sheet.sheetName}
+              </div>
+              <h2 className="text-lg font-semibold">{sheet.title}</h2>
+            </div>
+
+            <div className="mt-4 grid gap-3 md:grid-cols-5">
+              <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-3">
+                <div className="text-xs text-muted-foreground">Nieuw</div>
+                <div className="mt-1 text-xl font-semibold">
+                  {sheet.counts.new}
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-3">
+                <div className="text-xs text-muted-foreground">Gewijzigd</div>
+                <div className="mt-1 text-xl font-semibold">
+                  {sheet.counts.changed}
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-3">
+                <div className="text-xs text-muted-foreground">Ongewijzigd</div>
+                <div className="mt-1 text-xl font-semibold">
+                  {sheet.counts.unchanged}
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-3">
+                <div className="text-xs text-muted-foreground">
+                  Mogelijk verwijderd
+                </div>
+                <div className="mt-1 text-xl font-semibold">
+                  {sheet.counts.possiblyRemoved}
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-3">
+                <div className="text-xs text-muted-foreground">Ongeldig</div>
+                <div className="mt-1 text-xl font-semibold">
+                  {sheet.counts.invalid}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-5 space-y-3">
+              {visibleItems.slice(0, 20).map((item) => (
+                <div
+                  key={`${sheet.sheetName}-${item.key}`}
+                  className="rounded-2xl border border-black/10 bg-black/[0.02] p-4"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <div className="text-sm font-semibold">{item.label}</div>
+                      <div className="mt-1 text-xs text-muted-foreground">
+                        Key: {item.key}
+                      </div>
+                    </div>
+
+                    <DiffStatusBadge status={item.status} />
+                  </div>
+
+                  {item.changedFields.length > 0 && (
+                    <div className="mt-3 text-sm text-muted-foreground">
+                      Gewijzigde velden:{" "}
+                      <span className="font-medium">
+                        {item.changedFields.join(", ")}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {visibleItems.length === 0 && (
+                <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4 text-sm text-muted-foreground">
+                  Geen wijzigingen gevonden voor deze sheet.
+                </div>
+              )}
+
+              {visibleItems.length > 20 && (
+                <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4 text-sm text-muted-foreground">
+                  Er zijn meer wijzigingen. Alleen de eerste 20 worden hier
+                  getoond.
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </section>
+  );
+}
+
 export default function DefinitionImportConceptPage() {
   const [concept, setConcept] = useState<ImportConcept | null>(null);
+  const [diff, setDiff] = useState<ImportDiffResult | null>(null);
 
   useEffect(() => {
     const raw = window.localStorage.getItem("definitionImportConcept");
 
     if (!raw) {
       setConcept(null);
+      setDiff(null);
       return;
     }
 
     try {
-      setConcept(JSON.parse(raw) as ImportConcept);
+      const parsedConcept = JSON.parse(raw) as ImportConcept;
+      setConcept(parsedConcept);
+
+      if (parsedConcept.importRows) {
+        setDiff(buildImportDiff(parsedConcept.importRows));
+      } else {
+        setDiff(null);
+      }
     } catch {
       setConcept(null);
+      setDiff(null);
     }
   }, []);
 
   const clearConcept = () => {
     window.localStorage.removeItem("definitionImportConcept");
     setConcept(null);
+    setDiff(null);
   };
 
   const checks = concept?.checks ?? [];
@@ -201,6 +389,8 @@ export default function DefinitionImportConceptPage() {
         </div>
       </section>
 
+      {diff && <DiffOverview diff={diff} />}
+
       {Object.keys(importSummary).length > 0 && (
         <section className="grid gap-4 md:grid-cols-5">
           {Object.entries(importSummary).map(([key, count]) => (
@@ -286,6 +476,8 @@ export default function DefinitionImportConceptPage() {
           </div>
         </section>
       )}
+
+      {diff && <DiffDetails diff={diff} />}
 
       {Object.keys(preview).length > 0 && (
         <section className="space-y-6">

@@ -242,6 +242,21 @@ function getRecordsBySheet(
   return recordsBySheet;
 }
 
+function getImportRows(
+  recordsBySheet: Record<string, RowRecord[]>
+): Record<string, Record<string, string>[]> {
+  return previewSheets.reduce<Record<string, Record<string, string>[]>>(
+    (acc, sheetName) => {
+      acc[sheetName] = (recordsBySheet[sheetName] ?? []).map(
+        (row) => row.record
+      );
+
+      return acc;
+    },
+    {}
+  );
+}
+
 function getValueSet(rows: RowRecord[], field: string): Set<string> {
   return new Set(
     rows
@@ -477,6 +492,7 @@ export async function POST(request: Request) {
     const requiredFieldIssues = getRequiredFieldIssues(recordsBySheet);
     const relationIssues = getRelationIssues(recordsBySheet);
     const importSummary = getImportSummary(recordsBySheet);
+    const importRows = getImportRows(recordsBySheet);
 
     const sheetsOk = checks.every((check) => check.ok);
     const duplicatesOk = duplicateIssues.length === 0;
@@ -506,6 +522,7 @@ export async function POST(request: Request) {
       relationIssues,
       importSummary,
       preview,
+      importRows,
     });
   } catch (error) {
     return NextResponse.json(
