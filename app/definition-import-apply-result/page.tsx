@@ -75,6 +75,15 @@ type MappingCheck = {
   missingRequiredFields: MappingFieldCheck[];
 };
 
+type MappingStatusSummary = {
+  totalFiles: number;
+  filesWithRows: number;
+  filesOk: number;
+  filesWithAttention: number;
+  missingRequiredFields: number;
+  emptyOptionalFields: number;
+};
+
 const EMPTY_COUNTS: Counts = {
   new: 0,
   changed: 0,
@@ -626,6 +635,43 @@ function buildMappingCheck(output: DefinitionFileOutput): MappingCheck {
       (field) =>
         field.required && (!field.matchedColumn || field.filledRows === 0)
     ),
+  };
+}
+
+function buildMappingStatusSummary(
+  outputs: DefinitionFileOutput[]
+): MappingStatusSummary {
+  const checks = outputs.map((output) => buildMappingCheck(output));
+  const checksWithRows = checks.filter((check) => check.rowCount > 0);
+
+  const filesOk = checksWithRows.filter(
+    (check) => check.missingRequiredFields.length === 0
+  ).length;
+
+  const filesWithAttention = checksWithRows.filter(
+    (check) => check.missingRequiredFields.length > 0
+  ).length;
+
+  const missingRequiredFields = checksWithRows.reduce(
+    (total, check) => total + check.missingRequiredFields.length,
+    0
+  );
+
+  const emptyOptionalFields = checksWithRows.reduce((total, check) => {
+    const emptyOptionalInFile = check.fields.filter(
+      (field) => !field.required && field.emptyRows > 0
+    ).length;
+
+    return total + emptyOptionalInFile;
+  }, 0);
+
+  return {
+    totalFiles: checks.length,
+    filesWithRows: checksWithRows.length,
+    filesOk,
+    filesWithAttention,
+    missingRequiredFields,
+    emptyOptionalFields,
   };
 }
 
@@ -1449,6 +1495,90 @@ function SheetCountCard({ label, value }: { label: string; value: number }) {
   );
 }
 
+function MappingStatusSummaryCard({
+  summary,
+}: {
+  summary: MappingStatusSummary;
+}) {
+  const hasAttention =
+    summary.filesWithAttention > 0 || summary.missingRequiredFields > 0;
+
+  return (
+    <section className="rounded-3xl border border-black/10 bg-white p-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-2">
+          <h2 className="text-lg font-semibold">Mappingstatus</h2>
+
+          <p className="max-w-4xl text-sm leading-6 text-muted-foreground">
+            Samenvatting van de kolom-mapping over alle doelbestanden. Hiermee
+            zie je direct of verplichte velden goed gekoppeld zijn.
+          </p>
+        </div>
+
+        <span
+          className={
+            hasAttention
+              ? "rounded-full border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-950"
+              : "rounded-full border border-green-200 bg-green-50 px-3 py-1.5 text-xs font-medium text-green-950"
+          }
+        >
+          {hasAttention ? "Aandacht nodig" : "Mapping veilig"}
+        </span>
+      </div>
+
+      <div className="mt-5 grid gap-4 md:grid-cols-6">
+        <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
+          <div className="text-sm text-muted-foreground">Doelbestanden</div>
+          <div className="mt-2 text-2xl font-semibold">
+            {summary.totalFiles}
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
+          <div className="text-sm text-muted-foreground">Met regels</div>
+          <div className="mt-2 text-2xl font-semibold">
+            {summary.filesWithRows}
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-green-200 bg-green-50 p-4">
+          <div className="text-sm text-green-950">Bestanden OK</div>
+          <div className="mt-2 text-2xl font-semibold text-green-950">
+            {summary.filesOk}
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-4">
+          <div className="text-sm text-red-950">Met aandacht</div>
+          <div className="mt-2 text-2xl font-semibold text-red-950">
+            {summary.filesWithAttention}
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-4">
+          <div className="text-sm text-red-950">Verplicht mist</div>
+          <div className="mt-2 text-2xl font-semibold text-red-950">
+            {summary.missingRequiredFields}
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
+          <div className="text-sm text-muted-foreground">Optioneel leeg</div>
+          <div className="mt-2 text-2xl font-semibold">
+            {summary.emptyOptionalFields}
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-5 rounded-2xl border border-black/10 bg-black/[0.02] p-4 text-sm leading-6 text-muted-foreground">
+        {hasAttention
+          ? "Er ontbreken nog verplichte velden in één of meer doelbestanden. Controleer de detailkaarten hieronder voordat je output overneemt."
+          : "Alle doelbestanden met importregels hebben hun verplichte velden gekoppeld. Eventuele lege optionele velden zijn niet blokkerend."}
+      </div>
+    </section>
+  );
+}
+
 function MappingCheckCard({ output }: { output: DefinitionFileOutput }) {
   const check = buildMappingCheck(output);
 
@@ -1816,6 +1946,10 @@ export default function DefinitionImportApplyResultPage() {
     return buildDefinitionFileOutputs(sheets, importRows);
   }, [sheets, importRows]);
 
+  const mappingStatusSummary = useMemo(() => {
+    return buildMappingStatusSummary(definitionFileOutputs);
+  }, [definitionFileOutputs]);
+
   const technicalProposal = useMemo(() => {
     if (!result) return null;
     return buildTechnicalProposal(result);
@@ -2132,6 +2266,8 @@ export default function DefinitionImportApplyResultPage() {
       </section>
 
       <section className="space-y-6">
+        <MappingStatusSummaryCard summary={mappingStatusSummary} />
+
         <div className="space-y-1">
           <h2 className="text-lg font-semibold">Kolom-mapping controle</h2>
 
@@ -2227,8 +2363,8 @@ export default function DefinitionImportApplyResultPage() {
           <h2 className="text-lg font-semibold">Volgende stap</h2>
 
           <p className="max-w-4xl text-sm leading-6 text-muted-foreground">
-            Controleer nu welke velden rood worden in de kolom-mapping. Daarna
-            kunnen we gericht extra kolomnamen toevoegen of de Excel-template
+            Controleer of de mappingstatus veilig is. Daarna kunnen we de pagina
+            compacter maken of de TypeScript-output inhoudelijk verder
             aanscherpen.
           </p>
         </div>
