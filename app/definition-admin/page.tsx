@@ -27,6 +27,13 @@ const adminLinks = [
     href: "/api/definition-export",
     label: "Download definitie",
   },
+  {
+    title: "Import-preview",
+    description:
+      "Upload een Excelbestand en controleer eerst veilig de structuur, dubbele waardes en verwijzingen zonder iets op te slaan.",
+    href: "/definition-import",
+    label: "Controleer import",
+  },
 ];
 
 export default function DefinitionAdminPage() {
@@ -45,60 +52,63 @@ export default function DefinitionAdminPage() {
           Centrale plek voor controle, export en voorbereiding van beheer van
           categorieën, dimensies, vragen en antwoordopties.
         </p>
+
+        <div className="mt-6 rounded-3xl border border-black/10 bg-black/[0.02] p-6">
+          <div className="space-y-2">
+            <h2 className="text-lg font-semibold">
+              Status richting beheer door Key Users
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              De app is technisch voorbereid op beheer buiten code. De echte
+              importfunctie en een volledig beheerscherm moeten nog gebouwd
+              worden.
+            </p>
+          </div>
+
+          <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            <div className="rounded-2xl border border-black/10 bg-white p-4">
+              <div className="text-sm font-semibold">Fase 1</div>
+              <div className="mt-1 text-sm text-muted-foreground">
+                Definitie centraal maken
+              </div>
+              <div className="mt-3 inline-flex rounded-full border border-black/10 bg-black px-2.5 py-1 text-xs font-medium text-white">
+                Gereed
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-black/10 bg-white p-4">
+              <div className="text-sm font-semibold">Fase 2</div>
+              <div className="mt-1 text-sm text-muted-foreground">
+                Export, template en controle
+              </div>
+              <div className="mt-3 inline-flex rounded-full border border-black/10 bg-black px-2.5 py-1 text-xs font-medium text-white">
+                Gereed
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-black/10 bg-white p-4">
+              <div className="text-sm font-semibold">Fase 3</div>
+              <div className="mt-1 text-sm text-muted-foreground">
+                Import vanuit Excel
+              </div>
+              <div className="mt-3 inline-flex rounded-full border border-black/10 bg-white px-2.5 py-1 text-xs font-medium text-black">
+                In voorbereiding
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-black/10 bg-white p-4">
+              <div className="text-sm font-semibold">Fase 4</div>
+              <div className="mt-1 text-sm text-muted-foreground">
+                Beheerscherm voor Key Users
+              </div>
+              <div className="mt-3 inline-flex rounded-full border border-black/10 bg-white px-2.5 py-1 text-xs font-medium text-black">
+                Later
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="mt-6 rounded-3xl border border-black/10 bg-black/[0.02] p-6">
-  <div className="space-y-2">
-    <h2 className="text-lg font-semibold">Status richting beheer door Key Users</h2>
-    <p className="text-sm text-muted-foreground">
-      De app is technisch voorbereid op beheer buiten code. De echte importfunctie
-      en een volledig beheerscherm moeten nog gebouwd worden.
-    </p>
-  </div>
-
-  <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-    <div className="rounded-2xl border border-black/10 bg-white p-4">
-      <div className="text-sm font-semibold">Fase 1</div>
-      <div className="mt-1 text-sm text-muted-foreground">
-        Definitie centraal maken
-      </div>
-      <div className="mt-3 inline-flex rounded-full border border-black/10 bg-black px-2.5 py-1 text-xs font-medium text-white">
-        Gereed
-      </div>
-    </div>
-
-    <div className="rounded-2xl border border-black/10 bg-white p-4">
-      <div className="text-sm font-semibold">Fase 2</div>
-      <div className="mt-1 text-sm text-muted-foreground">
-        Export, template en controle
-      </div>
-      <div className="mt-3 inline-flex rounded-full border border-black/10 bg-black px-2.5 py-1 text-xs font-medium text-white">
-        Gereed
-      </div>
-    </div>
-
-    <div className="rounded-2xl border border-black/10 bg-white p-4">
-      <div className="text-sm font-semibold">Fase 3</div>
-      <div className="mt-1 text-sm text-muted-foreground">
-        Import vanuit Excel
-      </div>
-      <div className="mt-3 inline-flex rounded-full border border-black/10 bg-white px-2.5 py-1 text-xs font-medium text-black">
-        Nog te bouwen
-      </div>
-    </div>
-
-    <div className="rounded-2xl border border-black/10 bg-white p-4">
-      <div className="text-sm font-semibold">Fase 4</div>
-      <div className="mt-1 text-sm text-muted-foreground">
-        Beheerscherm voor Key Users
-      </div>
-      <div className="mt-3 inline-flex rounded-full border border-black/10 bg-white px-2.5 py-1 text-xs font-medium text-black">
-        Later
-      </div>
-    </div>
-  </div>
-</div>
-      
       <section className="grid gap-4 md:grid-cols-2">
         {adminLinks.map((item) => (
           <a
@@ -120,46 +130,48 @@ export default function DefinitionAdminPage() {
         ))}
       </section>
 
-<section className="rounded-3xl border border-black/10 bg-black/[0.02] p-6">
-  <div className="space-y-2">
-    <h2 className="text-lg font-semibold">Conclusie voor MT en Key Users</h2>
+      <section className="rounded-3xl border border-black/10 bg-black/[0.02] p-6">
+        <div className="space-y-2">
+          <h2 className="text-lg font-semibold">
+            Conclusie voor MT en Key Users
+          </h2>
 
-    <p className="text-sm text-muted-foreground">
-      De app is op dit moment technisch voorbereid op beheer door Key Users,
-      maar nog niet volledig self-service. De definitie van categorieën,
-      dimensies, vragen, antwoordopties en scores staat nu centraal en kan
-      gecontroleerd en geëxporteerd worden.
-    </p>
-  </div>
+          <p className="text-sm text-muted-foreground">
+            De app is op dit moment technisch voorbereid op beheer door Key
+            Users, maar nog niet volledig self-service. De definitie van
+            categorieën, dimensies, vragen, antwoordopties en scores staat nu
+            centraal en kan gecontroleerd en geëxporteerd worden.
+          </p>
+        </div>
 
-  <div className="mt-5 grid gap-4 md:grid-cols-3">
-    <div className="rounded-2xl border border-black/10 bg-white p-4">
-      <div className="text-sm font-semibold">Wat kan nu al?</div>
-      <p className="mt-2 text-sm text-muted-foreground">
-        De huidige definitie kan worden gecontroleerd, bekeken en als Excel
-        worden geëxporteerd. Ook is er een Excel-template beschikbaar als
-        basis voor toekomstig beheer.
-      </p>
-    </div>
+        <div className="mt-5 grid gap-4 md:grid-cols-3">
+          <div className="rounded-2xl border border-black/10 bg-white p-4">
+            <div className="text-sm font-semibold">Wat kan nu al?</div>
+            <p className="mt-2 text-sm text-muted-foreground">
+              De huidige definitie kan worden gecontroleerd, bekeken en als
+              Excel worden geëxporteerd. Ook is er een Excel-template beschikbaar
+              als basis voor toekomstig beheer.
+            </p>
+          </div>
 
-    <div className="rounded-2xl border border-black/10 bg-white p-4">
-      <div className="text-sm font-semibold">Wat kan nog niet?</div>
-      <p className="mt-2 text-sm text-muted-foreground">
-        Key Users kunnen nog niet zelf wijzigingen uploaden of rechtstreeks
-        via een beheerscherm aanpassen. Daarvoor is nog een importfunctie of
-        beheerinterface nodig.
-      </p>
-    </div>
+          <div className="rounded-2xl border border-black/10 bg-white p-4">
+            <div className="text-sm font-semibold">Wat kan nog niet?</div>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Key Users kunnen nog niet zelf wijzigingen definitief toepassen.
+              Daarvoor is nog een veilige importfunctie of beheerinterface
+              nodig.
+            </p>
+          </div>
 
-    <div className="rounded-2xl border border-black/10 bg-white p-4">
-      <div className="text-sm font-semibold">Volgende bouwstap</div>
-      <p className="mt-2 text-sm text-muted-foreground">
-        De volgende stap is een veilige importcontrole: eerst Excel inlezen,
-        controleren op fouten en pas daarna wijzigingen kunnen toepassen.
-      </p>
-    </div>
-  </div>
-</section>
+          <div className="rounded-2xl border border-black/10 bg-white p-4">
+            <div className="text-sm font-semibold">Volgende bouwstap</div>
+            <p className="mt-2 text-sm text-muted-foreground">
+              De volgende stap is import-preview verder uitbouwen naar een
+              gecontroleerde import: eerst controleren, daarna pas toepassen.
+            </p>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }

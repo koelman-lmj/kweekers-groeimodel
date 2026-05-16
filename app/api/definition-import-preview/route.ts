@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import ExcelJS from "exceljs";
 
+export const runtime = "nodejs";
+
 const requiredSheets: Record<string, string[]> = {
   categories: ["code", "title", "description", "order"],
 
@@ -17,14 +19,14 @@ const requiredSheets: Record<string, string[]> = {
     "optionSetKey",
     "dimensionCode",
     "category",
-    "outputRisk",
+    "outputRole",
     "scoreEnabled",
     "scoreWeight",
     "maxSelections",
-    "allowComment",
+    "allowsComment",
     "placeholder",
     "visibleWhen",
-    "startplan",
+    "examples",
   ],
 
   optionSets: ["key", "description"],
@@ -227,7 +229,9 @@ function findDuplicatesInCombinedFields(
     }));
 }
 
-function getRecordsBySheet(workbook: ExcelJS.Workbook): Record<string, RowRecord[]> {
+function getRecordsBySheet(
+  workbook: ExcelJS.Workbook
+): Record<string, RowRecord[]> {
   const recordsBySheet: Record<string, RowRecord[]> = {};
 
   previewSheets.forEach((sheetName) => {
@@ -247,23 +251,41 @@ function getValueSet(rows: RowRecord[], field: string): Set<string> {
   );
 }
 
-function getDuplicateIssues(recordsBySheet: Record<string, RowRecord[]>): DuplicateIssue[] {
+function getDuplicateIssues(
+  recordsBySheet: Record<string, RowRecord[]>
+): DuplicateIssue[] {
   const issues: DuplicateIssue[] = [];
 
   issues.push(
-    ...findDuplicatesInField("categories", recordsBySheet.categories ?? [], "code")
+    ...findDuplicatesInField(
+      "categories",
+      recordsBySheet.categories ?? [],
+      "code"
+    )
   );
 
   issues.push(
-    ...findDuplicatesInField("dimensions", recordsBySheet.dimensions ?? [], "code")
+    ...findDuplicatesInField(
+      "dimensions",
+      recordsBySheet.dimensions ?? [],
+      "code"
+    )
   );
 
   issues.push(
-    ...findDuplicatesInField("questions", recordsBySheet.questions ?? [], "key")
+    ...findDuplicatesInField(
+      "questions",
+      recordsBySheet.questions ?? [],
+      "key"
+    )
   );
 
   issues.push(
-    ...findDuplicatesInField("optionSets", recordsBySheet.optionSets ?? [], "key")
+    ...findDuplicatesInField(
+      "optionSets",
+      recordsBySheet.optionSets ?? [],
+      "key"
+    )
   );
 
   issues.push(
@@ -412,7 +434,8 @@ export async function POST(request: Request) {
     const arrayBuffer = await file.arrayBuffer();
 
     const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.load(arrayBuffer);
+
+    await workbook.xlsx.load(Buffer.from(arrayBuffer) as any);
 
     const checks = Object.entries(requiredSheets).map(
       ([sheetName, requiredColumns]) => {
