@@ -294,6 +294,7 @@ function ImportApplyConfirmation({
 
       const result = (await response.json()) as {
         ok?: boolean;
+        mode?: string;
         message?: string;
         error?: string;
         totals?: {
@@ -303,6 +304,17 @@ function ImportApplyConfirmation({
           possiblyRemoved: number;
           invalid: number;
         };
+        sheets?: {
+          sheetName: string;
+          title: string;
+          counts: {
+            new: number;
+            changed: number;
+            unchanged: number;
+            possiblyRemoved: number;
+            invalid: number;
+          };
+        }[];
       };
 
       if (!response.ok || !result.ok) {
@@ -315,15 +327,35 @@ function ImportApplyConfirmation({
 
       const totals = result.totals ?? diff.totals;
 
+      const applyResult = {
+        ...result,
+        ok: true,
+        mode: result.mode ?? "safe-test",
+        message:
+          result.message ??
+          "Server-side veilige test geslaagd. Er is nog niets definitief toegepast.",
+        totals,
+        createdAt: new Date().toISOString(),
+      };
+
+      window.localStorage.setItem(
+        "definitionImportApplyResult",
+        JSON.stringify(applyResult)
+      );
+
       setTestMessage(
         `${
-          result.message ?? "Server-side veilige test geslaagd."
+          applyResult.message
         } Samenvatting: ${totals.new} nieuw, ${totals.changed} gewijzigd, ${
           totals.unchanged
         } ongewijzigd, ${totals.possiblyRemoved} mogelijk verwijderd en ${
           totals.invalid
-        } ongeldig.`
+        } ongeldig. Je wordt doorgestuurd naar het importvoorstel.`
       );
+
+      window.setTimeout(() => {
+        window.location.href = "/definition-import-apply-result";
+      }, 600);
     } catch {
       setTestError(
         "Server-side veilige test kon niet worden uitgevoerd. Controleer of de lokale server draait."
