@@ -125,6 +125,7 @@ function getFileMeta(fileName: DefinitionFileKey) {
       title: "Categorieën",
       description:
         "Bevat de hoofdindeling of classificatie die gebruikt wordt in de scan-definitie.",
+      exportName: "categories",
     };
   }
 
@@ -133,6 +134,7 @@ function getFileMeta(fileName: DefinitionFileKey) {
       title: "Dimensies",
       description:
         "Bevat de inhoudelijke domeinen of beoordelingsgebieden van het groeimodel.",
+      exportName: "dimensions",
     };
   }
 
@@ -141,6 +143,7 @@ function getFileMeta(fileName: DefinitionFileKey) {
       title: "Antwoordsets",
       description:
         "Bevat herbruikbare antwoordopties, scores en keuzelijsten voor vragen.",
+      exportName: "optionSets",
     };
   }
 
@@ -149,6 +152,7 @@ function getFileMeta(fileName: DefinitionFileKey) {
       title: "Vragen",
       description:
         "Bevat de concrete vragen, teksten, koppelingen en scoring binnen de scan.",
+      exportName: "questions",
     };
   }
 
@@ -157,6 +161,7 @@ function getFileMeta(fileName: DefinitionFileKey) {
       title: "Secties",
       description:
         "Bevat de hoofdstukken of stappen waarin vragen in de scan worden gegroepeerd.",
+      exportName: "sections",
     };
   }
 
@@ -164,6 +169,7 @@ function getFileMeta(fileName: DefinitionFileKey) {
     title: "Niet gekoppeld",
     description:
       "Deze sheet kon nog niet automatisch aan een doelbestand worden gekoppeld.",
+    exportName: "unknownDefinitionOutput",
   };
 }
 
@@ -246,6 +252,27 @@ function buildDefinitionFileProposal(output: DefinitionFileOutput) {
   };
 }
 
+function buildTypeScriptPreview(output: DefinitionFileOutput) {
+  const meta = getFileMeta(output.fileName);
+  const exportName = meta.exportName;
+
+  const proposal = buildDefinitionFileProposal(output);
+
+  return `// Auto-generated preview voor ${output.fileName}
+// Let op: dit is nog geen definitieve productiecode.
+// Deze preview is bedoeld om veilig te controleren welke importonderdelen
+// naar dit doelbestand zouden gaan.
+//
+// Gegenereerd op: ${new Date().toISOString()}
+
+export const ${exportName}ImportProposal = ${JSON.stringify(
+    proposal,
+    null,
+    2
+  )} as const;
+`;
+}
+
 function SummaryCard({ label, value }: { label: string; value: number }) {
   return (
     <div className="rounded-2xl border border-black/10 bg-white p-5">
@@ -266,12 +293,16 @@ function SheetCountCard({ label, value }: { label: string; value: number }) {
 
 function DefinitionFileCard({
   output,
-  onCopy,
-  onDownload,
+  onCopyJson,
+  onDownloadJson,
+  onCopyTypeScript,
+  onDownloadTypeScript,
 }: {
   output: DefinitionFileOutput;
-  onCopy: (output: DefinitionFileOutput) => void;
-  onDownload: (output: DefinitionFileOutput) => void;
+  onCopyJson: (output: DefinitionFileOutput) => void;
+  onDownloadJson: (output: DefinitionFileOutput) => void;
+  onCopyTypeScript: (output: DefinitionFileOutput) => void;
+  onDownloadTypeScript: (output: DefinitionFileOutput) => void;
 }) {
   const hasContent =
     output.sheets.length > 0 ||
@@ -286,6 +317,8 @@ function DefinitionFileCard({
     null,
     2
   );
+
+  const typeScriptPreview = buildTypeScriptPreview(output);
 
   return (
     <div className="rounded-3xl border border-black/10 bg-white p-5">
@@ -305,7 +338,7 @@ function DefinitionFileCard({
         <div className="flex flex-wrap gap-3">
           <button
             type="button"
-            onClick={() => onCopy(output)}
+            onClick={() => onCopyJson(output)}
             disabled={!hasContent}
             className={
               hasContent
@@ -318,7 +351,7 @@ function DefinitionFileCard({
 
           <button
             type="button"
-            onClick={() => onDownload(output)}
+            onClick={() => onDownloadJson(output)}
             disabled={!hasContent}
             className={
               hasContent
@@ -327,6 +360,32 @@ function DefinitionFileCard({
             }
           >
             JSON downloaden
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onCopyTypeScript(output)}
+            disabled={!hasContent}
+            className={
+              hasContent
+                ? "inline-flex rounded-2xl border border-black/10 bg-black px-5 py-3 text-sm font-medium text-white"
+                : "inline-flex cursor-not-allowed rounded-2xl border border-black/10 bg-black/10 px-5 py-3 text-sm font-medium text-muted-foreground"
+            }
+          >
+            TS kopiëren
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onDownloadTypeScript(output)}
+            disabled={!hasContent}
+            className={
+              hasContent
+                ? "inline-flex rounded-2xl border border-black/10 bg-white px-5 py-3 text-sm font-medium text-black"
+                : "inline-flex cursor-not-allowed rounded-2xl border border-black/10 bg-black/10 px-5 py-3 text-sm font-medium text-muted-foreground"
+            }
+          >
+            TS downloaden
           </button>
         </div>
       </div>
@@ -367,15 +426,27 @@ function DefinitionFileCard({
       </div>
 
       {hasContent && (
-        <details className="mt-5 rounded-2xl border border-black/10 bg-black/[0.02] p-4">
-          <summary className="cursor-pointer text-sm font-medium">
-            JSON-preview voor {output.fileName}
-          </summary>
+        <div className="mt-5 space-y-3">
+          <details className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
+            <summary className="cursor-pointer text-sm font-medium">
+              JSON-preview voor {output.fileName}
+            </summary>
 
-          <pre className="mt-4 max-h-[360px] overflow-auto rounded-2xl border border-black/10 bg-white p-4 text-xs">
-            {proposalJson}
-          </pre>
-        </details>
+            <pre className="mt-4 max-h-[360px] overflow-auto rounded-2xl border border-black/10 bg-white p-4 text-xs">
+              {proposalJson}
+            </pre>
+          </details>
+
+          <details className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
+            <summary className="cursor-pointer text-sm font-medium">
+              TypeScript-preview voor {output.fileName}
+            </summary>
+
+            <pre className="mt-4 max-h-[420px] overflow-auto rounded-2xl border border-black/10 bg-white p-4 text-xs">
+              {typeScriptPreview}
+            </pre>
+          </details>
+        </div>
       )}
     </div>
   );
@@ -438,7 +509,7 @@ export default function DefinitionImportApplyResultPage() {
       setCopyMessage(successMessage);
     } catch {
       setCopyMessage(
-        "Kopiëren is niet gelukt. Selecteer de JSON handmatig en kopieer deze."
+        "Kopiëren is niet gelukt. Selecteer de tekst handmatig en kopieer deze."
       );
     }
 
@@ -447,11 +518,11 @@ export default function DefinitionImportApplyResultPage() {
     }, 3000);
   };
 
-  const downloadText = (text: string, fileName: string) => {
+  const downloadText = (text: string, fileName: string, mimeType: string) => {
     if (!text) return;
 
     const blob = new Blob([text], {
-      type: "application/json;charset=utf-8",
+      type: mimeType,
     });
 
     const url = window.URL.createObjectURL(blob);
@@ -483,7 +554,8 @@ export default function DefinitionImportApplyResultPage() {
   const downloadJson = () => {
     downloadText(
       technicalProposalJson,
-      `definition-import-proposal-${getTimestamp()}.json`
+      `definition-import-proposal-${getTimestamp()}.json`,
+      "application/json;charset=utf-8"
     );
   };
 
@@ -502,7 +574,28 @@ export default function DefinitionImportApplyResultPage() {
 
     downloadText(
       json,
-      `definition-file-proposal-${safeName}-${getTimestamp()}.json`
+      `definition-file-proposal-${safeName}-${getTimestamp()}.json`,
+      "application/json;charset=utf-8"
+    );
+  };
+
+  const copyDefinitionFileTypeScript = async (output: DefinitionFileOutput) => {
+    const typeScriptPreview = buildTypeScriptPreview(output);
+
+    await copyText(
+      typeScriptPreview,
+      `TypeScript-preview voor ${output.fileName} is gekopieerd naar het klembord.`
+    );
+  };
+
+  const downloadDefinitionFileTypeScript = (output: DefinitionFileOutput) => {
+    const typeScriptPreview = buildTypeScriptPreview(output);
+    const safeName = output.fileName.replace(".ts", "").replaceAll(".", "-");
+
+    downloadText(
+      typeScriptPreview,
+      `definition-file-preview-${safeName}-${getTimestamp()}.ts`,
+      "text/typescript;charset=utf-8"
     );
   };
 
@@ -625,8 +718,9 @@ export default function DefinitionImportApplyResultPage() {
         <p className="mt-2 max-w-4xl text-sm leading-6 text-amber-950">
           Dit is nog geen echte live-import. Deze stap is bedoeld als veilig
           importvoorstel. De actieve definitie in de app is nog niet aangepast.
-          De JSON hieronder is een technisch voorstel dat je kunt bewaren,
-          controleren of later gebruiken als basis voor een echte importstap.
+          De JSON- en TypeScript-preview hieronder zijn bedoeld om te bewaren,
+          controleren of later te gebruiken als basis voor een echte
+          verwerkingsstap.
         </p>
       </section>
 
@@ -709,8 +803,8 @@ export default function DefinitionImportApplyResultPage() {
 
           <p className="max-w-4xl text-sm leading-6 text-muted-foreground">
             Dit is een veilige mapping van importsheets naar de bestanden in
-            lib/scan/definition. Er wordt nog geen TypeScript-code gegenereerd
-            en er wordt niets weggeschreven.
+            lib/scan/definition. Je ziet nu zowel JSON als een eerste
+            TypeScript-preview per doelbestand. Er wordt niets weggeschreven.
           </p>
         </div>
 
@@ -725,8 +819,10 @@ export default function DefinitionImportApplyResultPage() {
             <DefinitionFileCard
               key={output.fileName}
               output={output}
-              onCopy={copyDefinitionFileJson}
-              onDownload={downloadDefinitionFileJson}
+              onCopyJson={copyDefinitionFileJson}
+              onDownloadJson={downloadDefinitionFileJson}
+              onCopyTypeScript={copyDefinitionFileTypeScript}
+              onDownloadTypeScript={downloadDefinitionFileTypeScript}
             />
           ))}
         </div>
@@ -774,9 +870,10 @@ export default function DefinitionImportApplyResultPage() {
           <h2 className="text-lg font-semibold">Volgende stap</h2>
 
           <p className="max-w-4xl text-sm leading-6 text-muted-foreground">
-            De volgende uitbreiding is TypeScript-output per bestand genereren.
-            Dan tonen we niet alleen JSON, maar ook codeblokken voor bijvoorbeeld
-            questions.ts, option-sets.ts en sections.ts.
+            De volgende uitbreiding is echte TypeScript-output genereren die
+            aansluit op de huidige types en exports in lib/scan/definition.
+            Daarna kunnen we bepalen of we dit als handmatige copy/paste-stap of
+            als gecontroleerde importstap willen gebruiken.
           </p>
         </div>
 
