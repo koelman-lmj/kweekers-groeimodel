@@ -1153,16 +1153,45 @@ function buildOptionSets(rows: Record<string, string>[]) {
       "set_key",
       "optionGroup",
       "option_group",
-    ]);
+    ]).trim();
 
-    if (!key) continue;
+    if (!key) {
+      continue;
+    }
+
+    const value = getString(row, [
+      "value",
+      "waarde",
+      "optionValue",
+      "option_value",
+      "optionKey",
+      "option_key",
+      "answerValue",
+      "answer_value",
+    ]).trim();
+
+    const label = getString(row, [
+      "label",
+      "label_nl",
+      "tekst",
+      "text",
+      "answerLabel",
+      "answer_label",
+      "optionLabel",
+      "option_label",
+    ]).trim();
+
+    if (!value || !label) {
+      continue;
+    }
 
     const title = getOptionalString(row, [
-      "title",
-      "title_nl",
-      "titel",
-      "name",
-      "naam",
+      "setTitle",
+      "set_title",
+      "optionSetTitle",
+      "option_set_title",
+      "titelSet",
+      "titel_set",
     ]);
 
     const current = grouped.get(key) ?? {
@@ -1171,29 +1200,11 @@ function buildOptionSets(rows: Record<string, string>[]) {
       options: [],
     };
 
+    const scoreRaw = getOptionalString(row, ["score", "points", "punten"]);
+
     const option = compactObject({
-      value: getString(row, [
-        "value",
-        "waarde",
-        "optionValue",
-        "option_value",
-        "optionKey",
-        "option_key",
-        "answerValue",
-        "answer_value",
-      ]),
-      label: getString(row, [
-        "label",
-        "label_nl",
-        "tekst",
-        "text",
-        "title",
-        "title_nl",
-        "answerLabel",
-        "answer_label",
-        "optionLabel",
-        "option_label",
-      ]),
+      value,
+      label,
       description: getOptionalString(row, [
         "description",
         "description_nl",
@@ -1207,7 +1218,7 @@ function buildOptionSets(rows: Record<string, string>[]) {
         ["order", "sortOrder", "sort_order", "volgorde"],
         current.options.length * 10 + 10
       ),
-      score: getOptionalString(row, ["score", "points", "punten"])
+      score: scoreRaw
         ? getNumber(row, ["score", "points", "punten"], 0)
         : undefined,
       adviceSignal: getOptionalString(row, [
@@ -1223,7 +1234,9 @@ function buildOptionSets(rows: Record<string, string>[]) {
     grouped.set(key, current);
   }
 
-  return Array.from(grouped.values()).map((set) => compactObject(set));
+  return Array.from(grouped.values())
+    .filter((set) => set.options.length > 0)
+    .map((set) => compactObject(set));
 }
 
 function buildQuestions(rows: Record<string, string>[]) {
