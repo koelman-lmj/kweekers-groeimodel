@@ -3,51 +3,92 @@ import ExcelJS from "exceljs";
 
 export const runtime = "nodejs";
 
-const requiredSheets: Record<string, string[]> = {
-  categories: ["code", "title", "description", "order"],
-
-  dimensions: ["code", "title", "category", "order", "isActive"],
-
-  questions: [
-    "key",
-    "sectionCode",
-    "order",
-    "label",
-    "helpText",
-    "inputType",
-    "required",
-    "optionSetKey",
-    "dimensionCode",
-    "category",
-    "outputRole",
-    "scoreEnabled",
-    "scoreWeight",
-    "maxSelections",
-    "allowsComment",
-    "placeholder",
-    "visibleWhen",
-    "examples",
-  ],
-
-  optionSets: ["key", "description"],
-
-  options: ["optionSetKey", "value", "label", "description", "order", "score"],
+type SheetConfig = {
+  canonicalName: string;
+  aliases: string[];
+  requiredColumns: string[];
+  requiredFields: string[];
+  duplicateFields?: string[];
+  duplicateCombinedFields?: string[];
 };
 
-const requiredFields: Record<string, string[]> = {
-  categories: ["code", "title"],
-  dimensions: ["code", "title", "category"],
-  questions: ["key", "sectionCode", "label", "inputType"],
-  optionSets: ["key"],
-  options: ["optionSetKey", "value", "label"],
-};
-
-const previewSheets = [
-  "categories",
-  "dimensions",
-  "questions",
-  "optionSets",
-  "options",
+const sheetConfigs: SheetConfig[] = [
+  {
+    canonicalName: "categories",
+    aliases: ["categories", "categorieen", "categorieën"],
+    requiredColumns: ["code", "title", "description", "order"],
+    requiredFields: ["code", "title"],
+    duplicateFields: ["code"],
+  },
+  {
+    canonicalName: "dimensions",
+    aliases: ["dimensions", "dimensies"],
+    requiredColumns: ["code", "title", "category", "order", "isActive"],
+    requiredFields: ["code", "title", "category"],
+    duplicateFields: ["code"],
+  },
+  {
+    canonicalName: "sections",
+    aliases: ["sections", "secties"],
+    requiredColumns: [
+      "code",
+      "title",
+      "shortTitle",
+      "phase",
+      "order",
+      "summaryEnabled",
+      "nextSectionCode",
+    ],
+    requiredFields: ["code", "title"],
+    duplicateFields: ["code"],
+  },
+  {
+    canonicalName: "questions",
+    aliases: ["questions", "vragen"],
+    requiredColumns: [
+      "key",
+      "sectionCode",
+      "order",
+      "label",
+      "helpText",
+      "inputType",
+      "required",
+      "optionSetKey",
+      "dimensionCode",
+      "category",
+      "outputRole",
+      "scoreEnabled",
+      "scoreWeight",
+      "maxSelections",
+      "allowsComment",
+      "placeholder",
+      "visibleWhen",
+      "examples",
+    ],
+    requiredFields: ["key", "sectionCode", "label", "inputType"],
+    duplicateFields: ["key"],
+  },
+  {
+    canonicalName: "optionSets",
+    aliases: ["optionSets", "option-sets", "option_sets", "antwoordsets"],
+    requiredColumns: ["key", "description"],
+    requiredFields: ["key"],
+    duplicateFields: ["key"],
+  },
+  {
+    canonicalName: "options",
+    aliases: ["options", "opties"],
+    requiredColumns: [
+      "optionSetKey",
+      "value",
+      "label",
+      "description",
+      "order",
+      "score",
+    ],
+    requiredFields: ["optionSetKey", "value", "label"],
+    duplicateCombinedFields: ["optionSetKey", "value"],
+  },
 ];
 
 type RowRecord = {
@@ -80,6 +121,44 @@ type RelationIssue = {
   message: string;
 };
 
+function normalizeName(value: string) {
+  return value.toLowerCase().replace(/[\s_\-.]/g, "");
+}
+
+function normalizeHeader(value: string) {
+  const header = value.trim();
+
+  const aliases: Record<string, string> = {
+    allowComment: "allowsComment",
+    commentAllowed: "allowsComment",
+    outputRisk: "outputRole",
+    option_set_key: "optionSetKey",
+    section_code: "sectionCode",
+    dimension_code: "dimensionCode",
+    score_weight: "scoreWeight",
+    score_enabled: "scoreEnabled",
+    max_selections: "maxSelections",
+    visible_when: "visibleWhen",
+  };
+
+  return aliases[header] ?? header;
+}
+
+function getWorksheet(
+  workbook: ExcelJS.Workbook,
+  config: SheetConfig
+): ExcelJS.Worksheet | undefined {
+  const worksheets = workbook.worksheets;
+
+  return worksheets.find((worksheet) => {
+    const normalizedWorksheetName = normalizeName(worksheet.name);
+
+    return config.aliases.some(
+      (alias) => normalizeName(alias) === normalizedWorksheetName
+    );
+  });
+}
+
 function getHeaderValues(sheet: ExcelJS.Worksheet): string[] {
   const headerRow = sheet.getRow(1);
   const headers: string[] = [];
@@ -91,7 +170,7 @@ function getHeaderValues(sheet: ExcelJS.Worksheet): string[] {
       return;
     }
 
-    headers.push(String(value).trim());
+    headers.push(normalizeHeader(String(value).trim()));
   });
 
   return headers.filter(Boolean);
@@ -229,25 +308,21 @@ function findDuplicatesInCombinedFields(
     }));
 }
 
-function getRecordsBySheet(
-  workbook: ExcelJS.Workbook
-): Record<string, RowRecord[]> {
+function getRecordsBySheet(workbook: ExcelJS.Workbook) {
   const recordsBySheet: Record<string, RowRecord[]> = {};
 
-  previewSheets.forEach((sheetName) => {
-    const sheet = workbook.getWorksheet(sheetName);
-    recordsBySheet[sheetName] = sheet ? getSheetRecords(sheet) : [];
-  });
+  for (const config of sheetConfigs) {
+    const sheet = getWorksheet(workbook, config);
+    recordsBySheet[config.canonicalName] = sheet ? getSheetRecords(sheet) : [];
+  }
 
   return recordsBySheet;
 }
 
-function getImportRows(
-  recordsBySheet: Record<string, RowRecord[]>
-): Record<string, Record<string, string>[]> {
-  return previewSheets.reduce<Record<string, Record<string, string>[]>>(
-    (acc, sheetName) => {
-      acc[sheetName] = (recordsBySheet[sheetName] ?? []).map(
+function getImportRows(recordsBySheet: Record<string, RowRecord[]>) {
+  return sheetConfigs.reduce<Record<string, Record<string, string>[]>>(
+    (acc, config) => {
+      acc[config.canonicalName] = (recordsBySheet[config.canonicalName] ?? []).map(
         (row) => row.record
       );
 
@@ -271,45 +346,23 @@ function getDuplicateIssues(
 ): DuplicateIssue[] {
   const issues: DuplicateIssue[] = [];
 
-  issues.push(
-    ...findDuplicatesInField(
-      "categories",
-      recordsBySheet.categories ?? [],
-      "code"
-    )
-  );
+  for (const config of sheetConfigs) {
+    const rows = recordsBySheet[config.canonicalName] ?? [];
 
-  issues.push(
-    ...findDuplicatesInField(
-      "dimensions",
-      recordsBySheet.dimensions ?? [],
-      "code"
-    )
-  );
+    for (const field of config.duplicateFields ?? []) {
+      issues.push(...findDuplicatesInField(config.canonicalName, rows, field));
+    }
 
-  issues.push(
-    ...findDuplicatesInField(
-      "questions",
-      recordsBySheet.questions ?? [],
-      "key"
-    )
-  );
-
-  issues.push(
-    ...findDuplicatesInField(
-      "optionSets",
-      recordsBySheet.optionSets ?? [],
-      "key"
-    )
-  );
-
-  issues.push(
-    ...findDuplicatesInCombinedFields(
-      "options",
-      recordsBySheet.options ?? [],
-      ["optionSetKey", "value"]
-    )
-  );
+    if (config.duplicateCombinedFields) {
+      issues.push(
+        ...findDuplicatesInCombinedFields(
+          config.canonicalName,
+          rows,
+          config.duplicateCombinedFields
+        )
+      );
+    }
+  }
 
   return issues;
 }
@@ -319,24 +372,24 @@ function getRequiredFieldIssues(
 ): RequiredFieldIssue[] {
   const issues: RequiredFieldIssue[] = [];
 
-  Object.entries(requiredFields).forEach(([sheetName, fields]) => {
-    const rows = recordsBySheet[sheetName] ?? [];
+  for (const config of sheetConfigs) {
+    const rows = recordsBySheet[config.canonicalName] ?? [];
 
     rows.forEach(({ rowNumber, record }) => {
-      fields.forEach((field) => {
+      config.requiredFields.forEach((field) => {
         const value = record[field]?.trim() ?? "";
 
         if (!value) {
           issues.push({
-            sheetName,
+            sheetName: config.canonicalName,
             field,
             row: rowNumber,
-            message: `Verplicht veld ontbreekt in ${sheetName}.${field} op rij ${rowNumber}.`,
+            message: `Verplicht veld ontbreekt in ${config.canonicalName}.${field} op rij ${rowNumber}.`,
           });
         }
       });
     });
-  });
+  }
 
   return issues;
 }
@@ -348,6 +401,7 @@ function getRelationIssues(
 
   const categoryCodes = getValueSet(recordsBySheet.categories ?? [], "code");
   const dimensionCodes = getValueSet(recordsBySheet.dimensions ?? [], "code");
+  const sectionCodes = getValueSet(recordsBySheet.sections ?? [], "code");
   const optionSetKeys = getValueSet(recordsBySheet.optionSets ?? [], "key");
 
   (recordsBySheet.dimensions ?? []).forEach(({ rowNumber, record }) => {
@@ -367,6 +421,20 @@ function getRelationIssues(
   });
 
   (recordsBySheet.questions ?? []).forEach(({ rowNumber, record }) => {
+    const sectionCode = record.sectionCode?.trim();
+
+    if (sectionCode && sectionCodes.size > 0 && !sectionCodes.has(sectionCode.toLowerCase())) {
+      issues.push({
+        sheetName: "questions",
+        field: "sectionCode",
+        value: sectionCode,
+        row: rowNumber,
+        targetSheet: "sections",
+        targetField: "code",
+        message: `Verwijzing klopt niet: questions.sectionCode "${sectionCode}" op rij ${rowNumber} bestaat niet in sections.code.`,
+      });
+    }
+
     const dimensionCode = record.dimensionCode?.trim();
 
     if (dimensionCode && !dimensionCodes.has(dimensionCode.toLowerCase())) {
@@ -418,13 +486,12 @@ function getRelationIssues(
 function getImportSummary(
   recordsBySheet: Record<string, RowRecord[]>
 ): Record<string, number> {
-  return {
-    categories: recordsBySheet.categories?.length ?? 0,
-    dimensions: recordsBySheet.dimensions?.length ?? 0,
-    questions: recordsBySheet.questions?.length ?? 0,
-    optionSets: recordsBySheet.optionSets?.length ?? 0,
-    options: recordsBySheet.options?.length ?? 0,
-  };
+  return sheetConfigs.reduce<Record<string, number>>((acc, config) => {
+    acc[config.canonicalName] =
+      recordsBySheet[config.canonicalName]?.length ?? 0;
+
+    return acc;
+  }, {});
 }
 
 export async function POST(request: Request) {
@@ -447,44 +514,41 @@ export async function POST(request: Request) {
     }
 
     const arrayBuffer = await file.arrayBuffer();
-
     const workbook = new ExcelJS.Workbook();
 
-    await workbook.xlsx.load(Buffer.from(arrayBuffer) as any);
+    await workbook.xlsx.load(Buffer.from(arrayBuffer));
 
-    const checks = Object.entries(requiredSheets).map(
-      ([sheetName, requiredColumns]) => {
-        const sheet = workbook.getWorksheet(sheetName);
+    const checks = sheetConfigs.map((config) => {
+      const sheet = getWorksheet(workbook, config);
 
-        if (!sheet) {
-          return {
-            sheetName,
-            exists: false,
-            ok: false,
-            rowCount: 0,
-            columnCount: 0,
-            headers: [],
-            missingColumns: requiredColumns,
-          };
-        }
-
-        const headers = getHeaderValues(sheet);
-
-        const missingColumns = requiredColumns.filter(
-          (column) => !headers.includes(column)
-        );
-
+      if (!sheet) {
         return {
-          sheetName,
-          exists: true,
-          ok: missingColumns.length === 0,
-          rowCount: sheet.rowCount,
-          columnCount: sheet.columnCount,
-          headers,
-          missingColumns,
+          sheetName: config.canonicalName,
+          exists: false,
+          ok: false,
+          rowCount: 0,
+          columnCount: 0,
+          headers: [],
+          missingColumns: config.requiredColumns,
         };
       }
-    );
+
+      const headers = getHeaderValues(sheet);
+
+      const missingColumns = config.requiredColumns.filter(
+        (column) => !headers.includes(column)
+      );
+
+      return {
+        sheetName: config.canonicalName,
+        exists: true,
+        ok: missingColumns.length === 0,
+        rowCount: sheet.rowCount,
+        columnCount: sheet.columnCount,
+        headers,
+        missingColumns,
+      };
+    });
 
     const recordsBySheet = getRecordsBySheet(workbook);
 
@@ -501,10 +565,10 @@ export async function POST(request: Request) {
 
     const ok = sheetsOk && duplicatesOk && requiredFieldsOk && relationsOk;
 
-    const preview = previewSheets.reduce<Record<string, Record<string, string>[]>>(
-      (acc, sheetName) => {
-        const sheet = workbook.getWorksheet(sheetName);
-        acc[sheetName] = sheet ? getSheetPreview(sheet, 5) : [];
+    const preview = sheetConfigs.reduce<Record<string, Record<string, string>[]>>(
+      (acc, config) => {
+        const sheet = getWorksheet(workbook, config);
+        acc[config.canonicalName] = sheet ? getSheetPreview(sheet, 5) : [];
         return acc;
       },
       {}
