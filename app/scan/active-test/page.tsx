@@ -379,24 +379,33 @@ export default function ActiveTestScanPage() {
             <p className="mt-3 text-gray-600">{currentQuestion.helpText}</p>
           )}
 
-          <div className="mt-6 rounded-xl bg-gray-50 p-4 text-sm text-gray-600">
-            <div>
-              <span className="font-medium">key:</span> {currentQuestion.key}
-            </div>
-            <div>
-              <span className="font-medium">inputType:</span> {inputType}
-            </div>
-            <div>
-              <span className="font-medium">required:</span>{" "}
-              {getBooleanLabel(currentQuestion.required)}
-            </div>
-            {currentQuestion.optionSetKey && (
-              <div>
-                <span className="font-medium">optionSetKey:</span>{" "}
-                {currentQuestion.optionSetKey}
-              </div>
-            )}
-          </div>
+          <details className="mt-6 rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
+  <summary className="cursor-pointer font-medium text-gray-900">
+    Technische info tonen
+  </summary>
+
+  <div className="mt-3 space-y-1">
+    <div>
+      <span className="font-medium">key:</span> {currentQuestion.key}
+    </div>
+
+    <div>
+      <span className="font-medium">inputType:</span> {inputType}
+    </div>
+
+    <div>
+      <span className="font-medium">required:</span>{" "}
+      {getBooleanLabel(currentQuestion.required)}
+    </div>
+
+    {currentQuestion.optionSetKey && (
+      <div>
+        <span className="font-medium">optionSetKey:</span>{" "}
+        {currentQuestion.optionSetKey}
+      </div>
+    )}
+  </div>
+</details>
 
           <div className="mt-6">
             {inputType === "text" && (
