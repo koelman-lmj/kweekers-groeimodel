@@ -1433,45 +1433,6 @@ function buildTypeScriptPreview(output: DefinitionFileOutput) {
   order: number;
 };
 
-function buildImportPackage(
-  outputs: DefinitionFileOutput[],
-  summary: MappingStatusSummary,
-  mode: string
-): ImportPackage {
-  const allowedFiles: Exclude<DefinitionFileKey, "unknown">[] = [
-    "categories.ts",
-    "dimensions.ts",
-    "option-sets.ts",
-    "questions.ts",
-    "sections.ts",
-  ];
-
-  const files = outputs
-    .filter((output) => {
-      return (
-        allowedFiles.includes(output.fileName as Exclude<DefinitionFileKey, "unknown">) &&
-        output.rows.length > 0
-      );
-    })
-    .map((output) => ({
-      fileName: output.fileName as Exclude<DefinitionFileKey, "unknown">,
-      rowCount: output.rows.length,
-      content: buildTypeScriptPreview(output),
-    }));
-
-  return {
-    packageType: "kweekers-definition-import-package",
-    packageVersion: 1,
-    generatedAt: new Date().toISOString(),
-    source: {
-      app: "kweekers-groeimodel",
-      mode,
-    },
-    mappingStatus: summary,
-    files,
-  };
-}
-
 export const categories: CategoryDefinition[] = ${stringifyTs(data)};
 
 export function getCategoryDefinition(code: string): CategoryDefinition {
@@ -1532,6 +1493,46 @@ export const sections: SectionDefinition[] = ${stringifyTs(data)};
 // Ruwe importregels:
 export const unknownDefinitionRows = ${stringifyTs(output.rows)} as const;
 `;
+}
+
+function buildImportPackage(
+  outputs: DefinitionFileOutput[],
+  summary: MappingStatusSummary,
+  mode: string
+): ImportPackage {
+  const allowedFiles: Exclude<DefinitionFileKey, "unknown">[] = [
+    "categories.ts",
+    "dimensions.ts",
+    "option-sets.ts",
+    "questions.ts",
+    "sections.ts",
+  ];
+
+  const files = outputs
+    .filter((output) => {
+      return (
+        allowedFiles.includes(
+          output.fileName as Exclude<DefinitionFileKey, "unknown">
+        ) && output.rows.length > 0
+      );
+    })
+    .map((output) => ({
+      fileName: output.fileName as Exclude<DefinitionFileKey, "unknown">,
+      rowCount: output.rows.length,
+      content: buildTypeScriptPreview(output),
+    }));
+
+  return {
+    packageType: "kweekers-definition-import-package",
+    packageVersion: 1,
+    generatedAt: new Date().toISOString(),
+    source: {
+      app: "kweekers-groeimodel",
+      mode,
+    },
+    mappingStatus: summary,
+    files,
+  };
 }
 
 function SummaryCard({ label, value }: { label: string; value: number }) {
@@ -2017,10 +2018,22 @@ export default function DefinitionImportApplyResultPage() {
     return JSON.stringify(technicalProposal, null, 2);
   }, [technicalProposal]);
 
-const technicalProposalJson = useMemo(() => {
-  if (!technicalProposal) return "";
-  return JSON.stringify(technicalProposal, null, 2);
-}, [technicalProposal]);
+  const importPackage = useMemo(() => {
+  if (!result) return null;
+
+  return buildImportPackage(
+    definitionFileOutputs,
+    mappingStatusSummary,
+    result.mode ?? "safe-test"
+  );
+  }, [definitionFileOutputs, mappingStatusSummary, result]);
+
+  const importPackageJson = useMemo(() => {
+  if (!importPackage) return "";
+  return JSON.stringify(importPackage, null, 2);
+}, [importPackage]);
+
+
 
   const clearResult = () => {
     window.localStorage.removeItem("definitionImportApplyResult");
@@ -2086,7 +2099,7 @@ const technicalProposalJson = useMemo(() => {
     );
   };
 
-const downloadImportPackage = () => {
+  const downloadImportPackage = () => {
   if (!importPackageJson) return;
 
   downloadText(
@@ -2094,7 +2107,7 @@ const downloadImportPackage = () => {
     `definition-import-package-${getTimestamp()}.json`,
     "application/json;charset=utf-8"
   );
-};
+  };
 
   const copyDefinitionFileJson = async (output: DefinitionFileOutput) => {
     const json = JSON.stringify(buildDefinitionFileProposal(output), null, 2);
@@ -2405,28 +2418,30 @@ const downloadImportPackage = () => {
         ))}
       </section>
 
-<section className="space-y-6">
-  <MappingStatusSummaryCard summary={mappingStatusSummary} />
+      <section className="space-y-6">
+        <MappingStatusSummaryCard summary={mappingStatusSummary} />
 
-  <div className="space-y-1">
-    <h2 className="text-lg font-semibold">Kolom-mapping controle</h2>
+        <details className="rounded-3xl border border-black/10 bg-white p-5">
+          <summary className="cursor-pointer text-lg font-semibold">
+            Kolom-mapping details tonen
+          </summary>
 
-    <p className="max-w-4xl text-sm leading-6 text-muted-foreground">
-      Hier zie je of de kolommen uit de Excel-import goed worden gekoppeld
-      aan de velden van de TypeScript-output. Dit is de controlelaag vóór
-      we de mapping verder aanscherpen.
-    </p>
-  </div>
+          <p className="mt-3 max-w-4xl text-sm leading-6 text-muted-foreground">
+            Hier zie je per doelbestand of de kolommen uit de Excel-import goed
+            worden gekoppeld aan de velden van de TypeScript-output. Dit
+            detailblok is vooral bedoeld voor controle en foutopsporing.
+          </p>
 
-  <div className="space-y-5">
-    {definitionFileOutputs.map((output) => (
-      <MappingCheckCard
-        key={`mapping-${output.fileName}`}
-        output={output}
-      />
-    ))}
-  </div>
-</section>
+          <div className="mt-5 space-y-5">
+            {definitionFileOutputs.map((output) => (
+              <MappingCheckCard
+                key={`mapping-${output.fileName}`}
+                output={output}
+              />
+            ))}
+          </div>
+        </details>
+      </section>
 
       <section className="space-y-6">
         <div className="space-y-1">
