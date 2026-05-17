@@ -3,6 +3,7 @@ import type { OptionSetDefinition } from "./types";
 export const optionSets: OptionSetDefinition[] = [
   {
     "key": "sector_options",
+    "title": "Sector",
     "options": [
       {
         "value": "zorg",
@@ -33,6 +34,7 @@ export const optionSets: OptionSetDefinition[] = [
   },
   {
     "key": "organization_size_options",
+    "title": "Organisatiegrootte",
     "options": [
       {
         "value": "1-25",
@@ -63,6 +65,7 @@ export const optionSets: OptionSetDefinition[] = [
   },
   {
     "key": "administration_count_options",
+    "title": "Aantal administraties",
     "options": [
       {
         "value": "1",
@@ -88,6 +91,7 @@ export const optionSets: OptionSetDefinition[] = [
   },
   {
     "key": "organization_type_options",
+    "title": "Organisatietype",
     "options": [
       {
         "value": "centraal_operationeel",
@@ -129,6 +133,7 @@ export const optionSets: OptionSetDefinition[] = [
   },
   {
     "key": "afas_products_options",
+    "title": "AFAS-producten",
     "options": [
       {
         "value": "crm",
@@ -224,6 +229,7 @@ export const optionSets: OptionSetDefinition[] = [
   },
   {
     "key": "ownership_model_options",
+    "title": "Ownership Model",
     "options": [
       {
         "value": "extern_uitbesteed",
@@ -259,6 +265,7 @@ export const optionSets: OptionSetDefinition[] = [
   },
   {
     "key": "afas_usage_duration_options",
+    "title": "Afas Usage Duration",
     "options": [
       {
         "value": "korter_dan_2_jaar",
@@ -294,6 +301,7 @@ export const optionSets: OptionSetDefinition[] = [
   },
   {
     "key": "maintenance_quality_options",
+    "title": "Maintenance Quality",
     "options": [
       {
         "value": "goed_onderhouden",
@@ -323,6 +331,7 @@ export const optionSets: OptionSetDefinition[] = [
   },
   {
     "key": "expected_org_changes_options",
+    "title": "Expected Org Changes",
     "options": [
       {
         "value": "ja_waarschijnlijk",
@@ -352,6 +361,7 @@ export const optionSets: OptionSetDefinition[] = [
   },
   {
     "key": "standardization_context_options",
+    "title": "Standardization Context",
     "options": [
       {
         "value": "afas_standaard",
@@ -381,6 +391,7 @@ export const optionSets: OptionSetDefinition[] = [
   },
   {
     "key": "primary_process_chains_options",
+    "title": "Primary Process Chains",
     "options": [
       {
         "value": "lead_to_order",
@@ -431,6 +442,7 @@ export const optionSets: OptionSetDefinition[] = [
   },
   {
     "key": "scan_reason_options",
+    "title": "Scan Reason",
     "options": [
       {
         "value": "nulmeting",
@@ -466,6 +478,7 @@ export const optionSets: OptionSetDefinition[] = [
   },
   {
     "key": "biggest_bottleneck_options",
+    "title": "Biggest Bottleneck",
     "options": [
       {
         "value": "processen",
@@ -501,6 +514,7 @@ export const optionSets: OptionSetDefinition[] = [
   },
   {
     "key": "scope_options",
+    "title": "Scope",
     "options": [
       {
         "value": "smal",
@@ -524,6 +538,7 @@ export const optionSets: OptionSetDefinition[] = [
   },
   {
     "key": "scope_focus_options",
+    "title": "Scope Focus",
     "options": [
       {
         "value": "organisatie_eigenaarschap",
@@ -554,6 +569,7 @@ export const optionSets: OptionSetDefinition[] = [
   },
   {
     "key": "scope_depth_options",
+    "title": "Scope Depth",
     "options": [
       {
         "value": "eerste_beeld",
@@ -574,6 +590,7 @@ export const optionSets: OptionSetDefinition[] = [
   },
   {
     "key": "maturity_3level_clarity_options",
+    "title": "Maturity 3level Clarity",
     "options": [
       {
         "value": "onvoldoende_duidelijk",
@@ -597,6 +614,7 @@ export const optionSets: OptionSetDefinition[] = [
   },
   {
     "key": "maturity_3level_change_governance_options",
+    "title": "Maturity 3level Change Governance",
     "options": [
       {
         "value": "ad_hoc",
@@ -620,6 +638,7 @@ export const optionSets: OptionSetDefinition[] = [
   },
   {
     "key": "maturity_3level_improvement_options",
+    "title": "Maturity 3level Improvement",
     "options": [
       {
         "value": "nauwelijks",
@@ -643,6 +662,7 @@ export const optionSets: OptionSetDefinition[] = [
   },
   {
     "key": "maturity_3level_standardization_options",
+    "title": "Maturity 3level Standardization",
     "options": [
       {
         "value": "sterk_verschillend",
@@ -666,6 +686,7 @@ export const optionSets: OptionSetDefinition[] = [
   },
   {
     "key": "maturity_3level_exception_control_options",
+    "title": "Maturity 3level Exception Control",
     "options": [
       {
         "value": "uitzondering_is_norm",
@@ -689,6 +710,7 @@ export const optionSets: OptionSetDefinition[] = [
   },
   {
     "key": "maturity_3level_issue_resolution_options",
+    "title": "Maturity 3level Issue Resolution",
     "options": [
       {
         "value": "handmatig_herstellen",
@@ -712,6 +734,7 @@ export const optionSets: OptionSetDefinition[] = [
   },
   {
     "key": "maturity_3level_strength_options",
+    "title": "Maturity 3level Strength",
     "options": [
       {
         "value": "kwetsbaar",
@@ -735,6 +758,7 @@ export const optionSets: OptionSetDefinition[] = [
   },
   {
     "key": "maturity_3level_usefulness_options",
+    "title": "Maturity 3level Usefulness",
     "options": [
       {
         "value": "beperkt_bruikbaar",
@@ -758,6 +782,7 @@ export const optionSets: OptionSetDefinition[] = [
   },
   {
     "key": "maturity_3level_fit_options",
+    "title": "Maturity 3level Fit",
     "options": [
       {
         "value": "sluit_beperkt_aan",
@@ -781,6 +806,7 @@ export const optionSets: OptionSetDefinition[] = [
   },
   {
     "key": "maturity_3level_exception_practical_options",
+    "title": "Maturity 3level Exception Practical",
     "options": [
       {
         "value": "vooral_handmatig",
@@ -804,6 +830,7 @@ export const optionSets: OptionSetDefinition[] = [
   },
   {
     "key": "finance_strategic_pressure_options",
+    "title": "Finance Strategic Pressure",
     "options": [
       {
         "value": "betrouwbaarheid_basis",
@@ -833,6 +860,7 @@ export const optionSets: OptionSetDefinition[] = [
   },
   {
     "key": "crm_strategic_pressure_options",
+    "title": "Crm Strategic Pressure",
     "options": [
       {
         "value": "lead_opvolging",
@@ -862,6 +890,7 @@ export const optionSets: OptionSetDefinition[] = [
   },
   {
     "key": "order_strategic_pressure_options",
+    "title": "Order Strategic Pressure",
     "options": [
       {
         "value": "orderinvoer",
@@ -891,6 +920,7 @@ export const optionSets: OptionSetDefinition[] = [
   },
   {
     "key": "hrm_strategic_pressure_options",
+    "title": "Hrm Strategic Pressure",
     "options": [
       {
         "value": "mutatieverwerking",
@@ -920,6 +950,7 @@ export const optionSets: OptionSetDefinition[] = [
   },
   {
     "key": "reporting_strategic_pressure_options",
+    "title": "Reporting Strategic Pressure",
     "options": [
       {
         "value": "definities_kpis",
@@ -949,6 +980,7 @@ export const optionSets: OptionSetDefinition[] = [
   },
   {
     "key": "integration_strategic_pressure_options",
+    "title": "Integration Strategic Pressure",
     "options": [
       {
         "value": "stabiliteit_keten",
