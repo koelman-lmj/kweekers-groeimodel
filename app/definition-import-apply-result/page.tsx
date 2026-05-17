@@ -2979,7 +2979,68 @@ const downloadImportPackage = () => {
     </pre>
   </details>
 </section>
+<section className="rounded-3xl border border-blue-200 bg-blue-50 p-5">
+  <div className="space-y-2">
+    <h2 className="text-lg font-semibold text-blue-950">
+      Lokale vervolgstappen
+    </h2>
 
+    <p className="max-w-4xl text-sm leading-6 text-blue-950">
+      Download eerst het importpakket. Zet het bestand daarna lokaal in de
+      projectmap en voer onderstaande stappen uit in PowerShell.
+    </p>
+  </div>
+
+  <div className="mt-5 space-y-4">
+    <div className="rounded-2xl border border-blue-200 bg-white p-4">
+      <div className="text-sm font-semibold text-blue-950">
+        1. Hernoem het gedownloade bestand
+      </div>
+
+      <p className="mt-2 text-sm leading-6 text-blue-900">
+        Zet het bestand in de projectmap en hernoem het naar:
+      </p>
+
+      <pre className="mt-3 overflow-auto rounded-xl bg-gray-950 p-4 text-xs text-white">
+{`definition-import-package.json`}
+      </pre>
+    </div>
+
+    <div className="rounded-2xl border border-blue-200 bg-white p-4">
+      <div className="text-sm font-semibold text-blue-950">
+        2. Pas het importpakket lokaal toe
+      </div>
+
+      <pre className="mt-3 overflow-auto rounded-xl bg-gray-950 p-4 text-xs text-white">
+{`npm run apply-definition-import -- ".\\definition-import-package.json"`}
+      </pre>
+    </div>
+
+    <div className="rounded-2xl border border-blue-200 bg-white p-4">
+      <div className="text-sm font-semibold text-blue-950">
+        3. Controleer build en wijzigingen
+      </div>
+
+      <pre className="mt-3 overflow-auto rounded-xl bg-gray-950 p-4 text-xs text-white">
+{`npm run build
+git diff
+git status`}
+      </pre>
+    </div>
+
+    <div className="rounded-2xl border border-blue-200 bg-white p-4">
+      <div className="text-sm font-semibold text-blue-950">
+        4. Commit en push alleen als alles klopt
+      </div>
+
+      <pre className="mt-3 overflow-auto rounded-xl bg-gray-950 p-4 text-xs text-white">
+{`git add lib/scan/definition/categories.ts lib/scan/definition/dimensions.ts lib/scan/definition/option-sets.ts lib/scan/definition/questions.ts
+git commit -m "Apply definition import package"
+git push`}
+      </pre>
+    </div>
+  </div>
+</section>
       <section className="space-y-6">
         <div className="space-y-1">
           <h2 className="text-lg font-semibold">Sheets in dit voorstel</h2>
