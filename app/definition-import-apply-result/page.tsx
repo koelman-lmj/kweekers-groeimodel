@@ -108,6 +108,7 @@ type ImportPackageValidationIssue = {
   message: string;
   rowIndex?: number;
   field?: string;
+  details?: string[];
 };
 
 type ImportPackageValidationResult = {
@@ -1729,15 +1730,81 @@ function validateImportPackageOutputs(
         });
       }
 
-      if (rowsWithOptionSetKey > generatedOptionCount) {
-        issues.push({
-          fileName: output.fileName,
-          severity: "warning",
-          message: `${
-            rowsWithOptionSetKey - generatedOptionCount
-          } option-set regel(s) zijn overgeslagen omdat value of label ontbreekt.`,
-        });
-      }
+if (rowsWithOptionSetKey > generatedOptionCount) {
+  const skippedRows = output.rows
+    .map((row, index) => {
+      const key = getString(row, [
+        "key",
+        "optionSet",
+        "option_set",
+        "optionSetKey",
+        "option_set_key",
+        "set",
+        "setKey",
+        "set_key",
+        "optionGroup",
+        "option_group",
+      ]).trim();
+
+      if (!key) return null;
+
+      const value = getString(row, [
+        "value",
+        "waarde",
+        "optionValue",
+        "option_value",
+        "optionKey",
+        "option_key",
+        "answerValue",
+        "answer_value",
+      ]).trim();
+
+      const label = getString(row, [
+        "label",
+        "label_nl",
+        "tekst",
+        "text",
+        "answerLabel",
+        "answer_label",
+        "optionLabel",
+        "option_label",
+      ]).trim();
+
+      if (value && label) return null;
+
+      return {
+        index: index + 1,
+        key,
+        value,
+        label,
+      };
+    })
+    .filter(Boolean)
+    .slice(0, 5) as Array<{
+    index: number;
+    key: string;
+    value: string;
+    label: string;
+  }>;
+
+  issues.push({
+    fileName: output.fileName,
+    severity: "warning",
+    message: `${
+      rowsWithOptionSetKey - generatedOptionCount
+    } option-set regel(s) zijn overgeslagen. Dit zijn waarschijnlijk headerregels, groepsregels of incomplete regels zonder value en/of label.`,
+    details: skippedRows.map((row) => {
+      const missing = [
+        row.value ? null : "value ontbreekt",
+        row.label ? null : "label ontbreekt",
+      ]
+        .filter(Boolean)
+        .join(", ");
+
+      return `Regel ${row.index}: key="${row.key}" (${missing})`;
+    }),
+  });
+}
 
       optionSets.forEach((optionSet, setIndex) => {
         if (!isFilledString(optionSet.key)) {
@@ -1970,13 +2037,27 @@ function ImportPackageValidationPanel({
 
             <div className="mt-1 text-muted-foreground">{issue.message}</div>
 
-            {(issue.field || issue.rowIndex) && (
-              <div className="mt-1 text-muted-foreground">
-                {issue.field ? `Veld: ${issue.field}` : ""}
-                {issue.field && issue.rowIndex ? " · " : ""}
-                {issue.rowIndex ? `Regel: ${issue.rowIndex}` : ""}
-              </div>
-            )}
+{(issue.field || issue.rowIndex) && (
+  <div className="mt-1 text-muted-foreground">
+    {issue.field ? `Veld: ${issue.field}` : ""}
+    {issue.field && issue.rowIndex ? " · " : ""}
+    {issue.rowIndex ? `Regel: ${issue.rowIndex}` : ""}
+  </div>
+)}
+
+{issue.details && issue.details.length > 0 && (
+  <div className="mt-2 rounded-lg border border-black/10 bg-black/[0.02] p-2 text-muted-foreground">
+    <div className="font-medium text-black">
+      Voorbeelden van overgeslagen regels:
+    </div>
+
+    <ul className="mt-1 list-disc space-y-1 pl-4">
+      {issue.details.map((detail) => (
+        <li key={detail}>{detail}</li>
+      ))}
+    </ul>
+  </div>
+)}
           </div>
         ))}
 
