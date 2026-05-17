@@ -178,6 +178,20 @@ export default function ActiveTestResultsPage() {
     window.location.href = "/scan/active-test";
   }
 
+  function goToQuestion(questionKey: string) {
+    const questionIndex = questions.findIndex(
+      (question) => question.key === questionKey
+    );
+
+    if (questionIndex === -1) {
+      window.location.href = "/scan/active-test";
+      return;
+    }
+
+    localStorage.setItem(CURRENT_INDEX_STORAGE_KEY, String(questionIndex));
+    window.location.href = "/scan/active-test";
+  }
+
   function handleDownloadResults() {
     const exportPayload = {
       exportType: "kweekers-active-test-readable-results",
@@ -402,14 +416,28 @@ export default function ActiveTestResultsPage() {
                   key={question.key}
                   className="rounded-xl border border-gray-200 p-4"
                 >
-                  <div className="text-xs text-gray-500">
-                    {question.sectionCode}
-                  </div>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <div className="text-xs text-gray-500">
+                        {question.sectionCode}
+                      </div>
 
-                  <div className="mt-1 font-semibold">{question.label}</div>
+                      <div className="mt-1 font-semibold">
+                        {question.label}
+                      </div>
 
-                  <div className="mt-2 text-sm text-gray-500">
-                    key: {question.key}
+                      <div className="mt-2 text-sm text-gray-500">
+                        key: {question.key}
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => goToQuestion(question.key)}
+                      className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-50"
+                    >
+                      Ga naar deze vraag
+                    </button>
                   </div>
                 </div>
               ))}
