@@ -84,6 +84,24 @@ type MappingStatusSummary = {
   emptyOptionalFields: number;
 };
 
+type ImportPackageFile = {
+  fileName: Exclude<DefinitionFileKey, "unknown">;
+  rowCount: number;
+  content: string;
+};
+
+type ImportPackage = {
+  packageType: "kweekers-definition-import-package";
+  packageVersion: 1;
+  generatedAt: string;
+  source: {
+    app: "kweekers-groeimodel";
+    mode: string;
+  };
+  mappingStatus: MappingStatusSummary;
+  files: ImportPackageFile[];
+};
+
 const EMPTY_COUNTS: Counts = {
   new: 0,
   changed: 0,
@@ -1415,6 +1433,45 @@ function buildTypeScriptPreview(output: DefinitionFileOutput) {
   order: number;
 };
 
+function buildImportPackage(
+  outputs: DefinitionFileOutput[],
+  summary: MappingStatusSummary,
+  mode: string
+): ImportPackage {
+  const allowedFiles: Exclude<DefinitionFileKey, "unknown">[] = [
+    "categories.ts",
+    "dimensions.ts",
+    "option-sets.ts",
+    "questions.ts",
+    "sections.ts",
+  ];
+
+  const files = outputs
+    .filter((output) => {
+      return (
+        allowedFiles.includes(output.fileName as Exclude<DefinitionFileKey, "unknown">) &&
+        output.rows.length > 0
+      );
+    })
+    .map((output) => ({
+      fileName: output.fileName as Exclude<DefinitionFileKey, "unknown">,
+      rowCount: output.rows.length,
+      content: buildTypeScriptPreview(output),
+    }));
+
+  return {
+    packageType: "kweekers-definition-import-package",
+    packageVersion: 1,
+    generatedAt: new Date().toISOString(),
+    source: {
+      app: "kweekers-groeimodel",
+      mode,
+    },
+    mappingStatus: summary,
+    files,
+  };
+}
+
 export const categories: CategoryDefinition[] = ${stringifyTs(data)};
 
 export function getCategoryDefinition(code: string): CategoryDefinition {
@@ -1960,6 +2017,11 @@ export default function DefinitionImportApplyResultPage() {
     return JSON.stringify(technicalProposal, null, 2);
   }, [technicalProposal]);
 
+const technicalProposalJson = useMemo(() => {
+  if (!technicalProposal) return "";
+  return JSON.stringify(technicalProposal, null, 2);
+}, [technicalProposal]);
+
   const clearResult = () => {
     window.localStorage.removeItem("definitionImportApplyResult");
     setResult(null);
@@ -2023,6 +2085,16 @@ export default function DefinitionImportApplyResultPage() {
       "application/json;charset=utf-8"
     );
   };
+
+const downloadImportPackage = () => {
+  if (!importPackageJson) return;
+
+  downloadText(
+    importPackageJson,
+    `definition-import-package-${getTimestamp()}.json`,
+    "application/json;charset=utf-8"
+  );
+};
 
   const copyDefinitionFileJson = async (output: DefinitionFileOutput) => {
     const json = JSON.stringify(buildDefinitionFileProposal(output), null, 2);
@@ -2213,6 +2285,74 @@ export default function DefinitionImportApplyResultPage() {
           <SummaryCard label="Ongeldig" value={totals.invalid} />
         </div>
       </section>
+
+<section className="rounded-3xl border border-black/10 bg-white p-5">
+  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div className="space-y-2">
+      <h2 className="text-lg font-semibold">Gecontroleerd importpakket</h2>
+
+      <p className="max-w-4xl text-sm leading-6 text-muted-foreground">
+        Download een gecontroleerd importpakket met de gegenereerde
+        TypeScript-output per doelbestand. Dit pakket schrijft nog niets weg,
+        maar vormt de basis voor handmatig overnemen of een later lokaal
+        apply-script.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      onClick={downloadImportPackage}
+      disabled={!importPackage || importPackage.files.length === 0}
+      className={
+        importPackage && importPackage.files.length > 0
+          ? "inline-flex rounded-2xl border border-black/10 bg-black px-5 py-3 text-sm font-medium text-white"
+          : "inline-flex cursor-not-allowed rounded-2xl border border-black/10 bg-black/10 px-5 py-3 text-sm font-medium text-muted-foreground"
+      }
+    >
+      Importpakket downloaden
+    </button>
+  </div>
+
+  <div className="mt-5 grid gap-4 md:grid-cols-4">
+    <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
+      <div className="text-sm text-muted-foreground">Bestanden in pakket</div>
+      <div className="mt-2 text-2xl font-semibold">
+        {importPackage?.files.length ?? 0}
+      </div>
+    </div>
+
+    <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
+      <div className="text-sm text-muted-foreground">Verplicht mist</div>
+      <div className="mt-2 text-2xl font-semibold">
+        {mappingStatusSummary.missingRequiredFields}
+      </div>
+    </div>
+
+    <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
+      <div className="text-sm text-muted-foreground">Mapping aandacht</div>
+      <div className="mt-2 text-2xl font-semibold">
+        {mappingStatusSummary.filesWithAttention}
+      </div>
+    </div>
+
+    <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
+      <div className="text-sm text-muted-foreground">Modus</div>
+      <div className="mt-2 text-xl font-semibold">
+        {result.mode ?? "safe-test"}
+      </div>
+    </div>
+  </div>
+
+  <details className="mt-5 rounded-2xl border border-black/10 bg-black/[0.02] p-4">
+    <summary className="cursor-pointer text-sm font-medium">
+      Importpakket-preview tonen
+    </summary>
+
+    <pre className="mt-4 max-h-[520px] overflow-auto rounded-2xl border border-black/10 bg-white p-4 text-xs">
+      {importPackageJson}
+    </pre>
+  </details>
+</section>
 
       <section className="space-y-6">
         <div className="space-y-1">
