@@ -310,10 +310,11 @@ export default function DefinitionImportReviewPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          mode: "safe-test",
-          concept,
-        }),
+body: JSON.stringify({
+  confirmed: true,
+  confirmText: "TOEPASSEN",
+  importRows: concept.importRows,
+}),
       });
 
       const result = (await response.json()) as ApplyResult;
