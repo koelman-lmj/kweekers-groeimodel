@@ -198,17 +198,51 @@ export default function ActiveTestScanPage() {
     setDownloadStatus("");
   }
 
-  function goToNext() {
-    const nextIndex = Math.min(
-      currentIndex + 1,
-      Math.max(questions.length - 1, 0)
-    );
+function goToNext() {
+  const nextIndex = Math.min(
+    currentIndex + 1,
+    Math.max(questions.length - 1, 0)
+  );
 
-    setCurrentIndex(nextIndex);
-    localStorage.setItem(CURRENT_INDEX_STORAGE_KEY, String(nextIndex));
-    setSaveStatus("");
-    setDownloadStatus("");
+  setCurrentIndex(nextIndex);
+  localStorage.setItem(CURRENT_INDEX_STORAGE_KEY, String(nextIndex));
+  setSaveStatus("");
+  setDownloadStatus("");
+}
+
+function isQuestionAnswered(question: Record<string, string>) {
+  if (!question.key) {
+    return false;
   }
+
+  const answer = answers[question.key];
+
+  if (Array.isArray(answer)) {
+    return answer.length > 0;
+  }
+
+  return typeof answer === "string" && answer.trim().length > 0;
+}
+
+function goToFirstUnanswered() {
+  const firstUnansweredIndex = questions.findIndex(
+    (question) => !isQuestionAnswered(question)
+  );
+
+  if (firstUnansweredIndex === -1) {
+    setSaveStatus("Alle vragen zijn beantwoord.");
+    setDownloadStatus("");
+    return;
+  }
+
+  setCurrentIndex(firstUnansweredIndex);
+  localStorage.setItem(
+    CURRENT_INDEX_STORAGE_KEY,
+    String(firstUnansweredIndex)
+  );
+  setSaveStatus("");
+  setDownloadStatus("");
+}
 
   function handleClearAnswers() {
     localStorage.removeItem(ANSWERS_STORAGE_KEY);
@@ -517,29 +551,39 @@ export default function ActiveTestScanPage() {
             </div>
           )}
 
-          <div className="mt-8 flex items-center justify-between gap-3">
-            <button
-              type="button"
-              onClick={goToPrevious}
-              disabled={currentIndex === 0}
-              className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium disabled:opacity-40"
-            >
-              Vorige
-            </button>
+<div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+  <button
+    type="button"
+    onClick={goToPrevious}
+    disabled={currentIndex === 0}
+    className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium disabled:opacity-40"
+  >
+    Vorige
+  </button>
 
-            <div className="text-sm text-gray-500">
-              Beantwoord: {answeredCount} van {questions.length}
-            </div>
+  <div className="flex flex-col items-center gap-2 text-sm text-gray-500">
+    <div>
+      Beantwoord: {answeredCount} van {questions.length}
+    </div>
 
-            <button
-              type="button"
-              onClick={goToNext}
-              disabled={currentIndex === questions.length - 1}
-              className="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white disabled:bg-gray-300 disabled:text-gray-600"
-            >
-              Volgende
-            </button>
-          </div>
+    <button
+      type="button"
+      onClick={goToFirstUnanswered}
+      className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-50"
+    >
+      Ga naar eerste onbeantwoorde
+    </button>
+  </div>
+
+  <button
+    type="button"
+    onClick={goToNext}
+    disabled={currentIndex === questions.length - 1}
+    className="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white disabled:bg-gray-300 disabled:text-gray-600"
+  >
+    Volgende
+  </button>
+</div>
         </div>
 
         <div className="mt-6 rounded-xl border border-blue-200 bg-blue-50 p-4">
