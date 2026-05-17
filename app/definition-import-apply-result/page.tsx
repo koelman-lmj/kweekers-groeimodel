@@ -1146,6 +1146,27 @@ function buildSections(rows: Record<string, string>[]) {
   );
 }
 
+function getOptionSetFallbackTitle(key: string) {
+  const predefinedTitles: Record<string, string> = {
+    sector_options: "Sector",
+    organization_size_options: "Organisatiegrootte",
+    administration_count_options: "Aantal administraties",
+    organization_type_options: "Organisatietype",
+    afas_products_options: "AFAS-producten",
+  };
+
+  if (predefinedTitles[key]) {
+    return predefinedTitles[key];
+  }
+
+  return key
+    .replace(/_options$/i, "")
+    .replace(/_option_set$/i, "")
+    .replace(/[_-]+/g, " ")
+    .trim()
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
 function buildOptionSets(rows: Record<string, string>[]) {
   const grouped = new Map<
     string,
@@ -1174,19 +1195,20 @@ function buildOptionSets(rows: Record<string, string>[]) {
       continue;
     }
 
-    const title = getOptionalString(row, [
-      "setTitle",
-      "set_title",
-      "optionSetTitle",
-      "option_set_title",
-      "titelSet",
-      "titel_set",
-      "title",
-      "title_nl",
-      "titel",
-      "name",
-      "naam",
-    ]);
+const title =
+  getOptionalString(row, [
+    "setTitle",
+    "set_title",
+    "optionSetTitle",
+    "option_set_title",
+    "titelSet",
+    "titel_set",
+    "title",
+    "title_nl",
+    "titel",
+    "name",
+    "naam",
+  ]) ?? getOptionSetFallbackTitle(key);
 
     const current = grouped.get(key) ?? {
       key,
@@ -1760,7 +1782,7 @@ if (rowsWithOptionSetKey > generatedOptionCount) {
 
       if (!key) return null;
 
-      const title = getOptionalString(row, [
+      const explicitTitle = getOptionalString(row, [
         "setTitle",
         "set_title",
         "optionSetTitle",
@@ -1773,6 +1795,9 @@ if (rowsWithOptionSetKey > generatedOptionCount) {
         "name",
         "naam",
       ]);
+
+      const fallbackTitle = getOptionSetFallbackTitle(key);
+      const title = explicitTitle ?? fallbackTitle;
 
       const value = getString(row, [
         "value",
@@ -1801,7 +1826,10 @@ if (rowsWithOptionSetKey > generatedOptionCount) {
       return {
         index: index + 1,
         key,
-        title: title ?? "",
+        title,
+        titleSource: explicitTitle
+          ? "metadata uit Excel"
+          : "fallbacktitel uit key",
         value,
         label,
       };
@@ -1810,6 +1838,7 @@ if (rowsWithOptionSetKey > generatedOptionCount) {
     index: number;
     key: string;
     title: string;
+    titleSource: string;
     value: string;
     label: string;
   }>;
@@ -1823,7 +1852,7 @@ if (rowsWithOptionSetKey > generatedOptionCount) {
     message: [
       `${skippedRows.length} option-set regel(s) zijn niet als losse antwoordoptie geïmporteerd.`,
       metadataRows.length > 0
-        ? `${metadataRows.length} daarvan zijn gebruikt als option-set metadata/header.`
+        ? `${metadataRows.length} daarvan hebben een titel/metadata gekregen voor de option-set.`
         : "Deze regels lijken headerregels, groepsregels of incomplete regels zonder value en/of label.",
       incompleteRows.length > 0
         ? `${incompleteRows.length} regel(s) hebben geen duidelijke titel/metadata en zijn alleen overgeslagen.`
@@ -1835,7 +1864,9 @@ if (rowsWithOptionSetKey > generatedOptionCount) {
       const missing = [
         row.value ? null : "value ontbreekt",
         row.label ? null : "label ontbreekt",
-        row.title ? "titel/metadata aanwezig" : "geen titel/metadata",
+        row.title
+          ? `titel="${row.title}" (${row.titleSource})`
+          : "geen titel/metadata",
       ]
         .filter(Boolean)
         .join(", ");
