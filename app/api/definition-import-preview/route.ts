@@ -516,7 +516,7 @@ export async function POST(request: Request) {
     const arrayBuffer = await file.arrayBuffer();
     const workbook = new ExcelJS.Workbook();
 
-  await workbook.xlsx.load(arrayBuffer);
+await workbook.xlsx.load(Buffer.from(arrayBuffer) as any);
 
     const checks = sheetConfigs.map((config) => {
       const sheet = getWorksheet(workbook, config);
