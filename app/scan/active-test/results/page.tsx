@@ -376,14 +376,32 @@ export default function ActiveTestResultsPage() {
                   key={question.key}
                   className="rounded-xl border border-gray-200 p-4"
                 >
-                  <div className="text-xs text-gray-500">
-                    {question.sectionCode} · vraag {index + 1}
-                  </div>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="flex-1">
+                      <div className="text-xs text-gray-500">
+                        {question.sectionCode} · vraag {index + 1}
+                      </div>
 
-                  <div className="mt-1 font-semibold">{question.label}</div>
+                      <div className="mt-1 font-semibold">
+                        {question.label}
+                      </div>
 
-                  <div className="mt-2 rounded-lg bg-gray-50 p-3 text-sm">
-                    {getAnswerLabel(question, answers[question.key], options)}
+                      <div className="mt-2 rounded-lg bg-gray-50 p-3 text-sm">
+                        {getAnswerLabel(
+                          question,
+                          answers[question.key],
+                          options
+                        )}
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => goToQuestion(question.key)}
+                      className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-50"
+                    >
+                      Antwoord wijzigen
+                    </button>
                   </div>
                 </div>
               ))}
