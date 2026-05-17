@@ -209,8 +209,15 @@ export default function DefinitionImportPage() {
             Gebruik bij voorkeur de download “Huidige definitie” of de
             Excel-template vanaf de definitiebeheerpagina.
           </p>
+<div className="mt-5 flex flex-wrap gap-3">
+  <a
+    href="/api/definition-template"
+    className="inline-flex rounded-2xl border border-black/10 bg-black px-5 py-3 text-sm font-medium text-white"
+  >
+    Excel-template downloaden
+  </a>
         </div>
-
+</div>
         <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center">
           <input
             type="file"
