@@ -630,22 +630,29 @@ export default function DefinitionImportConceptPage() {
           <StatusBadge ok={Boolean(concept.ok)} />
         </div>
 
-        <div className="mt-5 flex flex-wrap gap-3">
-          <Link
-            href="/definition-import"
-            className="inline-flex rounded-2xl border border-black/10 bg-black px-5 py-3 text-sm font-medium text-white"
-          >
-            Nieuwe preview uitvoeren
-          </Link>
+<div className="mt-5 flex flex-wrap gap-3">
+  <Link
+    href="/definition-import-review"
+    className="inline-flex rounded-2xl border border-black/10 bg-black px-5 py-3 text-sm font-medium text-white"
+  >
+    Naar import-review
+  </Link>
 
-          <button
-            type="button"
-            onClick={clearConcept}
-            className="inline-flex rounded-2xl border border-black/10 bg-white px-5 py-3 text-sm font-medium text-black"
-          >
-            Concept verwijderen
-          </button>
-        </div>
+  <Link
+    href="/definition-import"
+    className="inline-flex rounded-2xl border border-black/10 bg-white px-5 py-3 text-sm font-medium text-black"
+  >
+    Nieuwe preview uitvoeren
+  </Link>
+
+  <button
+    type="button"
+    onClick={clearConcept}
+    className="inline-flex rounded-2xl border border-black/10 bg-white px-5 py-3 text-sm font-medium text-black"
+  >
+    Concept verwijderen
+  </button>
+</div>
       </section>
 
       {diff && <DiffOverview diff={diff} />}
