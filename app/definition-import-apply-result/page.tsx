@@ -2053,6 +2053,46 @@ function SummaryCard({ label, value }: { label: string; value: number }) {
   );
 }
 
+function CommandBlock({
+  title,
+  description,
+  command,
+  onCopy,
+}: {
+  title: string;
+  description?: string;
+  command: string;
+  onCopy: (command: string, title: string) => void;
+}) {
+  return (
+    <div className="rounded-2xl border border-blue-200 bg-white p-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <div className="text-sm font-semibold text-blue-950">{title}</div>
+
+          {description && (
+            <p className="mt-2 text-sm leading-6 text-blue-900">
+              {description}
+            </p>
+          )}
+        </div>
+
+        <button
+          type="button"
+          onClick={() => onCopy(command, title)}
+          className="inline-flex rounded-xl border border-blue-200 bg-blue-50 px-4 py-2 text-xs font-medium text-blue-950 hover:bg-blue-100"
+        >
+          Kopieer
+        </button>
+      </div>
+
+      <pre className="mt-3 overflow-auto rounded-xl bg-gray-950 p-4 text-xs text-white">
+        {command}
+      </pre>
+    </div>
+  );
+}
+
 function SheetCountCard({ label, value }: { label: string; value: number }) {
   return (
     <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
@@ -2651,6 +2691,10 @@ const importPackageValidation = useMemo(() => {
     }, 3000);
   };
 
+ const copyCommand = (command: string, title: string) => {
+  copyText(command, `${title} gekopieerd.`);
+};
+  
   const downloadText = (text: string, fileName: string, mimeType: string) => {
     if (!text) return;
 
@@ -2991,55 +3035,42 @@ const downloadImportPackage = () => {
     </p>
   </div>
 
-  <div className="mt-5 space-y-4">
-    <div className="rounded-2xl border border-blue-200 bg-white p-4">
-      <div className="text-sm font-semibold text-blue-950">
-        1. Hernoem het gedownloade bestand
-      </div>
+{copyMessage && (
+  <div className="mt-4 rounded-2xl border border-green-200 bg-green-50 p-4 text-sm text-green-950">
+    {copyMessage}
+  </div>
+)}
 
-      <p className="mt-2 text-sm leading-6 text-blue-900">
-        Zet het bestand in de projectmap en hernoem het naar:
-      </p>
+<div className="mt-5 space-y-4">
+  <CommandBlock
+    title="1. Hernoem het gedownloade bestand"
+    description="Zet het bestand in de projectmap en hernoem het naar:"
+    command={`definition-import-package.json`}
+    onCopy={copyCommand}
+  />
 
-      <pre className="mt-3 overflow-auto rounded-xl bg-gray-950 p-4 text-xs text-white">
-{`definition-import-package.json`}
-      </pre>
-    </div>
+  <CommandBlock
+    title="2. Pas het importpakket lokaal toe"
+    command={`npm run apply-definition-import -- ".\\definition-import-package.json"`}
+    onCopy={copyCommand}
+  />
 
-    <div className="rounded-2xl border border-blue-200 bg-white p-4">
-      <div className="text-sm font-semibold text-blue-950">
-        2. Pas het importpakket lokaal toe
-      </div>
-
-      <pre className="mt-3 overflow-auto rounded-xl bg-gray-950 p-4 text-xs text-white">
-{`npm run apply-definition-import -- ".\\definition-import-package.json"`}
-      </pre>
-    </div>
-
-    <div className="rounded-2xl border border-blue-200 bg-white p-4">
-      <div className="text-sm font-semibold text-blue-950">
-        3. Controleer build en wijzigingen
-      </div>
-
-      <pre className="mt-3 overflow-auto rounded-xl bg-gray-950 p-4 text-xs text-white">
-{`npm run build
+  <CommandBlock
+    title="3. Controleer build en wijzigingen"
+    command={`npm run build
 git diff
 git status`}
-      </pre>
-    </div>
+    onCopy={copyCommand}
+  />
 
-    <div className="rounded-2xl border border-blue-200 bg-white p-4">
-      <div className="text-sm font-semibold text-blue-950">
-        4. Commit en push alleen als alles klopt
-      </div>
-
-      <pre className="mt-3 overflow-auto rounded-xl bg-gray-950 p-4 text-xs text-white">
-{`git add lib/scan/definition/categories.ts lib/scan/definition/dimensions.ts lib/scan/definition/option-sets.ts lib/scan/definition/questions.ts
+  <CommandBlock
+    title="4. Commit en push alleen als alles klopt"
+    command={`git add lib/scan/definition/categories.ts lib/scan/definition/dimensions.ts lib/scan/definition/option-sets.ts lib/scan/definition/questions.ts
 git commit -m "Apply definition import package"
 git push`}
-      </pre>
-    </div>
-  </div>
+    onCopy={copyCommand}
+  />
+</div>
 </section>
       <section className="space-y-6">
         <div className="space-y-1">
