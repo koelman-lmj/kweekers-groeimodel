@@ -21,6 +21,7 @@ type ActiveDefinition = {
 type AnswerValue = string | string[];
 
 const ANSWERS_STORAGE_KEY = "kweekers-active-test-answers";
+const CURRENT_INDEX_STORAGE_KEY = "kweekers-active-test-current-index";
 
 function downloadJson(fileName: string, data: unknown) {
   const json = JSON.stringify(data, null, 2);
@@ -82,7 +83,13 @@ function getAnswerLabel(
   return option?.label ?? answer;
 }
 
-function SummaryCard({ label, value }: { label: string; value: string | number }) {
+function SummaryCard({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | number;
+}) {
   return (
     <div className="rounded-2xl border border-black/10 bg-white p-5">
       <div className="text-sm text-gray-500">{label}</div>
@@ -152,6 +159,24 @@ export default function ActiveTestResultsPage() {
     questions.length > 0
       ? Math.round((answeredQuestions.length / questions.length) * 100)
       : 0;
+
+  function goToFirstUnansweredQuestion() {
+    const firstUnansweredIndex = questions.findIndex(
+      (question) => !isAnswered(answers[question.key])
+    );
+
+    if (firstUnansweredIndex === -1) {
+      window.location.href = "/scan/active-test";
+      return;
+    }
+
+    localStorage.setItem(
+      CURRENT_INDEX_STORAGE_KEY,
+      String(firstUnansweredIndex)
+    );
+
+    window.location.href = "/scan/active-test";
+  }
 
   function handleDownloadResults() {
     const exportPayload = {
@@ -242,6 +267,19 @@ export default function ActiveTestResultsPage() {
               >
                 Terug naar active-test
               </Link>
+
+              <button
+                type="button"
+                onClick={goToFirstUnansweredQuestion}
+                disabled={unansweredQuestions.length === 0}
+                className={
+                  unansweredQuestions.length === 0
+                    ? "rounded-lg border border-gray-300 bg-gray-100 px-4 py-2 text-sm font-medium text-gray-400"
+                    : "rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-50"
+                }
+              >
+                Verder met eerste onbeantwoorde vraag
+              </button>
 
               <button
                 type="button"
