@@ -603,6 +603,13 @@ function goToFirstUnanswered() {
               Download antwoorden als JSON
             </button>
 
+<Link
+  href="/scan/active-test/results"
+  className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-900"
+>
+  Bekijk resultaten
+</Link>
+
             <button
               type="button"
               onClick={handleClearAnswers}

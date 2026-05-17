@@ -20,25 +20,7 @@ type ActiveDefinition = {
 
 type AnswerValue = string | string[];
 
-type AnswerRow = {
-  key: string;
-  label: string;
-  sectionCode: string;
-  dimensionCode: string;
-  category: string;
-  inputType: string;
-  answer: AnswerValue;
-};
-
 const ANSWERS_STORAGE_KEY = "kweekers-active-test-answers";
-
-function formatAnswer(answer: AnswerValue) {
-  if (Array.isArray(answer)) {
-    return answer.length > 0 ? answer.join(", ") : "-";
-  }
-
-  return answer || "-";
-}
 
 function downloadJson(fileName: string, data: unknown) {
   const json = JSON.stringify(data, null, 2);
@@ -53,38 +35,91 @@ function downloadJson(fileName: string, data: unknown) {
   URL.revokeObjectURL(url);
 }
 
+function isAnswered(answer: AnswerValue | undefined) {
+  if (Array.isArray(answer)) {
+    return answer.length > 0;
+  }
+
+  return typeof answer === "string" && answer.trim().length > 0;
+}
+
+function getOptionsForQuestion(
+  question: Record<string, string>,
+  options: Record<string, string>[]
+) {
+  const optionSetKey = question.optionSetKey?.trim();
+
+  if (!optionSetKey) {
+    return [];
+  }
+
+  return options
+    .filter((option) => option.optionSetKey === optionSetKey)
+    .sort((a, b) => Number(a.order || 0) - Number(b.order || 0));
+}
+
+function getAnswerLabel(
+  question: Record<string, string>,
+  answer: AnswerValue | undefined,
+  options: Record<string, string>[]
+) {
+  if (!isAnswered(answer)) {
+    return "Niet beantwoord";
+  }
+
+  const questionOptions = getOptionsForQuestion(question, options);
+
+  if (Array.isArray(answer)) {
+    const labels = answer.map((value) => {
+      const option = questionOptions.find((item) => item.value === value);
+      return option?.label ?? value;
+    });
+
+    return labels.join(", ");
+  }
+
+  const option = questionOptions.find((item) => item.value === answer);
+  return option?.label ?? answer;
+}
+
+function SummaryCard({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div className="rounded-2xl border border-black/10 bg-white p-5">
+      <div className="text-sm text-gray-500">{label}</div>
+      <div className="mt-2 text-2xl font-semibold">{value}</div>
+    </div>
+  );
+}
+
 export default function ActiveTestResultsPage() {
   const [activeDefinition, setActiveDefinition] =
     useState<ActiveDefinition | null>(null);
 
   const [answers, setAnswers] = useState<Record<string, AnswerValue>>({});
+  const [isLoaded, setIsLoaded] = useState(false);
   const [downloadStatus, setDownloadStatus] = useState("");
 
   useEffect(() => {
     const rawDefinition = localStorage.getItem("kweekers-active-definition");
+    const rawAnswers = localStorage.getItem(ANSWERS_STORAGE_KEY);
 
     if (rawDefinition) {
       try {
-        const parsed = JSON.parse(rawDefinition) as ActiveDefinition;
-        setActiveDefinition(parsed);
+        setActiveDefinition(JSON.parse(rawDefinition) as ActiveDefinition);
       } catch {
         setActiveDefinition(null);
       }
     }
 
-    const rawAnswers = localStorage.getItem(ANSWERS_STORAGE_KEY);
-
     if (rawAnswers) {
       try {
-        const parsedAnswers = JSON.parse(rawAnswers) as Record<
-          string,
-          AnswerValue
-        >;
-        setAnswers(parsedAnswers);
+        setAnswers(JSON.parse(rawAnswers) as Record<string, AnswerValue>);
       } catch {
         setAnswers({});
       }
     }
+
+    setIsLoaded(true);
   }, []);
 
   const questions = useMemo(() => {
@@ -103,59 +138,46 @@ export default function ActiveTestResultsPage() {
     });
   }, [activeDefinition]);
 
-  const answeredRows: AnswerRow[] = questions
-    .filter((question) => {
-      const answer = answers[question.key];
+  const options = activeDefinition?.data?.options ?? [];
 
-      if (Array.isArray(answer)) {
-        return answer.length > 0;
-      }
+  const answeredQuestions = useMemo(() => {
+    return questions.filter((question) => isAnswered(answers[question.key]));
+  }, [questions, answers]);
 
-      return Boolean(answer);
-    })
-    .map((question) => ({
-      key: question.key,
-      label: question.label,
-      sectionCode: question.sectionCode,
-      dimensionCode: question.dimensionCode,
-      category: question.category,
-      inputType: question.inputType,
-      answer: answers[question.key],
-    }));
+  const unansweredQuestions = useMemo(() => {
+    return questions.filter((question) => !isAnswered(answers[question.key]));
+  }, [questions, answers]);
 
-  const unansweredRows = questions.filter((question) => {
-    const answer = answers[question.key];
-
-    if (Array.isArray(answer)) {
-      return answer.length === 0;
-    }
-
-    return !answer;
-  });
-
-  const answeredCount = answeredRows.length;
-  const totalCount = questions.length;
   const progressPercentage =
-    totalCount > 0 ? Math.round((answeredCount / totalCount) * 100) : 0;
+    questions.length > 0
+      ? Math.round((answeredQuestions.length / questions.length) * 100)
+      : 0;
 
   function handleDownloadResults() {
     const exportPayload = {
-      exportType: "kweekers-active-test-results",
+      exportType: "kweekers-active-test-readable-results",
       exportedAt: new Date().toISOString(),
       sourceDefinition: {
         fileName: activeDefinition?.fileName,
         publishedAt: activeDefinition?.publishedAt,
         source: activeDefinition?.source,
       },
-      progress: {
-        answered: answeredCount,
-        unanswered: unansweredRows.length,
-        totalQuestions: totalCount,
+      summary: {
+        totalQuestions: questions.length,
+        answered: answeredQuestions.length,
+        unanswered: unansweredQuestions.length,
         progressPercentage,
       },
-      answeredRows,
-      unansweredRows,
-      rawAnswers: answers,
+      answers: questions.map((question) => ({
+        key: question.key,
+        sectionCode: question.sectionCode,
+        label: question.label,
+        inputType: question.inputType,
+        optionSetKey: question.optionSetKey,
+        rawAnswer: answers[question.key] ?? null,
+        answerLabel: getAnswerLabel(question, answers[question.key], options),
+        answered: isAnswered(answers[question.key]),
+      })),
     };
 
     const datePart = new Date().toISOString().slice(0, 10);
@@ -165,29 +187,33 @@ export default function ActiveTestResultsPage() {
     setDownloadStatus(`Resultaten geëxporteerd: ${fileName}`);
   }
 
+  if (!isLoaded) {
+    return (
+      <main className="min-h-screen bg-gray-50 p-8">
+        <div className="mx-auto max-w-5xl rounded-2xl bg-white p-8 shadow">
+          Resultaten laden...
+        </div>
+      </main>
+    );
+  }
+
   if (!activeDefinition) {
     return (
       <main className="min-h-screen bg-gray-50 p-8">
-        <div className="mx-auto max-w-4xl rounded-2xl bg-white p-8 shadow">
-          <h1 className="text-2xl font-bold">Resultaten active-test</h1>
+        <div className="mx-auto max-w-5xl rounded-2xl bg-white p-8 shadow">
+          <h1 className="text-2xl font-bold">Geen actieve definitie gevonden</h1>
 
           <p className="mt-3 text-gray-600">
-            Er is nog geen actieve definitie gevonden in deze browser.
+            Er staat geen actieve definitie in deze browser. Ga terug naar de
+            actieve test of publiceer eerst een definitie.
           </p>
 
-          <div className="mt-6 flex flex-wrap gap-3">
+          <div className="mt-6">
             <Link
-              href="/definition-template/import-preview"
+              href="/scan/active-test"
               className="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white"
             >
-              Naar import-preview
-            </Link>
-
-            <Link
-              href="/definition-template/active-definition"
-              className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium"
-            >
-              Naar actieve definitie
+              Terug naar active-test
             </Link>
           </div>
         </div>
@@ -197,37 +223,46 @@ export default function ActiveTestResultsPage() {
 
   return (
     <main className="min-h-screen bg-gray-50 p-8">
-      <div className="mx-auto max-w-6xl rounded-2xl bg-white p-8 shadow">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold">Resultaten active-test</h1>
+      <div className="mx-auto max-w-6xl space-y-6">
+        <section className="rounded-2xl bg-white p-8 shadow">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h1 className="text-2xl font-bold">Resultaten active-test</h1>
 
-            <p className="mt-3 text-gray-600">
-              Deze pagina leest de actieve definitie en de ingevulde antwoorden
-              uit localStorage. Er wordt nog niets berekend of gepubliceerd.
-            </p>
+              <p className="mt-3 max-w-3xl text-gray-600">
+                Leesbare samenvatting van de ingevulde antwoorden. Deze pagina
+                gebruikt dezelfde localStorage-data als de active-test.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/scan/active-test"
+                className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium"
+              >
+                Terug naar active-test
+              </Link>
+
+              <button
+                type="button"
+                onClick={handleDownloadResults}
+                className="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white"
+              >
+                Download resultaten als JSON
+              </button>
+            </div>
           </div>
 
-          <div className="flex flex-wrap gap-3">
-            <Link
-              href="/scan/active-test"
-              className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium"
-            >
-              Terug naar scan
-            </Link>
+          {downloadStatus && (
+            <div className="mt-4 rounded-lg bg-blue-50 p-3 text-sm text-blue-900">
+              {downloadStatus}
+            </div>
+          )}
+        </section>
 
-            <Link
-              href="/definition-template/active-definition"
-              className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium"
-            >
-              Actieve definitie
-            </Link>
-          </div>
-        </div>
-
-        <div className="mt-8 rounded-xl border border-green-200 bg-green-50 p-4">
+        <section className="rounded-2xl border border-green-200 bg-green-50 p-5">
           <h2 className="text-lg font-semibold text-green-900">
-            Resultaten geladen
+            Actieve definitie
           </h2>
 
           <div className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
@@ -237,179 +272,112 @@ export default function ActiveTestResultsPage() {
             </div>
 
             <div>
-              <span className="font-medium">Definitie gepubliceerd:</span>{" "}
+              <span className="font-medium">Gepubliceerd:</span>{" "}
               {activeDefinition.publishedAt}
             </div>
+          </div>
+        </section>
 
-            <div>
-              <span className="font-medium">Beantwoord:</span> {answeredCount}{" "}
-              van {totalCount}
-            </div>
+        <section>
+          <h2 className="text-xl font-semibold">Samenvatting</h2>
 
-            <div>
-              <span className="font-medium">Openstaand:</span>{" "}
-              {unansweredRows.length}
-            </div>
+          <div className="mt-4 grid gap-4 md:grid-cols-4">
+            <SummaryCard label="Totaal vragen" value={questions.length} />
+            <SummaryCard label="Beantwoord" value={answeredQuestions.length} />
+            <SummaryCard
+              label="Onbeantwoord"
+              value={unansweredQuestions.length}
+            />
+            <SummaryCard label="Voortgang" value={`${progressPercentage}%`} />
           </div>
 
-          <div className="mt-4 h-3 overflow-hidden rounded-full bg-white">
+          <div className="mt-5 h-3 overflow-hidden rounded-full bg-gray-200">
             <div
               className="h-full rounded-full bg-black"
               style={{ width: `${progressPercentage}%` }}
             />
           </div>
+        </section>
 
-          <div className="mt-2 text-sm text-green-800">
-            Voortgang: {progressPercentage}%
+        <section className="rounded-2xl bg-white p-6 shadow">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="text-xl font-semibold">Beantwoorde vragen</h2>
+              <p className="mt-2 text-sm text-gray-600">
+                Per vraag zie je het gekozen antwoord in leesbare vorm.
+              </p>
+            </div>
+
+            <div className="text-sm text-gray-500">
+              {answeredQuestions.length} van {questions.length}
+            </div>
           </div>
-        </div>
 
-        <div className="mt-6 rounded-xl border border-blue-200 bg-blue-50 p-4">
-          <h2 className="text-lg font-semibold text-blue-900">
-            Export resultaten
-          </h2>
-
-          <p className="mt-2 text-sm text-blue-800">
-            Download de ingevulde antwoorden als JSON. Dit is handig als
-            controlebestand voordat we scoring of advieslogica toevoegen.
-          </p>
-
-          <button
-            type="button"
-            onClick={handleDownloadResults}
-            className="mt-4 rounded-lg bg-black px-4 py-2 text-sm font-medium text-white"
-          >
-            Download resultaten als JSON
-          </button>
-
-          {downloadStatus && (
-            <div className="mt-3 rounded-lg bg-white p-3 text-sm text-blue-900">
-              {downloadStatus}
+          {answeredQuestions.length === 0 ? (
+            <div className="mt-5 rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
+              Er zijn nog geen vragen beantwoord.
             </div>
-          )}
-        </div>
-
-        <div className="mt-6 rounded-xl border border-gray-200 p-4">
-          <h2 className="text-lg font-semibold">Beantwoorde vragen</h2>
-
-          {answeredRows.length === 0 ? (
-            <p className="mt-3 text-sm text-gray-600">
-              Er zijn nog geen antwoorden ingevuld.
-            </p>
           ) : (
-            <div className="mt-4 overflow-auto rounded-lg border border-gray-200">
-              <table className="min-w-full text-left text-xs">
-                <thead className="bg-gray-100">
-                  <tr>
-                    <th className="whitespace-nowrap px-3 py-2">Vraag</th>
-                    <th className="whitespace-nowrap px-3 py-2">Antwoord</th>
-                    <th className="whitespace-nowrap px-3 py-2">Sectie</th>
-                    <th className="whitespace-nowrap px-3 py-2">Dimensie</th>
-                    <th className="whitespace-nowrap px-3 py-2">Categorie</th>
-                    <th className="whitespace-nowrap px-3 py-2">Type</th>
-                  </tr>
-                </thead>
+            <div className="mt-5 space-y-3">
+              {answeredQuestions.map((question, index) => (
+                <div
+                  key={question.key}
+                  className="rounded-xl border border-gray-200 p-4"
+                >
+                  <div className="text-xs text-gray-500">
+                    {question.sectionCode} · vraag {index + 1}
+                  </div>
 
-                <tbody>
-                  {answeredRows.map((row) => (
-                    <tr key={row.key} className="border-t">
-                      <td className="max-w-lg px-3 py-2 align-top">
-                        <div className="font-medium">{row.label}</div>
-                        <div className="mt-1 text-gray-500">{row.key}</div>
-                      </td>
+                  <div className="mt-1 font-semibold">{question.label}</div>
 
-                      <td className="max-w-md px-3 py-2 align-top">
-                        {formatAnswer(row.answer)}
-                      </td>
-
-                      <td className="px-3 py-2 align-top">
-                        {row.sectionCode}
-                      </td>
-
-                      <td className="px-3 py-2 align-top">
-                        {row.dimensionCode}
-                      </td>
-
-                      <td className="px-3 py-2 align-top">{row.category}</td>
-
-                      <td className="px-3 py-2 align-top">{row.inputType}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                  <div className="mt-2 rounded-lg bg-gray-50 p-3 text-sm">
+                    {getAnswerLabel(question, answers[question.key], options)}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
-        </div>
+        </section>
 
-        <div className="mt-6 rounded-xl border border-gray-200 p-4">
-          <h2 className="text-lg font-semibold">Nog niet beantwoord</h2>
+        <section className="rounded-2xl bg-white p-6 shadow">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="text-xl font-semibold">Onbeantwoorde vragen</h2>
+              <p className="mt-2 text-sm text-gray-600">
+                Deze vragen hebben nog geen antwoord.
+              </p>
+            </div>
 
-          {unansweredRows.length === 0 ? (
-            <p className="mt-3 text-sm text-gray-600">
+            <div className="text-sm text-gray-500">
+              {unansweredQuestions.length} open
+            </div>
+          </div>
+
+          {unansweredQuestions.length === 0 ? (
+            <div className="mt-5 rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-900">
               Alle vragen zijn beantwoord.
-            </p>
+            </div>
           ) : (
-            <div className="mt-4 overflow-auto rounded-lg border border-gray-200">
-              <table className="min-w-full text-left text-xs">
-                <thead className="bg-gray-100">
-                  <tr>
-                    <th className="whitespace-nowrap px-3 py-2">Vraag</th>
-                    <th className="whitespace-nowrap px-3 py-2">Sectie</th>
-                    <th className="whitespace-nowrap px-3 py-2">Dimensie</th>
-                    <th className="whitespace-nowrap px-3 py-2">Categorie</th>
-                    <th className="whitespace-nowrap px-3 py-2">Type</th>
-                  </tr>
-                </thead>
+            <div className="mt-5 space-y-3">
+              {unansweredQuestions.map((question) => (
+                <div
+                  key={question.key}
+                  className="rounded-xl border border-gray-200 p-4"
+                >
+                  <div className="text-xs text-gray-500">
+                    {question.sectionCode}
+                  </div>
 
-                <tbody>
-                  {unansweredRows.map((question) => (
-                    <tr key={question.key} className="border-t">
-                      <td className="max-w-lg px-3 py-2 align-top">
-                        <div className="font-medium">{question.label}</div>
-                        <div className="mt-1 text-gray-500">
-                          {question.key}
-                        </div>
-                      </td>
+                  <div className="mt-1 font-semibold">{question.label}</div>
 
-                      <td className="px-3 py-2 align-top">
-                        {question.sectionCode}
-                      </td>
-
-                      <td className="px-3 py-2 align-top">
-                        {question.dimensionCode}
-                      </td>
-
-                      <td className="px-3 py-2 align-top">
-                        {question.category}
-                      </td>
-
-                      <td className="px-3 py-2 align-top">
-                        {question.inputType}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                  <div className="mt-2 text-sm text-gray-500">
+                    key: {question.key}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
-        </div>
-
-        <div className="mt-8 flex flex-wrap gap-3">
-          <Link
-            href="/scan/active-test"
-            className="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white"
-          >
-            Verder invullen
-          </Link>
-
-          <button
-            type="button"
-            disabled
-            className="rounded-lg bg-gray-300 px-4 py-2 text-sm font-medium text-gray-600"
-          >
-            Score berekenen — volgt later
-          </button>
-        </div>
+        </section>
       </div>
     </main>
   );
