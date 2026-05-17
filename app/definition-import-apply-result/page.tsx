@@ -102,6 +102,20 @@ type ImportPackage = {
   files: ImportPackageFile[];
 };
 
+type ImportPackageValidationIssue = {
+  fileName: DefinitionFileKey;
+  severity: "error" | "warning";
+  message: string;
+  rowIndex?: number;
+  field?: string;
+};
+
+type ImportPackageValidationResult = {
+  isSafe: boolean;
+  errors: number;
+  warnings: number;
+  issues: ImportPackageValidationIssue[];
+};
 const EMPTY_COUNTS: Counts = {
   new: 0,
   changed: 0,
@@ -1547,7 +1561,352 @@ function buildImportPackage(
     files,
   };
 }
+function isFilledString(value: unknown) {
+  return typeof value === "string" && value.trim().length > 0;
+}
 
+function isValidNumberValue(value: unknown) {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
+function validateImportPackageOutputs(
+  outputs: DefinitionFileOutput[],
+  mappingStatus: MappingStatusSummary
+): ImportPackageValidationResult {
+  const issues: ImportPackageValidationIssue[] = [];
+
+  if (mappingStatus.missingRequiredFields > 0) {
+    issues.push({
+      fileName: "unknown",
+      severity: "error",
+      message: `Er missen nog ${mappingStatus.missingRequiredFields} verplichte mappingvelden.`,
+    });
+  }
+
+  if (mappingStatus.filesWithAttention > 0) {
+    issues.push({
+      fileName: "unknown",
+      severity: "error",
+      message: `Er zijn nog ${mappingStatus.filesWithAttention} doelbestanden met mapping-aandacht.`,
+    });
+  }
+
+  for (const output of outputs) {
+    if (output.fileName === "unknown" && output.rows.length > 0) {
+      issues.push({
+        fileName: output.fileName,
+        severity: "error",
+        message:
+          "Er zijn importregels die niet aan een bekend doelbestand gekoppeld zijn.",
+      });
+
+      continue;
+    }
+
+    if (output.rows.length === 0) {
+      continue;
+    }
+
+    if (output.fileName === "categories.ts") {
+      const categories = buildCategories(output.rows);
+
+      categories.forEach((category, index) => {
+        if (!isFilledString(category.code)) {
+          issues.push({
+            fileName: output.fileName,
+            severity: "error",
+            rowIndex: index + 1,
+            field: "code",
+            message: "Categorie mist een code.",
+          });
+        }
+
+        if (!isFilledString(category.title)) {
+          issues.push({
+            fileName: output.fileName,
+            severity: "error",
+            rowIndex: index + 1,
+            field: "title",
+            message: "Categorie mist een titel.",
+          });
+        }
+
+        if (!isValidNumberValue(category.order)) {
+          issues.push({
+            fileName: output.fileName,
+            severity: "error",
+            rowIndex: index + 1,
+            field: "order",
+            message: "Categorie heeft geen geldige volgorde.",
+          });
+        }
+      });
+    }
+
+    if (output.fileName === "dimensions.ts") {
+      const dimensions = buildDimensions(output.rows);
+
+      dimensions.forEach((dimension, index) => {
+        if (!isFilledString(dimension.code)) {
+          issues.push({
+            fileName: output.fileName,
+            severity: "error",
+            rowIndex: index + 1,
+            field: "code",
+            message: "Dimensie mist een code.",
+          });
+        }
+
+        if (!isFilledString(dimension.title)) {
+          issues.push({
+            fileName: output.fileName,
+            severity: "error",
+            rowIndex: index + 1,
+            field: "title",
+            message: "Dimensie mist een titel.",
+          });
+        }
+
+        if (!isFilledString(dimension.category)) {
+          issues.push({
+            fileName: output.fileName,
+            severity: "error",
+            rowIndex: index + 1,
+            field: "category",
+            message: "Dimensie mist een categorie.",
+          });
+        }
+
+        if (!isValidNumberValue(dimension.order)) {
+          issues.push({
+            fileName: output.fileName,
+            severity: "error",
+            rowIndex: index + 1,
+            field: "order",
+            message: "Dimensie heeft geen geldige volgorde.",
+          });
+        }
+      });
+    }
+
+    if (output.fileName === "option-sets.ts") {
+      const optionSets = buildOptionSets(output.rows) as Array<{
+        key?: unknown;
+        title?: unknown;
+        options?: Array<Record<string, unknown>>;
+      }>;
+
+      const rowsWithOptionSetKey = output.rows.filter((row) =>
+        isFilledString(
+          getString(row, [
+            "key",
+            "optionSet",
+            "option_set",
+            "optionSetKey",
+            "option_set_key",
+            "set",
+            "setKey",
+            "set_key",
+            "optionGroup",
+            "option_group",
+          ])
+        )
+      ).length;
+
+      const generatedOptionCount = optionSets.reduce((total, optionSet) => {
+        return (
+          total +
+          (Array.isArray(optionSet.options) ? optionSet.options.length : 0)
+        );
+      }, 0);
+
+      if (optionSets.length === 0) {
+        issues.push({
+          fileName: output.fileName,
+          severity: "error",
+          message:
+            "Er zijn option-set regels aanwezig, maar er kon geen geldige option-set worden gegenereerd.",
+        });
+      }
+
+      if (rowsWithOptionSetKey > generatedOptionCount) {
+        issues.push({
+          fileName: output.fileName,
+          severity: "warning",
+          message: `${
+            rowsWithOptionSetKey - generatedOptionCount
+          } option-set regel(s) zijn overgeslagen omdat value of label ontbreekt.`,
+        });
+      }
+
+      optionSets.forEach((optionSet, setIndex) => {
+        if (!isFilledString(optionSet.key)) {
+          issues.push({
+            fileName: output.fileName,
+            severity: "error",
+            rowIndex: setIndex + 1,
+            field: "key",
+            message: "Option-set mist een key.",
+          });
+        }
+
+        if (!Array.isArray(optionSet.options) || optionSet.options.length === 0) {
+          issues.push({
+            fileName: output.fileName,
+            severity: "error",
+            rowIndex: setIndex + 1,
+            field: "options",
+            message: "Option-set heeft geen geldige options.",
+          });
+
+          return;
+        }
+
+        optionSet.options.forEach((option, optionIndex) => {
+          if (!isFilledString(option.value)) {
+            issues.push({
+              fileName: output.fileName,
+              severity: "error",
+              rowIndex: optionIndex + 1,
+              field: "value",
+              message: `Option in ${String(optionSet.key)} mist een value.`,
+            });
+          }
+
+          if (!isFilledString(option.label)) {
+            issues.push({
+              fileName: output.fileName,
+              severity: "error",
+              rowIndex: optionIndex + 1,
+              field: "label",
+              message: `Option in ${String(optionSet.key)} mist een label.`,
+            });
+          }
+
+          if (!isValidNumberValue(option.order)) {
+            issues.push({
+              fileName: output.fileName,
+              severity: "error",
+              rowIndex: optionIndex + 1,
+              field: "order",
+              message: `Option in ${String(
+                optionSet.key
+              )} heeft geen geldige volgorde.`,
+            });
+          }
+        });
+      });
+    }
+
+    if (output.fileName === "questions.ts") {
+      const questions = buildQuestions(output.rows) as Array<
+        Record<string, unknown>
+      >;
+
+      questions.forEach((question, index) => {
+        if (!isFilledString(question.key)) {
+          issues.push({
+            fileName: output.fileName,
+            severity: "error",
+            rowIndex: index + 1,
+            field: "key",
+            message: "Vraag mist een key.",
+          });
+        }
+
+        if (!isFilledString(question.sectionCode)) {
+          issues.push({
+            fileName: output.fileName,
+            severity: "error",
+            rowIndex: index + 1,
+            field: "sectionCode",
+            message: "Vraag mist een sectionCode.",
+          });
+        }
+
+        if (!isFilledString(question.label)) {
+          issues.push({
+            fileName: output.fileName,
+            severity: "error",
+            rowIndex: index + 1,
+            field: "label",
+            message: "Vraag mist een label.",
+          });
+        }
+
+        if (!isFilledString(question.inputType)) {
+          issues.push({
+            fileName: output.fileName,
+            severity: "error",
+            rowIndex: index + 1,
+            field: "inputType",
+            message: "Vraag mist een inputType.",
+          });
+        }
+
+        if (!isValidNumberValue(question.order)) {
+          issues.push({
+            fileName: output.fileName,
+            severity: "error",
+            rowIndex: index + 1,
+            field: "order",
+            message: "Vraag heeft geen geldige volgorde.",
+          });
+        }
+      });
+    }
+
+    if (output.fileName === "sections.ts") {
+      const sections = buildSections(output.rows) as Array<
+        Record<string, unknown>
+      >;
+
+      sections.forEach((section, index) => {
+        if (!isFilledString(section.code)) {
+          issues.push({
+            fileName: output.fileName,
+            severity: "error",
+            rowIndex: index + 1,
+            field: "code",
+            message: "Sectie mist een code.",
+          });
+        }
+
+        if (!isFilledString(section.title)) {
+          issues.push({
+            fileName: output.fileName,
+            severity: "error",
+            rowIndex: index + 1,
+            field: "title",
+            message: "Sectie mist een titel.",
+          });
+        }
+
+        if (!isValidNumberValue(section.order)) {
+          issues.push({
+            fileName: output.fileName,
+            severity: "error",
+            rowIndex: index + 1,
+            field: "order",
+            message: "Sectie heeft geen geldige volgorde.",
+          });
+        }
+      });
+    }
+  }
+
+  const errors = issues.filter((issue) => issue.severity === "error").length;
+  const warnings = issues.filter(
+    (issue) => issue.severity === "warning"
+  ).length;
+
+  return {
+    isSafe: errors === 0,
+    errors,
+    warnings,
+    issues,
+  };
+}
 function SummaryCard({ label, value }: { label: string; value: number }) {
   return (
     <div className="rounded-2xl border border-black/10 bg-white p-5">
@@ -1562,6 +1921,71 @@ function SheetCountCard({ label, value }: { label: string; value: number }) {
     <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
       <div className="text-xs text-muted-foreground">{label}</div>
       <div className="mt-1 text-xl font-semibold">{value}</div>
+    </div>
+  );
+}
+function ImportPackageValidationPanel({
+  validation,
+}: {
+  validation: ImportPackageValidationResult;
+}) {
+  if (validation.issues.length === 0) {
+    return (
+      <div className="mt-5 rounded-2xl border border-green-200 bg-green-50 p-4 text-sm leading-6 text-green-950">
+        Importpakket-validatie geslaagd. Er zijn geen fouten of waarschuwingen
+        gevonden in de gegenereerde output.
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={
+        validation.isSafe
+          ? "mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4"
+          : "mt-5 rounded-2xl border border-red-200 bg-red-50 p-4"
+      }
+    >
+      <div
+        className={
+          validation.isSafe
+            ? "text-sm font-semibold text-amber-950"
+            : "text-sm font-semibold text-red-950"
+        }
+      >
+        Importpakket-validatie: {validation.errors} fout(en),{" "}
+        {validation.warnings} waarschuwing(en)
+      </div>
+
+      <div className="mt-3 space-y-2">
+        {validation.issues.slice(0, 12).map((issue, index) => (
+          <div
+            key={`${issue.fileName}-${issue.message}-${index}`}
+            className="rounded-xl border border-black/10 bg-white p-3 text-xs leading-5"
+          >
+            <div className="font-medium">
+              {issue.severity === "error" ? "Fout" : "Waarschuwing"} —{" "}
+              {issue.fileName}
+            </div>
+
+            <div className="mt-1 text-muted-foreground">{issue.message}</div>
+
+            {(issue.field || issue.rowIndex) && (
+              <div className="mt-1 text-muted-foreground">
+                {issue.field ? `Veld: ${issue.field}` : ""}
+                {issue.field && issue.rowIndex ? " · " : ""}
+                {issue.rowIndex ? `Regel: ${issue.rowIndex}` : ""}
+              </div>
+            )}
+          </div>
+        ))}
+
+        {validation.issues.length > 12 && (
+          <div className="rounded-xl border border-black/10 bg-white p-3 text-xs text-muted-foreground">
+            Er zijn meer meldingen. Alleen de eerste 12 worden hier getoond.
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -2046,7 +2470,12 @@ export default function DefinitionImportApplyResultPage() {
   return JSON.stringify(importPackage, null, 2);
 }, [importPackage]);
 
-
+const importPackageValidation = useMemo(() => {
+  return validateImportPackageOutputs(
+    definitionFileOutputs,
+    mappingStatusSummary
+  );
+}, [definitionFileOutputs, mappingStatusSummary]);
 
   const clearResult = () => {
     window.localStorage.removeItem("definitionImportApplyResult");
@@ -2112,15 +2541,27 @@ export default function DefinitionImportApplyResultPage() {
     );
   };
 
-  const downloadImportPackage = () => {
+const downloadImportPackage = () => {
   if (!importPackageJson) return;
+
+  if (!importPackageValidation.isSafe) {
+    setCopyMessage(
+      "Importpakket downloaden is geblokkeerd: los eerst de validatiefouten op."
+    );
+
+    window.setTimeout(() => {
+      setCopyMessage(null);
+    }, 3000);
+
+    return;
+  }
 
   downloadText(
     importPackageJson,
     `definition-import-package-${getTimestamp()}.json`,
     "application/json;charset=utf-8"
   );
-  };
+};
 
   const copyDefinitionFileJson = async (output: DefinitionFileOutput) => {
     const json = JSON.stringify(buildDefinitionFileProposal(output), null, 2);
@@ -2325,18 +2766,24 @@ export default function DefinitionImportApplyResultPage() {
       </p>
     </div>
 
-    <button
-      type="button"
-      onClick={downloadImportPackage}
-      disabled={!importPackage || importPackage.files.length === 0}
-      className={
-        importPackage && importPackage.files.length > 0
-          ? "inline-flex rounded-2xl border border-black/10 bg-black px-5 py-3 text-sm font-medium text-white"
-          : "inline-flex cursor-not-allowed rounded-2xl border border-black/10 bg-black/10 px-5 py-3 text-sm font-medium text-muted-foreground"
-      }
-    >
-      Importpakket downloaden
-    </button>
+<button
+  type="button"
+  onClick={downloadImportPackage}
+  disabled={
+    !importPackage ||
+    importPackage.files.length === 0 ||
+    !importPackageValidation.isSafe
+  }
+  className={
+    importPackage &&
+    importPackage.files.length > 0 &&
+    importPackageValidation.isSafe
+      ? "inline-flex rounded-2xl border border-black/10 bg-black px-5 py-3 text-sm font-medium text-white"
+      : "inline-flex cursor-not-allowed rounded-2xl border border-black/10 bg-black/10 px-5 py-3 text-sm font-medium text-muted-foreground"
+  }
+>
+  Importpakket downloaden
+</button>
   </div>
 
   <div className="mt-5 grid gap-4 md:grid-cols-4">
@@ -2368,6 +2815,8 @@ export default function DefinitionImportApplyResultPage() {
       </div>
     </div>
   </div>
+
+<ImportPackageValidationPanel validation={importPackageValidation} />
 
   <details className="mt-5 rounded-2xl border border-black/10 bg-black/[0.02] p-4">
     <summary className="cursor-pointer text-sm font-medium">
