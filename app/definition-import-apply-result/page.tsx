@@ -1174,6 +1174,30 @@ function buildOptionSets(rows: Record<string, string>[]) {
       continue;
     }
 
+    const title = getOptionalString(row, [
+      "setTitle",
+      "set_title",
+      "optionSetTitle",
+      "option_set_title",
+      "titelSet",
+      "titel_set",
+      "title",
+      "title_nl",
+      "titel",
+      "name",
+      "naam",
+    ]);
+
+    const current = grouped.get(key) ?? {
+      key,
+      title,
+      options: [],
+    };
+
+    if (!current.title && title) {
+      current.title = title;
+    }
+
     const value = getString(row, [
       "value",
       "waarde",
@@ -1196,24 +1220,12 @@ function buildOptionSets(rows: Record<string, string>[]) {
       "option_label",
     ]).trim();
 
+    // Header-/groepsregel: wel key/title, maar geen echte option.
+    // Deze regel gebruiken we alleen als metadata voor de option-set.
     if (!value || !label) {
+      grouped.set(key, current);
       continue;
     }
-
-    const title = getOptionalString(row, [
-      "setTitle",
-      "set_title",
-      "optionSetTitle",
-      "option_set_title",
-      "titelSet",
-      "titel_set",
-    ]);
-
-    const current = grouped.get(key) ?? {
-      key,
-      title,
-      options: [],
-    };
 
     const scoreRaw = getOptionalString(row, ["score", "points", "punten"]);
 
@@ -1748,6 +1760,20 @@ if (rowsWithOptionSetKey > generatedOptionCount) {
 
       if (!key) return null;
 
+      const title = getOptionalString(row, [
+        "setTitle",
+        "set_title",
+        "optionSetTitle",
+        "option_set_title",
+        "titelSet",
+        "titel_set",
+        "title",
+        "title_nl",
+        "titel",
+        "name",
+        "naam",
+      ]);
+
       const value = getString(row, [
         "value",
         "waarde",
@@ -1775,28 +1801,41 @@ if (rowsWithOptionSetKey > generatedOptionCount) {
       return {
         index: index + 1,
         key,
+        title: title ?? "",
         value,
         label,
       };
     })
-    .filter(Boolean)
-    .slice(0, 5) as Array<{
+    .filter(Boolean) as Array<{
     index: number;
     key: string;
+    title: string;
     value: string;
     label: string;
   }>;
 
+  const metadataRows = skippedRows.filter((row) => row.title);
+  const incompleteRows = skippedRows.filter((row) => !row.title);
+
   issues.push({
     fileName: output.fileName,
     severity: "warning",
-    message: `${
-      rowsWithOptionSetKey - generatedOptionCount
-    } option-set regel(s) zijn overgeslagen. Dit zijn waarschijnlijk headerregels, groepsregels of incomplete regels zonder value en/of label.`,
-    details: skippedRows.map((row) => {
+    message: [
+      `${skippedRows.length} option-set regel(s) zijn niet als losse antwoordoptie geïmporteerd.`,
+      metadataRows.length > 0
+        ? `${metadataRows.length} daarvan zijn gebruikt als option-set metadata/header.`
+        : "Deze regels lijken headerregels, groepsregels of incomplete regels zonder value en/of label.",
+      incompleteRows.length > 0
+        ? `${incompleteRows.length} regel(s) hebben geen duidelijke titel/metadata en zijn alleen overgeslagen.`
+        : "",
+    ]
+      .filter(Boolean)
+      .join(" "),
+    details: skippedRows.slice(0, 5).map((row) => {
       const missing = [
         row.value ? null : "value ontbreekt",
         row.label ? null : "label ontbreekt",
+        row.title ? "titel/metadata aanwezig" : "geen titel/metadata",
       ]
         .filter(Boolean)
         .join(", ");
