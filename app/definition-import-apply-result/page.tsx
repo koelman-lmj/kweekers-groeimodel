@@ -1007,6 +1007,41 @@ function buildDefinitionFileOutputs(
   });
 }
 
+function mapDimensionCategory(raw: string | undefined): string {
+  if (!raw) return "Organisatie & Beheer";
+  const normalized = raw.trim().toLowerCase();
+  const map: Record<string, string> = {
+    "organisatie": "Organisatie & Beheer",
+    "organisatie & beheer": "Organisatie & Beheer",
+    "organisatie en beheer": "Organisatie & Beheer",
+    "proces": "Organisatie & Beheer",
+    "integraties": "Integraties & Beheer",
+    "integraties & beheer": "Integraties & Beheer",
+    "rapportage": "Rapportage & Data",
+    "rapportage & data": "Rapportage & Data",
+    "data": "Rapportage & Data",
+    "afas": "AFAS Modules",
+    "afas modules": "AFAS Modules",
+    "branche": "Branchespecifiek",
+    "branchespecifiek": "Branchespecifiek",
+  };
+  return map[normalized] ?? "Organisatie & Beheer";
+}
+
+function mapOutputRole(raw: string | undefined): string | undefined {
+  if (!raw) return undefined;
+  const normalized = raw.trim().toLowerCase();
+  const map: Record<string, string> = {
+    "score": "score",
+    "context": "context",
+    "evidence": "evidence",
+    "advies": "advice",
+    "advice": "advice",
+    "diagnose": "score",
+  };
+  return map[normalized] ?? undefined;
+}
+
 function buildCategories(rows: Record<string, string>[]) {
   return rows.map((row, index) => ({
     code: getString(row, [
@@ -1057,18 +1092,10 @@ function buildDimensions(rows: Record<string, string>[]) {
       "naam",
       "label",
     ]),
-    category: getString(
-      row,
-      [
-        "category",
-        "categoryCode",
-        "category_code",
-        "categorie",
-        "categorieCode",
-        "categorie_code",
-      ],
-      "Overig"
-    ),
+    category: mapDimensionCategory(getOptionalString(row, [
+      "category", "categoryCode", "category_code",
+      "categorie", "categorieCode", "categorie_code",
+    ])),
     description: getString(row, [
       "description",
       "description_nl",
@@ -1392,20 +1419,13 @@ function buildQuestions(rows: Record<string, string>[]) {
         "dimensieCode",
         "dimensie_code",
       ]),
-      category: getOptionalString(row, [
-        "category",
-        "categoryCode",
-        "category_code",
-        "categorie",
-        "categorieCode",
-        "categorie_code",
-      ]),
-      outputRole: getOptionalString(row, [
-        "outputRole",
-        "output_role",
-        "rol",
-        "role",
-      ]),
+category: mapDimensionCategory(getOptionalString(row, [
+        "category", "categoryCode", "category_code",
+        "categorie", "categorieCode", "categorie_code",
+      ])),
+      outputRole: mapOutputRole(getOptionalString(row, [
+        "outputRole", "output_role", "rol", "role",
+      ])),
       scoreEnabled: getOptionalString(row, [
         "scoreEnabled",
         "score_enabled",
