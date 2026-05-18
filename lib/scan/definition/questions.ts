@@ -3,7 +3,7 @@ import type { QuestionDefinition } from "./types";
 export const questions: QuestionDefinition[] = [
   {
     "key": "ownership_process_owner",
-    "sectionCode": "diagnose",
+    "sectionCode": "score",
     "order": 10,
     "label": "Is er een duidelijke eigenaar voor AFAS-processen?",
     "helpText": "Kies hoe duidelijk eigenaarschap nu is belegd.",
@@ -13,13 +13,13 @@ export const questions: QuestionDefinition[] = [
     "allowsComment": true,
     "dimensionCode": "eigenaarschap",
     "category": "Organisatie & Beheer",
-    "outputRole": "diagnose",
+    "outputRole": "score",
     "scoreEnabled": true,
     "scoreWeight": 1
   },
   {
     "key": "process_standardization",
-    "sectionCode": "diagnose",
+    "sectionCode": "score",
     "order": 20,
     "label": "Worden processen op één standaardmanier uitgevoerd?",
     "helpText": "Denk aan verschillen tussen teams, locaties of administraties.",
@@ -29,13 +29,13 @@ export const questions: QuestionDefinition[] = [
     "allowsComment": true,
     "dimensionCode": "procesafspraken",
     "category": "Organisatie & Beheer",
-    "outputRole": "diagnose",
+    "outputRole": "score",
     "scoreEnabled": true,
     "scoreWeight": 1
   },
   {
     "key": "data_quality_control",
-    "sectionCode": "diagnose",
+    "sectionCode": "score",
     "order": 30,
     "label": "Wordt stamdata actief gecontroleerd en opgeschoond?",
     "helpText": "Denk aan relaties, artikelen, projecten, grootboek en dimensies.",
@@ -45,13 +45,13 @@ export const questions: QuestionDefinition[] = [
     "allowsComment": true,
     "dimensionCode": "datakwaliteit",
     "category": "Organisatie & Beheer",
-    "outputRole": "diagnose",
+    "outputRole": "score",
     "scoreEnabled": true,
     "scoreWeight": 1
   },
   {
     "key": "improvement_backlog_exists",
-    "sectionCode": "diagnose",
+    "sectionCode": "score",
     "order": 40,
     "label": "Is er een duidelijke verbeterlijst voor AFAS?",
     "helpText": "Kies of verbeterpunten centraal worden bijgehouden.",
@@ -61,7 +61,7 @@ export const questions: QuestionDefinition[] = [
     "allowsComment": true,
     "dimensionCode": "eigenaarschap",
     "category": "Organisatie & Beheer",
-    "outputRole": "diagnose",
+    "outputRole": "score",
     "scoreEnabled": true,
     "scoreWeight": 1
   }
