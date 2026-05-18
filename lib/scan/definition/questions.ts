@@ -3,7 +3,7 @@ import type { QuestionDefinition } from "./types";
 export const questions: QuestionDefinition[] = [
   {
     "key": "ownership_process_owner",
-    "sectionCode": "score",
+    "sectionCode": "diagnose",
     "order": 10,
     "label": "Is er een duidelijke eigenaar voor AFAS-processen?",
     "helpText": "Kies hoe duidelijk eigenaarschap nu is belegd.",
@@ -19,7 +19,7 @@ export const questions: QuestionDefinition[] = [
   },
   {
     "key": "process_standardization",
-    "sectionCode": "score",
+    "sectionCode": "diagnose",
     "order": 20,
     "label": "Worden processen op één standaardmanier uitgevoerd?",
     "helpText": "Denk aan verschillen tussen teams, locaties of administraties.",
@@ -35,7 +35,7 @@ export const questions: QuestionDefinition[] = [
   },
   {
     "key": "data_quality_control",
-    "sectionCode": "score",
+    "sectionCode": "diagnose",
     "order": 30,
     "label": "Wordt stamdata actief gecontroleerd en opgeschoond?",
     "helpText": "Denk aan relaties, artikelen, projecten, grootboek en dimensies.",
@@ -51,7 +51,7 @@ export const questions: QuestionDefinition[] = [
   },
   {
     "key": "improvement_backlog_exists",
-    "sectionCode": "score",
+    "sectionCode": "diagnose",
     "order": 40,
     "label": "Is er een duidelijke verbeterlijst voor AFAS?",
     "helpText": "Kies of verbeterpunten centraal worden bijgehouden.",
