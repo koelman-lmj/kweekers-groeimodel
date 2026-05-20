@@ -1063,12 +1063,21 @@ export default function SectionSummaryPage() {
       )}
 
       <div className="flex items-center justify-between border-t pt-6">
-        <Link
-          href={previousHref}
-          className="rounded-2xl border border-black/10 px-5 py-3 text-sm font-medium"
-        >
-          Vorige
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href={previousHref}
+            className="rounded-2xl border border-black/10 px-5 py-3 text-sm font-medium"
+          >
+            Vorige
+          </Link>
+          <button
+            type="button"
+            onClick={() => resetScan()}
+            className="rounded-2xl border border-black/10 px-5 py-3 text-sm font-medium text-muted-foreground hover:text-foreground"
+          >
+            Reset scan
+          </button>
+        </div>
 
         {hasNextStep ? (
           canContinue ? (
