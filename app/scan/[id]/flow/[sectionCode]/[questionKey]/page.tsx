@@ -11,6 +11,7 @@ import {
   getQuestionsForSection,
   getSection,
 } from "@/lib/scan/engine/definition-helpers";
+import { getAnswerFromScan as getAnswerForProgress } from "@/lib/scan/engine/answer-mapping";
 import {
   getAnswerFromScan,
   setAnswerToScan,
@@ -48,6 +49,35 @@ function getShortHelpText(questionLabel: string, helpText?: string): string {
 
 function RequiredAsterisk() {
   return <span className="kweekers-required ml-1">*</span>;
+}
+
+function DiagnoseProgressBar({
+  answeredCount,
+  totalCount,
+}: {
+  answeredCount: number;
+  totalCount: number;
+}) {
+  const percentage = totalCount > 0 ? Math.round((answeredCount / totalCount) * 100) : 0;
+
+  return (
+    <div className="mb-6 space-y-2">
+      <div className="flex items-center justify-between text-sm">
+        <span className="font-medium text-[var(--kweekers-primary-dark)]">
+          Voortgang diagnose
+        </span>
+        <span className="text-muted-foreground">
+          {answeredCount} van {totalCount} vragen beantwoord ({percentage}%)
+        </span>
+      </div>
+      <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--kweekers-primary-soft)]">
+        <div
+          className="h-full rounded-full bg-[var(--kweekers-accent)] transition-all duration-300 ease-out"
+          style={{ width: `${percentage}%` }}
+        />
+      </div>
+    </div>
+  );
 }
 
 function OptionLabelWithTooltip({
@@ -251,6 +281,17 @@ export default function FlowQuestionPage() {
   const optionSet = question?.optionSetKey
     ? getOptionSet(question.optionSetKey)
     : undefined;
+
+  // Calculate diagnose progress
+  const diagnoseQuestions = getQuestionsForSection("diagnose", scan);
+  const answeredDiagnoseQuestions = diagnoseQuestions.filter((q) => {
+    const answer = getAnswerForProgress(scan, q.key);
+    if (Array.isArray(answer)) {
+      return answer.length > 0;
+    }
+    return typeof answer === "string" && answer.trim() !== "";
+  });
+  const isDiagnoseSection = sectionCode === "diagnose";
 
   const isProfileBasisOverview = isProfileBasisOverviewRoute(
     sectionCode,
@@ -585,6 +626,13 @@ export default function FlowQuestionPage() {
 
   return (
     <div className="space-y-8">
+      {isDiagnoseSection && (
+        <DiagnoseProgressBar
+          answeredCount={answeredDiagnoseQuestions.length}
+          totalCount={diagnoseQuestions.length}
+        />
+      )}
+
       <div className="space-y-3">
         <div className="space-y-1">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
