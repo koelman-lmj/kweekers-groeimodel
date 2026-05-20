@@ -1034,29 +1034,20 @@ export default function SectionSummaryPage() {
             </div>
 
             <div className="mt-5 flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={handlePrint}
-                className="rounded-2xl border border-black/10 px-5 py-3 text-sm font-medium"
+              <Link
+                href={`/scan/${scanId}/export`}
+                className="kweekers-primary-button"
               >
-                Exporteer samenvatting
-              </button>
+                Download PDF rapport
+              </Link>
 
               <Link
                 href="/scan/nieuw/flow/profile_basis/customer_name"
-                className="kweekers-primary-button"
+                className="rounded-2xl border border-black/10 px-5 py-3 text-sm font-medium"
                 onClick={() => resetScan()}
               >
                 Nieuwe scan starten
               </Link>
-
-              <button
-                type="button"
-                onClick={() => resetScan()}
-                className="rounded-2xl border border-black/10 px-5 py-3 text-sm font-medium"
-              >
-                Reset scan
-              </button>
             </div>
           </section>
         </>
