@@ -236,11 +236,16 @@ export const optionSets: OptionSetDefinition[] = [
   {
     key: "primary_process_chains_options",
     options: [
-      { value: "hire-to-retire", label: "Hire to Retire (HR)", order: 10 },
-      { value: "quote-to-cash", label: "Quote to Cash (Sales)", order: 20 },
-      { value: "procure-to-pay", label: "Procure to Pay (Inkoop)", order: 30 },
-      { value: "record-to-report", label: "Record to Report (Finance)", order: 40 },
-      { value: "project-lifecycle", label: "Project Lifecycle", order: 50 },
+      { value: "hire-to-retire", label: "Hire to Retire (HR)", description: "Van werving tot uitdiensttreding", order: 10 },
+      { value: "quote-to-cash", label: "Quote to Cash (Sales)", description: "Van offerte tot betaling ontvangen", order: 20 },
+      { value: "procure-to-pay", label: "Procure to Pay (Inkoop)", description: "Van aanvraag tot betaling leverancier", order: 30 },
+      { value: "record-to-report", label: "Record to Report (Finance)", description: "Van boeking tot financiële rapportage", order: 40 },
+      { value: "project-lifecycle", label: "Project Lifecycle", description: "Van projectstart tot afronding", order: 50 },
+      { value: "contract-to-renewal", label: "Contract to Renewal (Abonnementen)", description: "Van contract tot verlenging", order: 60 },
+      { value: "recruit-to-onboard", label: "Recruit to Onboard (Werving)", description: "Van vacature tot ingewerkte medewerker", order: 70 },
+      { value: "request-to-resolve", label: "Request to Resolve (Service)", description: "Van klantvraag tot oplossing", order: 80 },
+      { value: "plan-to-perform", label: "Plan to Perform (Planning)", description: "Van capaciteitsplanning tot uitvoering", order: 90 },
+      { value: "expense-to-payment", label: "Expense to Payment (Declaraties)", description: "Van declaratie tot uitbetaling", order: 100 },
     ],
   },
   // Diagnose maturity option sets - all variants
