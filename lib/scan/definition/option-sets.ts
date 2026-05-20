@@ -18,7 +18,9 @@ export const optionSets: OptionSetDefinition[] = [
       { value: "26-100", label: "26–100 medewerkers", order: 20 },
       { value: "101-250", label: "101–250 medewerkers", order: 30 },
       { value: "251-500", label: "251–500 medewerkers", order: 40 },
-      { value: "500+", label: "500+ medewerkers", order: 50 },
+      { value: "501-1000", label: "500–1000 medewerkers", order: 50 },
+      { value: "1001-1500", label: "1000–1500 medewerkers", order: 60 },
+      { value: "1500+", label: "Meer dan 1500 medewerkers", order: 70 },
     ],
   },
   {
