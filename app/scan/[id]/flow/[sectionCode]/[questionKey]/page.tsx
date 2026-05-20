@@ -50,6 +50,35 @@ function RequiredAsterisk() {
   return <span className="kweekers-required ml-1">*</span>;
 }
 
+function DiagnoseProgressBar({
+  answeredCount,
+  totalCount,
+}: {
+  answeredCount: number;
+  totalCount: number;
+}) {
+  const percentage = totalCount > 0 ? Math.round((answeredCount / totalCount) * 100) : 0;
+
+  return (
+    <div className="mb-6 space-y-2">
+      <div className="flex items-center justify-between text-sm">
+        <span className="font-medium text-[var(--kweekers-primary-dark)]">
+          Voortgang diagnose
+        </span>
+        <span className="text-muted-foreground">
+          {answeredCount} van {totalCount} vragen beantwoord ({percentage}%)
+        </span>
+      </div>
+      <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--kweekers-primary-soft)]">
+        <div
+          className="h-full rounded-full bg-[var(--kweekers-accent)] transition-all duration-300 ease-out"
+          style={{ width: `${percentage}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
 function OptionLabelWithTooltip({
   label,
 }: {
@@ -166,14 +195,14 @@ function getProfileBasisCompactStepIndex(questionKey: string): number {
 
 function getBaseOptionButtonClass(disabled: boolean) {
   if (disabled) {
-    return "justify-self-center w-[320px] min-h-[52px] rounded-xl border border-black/15 bg-white px-3 py-2 text-center opacity-40";
+    return "justify-self-center w-[320px] min-h-[52px] rounded-xl border border-black/15 bg-white px-3 py-2 text-center text-muted-foreground opacity-50 cursor-not-allowed";
   }
 
-  return "justify-self-center w-[320px] min-h-[52px] rounded-xl border border-black/15 bg-white px-3 py-2 text-center transition hover:bg-black/[0.02]";
+  return "justify-self-center w-[320px] min-h-[52px] rounded-xl border border-black/15 bg-white px-3 py-2 text-center transition hover:border-[#ed6e41] hover:bg-[#fef3ef]";
 }
 
 function getActiveOptionButtonClass() {
-  return "justify-self-center w-[320px] min-h-[52px] rounded-xl border border-[#db5f34] bg-[#3f4e87] px-3 py-2 text-center text-white shadow-sm transition ring-1 ring-[#f2c2ae]";
+  return "justify-self-center w-[320px] min-h-[52px] rounded-xl border-2 border-[#db5f34] bg-[#ed6e41] px-3 py-2 text-center text-white font-medium shadow-sm transition";
 }
 
 export default function FlowQuestionPage() {
@@ -251,6 +280,17 @@ export default function FlowQuestionPage() {
   const optionSet = question?.optionSetKey
     ? getOptionSet(question.optionSetKey)
     : undefined;
+
+  // Calculate diagnose progress
+  const diagnoseQuestions = getQuestionsForSection("diagnose", scan);
+  const answeredDiagnoseQuestions = diagnoseQuestions.filter((q) => {
+    const answer = getAnswerFromScan(scan, q.key);
+    if (Array.isArray(answer)) {
+      return answer.length > 0;
+    }
+    return typeof answer === "string" && answer.trim() !== "";
+  });
+  const isDiagnoseSection = sectionCode === "diagnose";
 
   const isProfileBasisOverview = isProfileBasisOverviewRoute(
     sectionCode,
@@ -539,7 +579,10 @@ export default function FlowQuestionPage() {
     onSelect: (value: string) => void
   ) => {
     const currentOptionSet = getOptionSet(optionSetKey);
-    if (!currentOptionSet) return null;
+    if (!currentOptionSet) {
+      console.error("[v0] Option set not found:", optionSetKey);
+      return <p className="text-red-500 text-sm">Option set niet gevonden: {optionSetKey}</p>;
+    }
 
     return (
       <div className="grid gap-2 sm:grid-cols-2 justify-items-center">
@@ -554,10 +597,16 @@ export default function FlowQuestionPage() {
                 type="button"
                 onClick={() => onSelect(option.value)}
                 aria-pressed={isActive}
-                className={`group relative ${
+                style={isActive ? {
+                  backgroundColor: '#ed6e41',
+                  borderColor: '#db5f34',
+                  color: 'white',
+                  borderWidth: '2px'
+                } : {}}
+                className={`group relative justify-self-center w-[320px] min-h-[52px] rounded-xl border px-3 py-2 text-center transition ${
                   isActive
-                    ? getActiveOptionButtonClass()
-                    : getBaseOptionButtonClass(false)
+                    ? "font-medium shadow-sm"
+                    : "border-black/15 bg-white hover:border-[#ed6e41] hover:bg-[#fef3ef]"
                 }`}
               >
                 <OptionLabelWithTooltip
@@ -585,6 +634,13 @@ export default function FlowQuestionPage() {
 
   return (
     <div className="space-y-8">
+      {isDiagnoseSection && (
+        <DiagnoseProgressBar
+          answeredCount={answeredDiagnoseQuestions.length}
+          totalCount={diagnoseQuestions.length}
+        />
+      )}
+
       <div className="space-y-3">
         <div className="space-y-1">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">

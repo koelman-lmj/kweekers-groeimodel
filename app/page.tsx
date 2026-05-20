@@ -1,9 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
+import { BUILD_VERSION } from "@/lib/build-info";
 
+// Force recompilation v3
 export default function HomePage() {
   return (
     <main className="min-h-screen bg-neutral-50 px-6 py-10">
+      <p className="text-xs text-green-600 font-mono mb-2">Build: {BUILD_VERSION}</p>
       <section className="mx-auto max-w-5xl rounded-3xl border bg-white p-10 shadow-sm sm:p-12">
 <div className="kweekers-badge">
 <Image
