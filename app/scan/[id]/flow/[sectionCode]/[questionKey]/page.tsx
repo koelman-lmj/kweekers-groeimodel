@@ -198,11 +198,11 @@ function getBaseOptionButtonClass(disabled: boolean) {
     return "justify-self-center w-[320px] min-h-[52px] rounded-xl border border-black/15 bg-white px-3 py-2 text-center text-muted-foreground opacity-50 cursor-not-allowed";
   }
 
-  return "justify-self-center w-[320px] min-h-[52px] rounded-xl border border-black/15 bg-white px-3 py-2 text-center transition hover:border-[var(--kweekers-accent)] hover:bg-[var(--kweekers-accent-soft-2)]";
+  return "justify-self-center w-[320px] min-h-[52px] rounded-xl border border-black/15 bg-white px-3 py-2 text-center transition hover:border-[#ed6e41] hover:bg-[#fef3ef]";
 }
 
 function getActiveOptionButtonClass() {
-  return "justify-self-center w-[320px] min-h-[52px] rounded-xl border border-[var(--kweekers-accent-dark)] bg-[var(--kweekers-accent)] px-3 py-2 text-center text-white font-medium shadow-sm transition";
+  return "justify-self-center w-[320px] min-h-[52px] rounded-xl border-2 border-[#db5f34] bg-[#ed6e41] px-3 py-2 text-center text-white font-medium shadow-sm transition";
 }
 
 export default function FlowQuestionPage() {
