@@ -1,5 +1,5 @@
 import { sections } from "./sections";
-import { optionSets } from "./option-sets";
+import { optionSets } from "./option-sets-v2";
 import { questions } from "./questions";
 import { dimensions } from "./dimensions";
 
@@ -12,7 +12,7 @@ export const scanDefinition = {
 };
 
 export { sections } from "./sections";
-export { optionSets } from "./option-sets";
+export { optionSets } from "./option-sets-v2";
 export { questions } from "./questions";
 export { dimensions } from "./dimensions";
 
