@@ -40,8 +40,6 @@ export type ScanState = {
     processStandardization: string;
     exceptionControl: string;
     issueResolution: string;
-    improvementTracking: string;
-    learningFromMistakes: string;
     processDocumentation: string;
 
     financeStrategicPressure: string;
@@ -123,8 +121,6 @@ const INITIAL_SCAN: ScanState = {
     processStandardization: "",
     exceptionControl: "",
     issueResolution: "",
-    improvementTracking: "",
-    learningFromMistakes: "",
     processDocumentation: "",
 
     financeStrategicPressure: "",
@@ -201,8 +197,6 @@ type ScanContextValue = {
   setProcessStandardization: (value: string) => void;
   setExceptionControl: (value: string) => void;
   setIssueResolution: (value: string) => void;
-  setImprovementTracking: (value: string) => void;
-  setLearningFromMistakes: (value: string) => void;
   setProcessDocumentation: (value: string) => void;
 
   setFinanceStrategicPressure: (value: string) => void;
@@ -307,8 +301,6 @@ function loadInitialScan(): ScanState {
         processStandardization: parsed.diagnosis?.processStandardization ?? "",
         exceptionControl: parsed.diagnosis?.exceptionControl ?? "",
         issueResolution: parsed.diagnosis?.issueResolution ?? "",
-        improvementTracking: parsed.diagnosis?.improvementTracking ?? "",
-        learningFromMistakes: parsed.diagnosis?.learningFromMistakes ?? "",
         processDocumentation: parsed.diagnosis?.processDocumentation ?? "",
 
         financeStrategicPressure:
@@ -589,10 +581,6 @@ export function ScanProvider({ children }: { children: ReactNode }) {
     updateDiagnosis("exceptionControl", value);
   const setIssueResolution = (value: string) =>
     updateDiagnosis("issueResolution", value);
-  const setImprovementTracking = (value: string) =>
-    updateDiagnosis("improvementTracking", value);
-  const setLearningFromMistakes = (value: string) =>
-    updateDiagnosis("learningFromMistakes", value);
   const setProcessDocumentation = (value: string) =>
     updateDiagnosis("processDocumentation", value);
 
@@ -702,8 +690,6 @@ export function ScanProvider({ children }: { children: ReactNode }) {
       setProcessStandardization,
       setExceptionControl,
       setIssueResolution,
-      setImprovementTracking,
-      setLearningFromMistakes,
       setProcessDocumentation,
 
       setFinanceStrategicPressure,

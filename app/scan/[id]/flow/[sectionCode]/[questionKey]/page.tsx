@@ -243,8 +243,6 @@ export default function FlowQuestionPage() {
     setProcessStandardization,
     setExceptionControl,
     setIssueResolution,
-    setImprovementTracking,
-    setLearningFromMistakes,
     setProcessDocumentation,
     setFinanceStrategicPressure,
     setFinanceFoundationReliability,
@@ -276,6 +274,7 @@ export default function FlowQuestionPage() {
     setEducationExceptionHandling,
     setComment,
     markSectionVisited,
+    resetScan,
   } = useScanContext();
 
   const section = getSection(sectionCode);
@@ -465,8 +464,6 @@ export default function FlowQuestionPage() {
     setProcessStandardization,
     setExceptionControl,
     setIssueResolution,
-    setImprovementTracking,
-    setLearningFromMistakes,
     setProcessDocumentation,
     setFinanceStrategicPressure,
     setFinanceFoundationReliability,
