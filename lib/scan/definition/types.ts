@@ -1,8 +1,9 @@
 export type DimensionCategory =
   | "Organisatie & Beheer"
-  | "Functionele domeinen"
-  | "Data & Rapportage"
-  | "Sectorspecifiek"
+  | "AFAS Modules"
+  | "Rapportage & Data"
+  | "Integraties & Beheer"
+  | "Branchespecifiek"
   | "Overig";
 
 export type OutputRole = "context" | "score" | "evidence" | "advice";

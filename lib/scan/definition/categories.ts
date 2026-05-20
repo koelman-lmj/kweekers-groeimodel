@@ -7,34 +7,40 @@ export type CategoryDefinition = {
 
 export const categories: CategoryDefinition[] = [
   {
-    code: "Organisatie & Beheer",
-    title: "Organisatie & Beheer",
-    description: "Eigenaarschap, sturing, procesafspraken en beheer.",
+    code: "AFAS Modules",
+    title: "AFAS Modules",
+    description: "Hoe sterk zijn de gekozen modules nu ingericht en bruikbaar?",
     order: 10,
   },
   {
-    code: "Functionele domeinen",
-    title: "Functionele domeinen",
-    description: "Financieel, HRM, CRM, Projecten, Inkoop en andere modules.",
+    code: "Integraties & Beheer",
+    title: "Integraties & Beheer",
+    description: "Hoe stabiel en beheersbaar is de keten rondom AFAS?",
     order: 20,
   },
   {
-    code: "Data & Rapportage",
-    title: "Data & Rapportage",
-    description: "Stuurinformatie, integraties en databetrouwbaarheid.",
+    code: "Rapportage & Data",
+    title: "Rapportage & Data",
+    description: "Hoe bruikbaar en betrouwbaar is informatie voor sturing?",
     order: 30,
   },
   {
-    code: "Sectorspecifiek",
-    title: "Sectorspecifiek",
-    description: "Zorg- of onderwijsspecifieke processen en uitdagingen.",
+    code: "Organisatie & Beheer",
+    title: "Organisatie & Beheer",
+    description: "Hoe volwassen zijn eigenaarschap, governance en werkwijze?",
     order: 40,
+  },
+  {
+    code: "Branchespecifiek",
+    title: "Branchespecifiek",
+    description: "Thema's die specifiek samenhangen met de sector van deze organisatie.",
+    order: 50,
   },
   {
     code: "Overig",
     title: "Overig",
-    description: "Overige thema's en aandachtspunten.",
-    order: 100,
+    description: "Relevante aandachtspunten binnen deze categorie.",
+    order: 999,
   },
 ];
 
