@@ -102,14 +102,27 @@ export const optionSets: OptionSetDefinition[] = [
   {
     key: "afas_products_options",
     options: [
-      { value: "hrm-payroll", label: "HRM & Payroll", order: 10 },
-      { value: "finance", label: "Finance", order: 20 },
-      { value: "crm", label: "CRM", order: 30 },
-      { value: "projecten", label: "Projecten", order: 40 },
-      { value: "inkoop", label: "Inkoop", order: 50 },
-      { value: "abonnementen", label: "Abonnementen", order: 60 },
-      { value: "fleet", label: "Fleet", order: 70 },
-      { value: "self-service", label: "Self Service & Portalen", order: 80 },
+      // ALGEMEEN
+      { value: "autorisatie", label: "Autorisatie", order: 10 },
+      { value: "integraties", label: "Integraties", order: 20 },
+      { value: "insite", label: "InSite", order: 30 },
+      { value: "outsite", label: "OutSite", order: 40 },
+      { value: "rapportage_dashboards", label: "Rapportage & Dashboards", order: 50 },
+      { value: "workflow", label: "Workflow", order: 60 },
+      { value: "dossier_documentbeheer", label: "Dossier & Documentbeheer", order: 70 },
+      { value: "overig", label: "Overig", order: 80 },
+      // ERP
+      { value: "crm", label: "CRM", order: 100 },
+      { value: "financieel", label: "Financieel", order: 110 },
+      { value: "inkoop", label: "Inkoop", order: 120 },
+      { value: "projecten", label: "Projecten", order: 130 },
+      { value: "abonnementen", label: "Abonnementen", order: 140 },
+      { value: "ordermanagement", label: "Ordermanagement", order: 150 },
+      // HRM/Payroll
+      { value: "hrm", label: "HRM", order: 200 },
+      { value: "payroll", label: "Payroll", order: 210 },
+      { value: "verlof_verzuim", label: "Verlof & Verzuim", order: 220 },
+      { value: "declaraties", label: "Declaraties", order: 230 },
     ],
   },
   {
