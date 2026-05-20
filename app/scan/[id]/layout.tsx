@@ -320,7 +320,7 @@ function ScanShell({ children }: { children: ReactNode }) {
                   Reset scan
                 </button>
                 <a
-                  href="/docs/scan-handout.md"
+                  href="/scan/handout"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full rounded-2xl border border-black/10 px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-neutral-50 transition flex items-center justify-center gap-2"
