@@ -56,10 +56,6 @@ export function getAnswerFromScan(
       return scan.diagnosis.exceptionControl;
     case "issue_resolution":
       return scan.diagnosis.issueResolution;
-    case "improvement_tracking":
-      return scan.diagnosis.improvementTracking;
-    case "learning_from_mistakes":
-      return scan.diagnosis.learningFromMistakes;
     case "process_documentation":
       return scan.diagnosis.processDocumentation;
 
@@ -159,6 +155,7 @@ export type ScanActions = {
   setProcessStandardization: (value: string) => void;
   setExceptionControl: (value: string) => void;
   setIssueResolution: (value: string) => void;
+  setProcessDocumentation: (value: string) => void;
 
   setFinanceStrategicPressure: (value: string) => void;
   setFinanceFoundationReliability: (value: string) => void;
@@ -190,6 +187,7 @@ export type ScanActions = {
 
   setCareRegistrationExceptions: (value: string) => void;
   setCareAccountabilityPressure: (value: string) => void;
+  setCareProcessStandardization: (value: string) => void;
 
   setEducationIntakePlanningConsistency: (value: string) => void;
   setEducationProcessAdminAlignment: (value: string) => void;
@@ -293,12 +291,6 @@ export function setAnswerToScan(
       return;
     case "issue_resolution":
       actions.setIssueResolution(ensureString(value));
-      return;
-    case "improvement_tracking":
-      actions.setImprovementTracking(ensureString(value));
-      return;
-    case "learning_from_mistakes":
-      actions.setLearningFromMistakes(ensureString(value));
       return;
     case "process_documentation":
       actions.setProcessDocumentation(ensureString(value));

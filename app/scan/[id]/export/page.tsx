@@ -140,21 +140,28 @@ export default function ScanExportPage() {
           <button
             type="button"
             onClick={() => window.print()}
-            className="rounded-2xl border border-black/10 px-4 py-2 text-sm font-medium"
+            className="kweekers-primary-button"
           >
-            Print / opslaan als PDF
+            Download als PDF
           </button>
         </div>
 
         <div className="space-y-8">
           <header className="border-b border-black/10 pb-6">
-            <div className="space-y-2">
-              <p className="text-xs font-medium uppercase tracking-[0.18em] text-neutral-500">
-                KWEEKERS Groeiscan
-              </p>
-              <h1 className="text-4xl font-semibold tracking-tight">
-                Samenvatting groeiscan
-              </h1>
+            <div className="flex items-start justify-between">
+              <div className="space-y-2">
+                <p className="text-xs font-medium uppercase tracking-[0.18em] text-neutral-500">
+                  KWEEKERS Groeiscan
+                </p>
+                <h1 className="text-4xl font-semibold tracking-tight">
+                  Samenvatting groeiscan
+                </h1>
+              </div>
+              <img
+                src="/kweekers-logo.svg"
+                alt="KWEEKERS"
+                className="h-10 w-auto print:h-8"
+              />
             </div>
 
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
