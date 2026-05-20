@@ -40,6 +40,9 @@ export type ScanState = {
     processStandardization: string;
     exceptionControl: string;
     issueResolution: string;
+    improvementTracking: string;
+    learningFromMistakes: string;
+    processDocumentation: string;
 
     financeStrategicPressure: string;
     financeFoundationReliability: string;
@@ -71,6 +74,7 @@ export type ScanState = {
 
     careRegistrationExceptions: string;
     careAccountabilityPressure: string;
+    careProcessStandardization: string;
 
     educationIntakePlanningConsistency: string;
     educationProcessAdminAlignment: string;
@@ -119,6 +123,9 @@ const INITIAL_SCAN: ScanState = {
     processStandardization: "",
     exceptionControl: "",
     issueResolution: "",
+    improvementTracking: "",
+    learningFromMistakes: "",
+    processDocumentation: "",
 
     financeStrategicPressure: "",
     financeFoundationReliability: "",
@@ -150,6 +157,7 @@ const INITIAL_SCAN: ScanState = {
 
     careRegistrationExceptions: "",
     careAccountabilityPressure: "",
+    careProcessStandardization: "",
 
     educationIntakePlanningConsistency: "",
     educationProcessAdminAlignment: "",
@@ -193,6 +201,9 @@ type ScanContextValue = {
   setProcessStandardization: (value: string) => void;
   setExceptionControl: (value: string) => void;
   setIssueResolution: (value: string) => void;
+  setImprovementTracking: (value: string) => void;
+  setLearningFromMistakes: (value: string) => void;
+  setProcessDocumentation: (value: string) => void;
 
   setFinanceStrategicPressure: (value: string) => void;
   setFinanceFoundationReliability: (value: string) => void;
@@ -224,6 +235,7 @@ type ScanContextValue = {
 
   setCareRegistrationExceptions: (value: string) => void;
   setCareAccountabilityPressure: (value: string) => void;
+  setCareProcessStandardization: (value: string) => void;
 
   setEducationIntakePlanningConsistency: (value: string) => void;
   setEducationProcessAdminAlignment: (value: string) => void;
@@ -295,6 +307,9 @@ function loadInitialScan(): ScanState {
         processStandardization: parsed.diagnosis?.processStandardization ?? "",
         exceptionControl: parsed.diagnosis?.exceptionControl ?? "",
         issueResolution: parsed.diagnosis?.issueResolution ?? "",
+        improvementTracking: parsed.diagnosis?.improvementTracking ?? "",
+        learningFromMistakes: parsed.diagnosis?.learningFromMistakes ?? "",
+        processDocumentation: parsed.diagnosis?.processDocumentation ?? "",
 
         financeStrategicPressure:
           parsed.diagnosis?.financeStrategicPressure ?? "",
@@ -342,6 +357,8 @@ function loadInitialScan(): ScanState {
           parsed.diagnosis?.careRegistrationExceptions ?? "",
         careAccountabilityPressure:
           parsed.diagnosis?.careAccountabilityPressure ?? "",
+        careProcessStandardization:
+          parsed.diagnosis?.careProcessStandardization ?? "",
 
         educationIntakePlanningConsistency:
           parsed.diagnosis?.educationIntakePlanningConsistency ?? "",
@@ -572,6 +589,12 @@ export function ScanProvider({ children }: { children: ReactNode }) {
     updateDiagnosis("exceptionControl", value);
   const setIssueResolution = (value: string) =>
     updateDiagnosis("issueResolution", value);
+  const setImprovementTracking = (value: string) =>
+    updateDiagnosis("improvementTracking", value);
+  const setLearningFromMistakes = (value: string) =>
+    updateDiagnosis("learningFromMistakes", value);
+  const setProcessDocumentation = (value: string) =>
+    updateDiagnosis("processDocumentation", value);
 
   const setFinanceStrategicPressure = (value: string) =>
     updateDiagnosis("financeStrategicPressure", value);
@@ -627,6 +650,8 @@ export function ScanProvider({ children }: { children: ReactNode }) {
     updateDiagnosis("careRegistrationExceptions", value);
   const setCareAccountabilityPressure = (value: string) =>
     updateDiagnosis("careAccountabilityPressure", value);
+  const setCareProcessStandardization = (value: string) =>
+    updateDiagnosis("careProcessStandardization", value);
 
   const setEducationIntakePlanningConsistency = (value: string) =>
     updateDiagnosis("educationIntakePlanningConsistency", value);
@@ -677,6 +702,9 @@ export function ScanProvider({ children }: { children: ReactNode }) {
       setProcessStandardization,
       setExceptionControl,
       setIssueResolution,
+      setImprovementTracking,
+      setLearningFromMistakes,
+      setProcessDocumentation,
 
       setFinanceStrategicPressure,
       setFinanceFoundationReliability,
@@ -708,6 +736,7 @@ export function ScanProvider({ children }: { children: ReactNode }) {
 
       setCareRegistrationExceptions,
       setCareAccountabilityPressure,
+      setCareProcessStandardization,
 
       setEducationIntakePlanningConsistency,
       setEducationProcessAdminAlignment,

@@ -56,6 +56,12 @@ export function getAnswerFromScan(
       return scan.diagnosis.exceptionControl;
     case "issue_resolution":
       return scan.diagnosis.issueResolution;
+    case "improvement_tracking":
+      return scan.diagnosis.improvementTracking;
+    case "learning_from_mistakes":
+      return scan.diagnosis.learningFromMistakes;
+    case "process_documentation":
+      return scan.diagnosis.processDocumentation;
 
     case "finance_strategic_pressure":
       return scan.diagnosis.financeStrategicPressure;
@@ -111,6 +117,8 @@ export function getAnswerFromScan(
       return scan.diagnosis.careRegistrationExceptions;
     case "care_accountability_pressure":
       return scan.diagnosis.careAccountabilityPressure;
+    case "care_process_standardization":
+      return scan.diagnosis.careProcessStandardization;
 
     case "education_intake_planning_consistency":
       return scan.diagnosis.educationIntakePlanningConsistency;
@@ -286,6 +294,15 @@ export function setAnswerToScan(
     case "issue_resolution":
       actions.setIssueResolution(ensureString(value));
       return;
+    case "improvement_tracking":
+      actions.setImprovementTracking(ensureString(value));
+      return;
+    case "learning_from_mistakes":
+      actions.setLearningFromMistakes(ensureString(value));
+      return;
+    case "process_documentation":
+      actions.setProcessDocumentation(ensureString(value));
+      return;
 
     case "finance_strategic_pressure":
       actions.setFinanceStrategicPressure(ensureString(value));
@@ -364,6 +381,9 @@ export function setAnswerToScan(
       return;
     case "care_accountability_pressure":
       actions.setCareAccountabilityPressure(ensureString(value));
+      return;
+    case "care_process_standardization":
+      actions.setCareProcessStandardization(ensureString(value));
       return;
 
     case "education_intake_planning_consistency":
