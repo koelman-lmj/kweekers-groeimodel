@@ -496,6 +496,7 @@ export default function FlowQuestionPage() {
   };
 
   const setAnswerValue = (value: AnswerValue) => {
+    console.log("[v0] setAnswerValue called with:", value, "for question:", questionKey);
     setFieldValue(questionKey, value);
   };
 
@@ -840,31 +841,37 @@ export default function FlowQuestionPage() {
 
             {question.inputType === "single_select" && optionSet && (
               <div className="grid gap-2 sm:grid-cols-2 justify-items-center">
-                {[...optionSet.options]
-                  .sort((a, b) => a.order - b.order)
-                  .map((option) => {
-                    const isActive = answerString === option.value;
+                {(() => {
+                  console.log("[v0] Rendering single_select. optionSet:", optionSet?.key, "options count:", optionSet?.options?.length);
+                  return [...optionSet.options]
+                    .sort((a, b) => a.order - b.order)
+                    .map((option) => {
+                      const isActive = answerString === option.value;
 
-                    return (
-                      <button
-                        key={option.value}
-                        type="button"
-                        onClick={() => setAnswerValue(option.value)}
-                        aria-pressed={isActive}
-                        className={`group relative ${
-                          isActive
-                            ? getActiveOptionButtonClass()
-                            : getBaseOptionButtonClass(false)
-                        }`}
-                      >
-                        <OptionLabelWithTooltip
-                          label={option.label}
-                          description={option.description}
-                        />
-                        <OptionTooltip description={option.description} />
-                      </button>
-                    );
-                  })}
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => {
+                            console.log("[v0] Button clicked:", option.value);
+                            setAnswerValue(option.value);
+                          }}
+                          aria-pressed={isActive}
+                          className={`group relative ${
+                            isActive
+                              ? getActiveOptionButtonClass()
+                              : getBaseOptionButtonClass(false)
+                          }`}
+                        >
+                          <OptionLabelWithTooltip
+                            label={option.label}
+                            description={option.description}
+                          />
+                          <OptionTooltip description={option.description} />
+                        </button>
+                      );
+                    });
+                })()}
               </div>
             )}
 
