@@ -3,6 +3,7 @@ import { optionSets } from "./option-sets";
 import { questions } from "./questions";
 import { dimensions } from "./dimensions";
 
+// Force rebuild - scan definition exports
 export const scanDefinition = {
   sections,
   optionSets,
