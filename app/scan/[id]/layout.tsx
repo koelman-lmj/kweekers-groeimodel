@@ -2,7 +2,7 @@
 
 // Build v5 - Force recompile after option-sets-v2 change
 import Link from "next/link";
-import { useParams, usePathname } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { ScanProvider, useScanContext } from "@/app/context/ScanContext";
@@ -162,7 +162,13 @@ function getStepHref(
 function ScanShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const params = useParams();
+  const router = useRouter();
   const { scan, resetScan } = useScanContext();
+
+  const handleReset = () => {
+    resetScan();
+    router.push("/scan/nieuw/flow/profile_basis/customer_name");
+  };
 
   const visitedSections = scan.ui.visitedSections;
   const lastVisitedRouteBySection = scan.ui.lastVisitedRouteBySection;
@@ -308,7 +314,7 @@ function ScanShell({ children }: { children: ReactNode }) {
               <div className="border-t pt-4">
                 <button
                   type="button"
-                  onClick={() => resetScan()}
+                  onClick={handleReset}
                   className="w-full rounded-2xl border border-black/10 px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-neutral-50 transition"
                 >
                   Reset scan
