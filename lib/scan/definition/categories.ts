@@ -7,17 +7,35 @@ export type CategoryDefinition = {
 
 export const categories: CategoryDefinition[] = [
   {
-    "code": "organisatie",
-    "title": "Organisatie",
-    "description": "Vragen over eigenaarschap, sturing en beheer.",
-    "order": 10
+    code: "Organisatie & Beheer",
+    title: "Organisatie & Beheer",
+    description: "Eigenaarschap, sturing, procesafspraken en beheer.",
+    order: 10,
   },
   {
-    "code": "proces",
-    "title": "Proces",
-    "description": "Vragen over procesafspraken, werkwijze en standaardisatie.",
-    "order": 20
-  }
+    code: "Functionele domeinen",
+    title: "Functionele domeinen",
+    description: "Financieel, HRM, CRM, Projecten, Inkoop en andere modules.",
+    order: 20,
+  },
+  {
+    code: "Data & Rapportage",
+    title: "Data & Rapportage",
+    description: "Stuurinformatie, integraties en databetrouwbaarheid.",
+    order: 30,
+  },
+  {
+    code: "Sectorspecifiek",
+    title: "Sectorspecifiek",
+    description: "Zorg- of onderwijsspecifieke processen en uitdagingen.",
+    order: 40,
+  },
+  {
+    code: "Overig",
+    title: "Overig",
+    description: "Overige thema's en aandachtspunten.",
+    order: 100,
+  },
 ];
 
 export function getCategoryDefinition(code: string): CategoryDefinition {
