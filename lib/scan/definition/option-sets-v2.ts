@@ -52,6 +52,16 @@ export const optionSets: OptionSetDefinition[] = [
     ],
   },
   {
+    key: "afas_usage_duration_options",
+    options: [
+      { value: "less-than-2", label: "Minder dan 2 jaar", order: 10 },
+      { value: "2-5", label: "2 tot 5 jaar", order: 20 },
+      { value: "5-10", label: "5 tot 10 jaar", order: 30 },
+      { value: "10+", label: "10 jaar of langer", order: 40 },
+      { value: "onbekend", label: "Onbekend", order: 50 },
+    ],
+  },
+  {
     key: "setup_quality_options",
     options: [
       { value: "slecht", label: "Slecht onderhouden", order: 10 },
@@ -62,7 +72,26 @@ export const optionSets: OptionSetDefinition[] = [
     ],
   },
   {
+    key: "maintenance_quality_options",
+    options: [
+      { value: "slecht", label: "Slecht onderhouden", order: 10 },
+      { value: "redelijk", label: "Redelijk onderhouden", order: 20 },
+      { value: "aardvaardig", label: "Aardvaardig onderhouden", order: 30 },
+      { value: "goed", label: "Goed onderhouden", order: 40 },
+      { value: "moeilijk", label: "Moeilijk te beoordelen", order: 50 },
+    ],
+  },
+  {
     key: "expected_changes_options",
+    options: [
+      { value: "ja", label: "Ja, vrij zeker", order: 10 },
+      { value: "nee", label: "Nee", order: 20 },
+      { value: "mogelijk", label: "Mogelijk", order: 30 },
+      { value: "nog-onbekend", label: "Nog onbekend", order: 40 },
+    ],
+  },
+  {
+    key: "expected_org_changes_options",
     options: [
       { value: "ja", label: "Ja, vrij zeker", order: 10 },
       { value: "nee", label: "Nee", order: 20 },
@@ -115,6 +144,27 @@ export const optionSets: OptionSetDefinition[] = [
       { value: "volledig", label: "Volledig (alle modules en processen)", order: 10 },
       { value: "specifiek", label: "Specifieke modules of processen", order: 20 },
       { value: "pilot", label: "Pilot / Proof of concept", order: 30 },
+    ],
+  },
+  {
+    key: "scope_options",
+    options: [
+      { value: "volledig", label: "Volledig (alle modules en processen)", order: 10 },
+      { value: "specifiek", label: "Specifieke modules of processen", order: 20 },
+      { value: "pilot", label: "Pilot / Proof of concept", order: 30 },
+    ],
+  },
+  {
+    key: "biggest_bottleneck_options",
+    options: [
+      { value: "processen", label: "Inefficiënte processen", order: 10 },
+      { value: "datakwaliteit", label: "Slechte datakwaliteit", order: 20 },
+      { value: "integraties", label: "Gebrekkige integraties", order: 30 },
+      { value: "rapportage", label: "Onvoldoende rapportage mogelijkheden", order: 40 },
+      { value: "gebruikerservaring", label: "Slechte gebruikerservaring", order: 50 },
+      { value: "onderhoud", label: "Hoge onderhoudslast", order: 60 },
+      { value: "kennis", label: "Gebrek aan kennis", order: 70 },
+      { value: "anders", label: "Anders", order: 80 },
     ],
   },
   {
@@ -178,6 +228,136 @@ export const optionSets: OptionSetDefinition[] = [
       { value: "procure-to-pay", label: "Procure to Pay (Inkoop)", order: 30 },
       { value: "record-to-report", label: "Record to Report (Finance)", order: 40 },
       { value: "project-lifecycle", label: "Project Lifecycle", order: 50 },
+    ],
+  },
+  // Diagnose maturity option sets - all variants
+  {
+    key: "maturity_3level_clarity_options",
+    options: [
+      { value: "1", label: "Niet of nauwelijks", order: 10, score: 1 },
+      { value: "2", label: "Gedeeltelijk", order: 20, score: 2 },
+      { value: "3", label: "Grotendeels of volledig", order: 30, score: 3 },
+    ],
+  },
+  {
+    key: "maturity_3level_change_governance_options",
+    options: [
+      { value: "1", label: "Niet of nauwelijks", order: 10, score: 1 },
+      { value: "2", label: "Gedeeltelijk", order: 20, score: 2 },
+      { value: "3", label: "Grotendeels of volledig", order: 30, score: 3 },
+    ],
+  },
+  {
+    key: "maturity_3level_improvement_options",
+    options: [
+      { value: "1", label: "Niet of nauwelijks", order: 10, score: 1 },
+      { value: "2", label: "Gedeeltelijk", order: 20, score: 2 },
+      { value: "3", label: "Grotendeels of volledig", order: 30, score: 3 },
+    ],
+  },
+  {
+    key: "maturity_3level_standardization_options",
+    options: [
+      { value: "1", label: "Niet of nauwelijks", order: 10, score: 1 },
+      { value: "2", label: "Gedeeltelijk", order: 20, score: 2 },
+      { value: "3", label: "Grotendeels of volledig", order: 30, score: 3 },
+    ],
+  },
+  {
+    key: "maturity_3level_exception_control_options",
+    options: [
+      { value: "1", label: "Niet of nauwelijks", order: 10, score: 1 },
+      { value: "2", label: "Gedeeltelijk", order: 20, score: 2 },
+      { value: "3", label: "Grotendeels of volledig", order: 30, score: 3 },
+    ],
+  },
+  {
+    key: "maturity_3level_issue_resolution_options",
+    options: [
+      { value: "1", label: "Niet of nauwelijks", order: 10, score: 1 },
+      { value: "2", label: "Gedeeltelijk", order: 20, score: 2 },
+      { value: "3", label: "Grotendeels of volledig", order: 30, score: 3 },
+    ],
+  },
+  {
+    key: "maturity_3level_strength_options",
+    options: [
+      { value: "1", label: "Niet of nauwelijks", order: 10, score: 1 },
+      { value: "2", label: "Gedeeltelijk", order: 20, score: 2 },
+      { value: "3", label: "Grotendeels of volledig", order: 30, score: 3 },
+    ],
+  },
+  {
+    key: "maturity_3level_exception_practical_options",
+    options: [
+      { value: "1", label: "Niet of nauwelijks", order: 10, score: 1 },
+      { value: "2", label: "Gedeeltelijk", order: 20, score: 2 },
+      { value: "3", label: "Grotendeels of volledig", order: 30, score: 3 },
+    ],
+  },
+  {
+    key: "maturity_3level_usefulness_options",
+    options: [
+      { value: "1", label: "Niet of nauwelijks", order: 10, score: 1 },
+      { value: "2", label: "Gedeeltelijk", order: 20, score: 2 },
+      { value: "3", label: "Grotendeels of volledig", order: 30, score: 3 },
+    ],
+  },
+  {
+    key: "maturity_3level_fit_options",
+    options: [
+      { value: "1", label: "Niet of nauwelijks", order: 10, score: 1 },
+      { value: "2", label: "Gedeeltelijk", order: 20, score: 2 },
+      { value: "3", label: "Grotendeels of volledig", order: 30, score: 3 },
+    ],
+  },
+  // Strategic pressure options per domain
+  {
+    key: "finance_strategic_pressure_options",
+    options: [
+      { value: "low", label: "Laag", order: 10 },
+      { value: "medium", label: "Gemiddeld", order: 20 },
+      { value: "high", label: "Hoog", order: 30 },
+    ],
+  },
+  {
+    key: "order_strategic_pressure_options",
+    options: [
+      { value: "low", label: "Laag", order: 10 },
+      { value: "medium", label: "Gemiddeld", order: 20 },
+      { value: "high", label: "Hoog", order: 30 },
+    ],
+  },
+  {
+    key: "crm_strategic_pressure_options",
+    options: [
+      { value: "low", label: "Laag", order: 10 },
+      { value: "medium", label: "Gemiddeld", order: 20 },
+      { value: "high", label: "Hoog", order: 30 },
+    ],
+  },
+  {
+    key: "hrm_strategic_pressure_options",
+    options: [
+      { value: "low", label: "Laag", order: 10 },
+      { value: "medium", label: "Gemiddeld", order: 20 },
+      { value: "high", label: "Hoog", order: 30 },
+    ],
+  },
+  {
+    key: "reporting_strategic_pressure_options",
+    options: [
+      { value: "low", label: "Laag", order: 10 },
+      { value: "medium", label: "Gemiddeld", order: 20 },
+      { value: "high", label: "Hoog", order: 30 },
+    ],
+  },
+  {
+    key: "integration_strategic_pressure_options",
+    options: [
+      { value: "low", label: "Laag", order: 10 },
+      { value: "medium", label: "Gemiddeld", order: 20 },
+      { value: "high", label: "Hoog", order: 30 },
     ],
   },
 ];
