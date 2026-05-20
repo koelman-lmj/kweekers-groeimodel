@@ -1,6 +1,9 @@
 import type { OptionSetDefinition } from "./types";
 
-// Option sets for all form fields
+/**
+ * Option sets define the available choices for form fields.
+ * Each option set has a unique key and a list of options with values and labels.
+ */
 export const optionSets: OptionSetDefinition[] = [
   {
     key: "sector_options",
