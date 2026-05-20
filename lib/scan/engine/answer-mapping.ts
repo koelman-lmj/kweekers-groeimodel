@@ -159,6 +159,9 @@ export type ScanActions = {
   setProcessStandardization: (value: string) => void;
   setExceptionControl: (value: string) => void;
   setIssueResolution: (value: string) => void;
+  setImprovementTracking: (value: string) => void;
+  setLearningFromMistakes: (value: string) => void;
+  setProcessDocumentation: (value: string) => void;
 
   setFinanceStrategicPressure: (value: string) => void;
   setFinanceFoundationReliability: (value: string) => void;
@@ -190,6 +193,7 @@ export type ScanActions = {
 
   setCareRegistrationExceptions: (value: string) => void;
   setCareAccountabilityPressure: (value: string) => void;
+  setCareProcessStandardization: (value: string) => void;
 
   setEducationIntakePlanningConsistency: (value: string) => void;
   setEducationProcessAdminAlignment: (value: string) => void;
