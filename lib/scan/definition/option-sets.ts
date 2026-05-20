@@ -1,5 +1,6 @@
 import type { OptionSetDefinition } from "./types";
 
+// Option sets for all form fields
 export const optionSets: OptionSetDefinition[] = [
   {
     key: "sector_options",
