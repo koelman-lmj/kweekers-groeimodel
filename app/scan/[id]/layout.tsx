@@ -162,7 +162,7 @@ function getStepHref(
 function ScanShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const params = useParams();
-  const { scan } = useScanContext();
+  const { scan, resetScan } = useScanContext();
 
   const visitedSections = scan.ui.visitedSections;
   const lastVisitedRouteBySection = scan.ui.lastVisitedRouteBySection;
@@ -303,6 +303,16 @@ function ScanShell({ children }: { children: ReactNode }) {
                     </div>
                   );
                 })}
+              </div>
+
+              <div className="border-t pt-4">
+                <button
+                  type="button"
+                  onClick={() => resetScan()}
+                  className="w-full rounded-2xl border border-black/10 px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-neutral-50 transition"
+                >
+                  Reset scan
+                </button>
               </div>
             </div>
           </div>
