@@ -579,7 +579,10 @@ export default function FlowQuestionPage() {
     onSelect: (value: string) => void
   ) => {
     const currentOptionSet = getOptionSet(optionSetKey);
-    if (!currentOptionSet) return null;
+    if (!currentOptionSet) {
+      console.error("[v0] Option set not found:", optionSetKey);
+      return <p className="text-red-500 text-sm">Option set niet gevonden: {optionSetKey}</p>;
+    }
 
     return (
       <div className="grid gap-2 sm:grid-cols-2 justify-items-center">
@@ -594,10 +597,16 @@ export default function FlowQuestionPage() {
                 type="button"
                 onClick={() => onSelect(option.value)}
                 aria-pressed={isActive}
-                className={`group relative ${
+                style={isActive ? {
+                  backgroundColor: '#ed6e41',
+                  borderColor: '#db5f34',
+                  color: 'white',
+                  borderWidth: '2px'
+                } : {}}
+                className={`group relative justify-self-center w-[320px] min-h-[52px] rounded-xl border px-3 py-2 text-center transition ${
                   isActive
-                    ? getActiveOptionButtonClass()
-                    : getBaseOptionButtonClass(false)
+                    ? "font-medium shadow-sm"
+                    : "border-black/15 bg-white hover:border-[#ed6e41] hover:bg-[#fef3ef]"
                 }`}
               >
                 <OptionLabelWithTooltip
