@@ -67,6 +67,81 @@ function scoreToFiveDots(priorityScore: number) {
   return 5;
 }
 
+function getScoreColor(score: number): string {
+  if (score >= 4) return "#22c55e"; // green
+  if (score >= 3) return "#ed6e41"; // orange (brand)
+  if (score >= 2) return "#f59e0b"; // amber
+  return "#ef4444"; // red
+}
+
+function getScoreLabel(score: number): string {
+  if (score >= 4) return "Goed";
+  if (score >= 3) return "Redelijk";
+  if (score >= 2) return "Matig";
+  return "Aandacht nodig";
+}
+
+// Circular gauge for total score
+function ScoreGauge({ score, maxScore = 5 }: { score: number; maxScore?: number }) {
+  const percentage = (score / maxScore) * 100;
+  const circumference = 2 * Math.PI * 45;
+  const strokeDashoffset = circumference - (percentage / 100) * circumference;
+  const color = getScoreColor(score);
+
+  return (
+    <div className="relative flex items-center justify-center">
+      <svg width="120" height="120" className="-rotate-90">
+        {/* Background circle */}
+        <circle
+          cx="60"
+          cy="60"
+          r="45"
+          fill="none"
+          stroke="#e5e7eb"
+          strokeWidth="10"
+        />
+        {/* Progress circle */}
+        <circle
+          cx="60"
+          cy="60"
+          r="45"
+          fill="none"
+          stroke={color}
+          strokeWidth="10"
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={strokeDashoffset}
+          className="transition-all duration-500"
+        />
+      </svg>
+      <div className="absolute flex flex-col items-center">
+        <span className="text-3xl font-bold">{score}</span>
+        <span className="text-xs text-muted-foreground">van {maxScore}</span>
+      </div>
+    </div>
+  );
+}
+
+// Progress bar for dimension scores
+function ScoreProgressBar({ score, maxScore = 5 }: { score: number; maxScore?: number }) {
+  const percentage = (score / maxScore) * 100;
+  const color = getScoreColor(score);
+
+  return (
+    <div className="flex items-center gap-3">
+      <div className="h-2 flex-1 rounded-full bg-black/10">
+        <div
+          className="h-2 rounded-full transition-all duration-300"
+          style={{ width: `${percentage}%`, backgroundColor: color }}
+        />
+      </div>
+      <span className="text-sm font-medium tabular-nums" style={{ color }}>
+        {score.toFixed(1)}
+      </span>
+    </div>
+  );
+}
+
 function ScoreDots({ priorityScore }: { priorityScore: number }) {
   const active = scoreToFiveDots(priorityScore);
 
@@ -130,15 +205,27 @@ function ThemeCard({
       </div>
 
       <div className="mt-4 space-y-4">
-        {items.map((item) => (
-          <div key={item.id} className="space-y-1.5">
-            <div className="flex items-center justify-between gap-3">
-              <div className="text-sm font-medium">{item.title}</div>
-              <ScoreDots priorityScore={item.score} />
+        {items.map((item) => {
+          const displayScore = scoreToFiveDots(item.score);
+          return (
+            <div key={item.id} className="space-y-2">
+              <div className="flex items-center justify-between gap-3">
+                <div className="text-sm font-medium">{item.title}</div>
+                <span
+                  className="rounded-full px-2 py-0.5 text-xs font-medium"
+                  style={{
+                    backgroundColor: `${getScoreColor(displayScore)}15`,
+                    color: getScoreColor(displayScore),
+                  }}
+                >
+                  {getScoreLabel(displayScore)}
+                </span>
+              </div>
+              <ScoreProgressBar score={displayScore} />
+              <p className="text-sm text-muted-foreground">{item.reason}</p>
             </div>
-            <p className="text-sm text-muted-foreground">{item.reason}</p>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -520,39 +607,62 @@ export default function SectionSummaryPage() {
           </section>
 
           <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <div className="rounded-2xl border border-black/10 bg-white p-4">
+            <div className="flex flex-col items-center justify-center rounded-2xl border border-black/10 bg-white p-4">
               <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Totaalbeeld
               </div>
-              <div className="mt-2 text-3xl font-semibold">{totalScore}</div>
-              <div className="mt-2 text-sm text-muted-foreground">
-                op schaal 1–5
+              <div className="mt-2">
+                <ScoreGauge score={parseFloat(totalScore) || 0} />
+              </div>
+              <div className="mt-1 text-xs text-muted-foreground">
+                {getScoreLabel(parseFloat(totalScore) || 0)}
               </div>
             </div>
 
             <div className="rounded-2xl border border-black/10 bg-white p-4">
-              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Grootste risico
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-100">
+                  <svg className="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Grootste risico
+                </div>
               </div>
-              <div className="mt-2 text-sm font-medium">
+              <div className="mt-3 text-sm font-medium">
                 {scanOutput.summary.biggestRisk}
               </div>
             </div>
 
             <div className="rounded-2xl border border-black/10 bg-white p-4">
-              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Grootste kans
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100">
+                  <svg className="h-4 w-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                  </svg>
+                </div>
+                <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Grootste kans
+                </div>
               </div>
-              <div className="mt-2 text-sm font-medium">
+              <div className="mt-3 text-sm font-medium">
                 {scanOutput.summary.biggestOpportunity}
               </div>
             </div>
 
             <div className="rounded-2xl border border-black/10 bg-white p-4">
-              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Beste eerstvolgende stap
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#ed6e41]/10">
+                  <svg className="h-4 w-4 text-[#ed6e41]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                  </svg>
+                </div>
+                <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Beste eerstvolgende stap
+                </div>
               </div>
-              <div className="mt-2 text-sm font-medium">
+              <div className="mt-3 text-sm font-medium">
                 {scanOutput.summary.nextBestStep}
               </div>
             </div>
@@ -574,19 +684,29 @@ export default function SectionSummaryPage() {
           {scanOutput.quickWins.length > 0 && (
             <section className="rounded-3xl border border-black/10 bg-white p-5">
               <div className="space-y-1">
-                <h2 className="text-lg font-semibold">Quick wins</h2>
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100">
+                    <svg className="h-4 w-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <h2 className="text-lg font-semibold">Quick wins</h2>
+                </div>
                 <p className="text-sm text-muted-foreground">
                   Kleine ingrepen die snel waarde kunnen opleveren.
                 </p>
               </div>
 
               <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                {scanOutput.quickWins.slice(0, 6).map((item) => (
+                {scanOutput.quickWins.slice(0, 6).map((item, index) => (
                   <div
                     key={item}
-                    className="rounded-2xl border border-black/10 bg-black/[0.02] p-4 text-sm text-muted-foreground"
+                    className="flex items-start gap-3 rounded-2xl border border-green-200 bg-green-50 p-4"
                   >
-                    {item}
+                    <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-green-600 text-xs font-semibold text-white">
+                      {index + 1}
+                    </span>
+                    <span className="text-sm text-green-900">{item}</span>
                   </div>
                 ))}
               </div>
@@ -654,56 +774,88 @@ export default function SectionSummaryPage() {
               </p>
             </div>
 
-            <div className="mt-4 grid gap-4 md:grid-cols-3">
-              <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
-                <div className="text-sm font-semibold">Nu</div>
-                <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
-                  {scanOutput.roadmap.now.length > 0 ? (
-                    scanOutput.roadmap.now.map((item) => (
-                      <li key={item.id} className="ml-5 list-disc">
-                        {item.title}
-                      </li>
-                    ))
-                  ) : (
-                    <li className="list-none text-muted-foreground">
-                      Geen directe acties.
-                    </li>
-                  )}
-                </ul>
+            <div className="mt-6">
+              {/* Timeline header */}
+              <div className="relative mb-4 flex items-center justify-between px-4">
+                <div className="absolute left-[calc(16.67%+12px)] right-[calc(16.67%+12px)] top-1/2 h-1 -translate-y-1/2 bg-gradient-to-r from-[#ed6e41] via-[#f59e0b] to-[#22c55e]" />
+                
+                {/* Nu */}
+                <div className="relative z-10 flex flex-col items-center">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#ed6e41] text-white shadow-lg">
+                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                  <span className="mt-2 text-sm font-semibold">Nu</span>
+                </div>
+
+                {/* Daarna */}
+                <div className="relative z-10 flex flex-col items-center">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#f59e0b] text-white shadow-lg">
+                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <span className="mt-2 text-sm font-semibold">Daarna</span>
+                </div>
+
+                {/* Later */}
+                <div className="relative z-10 flex flex-col items-center">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#22c55e] text-white shadow-lg">
+                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <span className="mt-2 text-sm font-semibold">Later</span>
+                </div>
               </div>
 
-              <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
-                <div className="text-sm font-semibold">Daarna</div>
-                <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
-                  {scanOutput.roadmap.next.length > 0 ? (
-                    scanOutput.roadmap.next.map((item) => (
-                      <li key={item.id} className="ml-5 list-disc">
-                        {item.title}
-                      </li>
-                    ))
-                  ) : (
-                    <li className="list-none text-muted-foreground">
-                      Nog geen volgende stap bepaald.
-                    </li>
-                  )}
-                </ul>
-              </div>
+              {/* Timeline content */}
+              <div className="mt-6 grid gap-4 md:grid-cols-3">
+                <div className="rounded-2xl border-2 border-[#ed6e41]/20 bg-[#ed6e41]/5 p-4">
+                  <ul className="space-y-2 text-sm">
+                    {scanOutput.roadmap.now.length > 0 ? (
+                      scanOutput.roadmap.now.map((item) => (
+                        <li key={item.id} className="flex items-start gap-2">
+                          <span className="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#ed6e41]" />
+                          <span className="text-muted-foreground">{item.title}</span>
+                        </li>
+                      ))
+                    ) : (
+                      <li className="text-muted-foreground">Geen directe acties.</li>
+                    )}
+                  </ul>
+                </div>
 
-              <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4">
-                <div className="text-sm font-semibold">Later</div>
-                <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
-                  {scanOutput.roadmap.later.length > 0 ? (
-                    scanOutput.roadmap.later.map((item) => (
-                      <li key={item.id} className="ml-5 list-disc">
-                        {item.title}
-                      </li>
-                    ))
-                  ) : (
-                    <li className="list-none text-muted-foreground">
-                      Nog niets voor later.
-                    </li>
-                  )}
-                </ul>
+                <div className="rounded-2xl border-2 border-[#f59e0b]/20 bg-[#f59e0b]/5 p-4">
+                  <ul className="space-y-2 text-sm">
+                    {scanOutput.roadmap.next.length > 0 ? (
+                      scanOutput.roadmap.next.map((item) => (
+                        <li key={item.id} className="flex items-start gap-2">
+                          <span className="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#f59e0b]" />
+                          <span className="text-muted-foreground">{item.title}</span>
+                        </li>
+                      ))
+                    ) : (
+                      <li className="text-muted-foreground">Nog geen volgende stap bepaald.</li>
+                    )}
+                  </ul>
+                </div>
+
+                <div className="rounded-2xl border-2 border-[#22c55e]/20 bg-[#22c55e]/5 p-4">
+                  <ul className="space-y-2 text-sm">
+                    {scanOutput.roadmap.later.length > 0 ? (
+                      scanOutput.roadmap.later.map((item) => (
+                        <li key={item.id} className="flex items-start gap-2">
+                          <span className="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#22c55e]" />
+                          <span className="text-muted-foreground">{item.title}</span>
+                        </li>
+                      ))
+                    ) : (
+                      <li className="text-muted-foreground">Nog niets voor later.</li>
+                    )}
+                  </ul>
+                </div>
               </div>
             </div>
           </section>
@@ -711,7 +863,14 @@ export default function SectionSummaryPage() {
           {scanOutput.impact.length > 0 && (
             <section className="rounded-3xl border border-black/10 bg-white p-5">
               <div className="space-y-1">
-                <h2 className="text-lg font-semibold">Verwachte impact</h2>
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100">
+                    <svg className="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    </svg>
+                  </div>
+                  <h2 className="text-lg font-semibold">Verwachte impact</h2>
+                </div>
                 <p className="text-sm text-muted-foreground">
                   Wat deze verbeterstappen naar verwachting opleveren.
                 </p>
@@ -721,9 +880,12 @@ export default function SectionSummaryPage() {
                 {scanOutput.impact.map((item) => (
                   <div
                     key={item}
-                    className="rounded-2xl border border-black/10 bg-black/[0.02] p-4 text-sm"
+                    className="flex items-start gap-3 rounded-2xl border border-blue-200 bg-blue-50 p-4"
                   >
-                    {item}
+                    <svg className="h-5 w-5 flex-shrink-0 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-sm text-blue-900">{item}</span>
                   </div>
                 ))}
               </div>
