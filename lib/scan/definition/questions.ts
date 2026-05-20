@@ -63,7 +63,6 @@ export const questions: QuestionDefinition[] = [
     inputType: "multi_select",
     required: true,
     optionSetKey: "organization_type_options",
-    maxSelections: 3,
     examples: [
       "Kies meerdere opties als de organisatie op meerdere manieren werkt",
       "Selecteer alleen wat echt iets zegt over structuur en operatie",
@@ -166,7 +165,6 @@ export const questions: QuestionDefinition[] = [
     inputType: "multi_select",
     required: true,
     optionSetKey: "primary_process_chains_options",
-    maxSelections: 3,
     examples: [
       "Bijvoorbeeld: order tot factuur of inkoop tot betaling",
       "Kies alleen de ketens die echt centraal staan",
@@ -196,7 +194,6 @@ export const questions: QuestionDefinition[] = [
     inputType: "multi_select",
     required: true,
     optionSetKey: "biggest_bottleneck_options",
-    maxSelections: 3,
     examples: [
       "Bijvoorbeeld: processen, eigenaarschap of rapportage",
       "Kies alleen wat nu echt de meeste druk geeft",
@@ -226,7 +223,6 @@ export const questions: QuestionDefinition[] = [
     inputType: "multi_select",
     required: true,
     optionSetKey: "scope_focus_options",
-    maxSelections: 2,
     examples: [
       "Bijvoorbeeld: processen, AFAS-inrichting of rapportage",
       "Kies waar de scan extra scherpte op moet geven",
