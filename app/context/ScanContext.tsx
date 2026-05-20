@@ -81,6 +81,11 @@ export type ScanState = {
     visitedSections: string[];
     lastVisitedRouteBySection: Record<string, string>;
   };
+  roadmap?: {
+    items: import("@/lib/scan/types").RoadmapItem[];
+    lastModified: string;
+  };
+  answers?: Record<string, string | string[]>;
 };
 
 const STORAGE_KEY = "kweekers-groeimodel-scan";
@@ -226,6 +231,7 @@ type ScanContextValue = {
 
   setComment: (questionKey: string, value: string) => void;
   markSectionVisited: (sectionCode: string, route: string) => void;
+  updateScan: (updates: Partial<ScanState>) => void;
 };
 
 const ScanContext = createContext<ScanContextValue | undefined>(undefined);
@@ -455,6 +461,13 @@ export function ScanProvider({ children }: { children: ReactNode }) {
         },
       };
     });
+  }, [setScan]);
+
+  const updateScan = useCallback((updates: Partial<ScanState>) => {
+    setScan((current) => ({
+      ...current,
+      ...updates,
+    }));
   }, [setScan]);
 
   const setCustomerName = (value: string) => updateProfile("customerName", value);
@@ -702,8 +715,9 @@ export function ScanProvider({ children }: { children: ReactNode }) {
 
       setComment,
       markSectionVisited,
+      updateScan,
     }),
-    [scanState, markSectionVisited]
+    [scanState, markSectionVisited, updateScan]
   );
 
   return <ScanContext.Provider value={value}>{children}</ScanContext.Provider>;
@@ -718,5 +732,8 @@ export function useScanContext() {
 
   return context;
 }
+
+// Alias for useScanContext
+export const useScan = useScanContext;
 
 export default ScanProvider;

@@ -197,3 +197,92 @@ body {
   border: 1px solid #f2d5c8;
   background: #fffaf7;
 }
+
+/* Print Styles */
+@media print {
+  @page {
+    size: A4;
+    margin: 15mm;
+  }
+
+  body {
+    font-size: 10pt;
+    line-height: 1.4;
+    color: #000 !important;
+    background: #fff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Hide interactive elements */
+  .print\\:hidden,
+  button:not(.print\\:block),
+  nav,
+  header:not(.print\\:block),
+  .no-print {
+    display: none !important;
+  }
+
+  /* Ensure backgrounds print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Page breaks */
+  .page-break-before {
+    page-break-before: always;
+  }
+
+  .page-break-after {
+    page-break-after: always;
+  }
+
+  .avoid-break {
+    page-break-inside: avoid;
+  }
+
+  /* Card styling for print */
+  .rounded-xl {
+    border-radius: 8px !important;
+  }
+
+  /* Ensure charts are visible */
+  svg {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Grid adjustments for A4 */
+  .lg\\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .md\\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* Reduce spacing for print */
+  .gap-6 {
+    gap: 12px;
+  }
+
+  .gap-4 {
+    gap: 8px;
+  }
+
+  .p-4 {
+    padding: 8px;
+  }
+
+  .mb-6 {
+    margin-bottom: 12px;
+  }
+
+  /* Footer styling */
+  footer {
+    margin-top: 20px;
+    padding-top: 10px;
+    border-top: 1px solid #e5e7eb;
+  }
+}
