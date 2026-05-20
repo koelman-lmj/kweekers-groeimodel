@@ -262,6 +262,7 @@ export const optionSets: OptionSetDefinition[] = [
       { value: "uitzonderingen_handwerk", label: "Uitzonderingen en handwerk", description: "De grootste opgave zit in afwijkingen, correcties en handmatige verwerking.", order: 20 },
       { value: "stuurinformatie", label: "Stuurinformatie en inzicht", description: "De grootste opgave zit in tijdig, betrouwbaar en bruikbaar inzicht.", order: 30 },
       { value: "meerdere_administraties", label: "Complexiteit door meerdere administraties", description: "De grootste opgave zit in structuur, samenhang of afstemming tussen administraties.", order: 40 },
+      { value: "overig", label: "Overig", description: "Vul in de opmerking in wat de grootste opgave is.", order: 99 },
     ],
   },
   {
@@ -271,6 +272,7 @@ export const optionSets: OptionSetDefinition[] = [
       { value: "pipeline_forecast", label: "Pipeline en forecast", description: "De grootste opgave zit in grip op kansen, voortgang en verwachte omzet.", order: 20 },
       { value: "relatie_data", label: "Relatie- en contactgegevens", description: "De grootste opgave zit in kwaliteit, volledigheid en actualiteit van CRM-gegevens.", order: 30 },
       { value: "gebruik_adoptie", label: "Gebruik en adoptie", description: "De grootste opgave zit in structureel gebruik van CRM door de organisatie.", order: 40 },
+      { value: "overig", label: "Overig", description: "Vul in de opmerking in wat de grootste opgave is.", order: 99 },
     ],
   },
   {
@@ -280,6 +282,7 @@ export const optionSets: OptionSetDefinition[] = [
       { value: "blokkades_vrijgave", label: "Blokkades en vrijgave", description: "De grootste opgave zit in controle, vrijgave en uitzonderingen in de orderflow.", order: 20 },
       { value: "levering_facturatie", label: "Levering en facturatie", description: "De grootste opgave zit in de doorstroming naar levering en factuur.", order: 30 },
       { value: "afwijkingen_handwerk", label: "Afwijkingen en handwerk", description: "De grootste opgave zit in afwijkende routes, uitzonderingen en handmatige ingrepen.", order: 40 },
+      { value: "overig", label: "Overig", description: "Vul in de opmerking in wat de grootste opgave is.", order: 99 },
     ],
   },
   {
@@ -289,6 +292,7 @@ export const optionSets: OptionSetDefinition[] = [
       { value: "dossiers_vastlegging", label: "Dossiers en vastlegging", description: "De grootste opgave zit in volledigheid en kwaliteit van HR-dossiers en gegevens.", order: 20 },
       { value: "proces_uniformiteit", label: "Procesuniformiteit", description: "De grootste opgave zit in eenduidige HR-processen en werkwijzen.", order: 30 },
       { value: "selfservice_gebruik", label: "Selfservice en gebruik", description: "De grootste opgave zit in gebruik door medewerkers en leidinggevenden.", order: 40 },
+      { value: "overig", label: "Overig", description: "Vul in de opmerking in wat de grootste opgave is.", order: 99 },
     ],
   },
   {
@@ -298,6 +302,7 @@ export const optionSets: OptionSetDefinition[] = [
       { value: "betrouwbaarheid_cijfers", label: "Betrouwbaarheid van cijfers", description: "De grootste opgave zit in vertrouwen in de juistheid van rapportages.", order: 20 },
       { value: "snelheid_actualiteit", label: "Snelheid en actualiteit", description: "De grootste opgave zit in tijdige beschikbaarheid van informatie.", order: 30 },
       { value: "bruikbaarheid_sturing", label: "Bruikbaarheid voor sturing", description: "De grootste opgave zit in het daadwerkelijk gebruiken van rapportage voor besluitvorming.", order: 40 },
+      { value: "overig", label: "Overig", description: "Vul in de opmerking in wat de grootste opgave is.", order: 99 },
     ],
   },
   {
@@ -307,6 +312,7 @@ export const optionSets: OptionSetDefinition[] = [
       { value: "eigenaarschap_beheer", label: "Eigenaarschap en beheer", description: "De grootste opgave zit in duidelijke verantwoordelijkheid voor koppelingen en wijzigingen.", order: 20 },
       { value: "monitoring_opvolging", label: "Monitoring en opvolging", description: "De grootste opgave zit in signalering en opvolging van fouten en verstoringen.", order: 30 },
       { value: "handmatig_herstel", label: "Handmatig herstel", description: "De grootste opgave zit in afhankelijkheid van handmatige controles of herstelacties.", order: 40 },
+      { value: "overig", label: "Overig", description: "Vul in de opmerking in wat de grootste opgave is.", order: 99 },
     ],
   },
 ];

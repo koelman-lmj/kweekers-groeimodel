@@ -572,11 +572,16 @@ export default function FlowQuestionPage() {
     isFilled(profileOverviewValues[key])
   );
 
+  // Check if "overig" is selected and requires a comment
+  const isOverigSelected = answerString === "overig";
+  const overigNeedsComment = isOverigSelected && question.allowsComment;
+  const overigCommentFilled = commentValue.trim().length > 0;
+
   const canContinue = isProfileBasisOverview
     ? profileOverviewComplete
     : question.required
-      ? isFilled(answerValue)
-      : true;
+      ? isFilled(answerValue) && (!overigNeedsComment || overigCommentFilled)
+      : !overigNeedsComment || overigCommentFilled;
 
   const renderSingleSelectGrid = (
     optionSetKey: string,
@@ -1005,25 +1010,43 @@ export default function FlowQuestionPage() {
               )}
 
             {question.allowsComment && (
-              <div className="space-y-2 border-t border-black/10 pt-4">
+              <div className={`space-y-2 border-t border-black/10 pt-4 ${isOverigSelected ? 'bg-amber-50 -mx-4 px-4 py-4 rounded-xl border border-amber-200' : ''}`}>
                 <label
                   htmlFor={`${question.key}-comment`}
-                  className="text-sm font-medium"
+                  className="text-sm font-medium flex items-center gap-2"
                 >
                   Opmerking
+                  {isOverigSelected && (
+                    <span className="text-xs font-normal text-amber-700 bg-amber-100 px-2 py-0.5 rounded">
+                      Verplicht bij &apos;Overig&apos;
+                    </span>
+                  )}
                 </label>
                 <textarea
                   id={`${question.key}-comment`}
                   value={commentValue}
                   onChange={(event) => setCommentValue(event.target.value)}
-                  placeholder="Bijvoorbeeld: dit verschilt per team of is nog niet formeel belegd."
+                  placeholder={isOverigSelected 
+                    ? "Vul hier in wat de grootste opgave is..." 
+                    : "Bijvoorbeeld: dit verschilt per team of is nog niet formeel belegd."}
                   rows={4}
-                  className="w-full rounded-xl border border-black/15 bg-white px-4 py-3 outline-none"
+                  className={`w-full rounded-xl border bg-white px-4 py-3 outline-none ${
+                    isOverigSelected && !overigCommentFilled && showValidation
+                      ? 'border-red-400 ring-2 ring-red-100'
+                      : 'border-black/15'
+                  }`}
                 />
-                <p className="text-xs text-muted-foreground">
-                  Deze opmerking kan later worden meegenomen in samenvatting of
-                  rapportage.
-                </p>
+                {isOverigSelected && !overigCommentFilled && showValidation && (
+                  <p className="text-xs text-red-600 font-medium">
+                    Vul een opmerking in om uit te leggen wat &apos;Overig&apos; inhoudt.
+                  </p>
+                )}
+                {!isOverigSelected && (
+                  <p className="text-xs text-muted-foreground">
+                    Deze opmerking kan later worden meegenomen in samenvatting of
+                    rapportage.
+                  </p>
+                )}
               </div>
             )}
           </>
