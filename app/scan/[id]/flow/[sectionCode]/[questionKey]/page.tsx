@@ -11,7 +11,6 @@ import {
   getQuestionsForSection,
   getSection,
 } from "@/lib/scan/engine/definition-helpers";
-import { getAnswerFromScan as getAnswerForProgress } from "@/lib/scan/engine/answer-mapping";
 import {
   getAnswerFromScan,
   setAnswerToScan,
@@ -285,7 +284,7 @@ export default function FlowQuestionPage() {
   // Calculate diagnose progress
   const diagnoseQuestions = getQuestionsForSection("diagnose", scan);
   const answeredDiagnoseQuestions = diagnoseQuestions.filter((q) => {
-    const answer = getAnswerForProgress(scan, q.key);
+    const answer = getAnswerFromScan(scan, q.key);
     if (Array.isArray(answer)) {
       return answer.length > 0;
     }
