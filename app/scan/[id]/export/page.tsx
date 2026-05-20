@@ -231,7 +231,7 @@ export default function ScanExportPage() {
                 </h1>
               </div>
               <img
-                src="/kweekers-logo.svg"
+                src="/kweekers-logo.png"
                 alt="KWEEKERS"
                 className="h-9 w-auto"
               />
