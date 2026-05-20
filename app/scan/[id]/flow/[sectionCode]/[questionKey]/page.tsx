@@ -243,6 +243,9 @@ export default function FlowQuestionPage() {
     setProcessStandardization,
     setExceptionControl,
     setIssueResolution,
+    setImprovementTracking,
+    setLearningFromMistakes,
+    setProcessDocumentation,
     setFinanceStrategicPressure,
     setFinanceFoundationReliability,
     setFinanceExceptionHandling,
@@ -267,6 +270,7 @@ export default function FlowQuestionPage() {
     setIntegrationMonitoringMaturity,
     setCareRegistrationExceptions,
     setCareAccountabilityPressure,
+    setCareProcessStandardization,
     setEducationIntakePlanningConsistency,
     setEducationProcessAdminAlignment,
     setEducationExceptionHandling,
@@ -461,6 +465,9 @@ export default function FlowQuestionPage() {
     setProcessStandardization,
     setExceptionControl,
     setIssueResolution,
+    setImprovementTracking,
+    setLearningFromMistakes,
+    setProcessDocumentation,
     setFinanceStrategicPressure,
     setFinanceFoundationReliability,
     setFinanceExceptionHandling,
@@ -485,6 +492,7 @@ export default function FlowQuestionPage() {
     setIntegrationMonitoringMaturity,
     setCareRegistrationExceptions,
     setCareAccountabilityPressure,
+    setCareProcessStandardization,
     setEducationIntakePlanningConsistency,
     setEducationProcessAdminAlignment,
     setEducationExceptionHandling,
@@ -779,8 +787,7 @@ export default function FlowQuestionPage() {
                 Gekozen:{" "}
                 {Array.isArray(profileOverviewValues.organization_type)
                   ? profileOverviewValues.organization_type.length
-                  : 0}{" "}
-                van maximaal 3
+                  : 0}
               </p>
             </div>
 
