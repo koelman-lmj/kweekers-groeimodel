@@ -491,7 +491,6 @@ export default function FlowQuestionPage() {
   };
 
   const setFieldValue = (fieldKey: string, value: AnswerValue) => {
-    console.log("[v0] setFieldValue called:", fieldKey, "value:", value);
     setAnswerToScan(setterBag, fieldKey, value);
     setShowValidation(false);
   };
