@@ -1,5 +1,6 @@
 "use client";
 
+// Build v4 - Force recompile
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import Image from "next/image";
