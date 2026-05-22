@@ -81,9 +81,9 @@ function getPriorityLabel(priority: "hoog" | "middel" | "laag") {
 }
 
 function getPriorityColor(priority: "hoog" | "middel" | "laag") {
-  if (priority === "hoog") return "bg-red-100 text-red-800 border-red-200";
-  if (priority === "middel") return "bg-amber-100 text-amber-800 border-amber-200";
-  return "bg-emerald-100 text-emerald-800 border-emerald-200";
+  if (priority === "hoog") return "bg-red-100 text-red-900 border-red-300";
+  if (priority === "middel") return "bg-amber-100 text-amber-900 border-amber-300";
+  return "bg-emerald-100 text-emerald-900 border-emerald-300";
 }
 
 export default function ScanExportPage() {
@@ -240,39 +240,39 @@ export default function ScanExportPage() {
             <div className="mt-6 grid gap-x-8 gap-y-2 sm:grid-cols-2 lg:grid-cols-3">
               <div className="text-sm">
                 <span className="font-semibold text-neutral-900">Klant:</span>{" "}
-                <span className="text-neutral-700">{customerName}</span>
+                <span className="text-neutral-800">{customerName}</span>
               </div>
               <div className="text-sm">
                 <span className="font-semibold text-neutral-900">Datum:</span>{" "}
-                <span className="text-neutral-700">{printDate}</span>
+                <span className="text-neutral-800">{printDate}</span>
               </div>
               <div className="text-sm">
                 <span className="font-semibold text-neutral-900">Aanleiding:</span>{" "}
-                <span className="text-neutral-700">{scanReasonLabel}</span>
+                <span className="text-neutral-800">{scanReasonLabel}</span>
               </div>
               <div className="text-sm">
                 <span className="font-semibold text-neutral-900">Sector:</span>{" "}
-                <span className="text-neutral-700">{sectorLabel}</span>
+                <span className="text-neutral-800">{sectorLabel}</span>
               </div>
               <div className="text-sm">
                 <span className="font-semibold text-neutral-900">Omvang:</span>{" "}
-                <span className="text-neutral-700">{organizationSizeLabel}</span>
+                <span className="text-neutral-800">{organizationSizeLabel}</span>
               </div>
             </div>
           </header>
 
           {/* Main Advice */}
-          <section className="print-section mt-8 rounded-xl border-2 border-[#E86C34]/20 bg-[#E86C34]/5 p-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#E86C34]">
+          <section className="print-section mt-8 rounded-xl border-2 border-[#E86C34]/30 bg-[#FDF6F3] p-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#C4522A]">
               KWEEKERS advies
             </p>
             <h2 className="mt-2 text-xl font-bold tracking-tight text-neutral-900">
               {scanOutput.summary.headline}
             </h2>
-            <p className="mt-3 text-[15px] leading-relaxed text-neutral-700">
+            <p className="mt-3 text-[15px] leading-relaxed text-neutral-800">
               {scanOutput.summary.explanation}
             </p>
-            <div className="mt-4 inline-flex rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-neutral-900 shadow-sm">
+            <div className="mt-4 inline-flex rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-neutral-900 shadow-sm border border-neutral-200">
               {scanOutput.summary.scoreLabel}
             </div>
           </section>
@@ -281,10 +281,10 @@ export default function ScanExportPage() {
           {scanOutput.quickWins.length > 0 && (
             <section className="print-section mt-8">
               <h2 className="text-lg font-bold tracking-tight text-neutral-900">Quick wins</h2>
-              <div className="mt-3 rounded-xl border border-black/10 bg-neutral-50 p-5">
+              <div className="mt-3 rounded-xl border border-neutral-200 bg-neutral-50 p-5">
                 <ul className="space-y-2">
                   {scanOutput.quickWins.map((item, index) => (
-                    <li key={index} className="flex gap-3 text-[15px] leading-relaxed text-neutral-700">
+                    <li key={index} className="flex gap-3 text-[15px] leading-relaxed text-neutral-800">
                       <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#E86C34]" />
                       {item}
                     </li>
@@ -314,15 +314,15 @@ export default function ScanExportPage() {
                     </span>
                   </div>
 
-                  <p className="mt-3 text-[15px] leading-relaxed text-neutral-600">
+                  <p className="mt-3 text-[15px] leading-relaxed text-neutral-700">
                     {item.reason}
                   </p>
 
                   <div className="mt-4 rounded-lg border-l-4 border-[#E86C34] bg-neutral-50 py-3 pl-4 pr-4">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-neutral-600">
                       Advies
                     </p>
-                    <p className="mt-1 text-[15px] leading-relaxed text-neutral-700">
+                    <p className="mt-1 text-[15px] leading-relaxed text-neutral-800">
                       {item.advice}
                     </p>
                   </div>
@@ -332,7 +332,7 @@ export default function ScanExportPage() {
                       {item.signals.map((signal) => (
                         <span
                           key={signal}
-                          className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-600"
+                          className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-700"
                         >
                           {signal}
                         </span>
@@ -349,7 +349,7 @@ export default function ScanExportPage() {
             <h2 className="text-lg font-bold tracking-tight text-neutral-900">Roadmap</h2>
 
             <div className="mt-4 grid gap-4 sm:grid-cols-3">
-              <div className="rounded-xl border-2 border-[#E86C34]/30 bg-[#E86C34]/5 p-5">
+              <div className="rounded-xl border-2 border-[#E86C34]/30 bg-[#FDF6F3] p-5">
                 <div className="flex items-center gap-2">
                   <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#E86C34] text-xs font-bold text-white">1</span>
                   <span className="font-bold text-neutral-900">Nu</span>
@@ -357,51 +357,51 @@ export default function ScanExportPage() {
                 <ul className="mt-3 space-y-2">
                   {scanOutput.roadmap.now.length > 0 ? (
                     scanOutput.roadmap.now.map((item) => (
-                      <li key={item.id} className="flex gap-2 text-sm text-neutral-700">
+                      <li key={item.id} className="flex gap-2 text-sm text-neutral-800">
                         <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#E86C34]" />
                         {item.title}
                       </li>
                     ))
                   ) : (
-                    <li className="text-sm text-neutral-500">Geen directe acties.</li>
+                    <li className="text-sm text-neutral-600">Geen directe acties.</li>
                   )}
                 </ul>
               </div>
 
-              <div className="rounded-xl border border-black/10 bg-white p-5">
+              <div className="rounded-xl border border-neutral-200 bg-white p-5">
                 <div className="flex items-center gap-2">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-neutral-200 text-xs font-bold text-neutral-700">2</span>
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-neutral-300 text-xs font-bold text-neutral-800">2</span>
                   <span className="font-bold text-neutral-900">Daarna</span>
                 </div>
                 <ul className="mt-3 space-y-2">
                   {scanOutput.roadmap.next.length > 0 ? (
                     scanOutput.roadmap.next.map((item) => (
-                      <li key={item.id} className="flex gap-2 text-sm text-neutral-700">
-                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-neutral-400" />
+                      <li key={item.id} className="flex gap-2 text-sm text-neutral-800">
+                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-neutral-500" />
                         {item.title}
                       </li>
                     ))
                   ) : (
-                    <li className="text-sm text-neutral-500">Nog geen volgende stap bepaald.</li>
+                    <li className="text-sm text-neutral-600">Nog geen volgende stap bepaald.</li>
                   )}
                 </ul>
               </div>
 
-              <div className="rounded-xl border border-black/10 bg-white p-5">
+              <div className="rounded-xl border border-neutral-200 bg-white p-5">
                 <div className="flex items-center gap-2">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-neutral-100 text-xs font-bold text-neutral-500">3</span>
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-neutral-200 text-xs font-bold text-neutral-700">3</span>
                   <span className="font-bold text-neutral-900">Later</span>
                 </div>
                 <ul className="mt-3 space-y-2">
                   {scanOutput.roadmap.later.length > 0 ? (
                     scanOutput.roadmap.later.map((item) => (
-                      <li key={item.id} className="flex gap-2 text-sm text-neutral-700">
-                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-neutral-300" />
+                      <li key={item.id} className="flex gap-2 text-sm text-neutral-800">
+                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-neutral-400" />
                         {item.title}
                       </li>
                     ))
                   ) : (
-                    <li className="text-sm text-neutral-500">Nog niets voor later.</li>
+                    <li className="text-sm text-neutral-600">Nog niets voor later.</li>
                   )}
                 </ul>
               </div>
@@ -414,27 +414,27 @@ export default function ScanExportPage() {
 
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               {domainScores.map((domain) => (
-                <div key={domain.code} className="rounded-xl border border-black/10 p-4">
+                <div key={domain.code} className="rounded-xl border border-neutral-200 p-4">
                   <div className="flex items-start justify-between gap-2">
                     <div className="font-semibold text-neutral-900">{domain.title}</div>
                     <div className="text-right">
                       <span className="text-lg font-bold text-neutral-900">
                         {domain.score.toFixed(1)}
                       </span>
-                      <span className="text-sm text-neutral-500">/8</span>
+                      <span className="text-sm text-neutral-600">/8</span>
                     </div>
                   </div>
                   
                   <div className="mt-2 flex items-center gap-3">
                     <div className="flex-1">
-                      <div className="h-2 overflow-hidden rounded-full bg-neutral-100">
+                      <div className="h-2.5 overflow-hidden rounded-full bg-neutral-200">
                         <div
                           className={`h-full rounded-full ${getScoreColor(domain.score)}`}
                           style={{ width: `${(domain.score / 8) * 100}%` }}
                         />
                       </div>
                     </div>
-                    <span className="shrink-0 text-xs font-medium text-neutral-600">
+                    <span className="shrink-0 text-xs font-semibold text-neutral-700">
                       {getScoreLabel(domain.score)}
                     </span>
                   </div>
@@ -444,35 +444,35 @@ export default function ScanExportPage() {
           </section>
 
           {/* Context */}
-          <section className="print-section mt-8 rounded-xl border border-black/10 bg-neutral-50 p-5">
+          <section className="print-section mt-8 rounded-xl border border-neutral-200 bg-neutral-50 p-5">
             <h2 className="text-lg font-bold tracking-tight text-neutral-900">Context van de scan</h2>
 
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               {bottleneckLabels.length > 0 && (
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">Knelpunten</p>
-                  <p className="mt-1 text-sm text-neutral-700">{bottleneckLabels.join(", ")}</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-neutral-600">Knelpunten</p>
+                  <p className="mt-1 text-sm text-neutral-800">{bottleneckLabels.join(", ")}</p>
                 </div>
               )}
 
               {focusLabels.length > 0 && (
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">Focus</p>
-                  <p className="mt-1 text-sm text-neutral-700">{focusLabels.join(", ")}</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-neutral-600">Focus</p>
+                  <p className="mt-1 text-sm text-neutral-800">{focusLabels.join(", ")}</p>
                 </div>
               )}
 
               {productLabels.length > 0 && (
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">AFAS-context</p>
-                  <p className="mt-1 text-sm text-neutral-700">{productLabels.join(", ")}</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-neutral-600">AFAS-context</p>
+                  <p className="mt-1 text-sm text-neutral-800">{productLabels.join(", ")}</p>
                 </div>
               )}
 
               {processChainLabels.length > 0 && (
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">Procesketens</p>
-                  <p className="mt-1 text-sm text-neutral-700">{processChainLabels.join(", ")}</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-neutral-600">Procesketens</p>
+                  <p className="mt-1 text-sm text-neutral-800">{processChainLabels.join(", ")}</p>
                 </div>
               )}
             </div>
@@ -487,9 +487,9 @@ export default function ScanExportPage() {
 
               <div className="mt-4 space-y-3">
                 {comments.map((item, index) => (
-                  <div key={index} className="rounded-lg border border-black/10 p-4">
+                  <div key={index} className="rounded-lg border border-neutral-200 p-4">
                     <p className="text-sm font-semibold text-neutral-900">{item.label}</p>
-                    <p className="mt-1 text-sm text-neutral-600">{item.comment}</p>
+                    <p className="mt-1 text-sm text-neutral-700">{item.comment}</p>
                   </div>
                 ))}
               </div>
