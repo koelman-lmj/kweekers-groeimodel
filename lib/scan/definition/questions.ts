@@ -70,8 +70,8 @@ export const questions: QuestionDefinition[] = [
   },
   {
     key: "afas_products",
-    sectionCode: "profile_basis",
-    order: 50,
+    sectionCode: "profile_afas",
+    order: 10,
     label: "Gebruikte AFAS-onderdelen",
     helpText: "Kies alles wat nu in gebruik of relevant is.",
     inputType: "multi_select",
@@ -84,14 +84,15 @@ export const questions: QuestionDefinition[] = [
   },
   {
     key: "ownership_model",
-    sectionCode: "profile_basis",
-    order: 60,
+    sectionCode: "profile_afas",
+    order: 20,
     label: "Wie is verantwoordelijk voor wijzigingen in AFAS?",
     helpText:
       "Kies hoe het beheer van AFAS nu is georganiseerd.",
     inputType: "single_select",
     required: true,
     optionSetKey: "ownership_model_options",
+    allowsComment: true,
     examples: [
       "Intern beheer, key-users, of uitbesteed?",
       "Wie pakt wijzigingsverzoeken op?",
@@ -99,13 +100,14 @@ export const questions: QuestionDefinition[] = [
   },
   {
     key: "afas_usage_duration",
-    sectionCode: "profile_basis",
-    order: 65,
+    sectionCode: "profile_afas",
+    order: 30,
     label: "Sinds wanneer gebruikt de organisatie AFAS?",
     helpText: "Kies hoe lang AFAS al in gebruik is binnen de organisatie.",
     inputType: "single_select",
     required: true,
     optionSetKey: "afas_usage_duration_options",
+    allowsComment: true,
     examples: [
       "Een oudere inrichting kent vaak andere keuzes en meer historie",
       "Kijk naar het moment waarop AFAS echt in gebruik is genomen",
@@ -113,14 +115,15 @@ export const questions: QuestionDefinition[] = [
   },
   {
     key: "maintenance_quality",
-    sectionCode: "profile_basis",
-    order: 67,
+    sectionCode: "profile_afas",
+    order: 40,
     label: "Hoe goed is de inrichting de afgelopen jaren onderhouden?",
     helpText:
       "Kies hoe goed beheer, opschoning en wijzigingen de afgelopen jaren zijn bijgehouden.",
     inputType: "single_select",
     required: true,
     optionSetKey: "maintenance_quality_options",
+    allowsComment: true,
     examples: [
       "Denk aan beheer, documentatie, opschoning en gecontroleerde wijzigingen",
       "Kijk niet alleen naar techniek, maar ook naar procesafspraken en discipline",
@@ -128,14 +131,15 @@ export const questions: QuestionDefinition[] = [
   },
   {
     key: "expected_org_changes",
-    sectionCode: "profile_basis",
-    order: 68,
+    sectionCode: "profile_afas",
+    order: 50,
     label: "Worden in de komende jaren fusies, overnames of afsplitsingen verwacht?",
     helpText:
       "Kies of er verwachte organisatieveranderingen zijn die impact kunnen hebben op inrichting, beheer of administraties.",
     inputType: "single_select",
     required: true,
     optionSetKey: "expected_org_changes_options",
+    allowsComment: true,
     examples: [
       "Denk aan fusies, overnames, afsplitsingen of sterke groei in entiteiten",
       "Kijk vooral naar veranderingen die invloed hebben op structuur en inrichting",
@@ -143,14 +147,15 @@ export const questions: QuestionDefinition[] = [
   },
   {
     key: "standardization_context",
-    sectionCode: "profile_basis",
-    order: 70,
+    sectionCode: "profile_afas",
+    order: 60,
     label: "Hoeveel maatwerk zit er in de AFAS-inrichting?",
     helpText:
       "Kies in hoeverre jullie AFAS-inrichting afwijkt van de standaard.",
     inputType: "single_select",
     required: true,
     optionSetKey: "standardization_context_options",
+    allowsComment: true,
     examples: [
       "Veel maatwerk = veel afwijkende inrichtingen en scripts",
       "Standaard = dicht bij de AFAS-standaard gebleven",
@@ -158,8 +163,8 @@ export const questions: QuestionDefinition[] = [
   },
   {
     key: "primary_process_chains",
-    sectionCode: "profile_basis",
-    order: 80,
+    sectionCode: "profile_afas",
+    order: 70,
     label: "Belangrijkste procesketens",
     helpText: "Kies de ketens die nu het belangrijkst zijn.",
     inputType: "multi_select",

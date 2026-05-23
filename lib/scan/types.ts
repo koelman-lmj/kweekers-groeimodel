@@ -24,6 +24,7 @@ export type SectionDefinition = {
   code: string;
   title: string;
   shortTitle: string;
+  description?: string;
   phase: string;
   order: number;
   summaryEnabled: boolean;

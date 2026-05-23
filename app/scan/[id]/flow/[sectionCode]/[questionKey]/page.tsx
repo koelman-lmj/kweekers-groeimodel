@@ -555,7 +555,7 @@ export default function FlowQuestionPage() {
   };
 
   const shortHelpText = isProfileBasisOverview
-    ? "We leggen eerst de belangrijkste basisgegevens van de organisatie vast."
+    ? "Eerst leggen we de basiscontext van de organisatie vast. Dit helpt om de scan gericht te maken."
     : getShortHelpText(question.label, question.helpText);
 
   const groupedOptions =
@@ -668,6 +668,9 @@ export default function FlowQuestionPage() {
 
   const title = isProfileBasisOverview ? "Basis van de organisatie" : question.label;
 
+  // Show reassuring text only on first step of first section
+  const isFirstStepOfScan = sectionCode === "profile_basis" && questionIndex === 1;
+
   return (
     <div className="space-y-8">
       {isDiagnoseSection && (
@@ -675,6 +678,14 @@ export default function FlowQuestionPage() {
           answeredCount={answeredDiagnoseQuestions.length}
           totalCount={diagnoseQuestions.length}
         />
+      )}
+
+      {isFirstStepOfScan && (
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+          <p className="text-sm text-emerald-800">
+            Deze scan is bedoeld als begeleid gesprek, geen toets. Antwoorden hoeven niet perfect te zijn en kunnen later worden aangepast.
+          </p>
+        </div>
       )}
 
       <div className="space-y-3">
