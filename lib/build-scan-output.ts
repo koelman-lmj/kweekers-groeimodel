@@ -243,6 +243,9 @@ function deriveSignals(theme: ThemeInput): string[] {
       "overtypen",
       "handwerk",
       "vooral_handmatig",
+      "handmatige_controles",
+      "dubbele_invoer",
+      "rapportages_handmatig",
     ])
   ) {
     signals.push("Veel handwerk");
@@ -258,6 +261,8 @@ function deriveSignals(theme: ThemeInput): string[] {
       "onduidelijk",
       "kwetsbaar",
       "sluit_beperkt_aan",
+      "correcties_achteraf",
+      "stamdata_fouten",
     ])
   ) {
     signals.push("Foutgevoelig proces");
@@ -272,6 +277,7 @@ function deriveSignals(theme: ThemeInput): string[] {
       "rapportage",
       "kpi",
       "beperkt_bruikbaar",
+      "zoeken_informatie",
     ])
   ) {
     signals.push("Beperkt inzicht");
@@ -303,6 +309,9 @@ function deriveSignals(theme: ThemeInput): string[] {
       "eigenaarschap",
       "onvoldoende_duidelijk",
       "ad_hoc",
+      "onduidelijk_eigenaarschap",
+      "gebrek_eigenaarschap",
+      "niet_duidelijk",
     ])
   ) {
     signals.push("Proces vraagt sturing of controle");
@@ -317,15 +326,48 @@ function deriveSignals(theme: ThemeInput): string[] {
       "specifiek",
       "afwijking",
       "uitzondering_is_norm",
+      "uitzonderingen_verwerken",
     ])
   ) {
     signals.push("Veel uitzonderingen");
   }
 
   if (
-    hasAnySignalInAnswers(answers, ["hoge_druk", "hoog", "kritiek", "urgent"])
+    hasAnySignalInAnswers(answers, ["hoge_druk", "hoog", "kritiek", "urgent", "zeer_urgent"])
   ) {
     signals.push("Hoge strategische druk");
+  }
+
+  // Nieuwe signalen uit diagnosevragen
+  if (
+    hasAnySignalInAnswers(answers, [
+      "beperkt",
+      "onvoldoende_kennis_training",
+      "weerstand_verandering",
+      "onduidelijke_werkafspraken",
+    ])
+  ) {
+    signals.push("Adoptie probleem");
+  }
+
+  if (
+    hasAnySignalInAnswers(answers, [
+      "vaak",
+      "afas_sluit_niet_aan",
+      "te_ingewikkeld",
+      "ontbrekende_functionaliteit",
+    ])
+  ) {
+    signals.push("AFAS sluit onvoldoende aan");
+  }
+
+  if (
+    hasAnySignalInAnswers(answers, [
+      "afstemming_afdelingen",
+      "geen_werkafspraken",
+    ])
+  ) {
+    signals.push("Samenwerking onder druk");
   }
 
   return signals;
@@ -342,6 +384,10 @@ function calculatePriorityScore(theme: ThemeInput, signals: string[]): number {
   if (signals.includes("Veel uitzonderingen")) priorityScore += 8;
   if (signals.includes("Afhankelijk van keten of koppeling")) priorityScore += 6;
   if (signals.includes("Hoge strategische druk")) priorityScore += 12;
+  // Nieuwe signalen
+  if (signals.includes("Adoptie probleem")) priorityScore += 10;
+  if (signals.includes("AFAS sluit onvoldoende aan")) priorityScore += 8;
+  if (signals.includes("Samenwerking onder druk")) priorityScore += 6;
 
   return clamp(Math.round(priorityScore), 0, 100);
 }
@@ -669,6 +715,18 @@ function buildQuickWinText(item: OutputPriorityItem): string {
     return `${item.title}: breng uitzonderingen terug en maak de standaard leidend.`;
   }
 
+  if (item.signals.includes("Adoptie probleem")) {
+    return `${item.title}: investeer in training en duidelijke werkafspraken.`;
+  }
+
+  if (item.signals.includes("AFAS sluit onvoldoende aan")) {
+    return `${item.title}: evalueer of AFAS-inrichting beter kan aansluiten op de praktijk.`;
+  }
+
+  if (item.signals.includes("Samenwerking onder druk")) {
+    return `${item.title}: verbeter afstemming en communicatie tussen afdelingen.`;
+  }
+
   return `${item.title}: maak de basis eerst eenvoudiger en strakker.`;
 }
 
@@ -858,6 +916,19 @@ function buildImpactItems(priorities: OutputPriorityItem[]): string[] {
 
     if (item.signals.includes("Veel uitzonderingen")) {
       impact.add("Meer standaardisatie en rust in de uitvoering");
+    }
+
+    // Nieuwe signalen
+    if (item.signals.includes("Adoptie probleem")) {
+      impact.add("Betere gebruikersadoptie en consistenter gebruik van AFAS");
+    }
+
+    if (item.signals.includes("AFAS sluit onvoldoende aan")) {
+      impact.add("AFAS sluit beter aan op de dagelijkse praktijk");
+    }
+
+    if (item.signals.includes("Samenwerking onder druk")) {
+      impact.add("Soepelere samenwerking tussen afdelingen");
     }
   }
 
