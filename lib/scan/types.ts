@@ -31,6 +31,8 @@ export type SectionDefinition = {
   nextSectionCode?: string;
 };
 
+export type DepthLevel = "eerste_beeld" | "gericht_verdiepen" | "verbeterplan";
+
 export type QuestionDefinition = {
   key: string;
   sectionCode: string;
@@ -47,6 +49,8 @@ export type QuestionDefinition = {
   category?: string;
   maxSelections?: number;
   visibleWhen?: VisibilityRule[];
+  /** Minimum depth level required to show this question. Default: always shown */
+  minDepthLevel?: DepthLevel;
 };
 
 export type ScanDefinition = {

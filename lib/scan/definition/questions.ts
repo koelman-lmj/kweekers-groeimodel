@@ -437,6 +437,7 @@ export const questions: QuestionDefinition[] = [
     required: true,
     optionSetKey: "finance_strategic_pressure_options",
     allowsComment: true,
+    minDepthLevel: "gericht_verdiepen",
     dimensionCode: "finance",
     category: "AFAS Modules",
     outputRole: "context",

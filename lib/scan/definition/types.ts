@@ -16,6 +16,8 @@ export type VisibleWhenCondition = {
   value: string | string[];
 };
 
+export type DepthLevel = "eerste_beeld" | "gericht_verdiepen" | "verbeterplan";
+
 export type QuestionDefinition = {
   key: string;
   sectionCode: string;
@@ -30,6 +32,9 @@ export type QuestionDefinition = {
   allowsComment?: boolean;
   maxSelections?: number;
   visibleWhen?: VisibleWhenCondition[];
+
+  /** Minimum depth level required to show this question. Default: "eerste_beeld" (always shown) */
+  minDepthLevel?: DepthLevel;
 
   dimensionCode?: string;
   category?: DimensionCategory;
