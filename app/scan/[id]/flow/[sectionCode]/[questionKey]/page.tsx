@@ -148,9 +148,6 @@ const PROFILE_BASIS_OVERVIEW_KEYS = [
   "organization_size",
   "administration_count",
   "organization_type",
-  "afas_usage_duration",
-  "maintenance_quality",
-  "expected_org_changes",
 ] as const;
 
 const PROFILE_BASIS_SKIPPED_KEYS = [
@@ -158,13 +155,28 @@ const PROFILE_BASIS_SKIPPED_KEYS = [
   "organization_size",
   "administration_count",
   "organization_type",
+] as const;
+
+// Keys that were moved from profile_basis to profile_afas - redirect old URLs
+const PROFILE_AFAS_KEYS = [
+  "afas_products",
+  "ownership_model",
   "afas_usage_duration",
   "maintenance_quality",
   "expected_org_changes",
+  "standardization_context",
+  "primary_process_chains",
 ] as const;
 
 function isProfileBasisOverviewRoute(sectionCode: string, questionKey: string) {
   return sectionCode === "profile_basis" && questionKey === "customer_name";
+}
+
+function isOldProfileBasisAfasRoute(sectionCode: string, questionKey: string) {
+  return (
+    sectionCode === "profile_basis" &&
+    PROFILE_AFAS_KEYS.includes(questionKey as (typeof PROFILE_AFAS_KEYS)[number])
+  );
 }
 
 function isSkippedProfileBasisRoute(sectionCode: string, questionKey: string) {
@@ -310,6 +322,10 @@ export default function FlowQuestionPage() {
     sectionCode,
     questionKey
   );
+  const shouldRedirectToProfileAfas = isOldProfileBasisAfasRoute(
+    sectionCode,
+    questionKey
+  );
 
   useEffect(() => {
     if (shouldRedirectSkippedProfileBasis) {
@@ -318,19 +334,27 @@ export default function FlowQuestionPage() {
   }, [shouldRedirectSkippedProfileBasis, router, scanId]);
 
   useEffect(() => {
+    if (shouldRedirectToProfileAfas) {
+      router.replace(`/scan/${scanId}/flow/profile_afas/${questionKey}`);
+    }
+  }, [shouldRedirectToProfileAfas, router, scanId, questionKey]);
+
+  useEffect(() => {
     if (!pathname) return;
     if (!sectionCode) return;
     if (shouldRedirectSkippedProfileBasis) return;
+    if (shouldRedirectToProfileAfas) return;
 
     markSectionVisited(sectionCode, pathname);
   }, [
     pathname,
     sectionCode,
     shouldRedirectSkippedProfileBasis,
+    shouldRedirectToProfileAfas,
     markSectionVisited,
   ]);
 
-  if (shouldRedirectSkippedProfileBasis) {
+  if (shouldRedirectSkippedProfileBasis || shouldRedirectToProfileAfas) {
     return null;
   }
 
@@ -432,7 +456,7 @@ export default function FlowQuestionPage() {
   let nextHref = `/scan/${scanId}/summary/advies`;
 
   if (isProfileBasisOverview) {
-    nextHref = `/scan/${scanId}/flow/profile_basis/afas_products`;
+    nextHref = `/scan/${scanId}/flow/profile_afas/afas_products`;
   } else if (nextQuestion) {
     nextHref = `/scan/${scanId}/flow/${sectionCode}/${nextQuestion.key}`;
   } else if (nextSection && nextSectionQuestions.length > 0) {
@@ -583,9 +607,6 @@ export default function FlowQuestionPage() {
     organization_size: getAnswerFromScan(scan, "organization_size"),
     administration_count: getAnswerFromScan(scan, "administration_count"),
     organization_type: getAnswerFromScan(scan, "organization_type"),
-    afas_usage_duration: getAnswerFromScan(scan, "afas_usage_duration"),
-    maintenance_quality: getAnswerFromScan(scan, "maintenance_quality"),
-    expected_org_changes: getAnswerFromScan(scan, "expected_org_changes"),
   };
 
   const profileOverviewComplete = PROFILE_BASIS_OVERVIEW_KEYS.every((key) =>
@@ -836,42 +857,6 @@ export default function FlowQuestionPage() {
                   ? profileOverviewValues.organization_type.length
                   : 0}
               </p>
-            </div>
-
-            <div className="space-y-2">
-              <div className="text-sm font-medium">
-                Sinds wanneer gebruikt de organisatie AFAS?
-                <RequiredAsterisk />
-              </div>
-              {renderSingleSelectGrid(
-                "afas_usage_duration_options",
-                asString(profileOverviewValues.afas_usage_duration),
-                (value) => setFieldValue("afas_usage_duration", value)
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <div className="text-sm font-medium">
-                Hoe goed is de inrichting de afgelopen jaren onderhouden?
-                <RequiredAsterisk />
-              </div>
-              {renderSingleSelectGrid(
-                "maintenance_quality_options",
-                asString(profileOverviewValues.maintenance_quality),
-                (value) => setFieldValue("maintenance_quality", value)
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <div className="text-sm font-medium">
-                Worden in de komende jaren fusies, overnames of afsplitsingen verwacht?
-                <RequiredAsterisk />
-              </div>
-              {renderSingleSelectGrid(
-                "expected_org_changes_options",
-                asString(profileOverviewValues.expected_org_changes),
-                (value) => setFieldValue("expected_org_changes", value)
-              )}
             </div>
           </div>
         ) : (
