@@ -36,6 +36,10 @@ export function getAnswerFromScan(
       return scan.profile.scanReason;
     case "biggest_bottleneck":
       return scan.profile.biggestBottleneck;
+    case "scan_reason_detailed":
+      return scan.profile.scanReasonDetailed;
+    case "improvement_urgency":
+      return scan.profile.improvementUrgency;
 
     case "scope":
       return scan.scope.width;
@@ -123,6 +127,28 @@ export function getAnswerFromScan(
     case "education_exception_handling":
       return scan.diagnosis.educationExceptionHandling;
 
+    // Nieuwe diagnosevragen
+    case "time_loss_areas":
+      return scan.diagnosis.timeLossAreas;
+    case "outside_afas_frequency":
+      return scan.diagnosis.outsideAfasFrequency;
+    case "outside_afas_reasons":
+      return scan.diagnosis.outsideAfasReasons;
+    case "backlog_maturity":
+      return scan.diagnosis.backlogMaturity;
+    case "change_decision_owner":
+      return scan.diagnosis.changeDecisionOwner;
+    case "master_data_reliability":
+      return scan.diagnosis.masterDataReliability;
+    case "master_data_problems":
+      return scan.diagnosis.masterDataProblems;
+    case "afas_adoption_level":
+      return scan.diagnosis.afasAdoptionLevel;
+    case "adoption_barriers":
+      return scan.diagnosis.adoptionBarriers;
+    case "most_valuable_improvement":
+      return scan.diagnosis.mostValuableImprovement;
+
     default:
       return "";
   }
@@ -144,6 +170,8 @@ export type ScanActions = {
 
   setScanReason: (value: string) => void;
   setBiggestBottleneck: (value: string[]) => void;
+  setScanReasonDetailed: (value: string) => void;
+  setImprovementUrgency: (value: string) => void;
 
   setScopeWidth: (value: string) => void;
   setScopeFocus: (value: string[]) => void;
@@ -192,6 +220,18 @@ export type ScanActions = {
   setEducationIntakePlanningConsistency: (value: string) => void;
   setEducationProcessAdminAlignment: (value: string) => void;
   setEducationExceptionHandling: (value: string) => void;
+
+  // Nieuwe diagnosevragen setters
+  setTimeLossAreas: (value: string[]) => void;
+  setOutsideAfasFrequency: (value: string) => void;
+  setOutsideAfasReasons: (value: string[]) => void;
+  setBacklogMaturity: (value: string) => void;
+  setChangeDecisionOwner: (value: string) => void;
+  setMasterDataReliability: (value: string) => void;
+  setMasterDataProblems: (value: string[]) => void;
+  setAfasAdoptionLevel: (value: string) => void;
+  setAdoptionBarriers: (value: string[]) => void;
+  setMostValuableImprovement: (value: string) => void;
 };
 
 function ensureStringArray(value: AnswerValue): string[] {
@@ -386,6 +426,44 @@ export function setAnswerToScan(
       return;
     case "education_exception_handling":
       actions.setEducationExceptionHandling(ensureString(value));
+      return;
+
+    // Nieuwe diagnosevragen
+    case "scan_reason_detailed":
+      actions.setScanReasonDetailed(ensureString(value));
+      return;
+    case "improvement_urgency":
+      actions.setImprovementUrgency(ensureString(value));
+      return;
+    case "time_loss_areas":
+      actions.setTimeLossAreas(ensureStringArray(value));
+      return;
+    case "outside_afas_frequency":
+      actions.setOutsideAfasFrequency(ensureString(value));
+      return;
+    case "outside_afas_reasons":
+      actions.setOutsideAfasReasons(ensureStringArray(value));
+      return;
+    case "backlog_maturity":
+      actions.setBacklogMaturity(ensureString(value));
+      return;
+    case "change_decision_owner":
+      actions.setChangeDecisionOwner(ensureString(value));
+      return;
+    case "master_data_reliability":
+      actions.setMasterDataReliability(ensureString(value));
+      return;
+    case "master_data_problems":
+      actions.setMasterDataProblems(ensureStringArray(value));
+      return;
+    case "afas_adoption_level":
+      actions.setAfasAdoptionLevel(ensureString(value));
+      return;
+    case "adoption_barriers":
+      actions.setAdoptionBarriers(ensureStringArray(value));
+      return;
+    case "most_valuable_improvement":
+      actions.setMostValuableImprovement(ensureString(value));
       return;
 
     default:

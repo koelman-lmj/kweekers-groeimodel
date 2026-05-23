@@ -309,6 +309,165 @@ export const optionSets: OptionSetDefinition[] = [
       { value: "eigenaarschap_beheer", label: "Eigenaarschap en beheer", description: "De grootste opgave zit in duidelijke verantwoordelijkheid voor koppelingen en wijzigingen.", order: 20 },
       { value: "monitoring_opvolging", label: "Monitoring en opvolging", description: "De grootste opgave zit in signalering en opvolging van fouten en verstoringen.", order: 30 },
       { value: "handmatig_herstel", label: "Handmatig herstel", description: "De grootste opgave zit in afhankelijkheid van handmatige controles of herstelacties.", order: 40 },
+      { value: "overig", label: "Overig", description: "Vul in de opmerking in wat de grootste opgave is.", order: 99 },
+    ],
+  },
+
+  // ==========================================
+  // NIEUWE VRAGEN - Diagnoseverdieping
+  // ==========================================
+
+  // Vraag 1: Belangrijkste reden voor scan
+  {
+    key: "scan_reason_detailed_options",
+    options: [
+      { value: "terugkerende_problemen", label: "Terugkerende problemen", description: "Er zijn terugkerende problemen in processen of AFAS.", order: 10 },
+      { value: "beter_benutten", label: "AFAS beter benutten", description: "We willen weten of we AFAS beter kunnen benutten.", order: 20 },
+      { value: "groei_fusie_verandering", label: "Groei, fusie of verandering", description: "We bereiden groei, fusie of verandering voor.", order: 30 },
+      { value: "optimaliseren_of_herinrichten", label: "Optimaliseren of herinrichten", description: "We twijfelen tussen optimaliseren of herinrichten.", order: 40 },
+      { value: "stuurinformatie_grip", label: "Stuurinformatie en grip", description: "We willen betere stuurinformatie en grip.", order: 50 },
+      { value: "bevestiging_basis", label: "Bevestiging basis", description: "We willen vooral bevestiging dat de basis goed staat.", order: 60 },
+    ],
+  },
+
+  // Vraag 2: Urgentie verbetering (score 1-3)
+  {
+    key: "improvement_urgency_options",
+    options: [
+      { value: "niet_urgent", label: "Niet urgent", description: "Verbeteren is wenselijk, maar er is geen directe druk.", order: 10, score: 1 },
+      { value: "redelijk_urgent", label: "Redelijk urgent", description: "Er zijn knelpunten die merkbaar tijd of kwaliteit kosten.", order: 20, score: 2 },
+      { value: "zeer_urgent", label: "Zeer urgent", description: "Problemen blokkeren groei, betrouwbaarheid of dagelijkse operatie.", order: 30, score: 3 },
+    ],
+  },
+
+  // Vraag 3: Waar verliest de organisatie tijd (multi-select)
+  {
+    key: "time_loss_areas_options",
+    options: [
+      { value: "handmatige_controles", label: "Handmatige controles", order: 10 },
+      { value: "dubbele_invoer", label: "Dubbele invoer", order: 20 },
+      { value: "correcties_achteraf", label: "Correcties achteraf", order: 30 },
+      { value: "zoeken_informatie", label: "Zoeken naar informatie", order: 40 },
+      { value: "afstemming_afdelingen", label: "Afstemming tussen afdelingen", order: 50 },
+      { value: "rapportages_handmatig", label: "Rapportages handmatig samenstellen", order: 60 },
+      { value: "stamdata_fouten", label: "Fouten in stamdata herstellen", order: 70 },
+      { value: "uitzonderingen_verwerken", label: "Uitzonderingen verwerken", order: 80 },
+      { value: "onduidelijk_eigenaarschap", label: "Onduidelijkheid over wie eigenaar is", order: 90 },
+    ],
+  },
+
+  // Vraag 4: Hoe vaak buiten AFAS gewerkt (score 1-3)
+  {
+    key: "outside_afas_frequency_options",
+    options: [
+      { value: "vaak", label: "Vaak", description: "Excel, mail of losse lijsten zijn nodig om het werk rond te krijgen.", order: 10, score: 1 },
+      { value: "soms", label: "Soms", description: "Vooral bij uitzonderingen of controles.", order: 20, score: 2 },
+      { value: "beperkt", label: "Beperkt", description: "AFAS ondersteunt het proces grotendeels.", order: 30, score: 3 },
+    ],
+  },
+
+  // Vraag 5: Reden buiten AFAS werken (multi-select)
+  {
+    key: "outside_afas_reasons_options",
+    options: [
+      { value: "afas_sluit_niet_aan", label: "AFAS sluit niet goed aan op de praktijk", order: 10 },
+      { value: "onvoldoende_kennis", label: "Medewerkers weten niet goed hoe AFAS gebruikt moet worden", order: 20 },
+      { value: "ontbrekende_functionaliteit", label: "Er ontbreken velden, workflows of rapportages", order: 30 },
+      { value: "te_ingewikkeld", label: "De inrichting is te ingewikkeld", order: 40 },
+      { value: "geen_werkafspraken", label: "De werkwijze is niet goed afgesproken", order: 50 },
+      { value: "data_niet_vertrouwd", label: "De data in AFAS wordt niet vertrouwd", order: 60 },
+      { value: "sneller_handmatig", label: "Het is sneller om het handmatig te doen", order: 70 },
+      { value: "nvt", label: "Niet van toepassing", order: 80 },
+    ],
+  },
+
+  // Vraag 6: Centrale verbeterlijst/backlog (score 1-3)
+  {
+    key: "backlog_maturity_options",
+    options: [
+      { value: "geen_centrale_lijst", label: "Geen centrale lijst", description: "Verbeterpunten zitten vooral in hoofden, mails of losse lijstjes.", order: 10, score: 1 },
+      { value: "deels_georganiseerd", label: "Deels georganiseerd", description: "Er is een lijst maar eigenaarschap en prioritering zijn wisselend.", order: 20, score: 2 },
+      { value: "goed_georganiseerd", label: "Goed georganiseerd", description: "Verbeterpunten worden centraal vastgelegd, geprioriteerd en opgevolgd.", order: 30, score: 3 },
+    ],
+  },
+
+  // Vraag 7: Wie bepaalt aanpassingen (single)
+  {
+    key: "change_decision_owner_options",
+    options: [
+      { value: "afas_beheerder", label: "De AFAS-beheerder", order: 10 },
+      { value: "proceseigenaar", label: "De proceseigenaar", order: 20 },
+      { value: "directie_mt", label: "De directie of het MT", order: 30 },
+      { value: "afdeling_probleem", label: "De afdeling die het probleem ervaart", order: 40 },
+      { value: "externe_partner", label: "Externe implementatiepartner", order: 50 },
+      { value: "niet_duidelijk", label: "Dat is niet duidelijk", order: 60 },
+    ],
+  },
+
+  // Vraag 8: Betrouwbaarheid stamdata (score 1-3)
+  {
+    key: "master_data_reliability_options",
+    options: [
+      { value: "kwetsbaar", label: "Kwetsbaar", description: "Gegevens zijn regelmatig onvolledig, dubbel of verouderd.", order: 10, score: 1 },
+      { value: "redelijk", label: "Redelijk", description: "De basis is bruikbaar, maar vraagt regelmatig controle of correctie.", order: 20, score: 2 },
+      { value: "sterk", label: "Sterk", description: "Gegevens zijn actueel, volledig en worden goed beheerd.", order: 30, score: 3 },
+    ],
+  },
+
+  // Vraag 9: Welke stamdata geeft problemen (multi-select)
+  {
+    key: "master_data_problems_options",
+    options: [
+      { value: "organisaties_debiteuren_crediteuren", label: "Organisaties / debiteuren / crediteuren", order: 10 },
+      { value: "contactpersonen", label: "Contactpersonen", order: 20 },
+      { value: "artikelen_producten_diensten", label: "Artikelen / producten / diensten", order: 30 },
+      { value: "projecten", label: "Projecten", order: 40 },
+      { value: "medewerkers", label: "Medewerkers", order: 50 },
+      { value: "contracten_abonnementen", label: "Contracten / abonnementen", order: 60 },
+      { value: "grootboek_kostenplaatsen", label: "Grootboek / kostenplaatsen / dimensies", order: 70 },
+      { value: "autorisaties_rollen", label: "Autorisaties / rollen", order: 80 },
+      { value: "geen_probleemgroep", label: "Geen duidelijke probleemgroep", order: 90 },
+    ],
+  },
+
+  // Vraag 10: Hoe goed gebruiken medewerkers AFAS (score 1-3)
+  {
+    key: "afas_adoption_level_options",
+    options: [
+      { value: "beperkt", label: "Beperkt", description: "Veel medewerkers werken eromheen of gebruiken AFAS verschillend.", order: 10, score: 1 },
+      { value: "redelijk", label: "Redelijk", description: "De basis wordt gebruikt, maar niet overal hetzelfde.", order: 20, score: 2 },
+      { value: "goed", label: "Goed", description: "AFAS wordt consequent gebruikt volgens afgesproken werkwijze.", order: 30, score: 3 },
+    ],
+  },
+
+  // Vraag 11: Wat belemmert goed gebruik (multi-select)
+  {
+    key: "adoption_barriers_options",
+    options: [
+      { value: "onvoldoende_kennis_training", label: "Onvoldoende kennis of training", order: 10 },
+      { value: "te_ingewikkelde_inrichting", label: "Te ingewikkelde inrichting", order: 20 },
+      { value: "onduidelijke_werkafspraken", label: "Onduidelijke werkafspraken", order: 30 },
+      { value: "te_weinig_tijd", label: "Te weinig tijd voor verbetering", order: 40 },
+      { value: "gebrek_eigenaarschap", label: "Gebrek aan eigenaarschap", order: 50 },
+      { value: "slechte_data_rapportage", label: "Slechte data of rapportage", order: 60 },
+      { value: "weerstand_verandering", label: "Weerstand tegen verandering", order: 70 },
+      { value: "afas_sluit_niet_aan", label: "AFAS sluit onvoldoende aan op het proces", order: 80 },
+    ],
+  },
+
+  // Vraag 12: Meest waardevolle verbetering (single)
+  {
+    key: "most_valuable_improvement_options",
+    options: [
+      { value: "minder_handwerk", label: "Minder handwerk", order: 10 },
+      { value: "minder_fouten", label: "Minder fouten", order: 20 },
+      { value: "snellere_verwerking", label: "Snellere verwerking", order: 30 },
+      { value: "betere_rapportage", label: "Betere rapportage", order: 40 },
+      { value: "meer_grip_processen", label: "Meer grip op processen", order: 50 },
+      { value: "betere_samenwerking", label: "Betere samenwerking tussen afdelingen", order: 60 },
+      { value: "minder_afhankelijkheid_personen", label: "Minder afhankelijkheid van personen", order: 70 },
+      { value: "betere_gebruikerservaring", label: "Betere gebruikerservaring", order: 80 },
+      { value: "voorbereiding_groei", label: "Betere voorbereiding op groei", order: 90 },
     ],
   },
 ];

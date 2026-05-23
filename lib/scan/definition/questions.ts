@@ -199,6 +199,42 @@ export const questions: QuestionDefinition[] = [
       "Kies alleen wat nu echt de meeste druk geeft",
     ],
   },
+  // NIEUWE VRAGEN - Aanleiding verdieping
+  {
+    key: "scan_reason_detailed",
+    sectionCode: "profile_reason",
+    order: 25,
+    label: "Wat is de belangrijkste reden dat deze scan nu wordt gedaan?",
+    helpText: "Kies wat het beste past bij de aanleiding.",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "scan_reason_detailed_options",
+    allowsComment: true,
+    examples: [
+      "Denk aan de directe aanleiding of trigger",
+      "Wat maakte dat dit nu nodig is?",
+    ],
+  },
+  {
+    key: "improvement_urgency",
+    sectionCode: "profile_reason",
+    order: 30,
+    label: "Hoe urgent is verbetering?",
+    helpText: "Geef aan hoe snel verbetering nodig is.",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "improvement_urgency_options",
+    allowsComment: true,
+    dimensionCode: "urgency",
+    category: "Organisatie & Beheer",
+    outputRole: "score",
+    scoreEnabled: true,
+    scoreWeight: 1,
+    examples: [
+      "Is er directe druk of is het meer wenselijk?",
+      "Blokkeren problemen de dagelijkse operatie?",
+    ],
+  },
 
   {
     key: "scope",
@@ -1117,6 +1153,230 @@ export const questions: QuestionDefinition[] = [
         operator: "includes",
         value: "beheer_doorontwikkeling",
       },
+    ],
+  },
+
+  // ==========================================
+  // NIEUWE VRAGEN - Diagnoseverdieping
+  // ==========================================
+
+  // Vraag 3: Waar verliest de organisatie tijd
+  {
+    key: "time_loss_areas",
+    sectionCode: "diagnose",
+    order: 950,
+    label: "Waar verliest de organisatie nu de meeste tijd?",
+    helpText: "Selecteer alles wat van toepassing is.",
+    inputType: "multi_select",
+    required: true,
+    optionSetKey: "time_loss_areas_options",
+    allowsComment: true,
+    dimensionCode: "process_efficiency",
+    category: "Organisatie & Beheer",
+    outputRole: "evidence",
+    scoreEnabled: false,
+    scoreWeight: 0,
+    examples: [
+      "Denk aan dagelijkse frustraties en tijdvreters",
+      "Waar gaat onnodig veel tijd aan op?",
+    ],
+  },
+
+  // Vraag 4: Buiten AFAS werken frequentie
+  {
+    key: "outside_afas_frequency",
+    sectionCode: "diagnose",
+    order: 960,
+    label: "Hoe vaak wordt er buiten AFAS om gewerkt?",
+    helpText: "Kies wat het beste de situatie beschrijft.",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "outside_afas_frequency_options",
+    allowsComment: true,
+    dimensionCode: "system_fit",
+    category: "AFAS Modules",
+    outputRole: "score",
+    scoreEnabled: true,
+    scoreWeight: 1,
+    examples: [
+      "Denk aan Excel, mail of losse lijsten",
+      "Hoe vaak zijn workarounds nodig?",
+    ],
+  },
+
+  // Vraag 5: Reden buiten AFAS werken
+  {
+    key: "outside_afas_reasons",
+    sectionCode: "diagnose",
+    order: 970,
+    label: "Wat is meestal de reden dat buiten AFAS om wordt gewerkt?",
+    helpText: "Selecteer alles wat van toepassing is.",
+    inputType: "multi_select",
+    required: true,
+    optionSetKey: "outside_afas_reasons_options",
+    allowsComment: true,
+    dimensionCode: "system_fit",
+    category: "AFAS Modules",
+    outputRole: "evidence",
+    scoreEnabled: false,
+    scoreWeight: 0,
+    examples: [
+      "Wat zijn de belangrijkste redenen?",
+      "Selecteer ook als meerdere redenen spelen",
+    ],
+  },
+
+  // Vraag 6: Backlog/verbeterlijst maturity
+  {
+    key: "backlog_maturity",
+    sectionCode: "diagnose",
+    order: 980,
+    label: "Is er een centrale verbeterlijst of backlog?",
+    helpText: "Kies wat het beste de situatie beschrijft.",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "backlog_maturity_options",
+    allowsComment: true,
+    dimensionCode: "governance",
+    category: "Organisatie & Beheer",
+    outputRole: "score",
+    scoreEnabled: true,
+    scoreWeight: 1,
+    examples: [
+      "Worden verbeterpunten centraal bijgehouden?",
+      "Is er een gedeelde backlog met prioriteiten?",
+    ],
+  },
+
+  // Vraag 7: Wie bepaalt aanpassingen
+  {
+    key: "change_decision_owner",
+    sectionCode: "diagnose",
+    order: 990,
+    label: "Wie bepaalt uiteindelijk of een proces of AFAS-inrichting wordt aangepast?",
+    helpText: "Kies wie nu de beslissingen neemt.",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "change_decision_owner_options",
+    allowsComment: true,
+    dimensionCode: "governance",
+    category: "Organisatie & Beheer",
+    outputRole: "context",
+    scoreEnabled: false,
+    scoreWeight: 0,
+    examples: [
+      "Wie heeft het laatste woord bij wijzigingen?",
+      "Is dit duidelijk of wisselt dit per situatie?",
+    ],
+  },
+
+  // Vraag 8: Stamdata betrouwbaarheid
+  {
+    key: "master_data_reliability",
+    sectionCode: "diagnose",
+    order: 1000,
+    label: "Hoe betrouwbaar is de stamdata in AFAS?",
+    helpText: "Kies wat het beste de datakwaliteit beschrijft.",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "master_data_reliability_options",
+    allowsComment: true,
+    dimensionCode: "data_quality",
+    category: "Rapportage & Data",
+    outputRole: "score",
+    scoreEnabled: true,
+    scoreWeight: 1,
+    examples: [
+      "Denk aan volledigheid, actualiteit en dubbelingen",
+      "Kun je vertrouwen op de basisgegevens?",
+    ],
+  },
+
+  // Vraag 9: Welke stamdata geeft problemen
+  {
+    key: "master_data_problems",
+    sectionCode: "diagnose",
+    order: 1010,
+    label: "Welke stamdata geeft de meeste problemen?",
+    helpText: "Selecteer alles wat van toepassing is.",
+    inputType: "multi_select",
+    required: true,
+    optionSetKey: "master_data_problems_options",
+    allowsComment: true,
+    dimensionCode: "data_quality",
+    category: "Rapportage & Data",
+    outputRole: "evidence",
+    scoreEnabled: false,
+    scoreWeight: 0,
+    examples: [
+      "Welke gegevensgroepen zijn het minst betrouwbaar?",
+      "Waar zitten de meeste fouten of hiaten?",
+    ],
+  },
+
+  // Vraag 10: AFAS adoptie niveau
+  {
+    key: "afas_adoption_level",
+    sectionCode: "diagnose",
+    order: 1020,
+    label: "Hoe goed gebruiken medewerkers AFAS zoals bedoeld?",
+    helpText: "Kies wat het beste de adoptie beschrijft.",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "afas_adoption_level_options",
+    allowsComment: true,
+    dimensionCode: "adoption",
+    category: "Organisatie & Beheer",
+    outputRole: "score",
+    scoreEnabled: true,
+    scoreWeight: 1,
+    examples: [
+      "Wordt AFAS consequent en correct gebruikt?",
+      "Of zijn er veel workarounds en verschillen?",
+    ],
+  },
+
+  // Vraag 11: Adoptie barrières
+  {
+    key: "adoption_barriers",
+    sectionCode: "diagnose",
+    order: 1030,
+    label: "Wat belemmert goed gebruik van AFAS het meest?",
+    helpText: "Selecteer alles wat van toepassing is.",
+    inputType: "multi_select",
+    required: true,
+    optionSetKey: "adoption_barriers_options",
+    allowsComment: true,
+    dimensionCode: "adoption",
+    category: "Organisatie & Beheer",
+    outputRole: "evidence",
+    scoreEnabled: false,
+    scoreWeight: 0,
+    examples: [
+      "Denk aan kennis, tijd, eigenaarschap of inrichting",
+      "Wat houdt beter gebruik tegen?",
+    ],
+  },
+
+  // Vraag 12: Meest waardevolle verbetering
+  {
+    key: "most_valuable_improvement",
+    sectionCode: "diagnose",
+    order: 1040,
+    label: "Welke verbetering zou de meeste waarde opleveren?",
+    helpText: "Kies wat het meeste impact zou hebben.",
+    inputType: "single_select",
+    required: true,
+    optionSetKey: "most_valuable_improvement_options",
+    allowsComment: true,
+    dimensionCode: "improvement_focus",
+    category: "Organisatie & Beheer",
+    outputRole: "context",
+    scoreEnabled: false,
+    scoreWeight: 0,
+    examples: [
+      "Als je één ding zou verbeteren, wat dan?",
+      "Wat zou het meeste verschil maken?",
     ],
   },
 ];

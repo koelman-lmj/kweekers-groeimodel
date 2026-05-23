@@ -27,6 +27,9 @@ export type ScanState = {
     primaryProcessChains: string[];
     scanReason: string;
     biggestBottleneck: string[];
+    // Nieuwe vragen aanleiding
+    scanReasonDetailed: string;
+    improvementUrgency: string;
   };
   scope: {
     width: string;
@@ -77,6 +80,18 @@ export type ScanState = {
     educationIntakePlanningConsistency: string;
     educationProcessAdminAlignment: string;
     educationExceptionHandling: string;
+
+    // Nieuwe diagnosevragen
+    timeLossAreas: string[];
+    outsideAfasFrequency: string;
+    outsideAfasReasons: string[];
+    backlogMaturity: string;
+    changeDecisionOwner: string;
+    masterDataReliability: string;
+    masterDataProblems: string[];
+    afasAdoptionLevel: string;
+    adoptionBarriers: string[];
+    mostValuableImprovement: string;
   };
   comments: Record<string, string>;
   ui: {
@@ -108,6 +123,8 @@ const INITIAL_SCAN: ScanState = {
     primaryProcessChains: [],
     scanReason: "",
     biggestBottleneck: [],
+    scanReasonDetailed: "",
+    improvementUrgency: "",
   },
   scope: {
     width: "",
@@ -158,6 +175,17 @@ const INITIAL_SCAN: ScanState = {
     educationIntakePlanningConsistency: "",
     educationProcessAdminAlignment: "",
     educationExceptionHandling: "",
+
+    timeLossAreas: [],
+    outsideAfasFrequency: "",
+    outsideAfasReasons: [],
+    backlogMaturity: "",
+    changeDecisionOwner: "",
+    masterDataReliability: "",
+    masterDataProblems: [],
+    afasAdoptionLevel: "",
+    adoptionBarriers: [],
+    mostValuableImprovement: "",
   },
   comments: {},
   ui: {
@@ -186,6 +214,8 @@ type ScanContextValue = {
 
   setScanReason: (value: string) => void;
   setBiggestBottleneck: (value: string[]) => void;
+  setScanReasonDetailed: (value: string) => void;
+  setImprovementUrgency: (value: string) => void;
 
   setScopeWidth: (value: string) => void;
   setScopeFocus: (value: string[]) => void;
@@ -235,6 +265,18 @@ type ScanContextValue = {
   setEducationProcessAdminAlignment: (value: string) => void;
   setEducationExceptionHandling: (value: string) => void;
 
+  // Nieuwe diagnosevragen setters
+  setTimeLossAreas: (value: string[]) => void;
+  setOutsideAfasFrequency: (value: string) => void;
+  setOutsideAfasReasons: (value: string[]) => void;
+  setBacklogMaturity: (value: string) => void;
+  setChangeDecisionOwner: (value: string) => void;
+  setMasterDataReliability: (value: string) => void;
+  setMasterDataProblems: (value: string[]) => void;
+  setAfasAdoptionLevel: (value: string) => void;
+  setAdoptionBarriers: (value: string[]) => void;
+  setMostValuableImprovement: (value: string) => void;
+
   setComment: (questionKey: string, value: string) => void;
   markSectionVisited: (sectionCode: string, route: string) => void;
   updateScan: (updates: Partial<ScanState>) => void;
@@ -279,6 +321,8 @@ function loadInitialScan(): ScanState {
         primaryProcessChains: toStringArray(parsed.profile?.primaryProcessChains),
         scanReason: parsed.profile?.scanReason ?? "",
         biggestBottleneck: toStringArray(parsed.profile?.biggestBottleneck),
+        scanReasonDetailed: parsed.profile?.scanReasonDetailed ?? "",
+        improvementUrgency: parsed.profile?.improvementUrgency ?? "",
       },
       scope: {
         width:
@@ -358,6 +402,18 @@ function loadInitialScan(): ScanState {
           parsed.diagnosis?.educationProcessAdminAlignment ?? "",
         educationExceptionHandling:
           parsed.diagnosis?.educationExceptionHandling ?? "",
+
+        // Nieuwe diagnosevelden
+        timeLossAreas: toStringArray(parsed.diagnosis?.timeLossAreas),
+        outsideAfasFrequency: parsed.diagnosis?.outsideAfasFrequency ?? "",
+        outsideAfasReasons: toStringArray(parsed.diagnosis?.outsideAfasReasons),
+        backlogMaturity: parsed.diagnosis?.backlogMaturity ?? "",
+        changeDecisionOwner: parsed.diagnosis?.changeDecisionOwner ?? "",
+        masterDataReliability: parsed.diagnosis?.masterDataReliability ?? "",
+        masterDataProblems: toStringArray(parsed.diagnosis?.masterDataProblems),
+        afasAdoptionLevel: parsed.diagnosis?.afasAdoptionLevel ?? "",
+        adoptionBarriers: toStringArray(parsed.diagnosis?.adoptionBarriers),
+        mostValuableImprovement: parsed.diagnosis?.mostValuableImprovement ?? "",
       },
       comments:
         typeof parsed.comments === "object" && parsed.comments !== null
@@ -539,6 +595,9 @@ export function ScanProvider({ children }: { children: ReactNode }) {
     }));
   };
 
+  const setScanReasonDetailed = (value: string) => updateProfile("scanReasonDetailed", value);
+  const setImprovementUrgency = (value: string) => updateProfile("improvementUrgency", value);
+
   const setScopeWidth = (value: string) => {
     setScan((current) => ({
       ...current,
@@ -648,6 +707,56 @@ export function ScanProvider({ children }: { children: ReactNode }) {
   const setEducationExceptionHandling = (value: string) =>
     updateDiagnosis("educationExceptionHandling", value);
 
+  // Nieuwe diagnosevragen setters
+  const setTimeLossAreas = (value: string[]) => {
+    setScan((current) => ({
+      ...current,
+      diagnosis: {
+        ...current.diagnosis,
+        timeLossAreas: value,
+      },
+    }));
+  };
+  const setOutsideAfasFrequency = (value: string) =>
+    updateDiagnosis("outsideAfasFrequency", value);
+  const setOutsideAfasReasons = (value: string[]) => {
+    setScan((current) => ({
+      ...current,
+      diagnosis: {
+        ...current.diagnosis,
+        outsideAfasReasons: value,
+      },
+    }));
+  };
+  const setBacklogMaturity = (value: string) =>
+    updateDiagnosis("backlogMaturity", value);
+  const setChangeDecisionOwner = (value: string) =>
+    updateDiagnosis("changeDecisionOwner", value);
+  const setMasterDataReliability = (value: string) =>
+    updateDiagnosis("masterDataReliability", value);
+  const setMasterDataProblems = (value: string[]) => {
+    setScan((current) => ({
+      ...current,
+      diagnosis: {
+        ...current.diagnosis,
+        masterDataProblems: value,
+      },
+    }));
+  };
+  const setAfasAdoptionLevel = (value: string) =>
+    updateDiagnosis("afasAdoptionLevel", value);
+  const setAdoptionBarriers = (value: string[]) => {
+    setScan((current) => ({
+      ...current,
+      diagnosis: {
+        ...current.diagnosis,
+        adoptionBarriers: value,
+      },
+    }));
+  };
+  const setMostValuableImprovement = (value: string) =>
+    updateDiagnosis("mostValuableImprovement", value);
+
   const setComment = (questionKey: string, value: string) => {
     setScan((current) => ({
       ...current,
@@ -679,6 +788,8 @@ export function ScanProvider({ children }: { children: ReactNode }) {
 
       setScanReason,
       setBiggestBottleneck,
+      setScanReasonDetailed,
+      setImprovementUrgency,
 
       setScopeWidth,
       setScopeFocus,
@@ -727,6 +838,18 @@ export function ScanProvider({ children }: { children: ReactNode }) {
       setEducationIntakePlanningConsistency,
       setEducationProcessAdminAlignment,
       setEducationExceptionHandling,
+
+      // Nieuwe diagnosevragen
+      setTimeLossAreas,
+      setOutsideAfasFrequency,
+      setOutsideAfasReasons,
+      setBacklogMaturity,
+      setChangeDecisionOwner,
+      setMasterDataReliability,
+      setMasterDataProblems,
+      setAfasAdoptionLevel,
+      setAdoptionBarriers,
+      setMostValuableImprovement,
 
       setComment,
       markSectionVisited,
