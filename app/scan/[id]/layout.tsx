@@ -11,7 +11,7 @@ import { getSectionStatuses } from "@/lib/scan/engine/section-status";
 const STEPS = [
   {
     number: "1",
-    sectionCodes: ["profile_basis", "profile_reason"],
+    sectionCodes: ["profile_basis", "profile_afas", "profile_reason"],
     primarySectionCode: "profile_basis",
     title: "Klantprofiel",
     description: "Context en uitgangssituatie",
@@ -56,6 +56,7 @@ function getCurrentSectionCode(pathname: string | null): string {
     return parts[summaryIndex + 1] ?? "profile_basis";
   }
 
+  if (pathname.includes("/profile_afas")) return "profile_afas";
   if (pathname.includes("/profile_reason")) return "profile_reason";
   if (pathname.includes("/profile_basis")) return "profile_basis";
   if (pathname.includes("/scope")) return "scope";
@@ -71,7 +72,7 @@ function getStepStatus(
   currentSectionCode: string
 ): StepStatus {
   const stepSections: Record<string, string[]> = {
-    profile: ["profile_basis", "profile_reason"],
+    profile: ["profile_basis", "profile_afas", "profile_reason"],
     scope: ["scope"],
     diagnose: ["diagnose"],
     advies: ["advies"],
@@ -79,6 +80,7 @@ function getStepStatus(
 
   const stepKeyMap: Record<string, string> = {
     profile_basis: "profile",
+    profile_afas: "profile",
     profile_reason: "profile",
     scope: "scope",
     diagnose: "diagnose",

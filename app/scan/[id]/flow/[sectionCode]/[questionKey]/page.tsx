@@ -177,17 +177,11 @@ function isSkippedProfileBasisRoute(sectionCode: string, questionKey: string) {
 }
 
 function getProfileBasisCompactStepIndex(questionKey: string): number {
+  // For profile_basis, we only show the overview step as step 1
+  // Other questions that remain in profile_basis get sequential numbers
   switch (questionKey) {
     case "customer_name":
       return 1;
-    case "afas_products":
-      return 2;
-    case "ownership_model":
-      return 3;
-    case "standardization_context":
-      return 4;
-    case "primary_process_chains":
-      return 5;
     default:
       return 1;
   }
@@ -382,7 +376,7 @@ export default function FlowQuestionPage() {
 
   if (sectionCode === "profile_basis") {
     questionIndex = getProfileBasisCompactStepIndex(questionKey);
-    questionTotal = 5;
+    questionTotal = 1; // profile_basis now only has the overview step
   }
 
   const previousQuestion =
@@ -555,7 +549,7 @@ export default function FlowQuestionPage() {
   };
 
   const shortHelpText = isProfileBasisOverview
-    ? "We leggen eerst de belangrijkste basisgegevens van de organisatie vast."
+    ? "Eerst leggen we de basiscontext van de organisatie vast. Dit helpt om de scan gericht te maken."
     : getShortHelpText(question.label, question.helpText);
 
   const groupedOptions =
@@ -668,6 +662,23 @@ export default function FlowQuestionPage() {
 
   const title = isProfileBasisOverview ? "Basis van de organisatie" : question.label;
 
+  // Show reassuring text only on first step of first section
+  const isFirstStepOfScan = sectionCode === "profile_basis" && questionIndex === 1;
+
+  // Check if this is the last question in the current section (going to next section)
+  const isLastInSection = !nextQuestion && nextSection;
+  
+  // Mini-feedback messages per section
+  const sectionFeedbackMessages: Record<string, string> = {
+    profile_basis: "De basiscontext is vastgelegd. De scan kan nu beter worden afgestemd op deze organisatie.",
+    profile_afas: "De relevante AFAS-onderdelen en knelpunten zijn bekend. De volgende stap bepaalt de gewenste diepgang.",
+    profile_reason: "De aanleiding en focus zijn bepaald. De scope kan nu worden afgestemd.",
+    scope: "De richting en diepgang zijn bepaald. De diagnosevragen worden hierop afgestemd.",
+    diagnose: "Er is voldoende input verzameld voor een eerste adviesrichting.",
+  };
+
+  const currentSectionFeedback = isLastInSection ? sectionFeedbackMessages[sectionCode] : null;
+
   return (
     <div className="space-y-8">
       {isDiagnoseSection && (
@@ -677,10 +688,18 @@ export default function FlowQuestionPage() {
         />
       )}
 
+      {isFirstStepOfScan && (
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+          <p className="text-sm text-emerald-800">
+            Deze scan is bedoeld als begeleid gesprek, geen toets. Antwoorden hoeven niet perfect te zijn en kunnen later worden aangepast.
+          </p>
+        </div>
+      )}
+
       <div className="space-y-3">
         <div className="space-y-1">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Stap {questionIndex} van {questionTotal}
+            {section?.title?.split(" — ")[0] || `Stap ${questionIndex} van ${questionTotal}`}
           </p>
 
           <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
@@ -1078,6 +1097,22 @@ export default function FlowQuestionPage() {
           </>
         )}
       </section>
+
+      {/* Mini-feedback when completing a section */}
+      {currentSectionFeedback && canContinue && (
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+          <div className="flex items-start gap-3">
+            <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500">
+              <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <p className="text-sm text-emerald-800">
+              {currentSectionFeedback}
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className="flex items-center justify-between border-t pt-6">
         <div className="flex items-center gap-3">

@@ -170,9 +170,9 @@ export const optionSets: OptionSetDefinition[] = [
   {
     key: "scope_depth_options",
     options: [
-      { value: "eerste_beeld", label: "Snel eerste beeld", order: 10 },
-      { value: "gericht_verdiepen", label: "Gericht verdiepen", order: 20 },
-      { value: "verbeterplan", label: "Basis voor concreet verbeterplan", order: 30 },
+      { value: "eerste_beeld", label: "Snel eerste beeld", description: "Lichte scan van ongeveer 10 minuten met alleen kernvragen.", order: 10 },
+      { value: "gericht_verdiepen", label: "Gericht verdiepen", description: "Gerichte verdieping van ongeveer 30 minuten met relevante domeinvragen.", order: 20 },
+      { value: "verbeterplan", label: "Basis voor concreet verbeterplan", description: "Volledige scan voor roadmap, nulmeting of adviesrapport.", order: 30 },
     ],
   },
   // Maturity 3-level option sets
