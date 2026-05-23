@@ -4,7 +4,7 @@ import { buildDomainScores } from "@/lib/scan/engine/build-domain-scores";
 import type { ScanState } from "@/app/context/ScanContext";
 
 export function normalizeScanForOutput(scan: ScanState) {
-  const sectionCodes = ["profile_basis", "profile_reason", "scope", "diagnose"];
+  const sectionCodes = ["profile_basis", "profile_afas", "profile_reason", "scope", "diagnose"];
 
   const sections = sectionCodes.map((code) => {
     const section = getSection(code);

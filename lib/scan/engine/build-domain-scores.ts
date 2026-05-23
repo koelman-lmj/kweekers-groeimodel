@@ -3,6 +3,7 @@ import { dimensions } from "@/lib/scan/definition/dimensions";
 import { questions } from "@/lib/scan/definition/questions";
 import { getOptionSet } from "@/lib/scan/engine/definition-helpers";
 import { getAnswerFromScan } from "@/lib/scan/engine/answer-mapping";
+import { isQuestionVisible } from "@/lib/scan/engine/question-visibility";
 
 type DomainScore = {
   code: string;
@@ -142,10 +143,14 @@ export function buildDomainScores(scan: ScanState): DomainScore[] {
     .filter((dimension) => dimension.isActive)
     .sort((a, b) => a.order - b.order)
     .map((dimension) => {
+      // Only include questions that are both:
+      // 1. Assigned to this dimension and have scoring enabled
+      // 2. Currently visible based on scan state (visibility rules + depth level)
       const dimensionQuestions = questions.filter((question) => {
         return (
           question.dimensionCode === dimension.code &&
-          question.scoreEnabled === true
+          question.scoreEnabled === true &&
+          isQuestionVisible(scan, question)
         );
       });
 
