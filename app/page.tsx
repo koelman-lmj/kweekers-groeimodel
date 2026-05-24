@@ -60,8 +60,8 @@ export default function HomePage() {
               {[
                 "Samen invullen met klant en consultant",
                 "Inzicht in huidige situatie en knelpunten",
-                "Input voor advies en roadmap",
-                "Geschikt als nulmeting en vervolgmeting",
+                "Voorbereiding op nulmeting en vervolgstappen",
+                "Ontwikkeling later opnieuw meetbaar maken",
               ].map((feature, index) => (
                 <div
                   key={index}
