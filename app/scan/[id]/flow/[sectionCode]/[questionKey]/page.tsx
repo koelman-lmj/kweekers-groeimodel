@@ -1058,7 +1058,7 @@ export default function FlowQuestionPage() {
                   onChange={(event) => setCommentValue(event.target.value)}
                   placeholder={isOverigSelected 
                     ? "Vul hier in wat de grootste opgave is..." 
-                    : "Bijvoorbeeld: dit verschilt per team of is nog niet formeel belegd."}
+                    : (question.commentPlaceholder || "Eventuele toelichting of context bij dit antwoord...")}
                   rows={4}
                   className={`w-full rounded-xl border bg-white px-4 py-3 outline-none ${
                     isOverigSelected && !overigCommentFilled && showValidation
