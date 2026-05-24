@@ -93,6 +93,7 @@ export const questions: QuestionDefinition[] = [
     required: true,
     optionSetKey: "ownership_model_options",
     allowsComment: true,
+    commentPlaceholder: "Bijv. 'Functioneel beheer zit bij Finance, technisch bij IT'",
     examples: [
       "Intern beheer, key-users, of uitbesteed?",
       "Wie pakt wijzigingsverzoeken op?",
@@ -108,6 +109,7 @@ export const questions: QuestionDefinition[] = [
     required: true,
     optionSetKey: "afas_usage_duration_options",
     allowsComment: true,
+    commentPlaceholder: "Bijv. 'Gestart in 2018, maar pas in 2020 volledig overgestapt'",
     examples: [
       "Een oudere inrichting kent vaak andere keuzes en meer historie",
       "Kijk naar het moment waarop AFAS echt in gebruik is genomen",
@@ -124,6 +126,7 @@ export const questions: QuestionDefinition[] = [
     required: true,
     optionSetKey: "maintenance_quality_options",
     allowsComment: true,
+    commentPlaceholder: "Bijv. 'Laatste grote opschoning was 2 jaar geleden'",
     examples: [
       "Denk aan beheer, documentatie, opschoning en gecontroleerde wijzigingen",
       "Kijk niet alleen naar techniek, maar ook naar procesafspraken en discipline",
@@ -140,6 +143,7 @@ export const questions: QuestionDefinition[] = [
     required: true,
     optionSetKey: "expected_org_changes_options",
     allowsComment: true,
+    commentPlaceholder: "Bijv. 'Fusie met zusterorganisatie gepland in 2025'",
     examples: [
       "Denk aan fusies, overnames, afsplitsingen of sterke groei in entiteiten",
       "Kijk vooral naar veranderingen die invloed hebben op structuur en inrichting",
@@ -156,6 +160,7 @@ export const questions: QuestionDefinition[] = [
     required: true,
     optionSetKey: "standardization_context_options",
     allowsComment: true,
+    commentPlaceholder: "Bijv. 'Veel eigen workflows en aangepaste schermen'",
     examples: [
       "Veel maatwerk = veel afwijkende inrichtingen en scripts",
       "Standaard = dicht bij de AFAS-standaard gebleven",
@@ -215,6 +220,7 @@ export const questions: QuestionDefinition[] = [
     required: true,
     optionSetKey: "scan_reason_detailed_options",
     allowsComment: true,
+    commentPlaceholder: "Bijv. 'Veel handwerk in maandafsluiting, kost nu 3 dagen extra'",
     examples: [
       "Denk aan de directe aanleiding of trigger",
       "Wat maakte dat dit nu nodig is?",
@@ -230,6 +236,7 @@ export const questions: QuestionDefinition[] = [
     required: true,
     optionSetKey: "improvement_urgency_options",
     allowsComment: true,
+    commentPlaceholder: "Bijv. 'Moet voor Q3 opgelost zijn ivm nieuwe wetgeving'",
     dimensionCode: "urgency",
     category: "Organisatie & Beheer",
     outputRole: "score",
@@ -281,6 +288,7 @@ export const questions: QuestionDefinition[] = [
     required: true,
     optionSetKey: "maturity_3level_clarity_options",
     allowsComment: true,
+    commentPlaceholder: "Bijv. 'Finance is eigenaar, maar IT voert wijzigingen door'",
     dimensionCode: "governance",
     category: "Organisatie & Beheer",
     outputRole: "score",
@@ -301,6 +309,7 @@ export const questions: QuestionDefinition[] = [
     required: true,
     optionSetKey: "maturity_3level_change_governance_options",
     allowsComment: true,
+    commentPlaceholder: "Bijv. 'Maandelijks overleg, maar urgente zaken gaan direct'",
     dimensionCode: "governance",
     category: "Organisatie & Beheer",
     outputRole: "score",
@@ -321,6 +330,7 @@ export const questions: QuestionDefinition[] = [
     required: true,
     optionSetKey: "maturity_3level_improvement_options",
     allowsComment: true,
+    commentPlaceholder: "Bijv. 'Verbeterlijst bestaat maar wordt zelden opgepakt'",
     dimensionCode: "governance",
     category: "Organisatie & Beheer",
     outputRole: "score",

@@ -30,6 +30,8 @@ export type QuestionDefinition = {
   placeholder?: string;
   examples?: string[];
   allowsComment?: boolean;
+  /** Placeholder text for the comment field, contextual to the question */
+  commentPlaceholder?: string;
   maxSelections?: number;
   visibleWhen?: VisibleWhenCondition[];
 

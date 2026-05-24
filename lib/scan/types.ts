@@ -45,6 +45,8 @@ export type QuestionDefinition = {
   optionSetKey?: string;
   examples?: string[];
   allowsComment?: boolean;
+  /** Placeholder text for the comment field, contextual to the question */
+  commentPlaceholder?: string;
   domain?: string;
   category?: string;
   maxSelections?: number;
