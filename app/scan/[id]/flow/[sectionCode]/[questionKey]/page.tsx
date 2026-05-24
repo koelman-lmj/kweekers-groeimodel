@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { useScanContext } from "@/app/context/ScanContext";
 import { sections } from "@/lib/scan/definition/sections";
@@ -16,6 +16,7 @@ import {
   setAnswerToScan,
   type AnswerValue,
 } from "@/lib/scan/engine/answer-mapping";
+import { ChoiceCard, ChoiceCardGrid, ChoicePill } from "@/components/scan/ChoiceCard";
 
 function getParam(value: string | string[] | undefined): string {
   if (Array.isArray(value)) return value[0] ?? "";
@@ -60,18 +61,24 @@ function SectionProgressBar({
   sectionLabel: string;
 }) {
   const percentage = totalCount > 0 ? Math.round((answeredCount / totalCount) * 100) : 0;
+  const isComplete = percentage === 100;
+
+  // Friendlier progress text
+  const progressText = isComplete
+    ? `${sectionLabel} compleet`
+    : `${answeredCount} van ${totalCount} onderdelen ingevuld`;
 
   return (
     <div className="mb-6 space-y-2">
       <div className="flex items-center justify-between text-sm">
         <span className="font-medium text-[var(--kweekers-primary-dark)]">
-          Voortgang {sectionLabel}
+          Voortgang {sectionLabel.toLowerCase()}
         </span>
-        <span className="text-muted-foreground">
-          {answeredCount} van {totalCount} vragen beantwoord ({percentage}%)
+        <span className="text-xs text-muted-foreground">
+          {progressText}
         </span>
       </div>
-      <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--kweekers-primary-soft)]">
+      <div className="h-1.5 w-full overflow-hidden rounded-full bg-black/5">
         <div
           className="h-full rounded-full bg-[var(--kweekers-accent)] transition-all duration-300 ease-out"
           style={{ width: `${percentage}%` }}
@@ -81,14 +88,47 @@ function SectionProgressBar({
   );
 }
 
+// Keyboard shortcuts hint component - subtle and non-dominant
+function KeyboardShortcutsHint() {
+  return (
+    <div className="hidden items-center gap-3 text-[10px] text-black/30 md:flex">
+      <span className="flex items-center gap-1">
+        <kbd className="rounded border border-black/5 bg-black/[0.02] px-1 py-0.5 font-mono text-[9px]">1-9</kbd>
+        <span>optie</span>
+      </span>
+      <span className="flex items-center gap-1">
+        <kbd className="rounded border border-black/5 bg-black/[0.02] px-1 py-0.5 font-mono text-[9px]">Enter</kbd>
+        <span>verder</span>
+      </span>
+      <span className="flex items-center gap-1">
+        <kbd className="rounded border border-black/5 bg-black/[0.02] px-1 py-0.5 font-mono text-[9px]">←</kbd>
+        <span>terug</span>
+      </span>
+    </div>
+  );
+}
+
 function OptionLabelWithTooltip({
   label,
+  isActive,
 }: {
   label: string;
   description?: string;
+  isActive?: boolean;
 }) {
   return (
-    <div className="flex items-center justify-center">
+    <div className="flex items-center justify-center gap-2">
+      <div className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
+        isActive 
+          ? 'bg-white/30 text-white' 
+          : 'border border-black/20 bg-white'
+      }`}>
+        {isActive && (
+          <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        )}
+      </div>
       <span className="text-[13px] font-semibold leading-5">{label}</span>
     </div>
   );
@@ -477,6 +517,8 @@ export default function FlowQuestionPage() {
     nextHref = `/scan/${scanId}/summary/advies`;
   }
 
+  const isLastQuestion = nextHref.includes("/summary/advies");
+
   const answerValue = getAnswerFromScan(scan, questionKey);
   const answerArray = asArray(answerValue);
   const answerString = asString(answerValue);
@@ -648,39 +690,20 @@ export default function FlowQuestionPage() {
     }
 
     return (
-      <div className="grid gap-2 sm:grid-cols-2 justify-items-center">
+      <ChoiceCardGrid columns={2}>
         {[...currentOptionSet.options]
           .sort((a, b) => a.order - b.order)
-          .map((option) => {
-            const isActive = currentValue === option.value;
-
-            return (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => onSelect(option.value)}
-                aria-pressed={isActive}
-                style={isActive ? {
-                  backgroundColor: '#ed6e41',
-                  borderColor: '#db5f34',
-                  color: 'white',
-                  borderWidth: '2px'
-                } : {}}
-                className={`group relative justify-self-center w-[320px] min-h-[52px] rounded-xl border px-3 py-2 text-center transition ${
-                  isActive
-                    ? "font-medium shadow-sm"
-                    : "border-black/15 bg-white hover:border-[#ed6e41] hover:bg-[#fef3ef]"
-                }`}
-              >
-                <OptionLabelWithTooltip
-                  label={option.label}
-                  description={option.description}
-                />
-                <OptionTooltip description={option.description} />
-              </button>
-            );
-          })}
-      </div>
+          .map((option, index) => (
+            <ChoiceCard
+              key={option.value}
+              label={option.label}
+              description={option.description}
+              isActive={currentValue === option.value}
+              variant="single"
+              onClick={() => onSelect(option.value)}
+            />
+          ))}
+      </ChoiceCardGrid>
     );
   };
 
@@ -692,6 +715,72 @@ export default function FlowQuestionPage() {
 
     router.push(nextHref);
   };
+
+  // Keyboard shortcuts handler
+  const sortedOptions = optionSet 
+    ? [...optionSet.options].sort((a, b) => a.order - b.order)
+    : [];
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Ignore if user is typing in an input/textarea
+      const target = event.target as HTMLElement;
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") {
+        // Allow Enter to move to next in text fields if value is filled
+        if (event.key === "Enter" && !event.shiftKey) {
+          if (question.inputType === "text" && isFilled(answerString)) {
+            event.preventDefault();
+            handleNext();
+          }
+        }
+        return;
+      }
+
+      // Number keys 1-9 for option selection (single_select)
+      if (question.inputType === "single_select" && sortedOptions.length > 0) {
+        const keyNumber = parseInt(event.key, 10);
+        if (keyNumber >= 1 && keyNumber <= 9 && keyNumber <= sortedOptions.length) {
+          event.preventDefault();
+          const selectedOption = sortedOptions[keyNumber - 1];
+          setAnswerValue(selectedOption.value);
+        }
+      }
+
+      // Number keys for multi_select toggle
+      if (question.inputType === "multi_select" && sortedOptions.length > 0) {
+        const keyNumber = parseInt(event.key, 10);
+        if (keyNumber >= 1 && keyNumber <= 9 && keyNumber <= sortedOptions.length) {
+          event.preventDefault();
+          const selectedOption = sortedOptions[keyNumber - 1];
+          toggleMultiSelectValue(selectedOption.value);
+        }
+      }
+
+      // Enter to proceed to next question
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        handleNext();
+      }
+
+      // ArrowLeft or Backspace to go back
+      if (event.key === "ArrowLeft" || event.key === "Backspace") {
+        event.preventDefault();
+        router.push(previousHref);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [
+    question.inputType,
+    sortedOptions,
+    setAnswerValue,
+    toggleMultiSelectValue,
+    handleNext,
+    router,
+    previousHref,
+    answerString,
+  ]);
 
   const title = isProfileBasisOverview ? "Basis van de organisatie" : question.label;
 
@@ -721,11 +810,9 @@ export default function FlowQuestionPage() {
       />
 
       {isFirstStepOfScan && (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
-          <p className="text-sm text-emerald-800">
-            Deze scan is bedoeld als begeleid gesprek, geen toets. Antwoorden hoeven niet perfect te zijn en kunnen later worden aangepast.
-          </p>
-        </div>
+        <p className="text-xs text-black/40 italic">
+          Begeleid gesprek, geen toets. Antwoorden kunnen later worden aangepast.
+        </p>
       )}
 
       <div className="space-y-3">
@@ -754,12 +841,12 @@ export default function FlowQuestionPage() {
 
       <section className="space-y-4 rounded-3xl border border-black/10 bg-[#fafafa] p-4 sm:p-5">
         {isProfileBasisOverview ? (
-          <div className="space-y-5">
+          <div className="space-y-8">
             <div className="space-y-2">
-              <label htmlFor="customer_name" className="text-sm font-medium">
-                Klantnaam
-                <RequiredAsterisk />
-              </label>
+                <label htmlFor="customer_name" className="text-xs font-semibold uppercase tracking-wide text-black/60">
+                  Klantnaam
+                  <RequiredAsterisk />
+                </label>
               <input
                 id="customer_name"
                 type="text"
@@ -768,12 +855,12 @@ export default function FlowQuestionPage() {
                   setFieldValue("customer_name", event.target.value)
                 }
                 placeholder="Bijvoorbeeld: Janssen BV"
-                className="w-full rounded-xl border border-black/15 bg-white px-4 py-3 outline-none"
+                className="w-full rounded-xl border border-black/15 bg-white px-4 py-3 outline-none focus:border-[#ed6e41]/40 focus:ring-2 focus:ring-[#ed6e41]/20"
               />
             </div>
 
             <div className="space-y-2">
-              <div className="text-sm font-medium">
+              <div className="text-xs font-semibold uppercase tracking-wide text-black/60">
                 Sector
                 <RequiredAsterisk />
               </div>
@@ -785,7 +872,7 @@ export default function FlowQuestionPage() {
             </div>
 
             <div className="space-y-2">
-              <div className="text-sm font-medium">
+              <div className="text-xs font-semibold uppercase tracking-wide text-black/60">
                 Organisatiegrootte
                 <RequiredAsterisk />
               </div>
@@ -797,7 +884,7 @@ export default function FlowQuestionPage() {
             </div>
 
             <div className="space-y-2">
-              <div className="text-sm font-medium">
+              <div className="text-xs font-semibold uppercase tracking-wide text-black/60">
                 Aantal administraties / entiteiten
                 <RequiredAsterisk />
               </div>
@@ -809,15 +896,15 @@ export default function FlowQuestionPage() {
             </div>
 
             <div className="space-y-2">
-              <div className="text-sm font-medium">
+              <div className="text-xs font-semibold uppercase tracking-wide text-black/60">
                 Type organisatie en operatie
                 <RequiredAsterisk />
               </div>
 
-              <div className="grid gap-2 sm:grid-cols-2 justify-items-center">
+              <ChoiceCardGrid columns={2}>
                 {[...(getOptionSet("organization_type_options")?.options ?? [])]
                   .sort((a, b) => a.order - b.order)
-                  .map((option) => {
+                  .map((option, index) => {
                     const currentValues = Array.isArray(
                       profileOverviewValues.organization_type
                     )
@@ -830,9 +917,13 @@ export default function FlowQuestionPage() {
                       !isActive && currentValues.length >= maxSelections;
 
                     return (
-                      <button
+                      <ChoiceCard
                         key={option.value}
-                        type="button"
+                        label={option.label}
+                        description={option.description}
+                        isActive={isActive}
+                        disabled={disableNewSelection}
+                        variant="multi"
                         onClick={() => {
                           if (!isActive && currentValues.length >= maxSelections) {
                             return;
@@ -844,23 +935,10 @@ export default function FlowQuestionPage() {
 
                           setFieldValue("organization_type", nextValues);
                         }}
-                        aria-pressed={isActive}
-                        disabled={disableNewSelection}
-                        className={`group relative ${
-                          isActive
-                            ? getActiveOptionButtonClass()
-                            : getBaseOptionButtonClass(disableNewSelection)
-                        }`}
-                      >
-                        <OptionLabelWithTooltip
-                          label={option.label}
-                          description={option.description}
-                        />
-                        <OptionTooltip description={option.description} />
-                      </button>
+                      />
                     );
                   })}
-              </div>
+              </ChoiceCardGrid>
 
               <p className="text-sm text-muted-foreground">
                 Gekozen:{" "}
@@ -890,43 +968,30 @@ export default function FlowQuestionPage() {
             )}
 
             {question.inputType === "single_select" && optionSet && (
-              <div className="grid gap-2 sm:grid-cols-2 justify-items-center">
+              <ChoiceCardGrid columns={2}>
                 {[...optionSet.options]
                   .sort((a, b) => a.order - b.order)
-                  .map((option) => {
-                    const isActive = answerString === option.value;
-
-                    return (
-                      <button
-                        key={option.value}
-                        type="button"
-                        onClick={() => setAnswerValue(option.value)}
-                        aria-pressed={isActive}
-                        className={`group relative ${
-                          isActive
-                            ? getActiveOptionButtonClass()
-                            : getBaseOptionButtonClass(false)
-                        }`}
-                      >
-                        <OptionLabelWithTooltip
-                          label={option.label}
-                          description={option.description}
-                        />
-                        <OptionTooltip description={option.description} />
-                      </button>
-                    );
-                  })}
-              </div>
+                  .map((option, index) => (
+                    <ChoiceCard
+                      key={option.value}
+                      label={option.label}
+                      description={option.description}
+                      isActive={answerString === option.value}
+                      variant="single"
+                      onClick={() => setAnswerValue(option.value)}
+                    />
+                  ))}
+              </ChoiceCardGrid>
             )}
 
             {question.inputType === "multi_select" &&
               optionSet &&
               question.key !== "afas_products" && (
                 <div className="space-y-3">
-                  <div className="grid gap-2 sm:grid-cols-2 justify-items-center">
+                  <ChoiceCardGrid columns={2}>
                     {[...optionSet.options]
                       .sort((a, b) => a.order - b.order)
-                      .map((option) => {
+                      .map((option, index) => {
                         const isActive = answerArray.includes(option.value);
                         const maxSelections =
                           question.maxSelections ?? Number.POSITIVE_INFINITY;
@@ -934,27 +999,18 @@ export default function FlowQuestionPage() {
                           !isActive && answerArray.length >= maxSelections;
 
                         return (
-                          <button
+                          <ChoiceCard
                             key={option.value}
-                            type="button"
-                            onClick={() => toggleMultiSelectValue(option.value)}
-                            aria-pressed={isActive}
-                            disabled={disableNewSelection}
-                            className={`group relative ${
-                              isActive
-                                ? getActiveOptionButtonClass()
-                                : getBaseOptionButtonClass(disableNewSelection)
-                            }`}
-                          >
-                            <OptionLabelWithTooltip
-                              label={option.label}
-                              description={option.description}
-                            />
-                            <OptionTooltip description={option.description} />
-                          </button>
+                            label={option.label}
+                            description={option.description}
+                            isActive={isActive}
+                          disabled={disableNewSelection}
+                          variant="multi"
+                          onClick={() => toggleMultiSelectValue(option.value)}
+                        />
                         );
                       })}
-                  </div>
+                  </ChoiceCardGrid>
 
                   {typeof question.maxSelections === "number" && (
                     <p className="text-sm text-muted-foreground">
@@ -991,7 +1047,7 @@ export default function FlowQuestionPage() {
                         {group.title}
                       </div>
 
-                      <div className="grid gap-2 sm:grid-cols-2 justify-items-center">
+                      <div className="flex flex-wrap gap-2">
                         {group.options.map((option) => {
                           const isActive = answerArray.includes(option.value);
                           const maxSelections =
@@ -1000,24 +1056,13 @@ export default function FlowQuestionPage() {
                             !isActive && answerArray.length >= maxSelections;
 
                           return (
-                            <button
+                            <ChoicePill
                               key={option.value}
-                              type="button"
-                              onClick={() => toggleMultiSelectValue(option.value)}
-                              aria-pressed={isActive}
+                              label={option.label}
+                              isActive={isActive}
                               disabled={disableNewSelection}
-                              className={`group relative ${
-                                isActive
-                                  ? getActiveOptionButtonClass()
-                                  : getBaseOptionButtonClass(disableNewSelection)
-                              }`}
-                            >
-                              <OptionLabelWithTooltip
-                                label={option.label}
-                                description={option.description}
-                              />
-                              <OptionTooltip description={option.description} />
-                            </button>
+                              onClick={() => toggleMultiSelectValue(option.value)}
+                            />
                           );
                         })}
                       </div>
@@ -1036,10 +1081,10 @@ export default function FlowQuestionPage() {
             {question.examples &&
               question.examples.length > 0 &&
               !optionSet?.options?.some((option) => option.description) && (
-                <div className="kweekers-help-box rounded-xl p-3">
-                  <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                    Hulp bij deze vraag
-                  </div>
+              <div className="kweekers-help-box rounded-xl p-3">
+                <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                  Gesprekshulp
+                </div>
                   <ul className="mt-1.5 space-y-1 text-xs text-muted-foreground">
                     {question.examples.map((example) => (
                       <li key={example} className="ml-5 list-disc">
@@ -1051,16 +1096,20 @@ export default function FlowQuestionPage() {
               )}
 
             {question.allowsComment && (
-              <div className={`space-y-2 border-t border-black/10 pt-4 ${isOverigSelected ? 'bg-amber-50 -mx-4 px-4 py-4 rounded-xl border border-amber-200' : ''}`}>
+              <div className={`space-y-1.5 border-t border-black/10 pt-3 ${isOverigSelected ? 'bg-amber-50 -mx-4 px-4 py-3 rounded-xl border border-amber-200' : ''}`}>
                 <label
                   htmlFor={`${question.key}-comment`}
-                  className="text-sm font-medium flex items-center gap-2"
+                  className="text-xs font-medium flex items-center gap-2 text-muted-foreground"
                 >
-                  Opmerking
-                  {isOverigSelected && (
-                    <span className="text-xs font-normal text-amber-700 bg-amber-100 px-2 py-0.5 rounded">
-                      Verplicht bij &apos;Overig&apos;
-                    </span>
+                  {isOverigSelected ? (
+                    <>
+                      Opmerking
+                      <span className="text-xs font-normal text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded">
+                        Verplicht
+                      </span>
+                    </>
+                  ) : (
+                    "Opmerking (optioneel)"
                   )}
                 </label>
                 <textarea
@@ -1069,23 +1118,17 @@ export default function FlowQuestionPage() {
                   onChange={(event) => setCommentValue(event.target.value)}
                   placeholder={isOverigSelected 
                     ? "Vul hier in wat de grootste opgave is..." 
-                    : (question.commentPlaceholder || "Eventuele toelichting of context bij dit antwoord...")}
-                  rows={4}
-                  className={`w-full rounded-xl border bg-white px-4 py-3 outline-none ${
+                    : (question.commentPlaceholder || "Eventuele toelichting...")}
+                  rows={2}
+                  className={`w-full rounded-xl border bg-white px-3 py-2 text-sm outline-none resize-none ${
                     isOverigSelected && !overigCommentFilled && showValidation
                       ? 'border-red-400 ring-2 ring-red-100'
-                      : 'border-black/15'
+                      : 'border-black/10'
                   }`}
                 />
                 {isOverigSelected && !overigCommentFilled && showValidation && (
                   <p className="text-xs text-red-600 font-medium">
                     Vul een opmerking in om uit te leggen wat &apos;Overig&apos; inhoudt.
-                  </p>
-                )}
-                {!isOverigSelected && (
-                  <p className="text-xs text-muted-foreground">
-                    Deze opmerking kan later worden meegenomen in samenvatting of
-                    rapportage.
                   </p>
                 )}
               </div>
@@ -1118,6 +1161,7 @@ export default function FlowQuestionPage() {
           >
             Vorige
           </Link>
+          <KeyboardShortcutsHint />
         </div>
 
         <button
