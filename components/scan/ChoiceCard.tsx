@@ -72,15 +72,15 @@ export const ChoiceCard = forwardRef<HTMLButtonElement, ChoiceCardProps>(
         <div className="flex-1 min-w-0">
           <span
             className={`text-sm font-semibold leading-5 ${
-              isActive ? "text-[#c45528]" : disabled ? "text-muted-foreground" : "text-foreground"
+              isActive ? "text-[#b54a22]" : disabled ? "text-muted-foreground" : "text-black"
             }`}
           >
             {label}
           </span>
           {description && (
             <p
-              className={`mt-0.5 text-xs leading-relaxed ${
-                isActive ? "text-[#a86b4e]" : "text-muted-foreground"
+              className={`mt-1 text-xs leading-relaxed ${
+                isActive ? "text-[#a86b4e]/90" : "text-black/50"
               }`}
             >
               {description}

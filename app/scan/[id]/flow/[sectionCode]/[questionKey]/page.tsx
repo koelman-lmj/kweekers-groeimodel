@@ -840,10 +840,10 @@ export default function FlowQuestionPage() {
         {isProfileBasisOverview ? (
           <div className="space-y-5">
             <div className="space-y-2">
-              <label htmlFor="customer_name" className="text-sm font-medium">
-                Klantnaam
-                <RequiredAsterisk />
-              </label>
+                <label htmlFor="customer_name" className="text-xs font-semibold uppercase tracking-wide text-black/60">
+                  Klantnaam
+                  <RequiredAsterisk />
+                </label>
               <input
                 id="customer_name"
                 type="text"
@@ -857,7 +857,7 @@ export default function FlowQuestionPage() {
             </div>
 
             <div className="space-y-2">
-              <div className="text-sm font-medium">
+              <div className="text-xs font-semibold uppercase tracking-wide text-black/60">
                 Sector
                 <RequiredAsterisk />
               </div>
@@ -869,7 +869,7 @@ export default function FlowQuestionPage() {
             </div>
 
             <div className="space-y-2">
-              <div className="text-sm font-medium">
+              <div className="text-xs font-semibold uppercase tracking-wide text-black/60">
                 Organisatiegrootte
                 <RequiredAsterisk />
               </div>
@@ -881,7 +881,7 @@ export default function FlowQuestionPage() {
             </div>
 
             <div className="space-y-2">
-              <div className="text-sm font-medium">
+              <div className="text-xs font-semibold uppercase tracking-wide text-black/60">
                 Aantal administraties / entiteiten
                 <RequiredAsterisk />
               </div>
@@ -893,7 +893,7 @@ export default function FlowQuestionPage() {
             </div>
 
             <div className="space-y-2">
-              <div className="text-sm font-medium">
+              <div className="text-xs font-semibold uppercase tracking-wide text-black/60">
                 Type organisatie en operatie
                 <RequiredAsterisk />
               </div>
