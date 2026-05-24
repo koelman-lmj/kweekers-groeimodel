@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { useScanContext } from "@/app/context/ScanContext";
 import { sections } from "@/lib/scan/definition/sections";
@@ -77,6 +77,26 @@ function SectionProgressBar({
           style={{ width: `${percentage}%` }}
         />
       </div>
+    </div>
+  );
+}
+
+// Keyboard shortcuts hint component
+function KeyboardShortcutsHint() {
+  return (
+    <div className="hidden items-center gap-4 text-xs text-muted-foreground md:flex">
+      <span className="flex items-center gap-1.5">
+        <kbd className="rounded border border-black/10 bg-black/5 px-1.5 py-0.5 font-mono text-[10px]">1-9</kbd>
+        <span>kies optie</span>
+      </span>
+      <span className="flex items-center gap-1.5">
+        <kbd className="rounded border border-black/10 bg-black/5 px-1.5 py-0.5 font-mono text-[10px]">Enter</kbd>
+        <span>verder</span>
+      </span>
+      <span className="flex items-center gap-1.5">
+        <kbd className="rounded border border-black/10 bg-black/5 px-1.5 py-0.5 font-mono text-[10px]">←</kbd>
+        <span>vorige</span>
+      </span>
     </div>
   );
 }
@@ -693,6 +713,72 @@ export default function FlowQuestionPage() {
     router.push(nextHref);
   };
 
+  // Keyboard shortcuts handler
+  const sortedOptions = optionSet 
+    ? [...optionSet.options].sort((a, b) => a.order - b.order)
+    : [];
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Ignore if user is typing in an input/textarea
+      const target = event.target as HTMLElement;
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") {
+        // Allow Enter to move to next in text fields if value is filled
+        if (event.key === "Enter" && !event.shiftKey) {
+          if (question.inputType === "text" && isFilled(answerString)) {
+            event.preventDefault();
+            handleNext();
+          }
+        }
+        return;
+      }
+
+      // Number keys 1-9 for option selection (single_select)
+      if (question.inputType === "single_select" && sortedOptions.length > 0) {
+        const keyNumber = parseInt(event.key, 10);
+        if (keyNumber >= 1 && keyNumber <= 9 && keyNumber <= sortedOptions.length) {
+          event.preventDefault();
+          const selectedOption = sortedOptions[keyNumber - 1];
+          setAnswerValue(selectedOption.value);
+        }
+      }
+
+      // Number keys for multi_select toggle
+      if (question.inputType === "multi_select" && sortedOptions.length > 0) {
+        const keyNumber = parseInt(event.key, 10);
+        if (keyNumber >= 1 && keyNumber <= 9 && keyNumber <= sortedOptions.length) {
+          event.preventDefault();
+          const selectedOption = sortedOptions[keyNumber - 1];
+          toggleMultiSelectValue(selectedOption.value);
+        }
+      }
+
+      // Enter to proceed to next question
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        handleNext();
+      }
+
+      // ArrowLeft or Backspace to go back
+      if (event.key === "ArrowLeft" || event.key === "Backspace") {
+        event.preventDefault();
+        router.push(previousHref);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [
+    question.inputType,
+    sortedOptions,
+    setAnswerValue,
+    toggleMultiSelectValue,
+    handleNext,
+    router,
+    previousHref,
+    answerString,
+  ]);
+
   const title = isProfileBasisOverview ? "Basis van de organisatie" : question.label;
 
   // Show reassuring text only on first step of first section
@@ -1118,6 +1204,7 @@ export default function FlowQuestionPage() {
           >
             Vorige
           </Link>
+          <KeyboardShortcutsHint />
         </div>
 
         <button
