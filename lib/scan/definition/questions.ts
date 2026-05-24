@@ -600,11 +600,6 @@ export const questions: QuestionDefinition[] = [
     ],
     visibleWhen: [
       { field: "afas_products", operator: "includes", value: "ordermanagement" },
-      {
-        field: "primary_process_chains",
-        operator: "includes",
-        value: "order_to_cash",
-      },
     ],
   },
   {
@@ -755,11 +750,6 @@ export const questions: QuestionDefinition[] = [
     ],
     visibleWhen: [
       { field: "sector", operator: "equals", value: "onderwijs" },
-      {
-        field: "primary_process_chains",
-        operator: "one_of",
-        value: ["project_to_invoice", "order_to_cash"],
-      },
     ],
   },
   {
@@ -807,11 +797,6 @@ export const questions: QuestionDefinition[] = [
     ],
     visibleWhen: [
       { field: "afas_products", operator: "includes", value: "crm" },
-      {
-        field: "primary_process_chains",
-        operator: "one_of",
-        value: ["lead_to_order", "order_to_cash"],
-      },
     ],
   },
   {
@@ -914,11 +899,6 @@ export const questions: QuestionDefinition[] = [
     ],
     visibleWhen: [
       { field: "afas_products", operator: "includes", value: "hrm" },
-      {
-        field: "primary_process_chains",
-        operator: "includes",
-        value: "hr_to_payroll",
-      },
     ],
   },
   {
@@ -995,11 +975,6 @@ export const questions: QuestionDefinition[] = [
         field: "afas_products",
         operator: "includes",
         value: "rapportage_dashboards",
-      },
-      {
-        field: "primary_process_chains",
-        operator: "includes",
-        value: "reporting_control",
       },
     ],
   },
@@ -1088,11 +1063,6 @@ export const questions: QuestionDefinition[] = [
     ],
     visibleWhen: [
       { field: "afas_products", operator: "includes", value: "integraties" },
-      {
-        field: "primary_process_chains",
-        operator: "includes",
-        value: "integration_chain",
-      },
     ],
   },
   {
