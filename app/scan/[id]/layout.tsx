@@ -151,7 +151,7 @@ function getStepHref(
   }
 
   if (step.primarySectionCode === "scope") {
-    return `/scan/${scanId}/flow/scope/scope`;
+    return `/scan/${scanId}/flow/scope/scope_focus`;
   }
 
   if (step.primarySectionCode === "diagnose") {

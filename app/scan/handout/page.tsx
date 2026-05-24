@@ -50,7 +50,9 @@ export default function HandoutPage() {
               "26–100 medewerkers",
               "101–250 medewerkers",
               "251–500 medewerkers",
-              "500+ medewerkers",
+              "500–1000 medewerkers",
+              "1000–1500 medewerkers",
+              "Meer dan 1500 medewerkers",
             ]}
           />
 
