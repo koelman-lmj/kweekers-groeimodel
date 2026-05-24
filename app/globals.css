@@ -146,41 +146,42 @@ body {
 }
 
 .kweekers-step-available {
-  border-color: var(--kweekers-neutral-border);
-  background: var(--kweekers-neutral-soft);
+  border-color: #d4d4d4;
+  background: #fafafa;
 }
 
 .kweekers-step-available-number {
-  border-color: #c9a186;
-  color: #8a5d40;
+  border-color: #b0b0b0;
+  color: #6b6b6b;
   background: white;
 }
 
 .kweekers-step-available-title {
-  color: #2d241a;
+  color: #4a4a4a;
 }
 
 .kweekers-step-available-description {
-  color: #7a6a57;
+  color: #8a8a8a;
 }
 
 .kweekers-step-locked {
-  border-color: #e2e2de;
-  background: white;
-  opacity: 0.72;
+  border-color: #e8e8e8;
+  background: #fafafa;
+  opacity: 0.6;
 }
 
 .kweekers-step-locked-number {
-  border-color: #cfcfcb;
-  color: #9a9a94;
+  border-color: #d0d0d0;
+  color: #b0b0b0;
+  background: white;
 }
 
 .kweekers-step-locked-title {
-  color: #9a9a94;
+  color: #b0b0b0;
 }
 
 .kweekers-step-locked-description {
-  color: #aaaaa4;
+  color: #c0c0c0;
 }
 
 .kweekers-chip-selected {

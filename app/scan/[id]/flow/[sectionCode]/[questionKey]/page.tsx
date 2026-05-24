@@ -61,18 +61,24 @@ function SectionProgressBar({
   sectionLabel: string;
 }) {
   const percentage = totalCount > 0 ? Math.round((answeredCount / totalCount) * 100) : 0;
+  const isComplete = percentage === 100;
+
+  // Friendlier progress text
+  const progressText = isComplete
+    ? `${sectionLabel} compleet`
+    : `${answeredCount} van ${totalCount} onderdelen ingevuld`;
 
   return (
     <div className="mb-6 space-y-2">
       <div className="flex items-center justify-between text-sm">
         <span className="font-medium text-[var(--kweekers-primary-dark)]">
-          Voortgang {sectionLabel}
+          Voortgang {sectionLabel.toLowerCase()}
         </span>
-        <span className="text-muted-foreground">
-          {answeredCount} van {totalCount} vragen beantwoord ({percentage}%)
+        <span className="text-xs text-muted-foreground">
+          {progressText}
         </span>
       </div>
-      <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--kweekers-primary-soft)]">
+      <div className="h-1.5 w-full overflow-hidden rounded-full bg-black/5">
         <div
           className="h-full rounded-full bg-[var(--kweekers-accent)] transition-all duration-300 ease-out"
           style={{ width: `${percentage}%` }}
@@ -82,21 +88,21 @@ function SectionProgressBar({
   );
 }
 
-// Keyboard shortcuts hint component
+// Keyboard shortcuts hint component - subtle and non-dominant
 function KeyboardShortcutsHint() {
   return (
-    <div className="hidden items-center gap-4 text-xs text-muted-foreground md:flex">
-      <span className="flex items-center gap-1.5">
-        <kbd className="rounded border border-black/10 bg-black/5 px-1.5 py-0.5 font-mono text-[10px]">1-9</kbd>
-        <span>kies optie</span>
+    <div className="hidden items-center gap-3 text-[10px] text-black/30 md:flex">
+      <span className="flex items-center gap-1">
+        <kbd className="rounded border border-black/5 bg-black/[0.02] px-1 py-0.5 font-mono text-[9px]">1-9</kbd>
+        <span>optie</span>
       </span>
-      <span className="flex items-center gap-1.5">
-        <kbd className="rounded border border-black/10 bg-black/5 px-1.5 py-0.5 font-mono text-[10px]">Enter</kbd>
+      <span className="flex items-center gap-1">
+        <kbd className="rounded border border-black/5 bg-black/[0.02] px-1 py-0.5 font-mono text-[9px]">Enter</kbd>
         <span>verder</span>
       </span>
-      <span className="flex items-center gap-1.5">
-        <kbd className="rounded border border-black/10 bg-black/5 px-1.5 py-0.5 font-mono text-[10px]">←</kbd>
-        <span>vorige</span>
+      <span className="flex items-center gap-1">
+        <kbd className="rounded border border-black/5 bg-black/[0.02] px-1 py-0.5 font-mono text-[9px]">←</kbd>
+        <span>terug</span>
       </span>
     </div>
   );
@@ -805,11 +811,9 @@ export default function FlowQuestionPage() {
       />
 
       {isFirstStepOfScan && (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
-          <p className="text-sm text-emerald-800">
-            Begeleid gesprek, geen toets. Antwoorden kunnen later worden aangepast.
-          </p>
-        </div>
+        <p className="text-xs text-black/40 italic">
+          Begeleid gesprek, geen toets. Antwoorden kunnen later worden aangepast.
+        </p>
       )}
 
       <div className="space-y-3">
@@ -838,7 +842,7 @@ export default function FlowQuestionPage() {
 
       <section className="space-y-4 rounded-3xl border border-black/10 bg-[#fafafa] p-4 sm:p-5">
         {isProfileBasisOverview ? (
-          <div className="space-y-5">
+          <div className="space-y-8">
             <div className="space-y-2">
                 <label htmlFor="customer_name" className="text-xs font-semibold uppercase tracking-wide text-black/60">
                   Klantnaam
@@ -852,7 +856,7 @@ export default function FlowQuestionPage() {
                   setFieldValue("customer_name", event.target.value)
                 }
                 placeholder="Bijvoorbeeld: Janssen BV"
-                className="w-full rounded-xl border border-black/15 bg-white px-4 py-3 outline-none"
+                className="w-full rounded-xl border border-black/15 bg-white px-4 py-3 outline-none focus:border-[#ed6e41]/40 focus:ring-2 focus:ring-[#ed6e41]/20"
               />
             </div>
 
