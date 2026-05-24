@@ -288,27 +288,23 @@ function ScanShell({ children }: { children: ReactNode }) {
                     </div>
                   );
 
-                  if (href !== null) {
-                    return (
-                      <Link
-                        key={step.primarySectionCode}
-                        href={href}
-                        className="block"
-                        prefetch={false}
-                      >
-                        {content}
-                      </Link>
-                    );
-                  }
+                  // Always render a Link to avoid hydration mismatch
+                  // Use aria-disabled and pointer-events for locked state
+                  const isLocked = href === null;
+                  const fallbackHref = `/scan/${scanId}/flow/${step.primarySectionCode}`;
 
                   return (
-                    <div
+                    <Link
                       key={step.primarySectionCode}
-                      className="block cursor-default pointer-events-none"
-                      aria-disabled="true"
+                      href={href ?? fallbackHref}
+                      className={`block ${isLocked ? "cursor-default pointer-events-none" : ""}`}
+                      prefetch={false}
+                      aria-disabled={isLocked}
+                      tabIndex={isLocked ? -1 : undefined}
+                      onClick={isLocked ? (e) => e.preventDefault() : undefined}
                     >
                       {content}
-                    </div>
+                    </Link>
                   );
                 })}
               </div>
