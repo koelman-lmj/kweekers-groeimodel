@@ -689,7 +689,7 @@ export default function FlowQuestionPage() {
     }
 
     return (
-      <div className="grid gap-2 sm:grid-cols-2 justify-items-center">
+      <div className="flex flex-col gap-2 items-center">
         {[...currentOptionSet.options]
           .sort((a, b) => a.order - b.order)
           .map((option) => {
@@ -917,7 +917,7 @@ export default function FlowQuestionPage() {
                 <RequiredAsterisk />
               </div>
 
-              <div className="grid gap-2 sm:grid-cols-2 justify-items-center">
+              <div className="flex flex-col gap-2 items-center">
                 {[...(getOptionSet("organization_type_options")?.options ?? [])]
                   .sort((a, b) => a.order - b.order)
                   .map((option) => {
@@ -958,6 +958,7 @@ export default function FlowQuestionPage() {
                         <OptionLabelWithTooltip
                           label={option.label}
                           description={option.description}
+                          isActive={isActive}
                         />
                         <OptionTooltip description={option.description} />
                       </button>
