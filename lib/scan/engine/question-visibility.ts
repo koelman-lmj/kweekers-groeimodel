@@ -2,6 +2,7 @@ import type { ScanState } from "@/app/context/ScanContext";
 import type { AnswerValue } from "@/lib/scan/engine/answer-mapping";
 import type { QuestionDefinition, VisibilityRule, DepthLevel } from "@/lib/scan/types";
 import { getAnswerFromScan } from "@/lib/scan/engine/answer-mapping";
+import { scanDefinition } from "@/lib/scan/definition";
 
 const DEPTH_ORDER: DepthLevel[] = ["eerste_beeld", "gericht_verdiepen", "verbeterplan"];
 
@@ -78,4 +79,54 @@ export function isQuestionVisible(
     const answer = getFieldValue(scan, rule.field);
     return matchesRule(answer, rule);
   });
+}
+
+/**
+ * Returns all visible questions for a given scan state.
+ * Optionally filter by sectionCode.
+ */
+export function getVisibleQuestions(
+  scan: ScanState,
+  sectionCode?: string
+): QuestionDefinition[] {
+  let questions = scanDefinition.questions;
+  
+  if (sectionCode) {
+    questions = questions.filter((q) => q.sectionCode === sectionCode);
+  }
+  
+  return questions
+    .filter((q) => isQuestionVisible(scan, q))
+    .sort((a, b) => a.order - b.order);
+}
+
+/**
+ * Checks if an answer is "active" - meaning its question is currently visible.
+ * Use this to determine if an answer should be included in scoring/analysis.
+ */
+export function isAnswerActive(scan: ScanState, questionKey: string): boolean {
+  const question = scanDefinition.questions.find((q) => q.key === questionKey);
+  if (!question) return false;
+  return isQuestionVisible(scan, question);
+}
+
+/**
+ * Returns only answers for questions that are currently visible.
+ * This ensures scoring and analysis only consider relevant answers.
+ */
+export function getActiveAnswers(
+  scan: ScanState
+): Record<string, AnswerValue> {
+  const activeAnswers: Record<string, AnswerValue> = {};
+  
+  for (const question of scanDefinition.questions) {
+    if (isQuestionVisible(scan, question)) {
+      const answer = getAnswerFromScan(scan, question.key);
+      if (answer !== undefined && answer !== null && answer !== "") {
+        activeAnswers[question.key] = answer;
+      }
+    }
+  }
+  
+  return activeAnswers;
 }
