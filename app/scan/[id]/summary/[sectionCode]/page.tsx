@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useScanContext } from "@/app/context/ScanContext";
@@ -48,45 +49,46 @@ function getDisplayValue(
 }
 
 function getPriorityLabel(priority: "hoog" | "middel" | "laag") {
-  if (priority === "hoog") return "Hoog";
-  if (priority === "middel") return "Middel";
-  return "Laag";
+  if (priority === "hoog") return "Urgentie: Hoog";
+  if (priority === "middel") return "Urgentie: Middel";
+  return "Urgentie: Laag";
 }
 
 function getBucketLabel(bucket: "now" | "next" | "later") {
-  if (bucket === "now") return "Nu";
-  if (bucket === "next") return "Daarna";
-  return "Later";
+  if (bucket === "now") return "Fase: Nu";
+  if (bucket === "next") return "Fase: Daarna";
+  return "Fase: Later";
 }
 
-function scoreToFiveDots(priorityScore: number) {
-  if (priorityScore >= 85) return 1;
-  if (priorityScore >= 70) return 2;
-  if (priorityScore >= 55) return 3;
-  if (priorityScore >= 40) return 4;
-  return 5;
+// Converteer priority score (0-100) naar 1-3 maturity schaal
+function priorityScoreToMaturity(priorityScore: number): number {
+  // Hoge priority score = lage maturity (veel werk nodig)
+  // Lage priority score = hoge maturity (goed beheerst)
+  if (priorityScore >= 70) return 1.0; // Kwetsbaar
+  if (priorityScore >= 40) return 2.0; // In ontwikkeling
+  return 3.0; // Beheerst
 }
 
+// Score helpers voor 1-3 schaal
 function getScoreColor(score: number): string {
-  if (score >= 4) return "#22c55e"; // green
-  if (score >= 3) return "#ed6e41"; // orange (brand)
-  if (score >= 2) return "#f59e0b"; // amber
-  return "#ef4444"; // red
+  if (score >= 2.4) return "#16a34a"; // green - Beheerst
+  if (score >= 1.6) return "#ea580c"; // orange - In ontwikkeling
+  return "#dc2626"; // red - Kwetsbaar
 }
 
 function getScoreLabel(score: number): string {
-  if (score >= 4) return "Goed";
-  if (score >= 3) return "Redelijk";
-  if (score >= 2) return "Matig";
-  return "Aandacht nodig";
+  if (score >= 2.4) return "Beheerst";
+  if (score >= 1.6) return "In ontwikkeling";
+  return "Kwetsbaar";
 }
 
-// Circular gauge for total score
-function ScoreGauge({ score, maxScore = 5 }: { score: number; maxScore?: number }) {
+// Circular gauge for total score (1-3 scale)
+function ScoreGauge({ score, maxScore = 3 }: { score: number; maxScore?: number }) {
   const percentage = (score / maxScore) * 100;
   const circumference = 2 * Math.PI * 45;
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
   const color = getScoreColor(score);
+  const label = getScoreLabel(score);
 
   return (
     <div className="relative flex items-center justify-center">
@@ -115,17 +117,18 @@ function ScoreGauge({ score, maxScore = 5 }: { score: number; maxScore?: number 
         />
       </svg>
       <div className="absolute flex flex-col items-center">
-        <span className="text-3xl font-bold">{score}</span>
-        <span className="text-xs text-muted-foreground">van {maxScore}</span>
+        <span className="text-3xl font-bold" style={{ color }}>{score.toFixed(1)}</span>
+        <span className="text-xs text-muted-foreground">{label}</span>
       </div>
     </div>
   );
 }
 
-// Progress bar for dimension scores
-function ScoreProgressBar({ score, maxScore = 5 }: { score: number; maxScore?: number }) {
+// Progress bar for dimension scores (1-3 scale)
+function ScoreProgressBar({ score, maxScore = 3 }: { score: number; maxScore?: number }) {
   const percentage = (score / maxScore) * 100;
   const color = getScoreColor(score);
+  const label = getScoreLabel(score);
 
   return (
     <div className="flex items-center gap-3">
@@ -135,23 +138,25 @@ function ScoreProgressBar({ score, maxScore = 5 }: { score: number; maxScore?: n
           style={{ width: `${percentage}%`, backgroundColor: color }}
         />
       </div>
-      <span className="text-sm font-medium tabular-nums" style={{ color }}>
-        {score.toFixed(1)}
+      <span className="text-sm font-medium" style={{ color }}>
+        {label}
       </span>
     </div>
   );
 }
 
 function ScoreDots({ priorityScore }: { priorityScore: number }) {
-  const active = scoreToFiveDots(priorityScore);
+  const maturityScore = priorityScoreToMaturity(priorityScore);
+  // 3 dots voor de 1-3 schaal
+  const activeDots = Math.round(maturityScore);
 
   return (
     <div className="flex items-center gap-1.5">
-      {Array.from({ length: 5 }).map((_, index) => (
+      {Array.from({ length: 3 }).map((_, index) => (
         <span
           key={index}
           className={
-            index < active
+            index < activeDots
               ? "h-2.5 w-2.5 rounded-full bg-black"
               : "h-2.5 w-2.5 rounded-full border border-black/20 bg-white"
           }
@@ -206,7 +211,7 @@ function ThemeCard({
 
       <div className="mt-4 space-y-4">
         {items.map((item) => {
-          const displayScore = scoreToFiveDots(item.score);
+          const displayScore = priorityScoreToMaturity(item.score);
           return (
             <div key={item.id} className="space-y-2">
               <div className="flex items-center justify-between gap-3">
@@ -339,6 +344,94 @@ function buildGroupedEvidence(
       };
     })
     .filter((group) => group.items.length > 0);
+}
+
+// Inklapbare onderbouwing component
+function CollapsibleEvidence({
+  groupedEvidence,
+  fallbackEvidenceItems,
+}: {
+  groupedEvidence: GroupedEvidence[];
+  fallbackEvidenceItems: EvidenceItem[];
+}) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  
+  // Standaard: toon max 2 items per groep, of alles als ingeklapt
+  const MAX_ITEMS_COLLAPSED = 2;
+  
+  return (
+    <section className="rounded-3xl border border-black/10 bg-white p-5">
+      <div className="flex items-center justify-between">
+        <div className="space-y-1">
+          <h2 className="text-lg font-semibold">Onderbouwing</h2>
+          <p className="text-sm text-muted-foreground">
+            De antwoorden hieronder zijn gegroepeerd per topprioriteit.
+          </p>
+        </div>
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="rounded-xl border border-black/10 px-3 py-1.5 text-xs font-medium transition-colors hover:bg-black/5"
+        >
+          {isExpanded ? "Toon minder" : "Toon volledige onderbouwing"}
+        </button>
+      </div>
+
+      <div className="mt-4 space-y-4">
+        {groupedEvidence.length > 0 ? (
+          groupedEvidence.map((group, index) => (
+            <div
+              key={group.priorityId}
+              className="rounded-2xl border border-black/10 bg-black/[0.02] p-4"
+            >
+              <div className="flex items-center gap-3">
+                <div className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-black/10 bg-white text-sm font-semibold">
+                  {index + 1}
+                </div>
+                <div className="text-base font-semibold">
+                  {group.priorityTitle}
+                </div>
+              </div>
+
+              <p className="mt-3 text-sm text-muted-foreground">
+                {group.conclusion}
+              </p>
+
+              <div className="mt-4 space-y-3">
+                {(isExpanded ? group.items : group.items.slice(0, MAX_ITEMS_COLLAPSED)).map((item) => (
+                  <div
+                    key={item.key}
+                    className="rounded-xl border border-black/10 bg-white p-3"
+                  >
+                    <div className="text-sm font-medium">{item.label}</div>
+                    <div className="mt-1 text-sm text-muted-foreground">
+                      {item.value}
+                    </div>
+                  </div>
+                ))}
+                {!isExpanded && group.items.length > MAX_ITEMS_COLLAPSED && (
+                  <p className="text-xs text-muted-foreground">
+                    +{group.items.length - MAX_ITEMS_COLLAPSED} meer bewijsregels
+                  </p>
+                )}
+              </div>
+            </div>
+          ))
+        ) : (
+          fallbackEvidenceItems.slice(0, isExpanded ? undefined : 4).map((item) => (
+            <div
+              key={item.key}
+              className="rounded-2xl border border-black/10 bg-black/[0.02] p-4"
+            >
+              <div className="text-sm font-medium">{item.label}</div>
+              <div className="mt-1 text-sm text-muted-foreground">
+                {item.value}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </section>
+  );
 }
 
 export default function SectionSummaryPage() {
@@ -509,7 +602,7 @@ export default function SectionSummaryPage() {
     scanOutput && scanOutput.priorities.length > 0
       ? (
           scanOutput.priorities.reduce((sum, item) => {
-            return sum + scoreToFiveDots(item.score);
+            return sum + priorityScoreToMaturity(item.score);
           }, 0) / scanOutput.priorities.length
         ).toFixed(1)
       : "-";
@@ -810,51 +903,72 @@ export default function SectionSummaryPage() {
                 </div>
               </div>
 
-              {/* Timeline content */}
+              {/* Timeline content - Actiegerichte roadmap */}
               <div className="mt-6 grid gap-4 md:grid-cols-3">
+                {/* Nu - Urgente acties */}
                 <div className="rounded-2xl border-2 border-[#ed6e41]/20 bg-[#ed6e41]/5 p-4">
-                  <ul className="space-y-2 text-sm">
-                    {scanOutput.roadmap.now.length > 0 ? (
-                      scanOutput.roadmap.now.map((item) => (
-                        <li key={item.id} className="flex items-start gap-2">
-                          <span className="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#ed6e41]" />
-                          <span className="text-muted-foreground">{item.title}</span>
-                        </li>
-                      ))
-                    ) : (
-                      <li className="text-muted-foreground">Geen directe acties.</li>
-                    )}
-                  </ul>
+                  <h4 className="mb-3 text-sm font-semibold text-[#ed6e41]">Directe prioriteiten</h4>
+                  {scanOutput.roadmap.now.length > 0 ? (
+                    <div className="space-y-3">
+                      {scanOutput.roadmap.now.slice(0, 3).map((item) => (
+                        <div key={item.id} className="rounded-xl bg-white p-3 shadow-sm">
+                          <div className="text-sm font-medium">{item.title}</div>
+                          <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{item.reason}</p>
+                          {item.advice && (
+                            <p className="mt-2 text-xs font-medium text-[#ed6e41]">
+                              Actie: {item.advice}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Geen directe acties nodig.</p>
+                  )}
                 </div>
 
+                {/* Daarna - Volgende stappen */}
                 <div className="rounded-2xl border-2 border-[#f59e0b]/20 bg-[#f59e0b]/5 p-4">
-                  <ul className="space-y-2 text-sm">
-                    {scanOutput.roadmap.next.length > 0 ? (
-                      scanOutput.roadmap.next.map((item) => (
-                        <li key={item.id} className="flex items-start gap-2">
-                          <span className="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#f59e0b]" />
-                          <span className="text-muted-foreground">{item.title}</span>
-                        </li>
-                      ))
-                    ) : (
-                      <li className="text-muted-foreground">Nog geen volgende stap bepaald.</li>
-                    )}
-                  </ul>
+                  <h4 className="mb-3 text-sm font-semibold text-[#f59e0b]">Volgende stappen</h4>
+                  {scanOutput.roadmap.next.length > 0 ? (
+                    <div className="space-y-3">
+                      {scanOutput.roadmap.next.slice(0, 3).map((item) => (
+                        <div key={item.id} className="rounded-xl bg-white p-3 shadow-sm">
+                          <div className="text-sm font-medium">{item.title}</div>
+                          <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{item.reason}</p>
+                          {item.advice && (
+                            <p className="mt-2 text-xs font-medium text-[#f59e0b]">
+                              Actie: {item.advice}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Nog geen volgende stap bepaald.</p>
+                  )}
                 </div>
 
+                {/* Later - Toekomstige verbeteringen */}
                 <div className="rounded-2xl border-2 border-[#22c55e]/20 bg-[#22c55e]/5 p-4">
-                  <ul className="space-y-2 text-sm">
-                    {scanOutput.roadmap.later.length > 0 ? (
-                      scanOutput.roadmap.later.map((item) => (
-                        <li key={item.id} className="flex items-start gap-2">
-                          <span className="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#22c55e]" />
-                          <span className="text-muted-foreground">{item.title}</span>
-                        </li>
-                      ))
-                    ) : (
-                      <li className="text-muted-foreground">Nog niets voor later.</li>
-                    )}
-                  </ul>
+                  <h4 className="mb-3 text-sm font-semibold text-[#22c55e]">Toekomstige verbeteringen</h4>
+                  {scanOutput.roadmap.later.length > 0 ? (
+                    <div className="space-y-3">
+                      {scanOutput.roadmap.later.slice(0, 3).map((item) => (
+                        <div key={item.id} className="rounded-xl bg-white p-3 shadow-sm">
+                          <div className="text-sm font-medium">{item.title}</div>
+                          <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{item.reason}</p>
+                          {item.advice && (
+                            <p className="mt-2 text-xs font-medium text-[#22c55e]">
+                              Actie: {item.advice}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Nog niets voor later gepland.</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -966,64 +1080,7 @@ export default function SectionSummaryPage() {
             </section>
           )}
 
-          <section className="rounded-3xl border border-black/10 bg-white p-5">
-            <div className="space-y-1">
-              <h2 className="text-lg font-semibold">Onderbouwing</h2>
-              <p className="text-sm text-muted-foreground">
-                De antwoorden hieronder zijn gegroepeerd per topprioriteit.
-              </p>
-            </div>
-
-            <div className="mt-4 space-y-4">
-              {groupedEvidence.length > 0 ? (
-                groupedEvidence.map((group, index) => (
-                  <div
-                    key={group.priorityId}
-                    className="rounded-2xl border border-black/10 bg-black/[0.02] p-4"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-black/10 bg-white text-sm font-semibold">
-                        {index + 1}
-                      </div>
-                      <div className="text-base font-semibold">
-                        {group.priorityTitle}
-                      </div>
-                    </div>
-
-                    <p className="mt-3 text-sm text-muted-foreground">
-                      {group.conclusion}
-                    </p>
-
-                    <div className="mt-4 space-y-3">
-                      {group.items.slice(0, 4).map((item) => (
-                        <div
-                          key={item.key}
-                          className="rounded-xl border border-black/10 bg-white p-3"
-                        >
-                          <div className="text-sm font-medium">{item.label}</div>
-                          <div className="mt-1 text-sm text-muted-foreground">
-                            {item.value}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                fallbackEvidenceItems.map((item) => (
-                  <div
-                    key={item.key}
-                    className="rounded-2xl border border-black/10 bg-black/[0.02] p-4"
-                  >
-                    <div className="text-sm font-medium">{item.label}</div>
-                    <div className="mt-1 text-sm text-muted-foreground">
-                      {item.value}
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </section>
+          <CollapsibleEvidence groupedEvidence={groupedEvidence} fallbackEvidenceItems={fallbackEvidenceItems} />
 
           <section className="rounded-3xl border border-black/10 bg-black/[0.01] p-5">
             <div className="space-y-2">

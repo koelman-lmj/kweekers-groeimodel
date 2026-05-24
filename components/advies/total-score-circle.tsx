@@ -1,22 +1,23 @@
 "use client";
 
-import { getMaturityColor } from "@/lib/scan/definition/maturity-levels";
+import { getMaturityColor, getMaturityLabel } from "@/lib/scan/definition/maturity-levels";
 
 interface TotalScoreCircleProps {
   score: number;
   maxScore?: number;
   size?: "sm" | "md" | "lg";
-  label?: string;
+  showLabel?: boolean;
 }
 
 export function TotalScoreCircle({ 
   score, 
-  maxScore = 5, 
+  maxScore = 3, 
   size = "md",
-  label = "van 5" 
+  showLabel = true 
 }: TotalScoreCircleProps) {
   const percentage = (score / maxScore) * 100;
   const color = getMaturityColor(score);
+  const maturityLabel = getMaturityLabel(score);
   
   const sizeConfig = {
     sm: { width: 80, strokeWidth: 6, fontSize: "text-xl", labelSize: "text-xs" },
@@ -63,7 +64,11 @@ export function TotalScoreCircle({
         <span className={`${config.fontSize} font-bold`} style={{ color }}>
           {score.toFixed(1)}
         </span>
-        <span className={`${config.labelSize} text-muted-foreground`}>{label}</span>
+        {showLabel && (
+          <span className={`${config.labelSize} text-muted-foreground`}>
+            {maturityLabel}
+          </span>
+        )}
       </div>
     </div>
   );
