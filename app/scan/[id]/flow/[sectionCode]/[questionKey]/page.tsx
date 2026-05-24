@@ -1107,13 +1107,6 @@ export default function FlowQuestionPage() {
           >
             Vorige
           </Link>
-          <button
-            type="button"
-            onClick={() => resetScan()}
-            className="rounded-2xl border border-black/10 px-5 py-3 text-sm font-medium text-muted-foreground hover:text-foreground"
-          >
-            Reset
-          </button>
         </div>
 
         <button
