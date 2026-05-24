@@ -4,6 +4,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type Dispatch,
@@ -198,6 +199,8 @@ type ScanContextValue = {
   scan: ScanState;
   setScan: Dispatch<SetStateAction<ScanState>>;
   resetScan: () => void;
+  /** True after localStorage has been loaded - use to avoid hydration mismatch */
+  isHydrated: boolean;
 
   setCustomerName: (value: string) => void;
   setSector: (value: string) => void;
@@ -450,7 +453,16 @@ function persistScan(nextScan: ScanState) {
 }
 
 export function ScanProvider({ children }: { children: ReactNode }) {
-  const [scanState, setScanState] = useState<ScanState>(() => loadInitialScan());
+  // Start with INITIAL_SCAN to match server render, then hydrate from localStorage
+  const [scanState, setScanState] = useState<ScanState>(INITIAL_SCAN);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Load from localStorage after mount to avoid hydration mismatch
+  useEffect(() => {
+    const stored = loadInitialScan();
+    setScanState(stored);
+    setIsHydrated(true);
+  }, []);
 
   const setScan: Dispatch<SetStateAction<ScanState>> = (value) => {
     setScanState((current) => {
@@ -772,6 +784,7 @@ export function ScanProvider({ children }: { children: ReactNode }) {
       scan: scanState,
       setScan,
       resetScan,
+      isHydrated,
 
       setCustomerName,
       setSector,
@@ -855,7 +868,7 @@ export function ScanProvider({ children }: { children: ReactNode }) {
       markSectionVisited,
       updateScan,
     }),
-    [scanState, markSectionVisited, updateScan]
+    [scanState, markSectionVisited, updateScan, isHydrated]
   );
 
   return <ScanContext.Provider value={value}>{children}</ScanContext.Provider>;
