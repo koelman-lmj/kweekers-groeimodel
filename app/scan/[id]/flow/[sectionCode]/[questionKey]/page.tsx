@@ -103,7 +103,6 @@ function KeyboardShortcutsHint() {
 
 function OptionLabelWithTooltip({
   label,
-  description,
   isActive,
 }: {
   label: string;
@@ -111,11 +110,11 @@ function OptionLabelWithTooltip({
   isActive?: boolean;
 }) {
   return (
-    <div className="flex w-full items-center gap-3">
-      <div className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${
+    <div className="flex items-center justify-center gap-2">
+      <div className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
         isActive 
-          ? 'border-[#ed6e41] bg-[#ed6e41] text-white' 
-          : 'border-black/20 bg-white'
+          ? 'bg-white/30 text-white' 
+          : 'border border-black/20 bg-white'
       }`}>
         {isActive && (
           <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -123,12 +122,7 @@ function OptionLabelWithTooltip({
           </svg>
         )}
       </div>
-      <div className="flex-1 min-w-0">
-        <span className={`text-[13px] font-semibold leading-5 block ${isActive ? 'text-[#c45528]' : ''}`}>{label}</span>
-        {description && (
-          <span className="text-[11px] text-muted-foreground line-clamp-1 block">{description}</span>
-        )}
-      </div>
+      <span className="text-[13px] font-semibold leading-5">{label}</span>
     </div>
   );
 }
@@ -242,14 +236,14 @@ function getProfileBasisCompactStepIndex(questionKey: string): number {
 
 function getBaseOptionButtonClass(disabled: boolean) {
   if (disabled) {
-    return "justify-self-center w-[320px] min-h-[56px] rounded-2xl border border-black/10 bg-white px-4 py-3 text-left text-muted-foreground opacity-50 cursor-not-allowed shadow-sm";
+    return "justify-self-center w-[320px] min-h-[52px] rounded-xl border border-black/15 bg-white px-3 py-2 text-center text-muted-foreground opacity-50 cursor-not-allowed";
   }
 
-  return "justify-self-center w-[320px] min-h-[56px] rounded-2xl border border-black/10 bg-white px-4 py-3 text-left transition-all duration-150 hover:border-[#ed6e41]/40 hover:bg-[#fef8f6] hover:shadow-md";
+  return "justify-self-center w-[320px] min-h-[52px] rounded-xl border border-black/15 bg-white px-3 py-2 text-center transition hover:border-[#ed6e41] hover:bg-[#fef3ef]";
 }
 
 function getActiveOptionButtonClass() {
-  return "justify-self-center w-[320px] min-h-[56px] rounded-2xl border-2 border-[#ed6e41] bg-[#fef3ef] px-4 py-3 text-left font-medium shadow-sm transition-all duration-150";
+  return "justify-self-center w-[320px] min-h-[52px] rounded-xl border-2 border-[#db5f34] bg-[#ed6e41] px-3 py-2 text-center text-white font-medium shadow-sm transition";
 }
 
 export default function FlowQuestionPage() {
@@ -689,7 +683,7 @@ export default function FlowQuestionPage() {
     }
 
     return (
-      <div className="flex flex-col gap-2 items-center">
+      <div className="grid gap-2 sm:grid-cols-2 justify-items-center">
         {[...currentOptionSet.options]
           .sort((a, b) => a.order - b.order)
           .map((option) => {
@@ -815,7 +809,7 @@ export default function FlowQuestionPage() {
   const currentSectionFeedback = isLastInSection ? sectionFeedbackMessages[sectionCode] : null;
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="space-y-8">
       <SectionProgressBar
         answeredCount={answeredCurrentSectionQuestions.length}
         totalCount={currentSectionQuestions.length}
@@ -823,26 +817,25 @@ export default function FlowQuestionPage() {
       />
 
       {isFirstStepOfScan && (
-        <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50/60 px-3 py-2">
-          <svg className="h-4 w-4 shrink-0 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <p className="text-xs text-emerald-700">
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+          <p className="text-sm text-emerald-800">
             Begeleid gesprek, geen toets. Antwoorden kunnen later worden aangepast.
           </p>
         </div>
       )}
 
-      <div className="space-y-2">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          {section?.title?.split(" — ")[0] || `Stap ${questionIndex} van ${questionTotal}`}
-        </p>
+      <div className="space-y-3">
+        <div className="space-y-1">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            {section?.title?.split(" — ")[0] || `Stap ${questionIndex} van ${questionTotal}`}
+          </p>
 
-        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-          {title}
-        </h1>
+          <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
+            {title}
+          </h1>
+        </div>
 
-        <p className="text-sm text-muted-foreground">
+        <p className="max-w-2xl text-sm text-muted-foreground">
           {shortHelpText}
         </p>
       </div>
@@ -917,7 +910,7 @@ export default function FlowQuestionPage() {
                 <RequiredAsterisk />
               </div>
 
-              <div className="flex flex-col gap-2 items-center">
+              <div className="grid gap-2 sm:grid-cols-2 justify-items-center">
                 {[...(getOptionSet("organization_type_options")?.options ?? [])]
                   .sort((a, b) => a.order - b.order)
                   .map((option) => {
@@ -1233,7 +1226,7 @@ export default function FlowQuestionPage() {
               : "inline-flex items-center rounded-2xl border border-black/10 px-5 py-3 text-sm font-semibold text-muted-foreground opacity-60"
           }
         >
-          {isLastQuestion ? "Bekijk eerste advies →" : "Verder →"}
+          Verder →
         </button>
       </div>
     </div>
