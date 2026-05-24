@@ -32,12 +32,12 @@ export default function HomePage() {
               <Image
                 src="/kweekers-logo.png"
                 alt="Kweekers logo"
-                width={28}
-                height={28}
-                className="rounded"
+                width={80}
+                height={32}
+                className="h-8 w-auto"
               />
               <span className="text-sm font-semibold text-slate-700 tracking-tight">
-                KWEEKERS Groeimodel
+                Groeimodel
               </span>
             </div>
 
