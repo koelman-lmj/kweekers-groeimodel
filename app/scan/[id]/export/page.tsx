@@ -42,22 +42,17 @@ function getLabelsFromOptionSet(
   });
 }
 
+// Score functies voor 1-3 schaal
 function getScoreLabel(score: number) {
-  if (score < 2.5) return "Kwetsbaar";
-  if (score < 4.5) return "Basis aanwezig";
-  if (score < 6.5) return "Redelijk op orde";
-  return "Sterk";
+  if (score <= 1.5) return "Kwetsbaar";
+  if (score <= 2.3) return "In ontwikkeling";
+  return "Beheerst";
 }
 
 function getScoreColor(score: number) {
-  if (score < 2.5) return "bg-red-500";
-  if (score < 4.5) return "bg-amber-500";
-  if (score < 6.5) return "bg-emerald-400";
-  return "bg-emerald-600";
-}
-
-function getFilledBlocks(score: number) {
-  return Math.max(0, Math.min(10, Math.round(score * 1.25)));
+  if (score <= 1.5) return "bg-red-500";
+  if (score <= 2.3) return "bg-amber-500";
+  return "bg-emerald-500";
 }
 
 function formatDate(date: Date): string {
@@ -69,15 +64,15 @@ function formatDate(date: Date): string {
 }
 
 function getBucketLabel(bucket: "now" | "next" | "later") {
-  if (bucket === "now") return "Nu";
-  if (bucket === "next") return "Daarna";
-  return "Later";
+  if (bucket === "now") return "Fase: Nu";
+  if (bucket === "next") return "Fase: Daarna";
+  return "Fase: Later";
 }
 
 function getPriorityLabel(priority: "hoog" | "middel" | "laag") {
-  if (priority === "hoog") return "Hoog";
-  if (priority === "middel") return "Middel";
-  return "Laag";
+  if (priority === "hoog") return "Urgentie: Hoog";
+  if (priority === "middel") return "Urgentie: Middel";
+  return "Urgentie: Laag";
 }
 
 function getPriorityColor(priority: "hoog" | "middel" | "laag") {
@@ -354,18 +349,21 @@ export default function ScanExportPage() {
                   <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#E86C34] text-xs font-bold text-white">1</span>
                   <span className="font-bold text-neutral-900">Nu</span>
                 </div>
-                <ul className="mt-3 space-y-2">
+                <p className="mt-1 text-xs text-neutral-600">Directe prioriteiten</p>
+                <div className="mt-3 space-y-3">
                   {scanOutput.roadmap.now.length > 0 ? (
-                    scanOutput.roadmap.now.map((item) => (
-                      <li key={item.id} className="flex gap-2 text-sm text-neutral-800">
-                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#E86C34]" />
-                        {item.title}
-                      </li>
+                    scanOutput.roadmap.now.slice(0, 3).map((item) => (
+                      <div key={item.id} className="rounded-lg bg-white p-2.5 shadow-sm">
+                        <p className="text-sm font-medium text-neutral-900">{item.title}</p>
+                        {item.advice && (
+                          <p className="mt-1 text-xs text-[#E86C34]">Actie: {item.advice}</p>
+                        )}
+                      </div>
                     ))
                   ) : (
-                    <li className="text-sm text-neutral-600">Geen directe acties.</li>
+                    <p className="text-sm text-neutral-600">Geen directe acties nodig.</p>
                   )}
-                </ul>
+                </div>
               </div>
 
               <div className="rounded-xl border border-neutral-200 bg-white p-5">
@@ -373,18 +371,21 @@ export default function ScanExportPage() {
                   <span className="flex h-6 w-6 items-center justify-center rounded-full bg-neutral-300 text-xs font-bold text-neutral-800">2</span>
                   <span className="font-bold text-neutral-900">Daarna</span>
                 </div>
-                <ul className="mt-3 space-y-2">
+                <p className="mt-1 text-xs text-neutral-600">Volgende stappen</p>
+                <div className="mt-3 space-y-3">
                   {scanOutput.roadmap.next.length > 0 ? (
-                    scanOutput.roadmap.next.map((item) => (
-                      <li key={item.id} className="flex gap-2 text-sm text-neutral-800">
-                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-neutral-500" />
-                        {item.title}
-                      </li>
+                    scanOutput.roadmap.next.slice(0, 3).map((item) => (
+                      <div key={item.id} className="rounded-lg border border-neutral-100 bg-neutral-50 p-2.5">
+                        <p className="text-sm font-medium text-neutral-900">{item.title}</p>
+                        {item.advice && (
+                          <p className="mt-1 text-xs text-neutral-600">Actie: {item.advice}</p>
+                        )}
+                      </div>
                     ))
                   ) : (
-                    <li className="text-sm text-neutral-600">Nog geen volgende stap bepaald.</li>
+                    <p className="text-sm text-neutral-600">Nog geen volgende stap bepaald.</p>
                   )}
-                </ul>
+                </div>
               </div>
 
               <div className="rounded-xl border border-neutral-200 bg-white p-5">
@@ -392,18 +393,21 @@ export default function ScanExportPage() {
                   <span className="flex h-6 w-6 items-center justify-center rounded-full bg-neutral-200 text-xs font-bold text-neutral-700">3</span>
                   <span className="font-bold text-neutral-900">Later</span>
                 </div>
-                <ul className="mt-3 space-y-2">
+                <p className="mt-1 text-xs text-neutral-600">Toekomstige verbeteringen</p>
+                <div className="mt-3 space-y-3">
                   {scanOutput.roadmap.later.length > 0 ? (
-                    scanOutput.roadmap.later.map((item) => (
-                      <li key={item.id} className="flex gap-2 text-sm text-neutral-800">
-                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-neutral-400" />
-                        {item.title}
-                      </li>
+                    scanOutput.roadmap.later.slice(0, 3).map((item) => (
+                      <div key={item.id} className="rounded-lg border border-neutral-100 bg-neutral-50 p-2.5">
+                        <p className="text-sm font-medium text-neutral-900">{item.title}</p>
+                        {item.advice && (
+                          <p className="mt-1 text-xs text-neutral-600">Actie: {item.advice}</p>
+                        )}
+                      </div>
                     ))
                   ) : (
-                    <li className="text-sm text-neutral-600">Nog niets voor later.</li>
+                    <p className="text-sm text-neutral-600">Nog niets voor later gepland.</p>
                   )}
-                </ul>
+                </div>
               </div>
             </div>
           </section>
@@ -421,7 +425,7 @@ export default function ScanExportPage() {
                       <span className="text-lg font-bold text-neutral-900">
                         {domain.score.toFixed(1)}
                       </span>
-                      <span className="text-sm text-neutral-600">/8</span>
+                      <span className="text-sm text-neutral-600"> van 3</span>
                     </div>
                   </div>
                   
@@ -430,7 +434,7 @@ export default function ScanExportPage() {
                       <div className="h-2.5 overflow-hidden rounded-full bg-neutral-200">
                         <div
                           className={`h-full rounded-full ${getScoreColor(domain.score)}`}
-                          style={{ width: `${(domain.score / 8) * 100}%` }}
+                          style={{ width: `${(domain.score / 3) * 100}%` }}
                         />
                       </div>
                     </div>
