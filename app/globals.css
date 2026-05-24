@@ -106,24 +106,24 @@ body {
 }
 
 .kweekers-step-current {
-  border-color: #aab8de;
-  background: linear-gradient(to right, var(--kweekers-accent-soft-2), var(--kweekers-primary-soft));
-  box-shadow: inset 0 0 0 1px rgba(237, 110, 65, 0.18);
+  border-color: #f2c2ae;
+  background: linear-gradient(to right, var(--kweekers-accent-soft-2), #fef8f4);
+  box-shadow: inset 0 0 0 1px rgba(237, 110, 65, 0.12);
 }
 
 .kweekers-step-current-number {
   border-color: var(--kweekers-accent);
-  background: var(--kweekers-primary);
+  background: var(--kweekers-accent);
   color: white;
-  box-shadow: 0 0 0 2px rgba(237, 110, 65, 0.18);
+  box-shadow: 0 0 0 2px rgba(237, 110, 65, 0.15);
 }
 
 .kweekers-step-current-title {
-  color: var(--kweekers-primary-dark);
+  color: #c45528;
 }
 
 .kweekers-step-current-description {
-  color: #5c6f9f;
+  color: #a86b4e;
 }
 
 .kweekers-step-completed {
