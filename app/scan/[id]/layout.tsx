@@ -186,10 +186,10 @@ function ScanShell({ children }: { children: ReactNode }) {
   const sectionStatuses = getSectionStatuses(scan);
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50/50">
       <div className="mx-auto grid max-w-7xl gap-6 px-6 py-8 lg:grid-cols-[280px_minmax(0,1fr)] lg:px-8">
         <aside className="lg:sticky lg:top-8 lg:self-start">
-          <div className="rounded-3xl border border-[var(--kweekers-card-border)] bg-white p-5 shadow-sm">
+          <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white/95 backdrop-blur-sm p-5 shadow-md">
             <div className="space-y-5">
               <div className="kweekers-badge">
                 <Image
@@ -350,7 +350,7 @@ function ScanShell({ children }: { children: ReactNode }) {
         </aside>
 
         <main className="min-w-0">
-          <div className="rounded-3xl border border-[var(--kweekers-card-border)] bg-white p-6 shadow-sm sm:p-8 lg:p-10">
+          <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white/95 backdrop-blur-sm p-6 shadow-md sm:p-8 lg:p-10">
             {children}
           </div>
         </main>
