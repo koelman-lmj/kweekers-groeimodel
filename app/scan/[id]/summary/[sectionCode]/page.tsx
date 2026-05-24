@@ -1061,13 +1061,6 @@ export default function SectionSummaryPage() {
           >
             Vorige
           </Link>
-          <button
-            type="button"
-            onClick={() => resetScan()}
-            className="rounded-2xl border border-black/10 px-5 py-3 text-sm font-medium text-muted-foreground hover:text-foreground"
-          >
-            Reset scan
-          </button>
         </div>
 
         {hasNextStep ? (
