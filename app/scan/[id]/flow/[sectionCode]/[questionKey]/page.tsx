@@ -50,12 +50,14 @@ function RequiredAsterisk() {
   return <span className="kweekers-required ml-1">*</span>;
 }
 
-function DiagnoseProgressBar({
+function SectionProgressBar({
   answeredCount,
   totalCount,
+  sectionLabel,
 }: {
   answeredCount: number;
   totalCount: number;
+  sectionLabel: string;
 }) {
   const percentage = totalCount > 0 ? Math.round((answeredCount / totalCount) * 100) : 0;
 
@@ -63,7 +65,7 @@ function DiagnoseProgressBar({
     <div className="mb-6 space-y-2">
       <div className="flex items-center justify-between text-sm">
         <span className="font-medium text-[var(--kweekers-primary-dark)]">
-          Voortgang diagnose
+          Voortgang {sectionLabel}
         </span>
         <span className="text-muted-foreground">
           {answeredCount} van {totalCount} vragen beantwoord ({percentage}%)
@@ -303,16 +305,26 @@ export default function FlowQuestionPage() {
     ? getOptionSet(question.optionSetKey)
     : undefined;
 
-  // Calculate diagnose progress
-  const diagnoseQuestions = getQuestionsForSection("diagnose", scan);
-  const answeredDiagnoseQuestions = diagnoseQuestions.filter((q) => {
+  // Calculate progress for current section
+  const currentSectionQuestions = sectionQuestions;
+  const answeredCurrentSectionQuestions = currentSectionQuestions.filter((q) => {
     const answer = getAnswerFromScan(scan, q.key);
     if (Array.isArray(answer)) {
       return answer.length > 0;
     }
     return typeof answer === "string" && answer.trim() !== "";
   });
-  const isDiagnoseSection = sectionCode === "diagnose";
+
+  // Section label mapping for progress bar
+  const sectionLabelMap: Record<string, string> = {
+    profile_basis: "klantprofiel",
+    profile_afas: "AFAS",
+    profile_reason: "aanleiding",
+    scope: "scope",
+    diagnose: "diagnose",
+    advies: "advies",
+  };
+  const currentSectionLabel = sectionLabelMap[sectionCode] || sectionCode;
 
   const isProfileBasisOverview = isProfileBasisOverviewRoute(
     sectionCode,
@@ -702,12 +714,11 @@ export default function FlowQuestionPage() {
 
   return (
     <div className="space-y-8">
-      {isDiagnoseSection && (
-        <DiagnoseProgressBar
-          answeredCount={answeredDiagnoseQuestions.length}
-          totalCount={diagnoseQuestions.length}
-        />
-      )}
+      <SectionProgressBar
+        answeredCount={answeredCurrentSectionQuestions.length}
+        totalCount={currentSectionQuestions.length}
+        sectionLabel={currentSectionLabel}
+      />
 
       {isFirstStepOfScan && (
         <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
