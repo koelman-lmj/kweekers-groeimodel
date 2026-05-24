@@ -12,8 +12,6 @@ export interface ChoiceCardProps {
   variant?: ChoiceCardVariant;
   onClick: () => void;
   className?: string;
-  /** Keyboard shortcut number to display (1-9) */
-  shortcutNumber?: number;
 }
 
 /**
@@ -38,7 +36,6 @@ export const ChoiceCard = forwardRef<HTMLButtonElement, ChoiceCardProps>(
       variant = "single",
       onClick,
       className = "",
-      shortcutNumber,
     },
     ref
   ) {
@@ -73,20 +70,13 @@ export const ChoiceCard = forwardRef<HTMLButtonElement, ChoiceCardProps>(
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2">
-            <span
-              className={`text-sm font-semibold leading-5 ${
-                isActive ? "text-[#c45528]" : disabled ? "text-muted-foreground" : "text-foreground"
-              }`}
-            >
-              {label}
-            </span>
-            {shortcutNumber && shortcutNumber <= 9 && (
-              <kbd className="hidden shrink-0 rounded border border-black/10 bg-black/5 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground md:inline-block">
-                {shortcutNumber}
-              </kbd>
-            )}
-          </div>
+          <span
+            className={`text-sm font-semibold leading-5 ${
+              isActive ? "text-[#c45528]" : disabled ? "text-muted-foreground" : "text-foreground"
+            }`}
+          >
+            {label}
+          </span>
           {description && (
             <p
               className={`mt-0.5 text-xs leading-relaxed ${
