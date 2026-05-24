@@ -1089,7 +1089,7 @@ export default function FlowQuestionPage() {
                         {group.title}
                       </div>
 
-                      <div className="grid gap-2 sm:grid-cols-2 justify-items-center">
+                      <div className="flex flex-wrap gap-2">
                         {group.options.map((option) => {
                           const isActive = answerArray.includes(option.value);
                           const maxSelections =
@@ -1104,17 +1104,26 @@ export default function FlowQuestionPage() {
                               onClick={() => toggleMultiSelectValue(option.value)}
                               aria-pressed={isActive}
                               disabled={disableNewSelection}
-                              className={`group relative ${
+                              className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm transition ${
                                 isActive
-                                  ? getActiveOptionButtonClass()
-                                  : getBaseOptionButtonClass(disableNewSelection)
+                                  ? "border-[#db5f34] bg-[#ed6e41] text-white font-medium"
+                                  : disableNewSelection
+                                    ? "border-black/10 bg-white text-muted-foreground opacity-50 cursor-not-allowed"
+                                    : "border-black/15 bg-white hover:border-[#ed6e41] hover:bg-[#fef3ef]"
                               }`}
                             >
-                              <OptionLabelWithTooltip
-                                label={option.label}
-                                description={option.description}
-                              />
-                              <OptionTooltip description={option.description} />
+                              <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full ${
+                                isActive 
+                                  ? 'bg-white/30 text-white' 
+                                  : 'border border-black/20 bg-white'
+                              }`}>
+                                {isActive && (
+                                  <svg className="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                  </svg>
+                                )}
+                              </span>
+                              {option.label}
                             </button>
                           );
                         })}
