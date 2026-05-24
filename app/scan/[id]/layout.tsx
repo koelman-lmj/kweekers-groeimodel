@@ -191,17 +191,17 @@ function ScanShell({ children }: { children: ReactNode }) {
         <aside className="lg:sticky lg:top-8 lg:self-start">
           <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white/95 backdrop-blur-sm p-5 shadow-md">
             <div className="space-y-5">
-              {/* Logo badge - gebalanceerde verhoudingen */}
-              <div className="flex flex-col items-center gap-0.5 text-center">
+              {/* Logo badge - subtiel en gecentreerd */}
+              <div className="flex flex-col items-center gap-0 text-center">
                 <Image
                   src="/kweekers-logo.png"
                   alt="Kweekers logo"
-                  width={130}
-                  height={42}
-                  className="h-9 w-auto"
+                  width={100}
+                  height={32}
+                  className="h-7 w-auto"
                   priority
                 />
-                <span className="text-lg font-semibold text-slate-600 tracking-tight">
+                <span className="text-sm font-medium text-slate-500 tracking-tight">
                   Groeimodel
                 </span>
               </div>
