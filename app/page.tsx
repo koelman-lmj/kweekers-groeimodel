@@ -28,15 +28,16 @@ export default function HomePage() {
 
           <div className="relative px-6 py-10 sm:px-10 sm:py-14 lg:px-14 lg:py-16">
             {/* Badge */}
-            <div className="inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white/95 backdrop-blur-sm px-4 py-2.5 shadow-sm">
+            <div className="inline-flex items-center gap-2 rounded-2xl border border-slate-200/80 bg-white/95 backdrop-blur-sm pl-3 pr-4 py-2 shadow-sm">
               <Image
                 src="/kweekers-logo.png"
                 alt="Kweekers logo"
-                width={80}
-                height={32}
-                className="h-8 w-auto"
+                width={120}
+                height={40}
+                className="h-9 w-auto"
               />
-              <span className="text-sm font-semibold text-slate-700 tracking-tight">
+              <div className="h-6 w-px bg-slate-200" />
+              <span className="text-base font-semibold text-slate-600 tracking-tight">
                 Groeimodel
               </span>
             </div>
