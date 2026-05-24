@@ -449,11 +449,6 @@ export const questions: QuestionDefinition[] = [
     ],
     visibleWhen: [
       { field: "afas_products", operator: "includes", value: "financieel" },
-      {
-        field: "scope_depth",
-        operator: "one_of",
-        value: ["gericht_verdiepen", "verbeterplan"],
-      },
     ],
   },
   {
@@ -478,11 +473,6 @@ export const questions: QuestionDefinition[] = [
     ],
     visibleWhen: [
       { field: "afas_products", operator: "includes", value: "financieel" },
-      {
-        field: "scope_depth",
-        operator: "one_of",
-        value: ["gericht_verdiepen", "verbeterplan"],
-      },
     ],
   },
   {
@@ -562,11 +552,6 @@ export const questions: QuestionDefinition[] = [
     ],
     visibleWhen: [
       { field: "afas_products", operator: "includes", value: "ordermanagement" },
-      {
-        field: "scope_depth",
-        operator: "one_of",
-        value: ["gericht_verdiepen", "verbeterplan"],
-      },
     ],
   },
   {
