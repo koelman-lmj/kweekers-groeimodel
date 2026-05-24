@@ -701,7 +701,6 @@ export default function FlowQuestionPage() {
               isActive={currentValue === option.value}
               variant="single"
               onClick={() => onSelect(option.value)}
-              shortcutNumber={index + 1}
             />
           ))}
       </ChoiceCardGrid>
@@ -936,7 +935,6 @@ export default function FlowQuestionPage() {
 
                           setFieldValue("organization_type", nextValues);
                         }}
-                        shortcutNumber={index + 1}
                       />
                     );
                   })}
@@ -981,7 +979,6 @@ export default function FlowQuestionPage() {
                       isActive={answerString === option.value}
                       variant="single"
                       onClick={() => setAnswerValue(option.value)}
-                      shortcutNumber={index + 1}
                     />
                   ))}
               </ChoiceCardGrid>
@@ -1007,11 +1004,10 @@ export default function FlowQuestionPage() {
                             label={option.label}
                             description={option.description}
                             isActive={isActive}
-                            disabled={disableNewSelection}
-                            variant="multi"
-                            onClick={() => toggleMultiSelectValue(option.value)}
-                            shortcutNumber={index + 1}
-                          />
+                          disabled={disableNewSelection}
+                          variant="multi"
+                          onClick={() => toggleMultiSelectValue(option.value)}
+                        />
                         );
                       })}
                   </ChoiceCardGrid>
