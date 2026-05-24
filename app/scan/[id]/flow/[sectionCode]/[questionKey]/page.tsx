@@ -16,6 +16,7 @@ import {
   setAnswerToScan,
   type AnswerValue,
 } from "@/lib/scan/engine/answer-mapping";
+import { ChoiceCard, ChoiceCardGrid, ChoicePill } from "@/components/scan/ChoiceCard";
 
 function getParam(value: string | string[] | undefined): string {
   if (Array.isArray(value)) return value[0] ?? "";
@@ -683,34 +684,21 @@ export default function FlowQuestionPage() {
     }
 
     return (
-      <div className="grid gap-2 sm:grid-cols-2 justify-items-center">
+      <ChoiceCardGrid columns={2}>
         {[...currentOptionSet.options]
           .sort((a, b) => a.order - b.order)
-          .map((option) => {
-            const isActive = currentValue === option.value;
-
-            return (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => onSelect(option.value)}
-                aria-pressed={isActive}
-                className={`group relative ${
-                  isActive
-                    ? getActiveOptionButtonClass()
-                    : getBaseOptionButtonClass(false)
-                }`}
-              >
-                      <OptionLabelWithTooltip
-                        label={option.label}
-                        description={option.description}
-                        isActive={isActive}
-                      />
-                <OptionTooltip description={option.description} />
-              </button>
-            );
-          })}
-      </div>
+          .map((option, index) => (
+            <ChoiceCard
+              key={option.value}
+              label={option.label}
+              description={option.description}
+              isActive={currentValue === option.value}
+              variant="single"
+              onClick={() => onSelect(option.value)}
+              shortcutNumber={index + 1}
+            />
+          ))}
+      </ChoiceCardGrid>
     );
   };
 
@@ -910,10 +898,10 @@ export default function FlowQuestionPage() {
                 <RequiredAsterisk />
               </div>
 
-              <div className="flex flex-wrap gap-2">
+              <ChoiceCardGrid columns={2}>
                 {[...(getOptionSet("organization_type_options")?.options ?? [])]
                   .sort((a, b) => a.order - b.order)
-                  .map((option) => {
+                  .map((option, index) => {
                     const currentValues = Array.isArray(
                       profileOverviewValues.organization_type
                     )
@@ -926,9 +914,13 @@ export default function FlowQuestionPage() {
                       !isActive && currentValues.length >= maxSelections;
 
                     return (
-                      <button
+                      <ChoiceCard
                         key={option.value}
-                        type="button"
+                        label={option.label}
+                        description={option.description}
+                        isActive={isActive}
+                        disabled={disableNewSelection}
+                        variant="multi"
                         onClick={() => {
                           if (!isActive && currentValues.length >= maxSelections) {
                             return;
@@ -940,33 +932,11 @@ export default function FlowQuestionPage() {
 
                           setFieldValue("organization_type", nextValues);
                         }}
-                        aria-pressed={isActive}
-                        disabled={disableNewSelection}
-                        title={option.description}
-                        className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm transition ${
-                          isActive
-                            ? "border-[#db5f34] bg-[#ed6e41] text-white font-medium"
-                            : disableNewSelection
-                              ? "border-black/10 bg-white text-muted-foreground opacity-50 cursor-not-allowed"
-                              : "border-black/15 bg-white hover:border-[#ed6e41] hover:bg-[#fef3ef]"
-                        }`}
-                      >
-                        <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full ${
-                          isActive 
-                            ? 'bg-white/30 text-white' 
-                            : 'border border-black/20 bg-white'
-                        }`}>
-                          {isActive && (
-                            <svg className="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                            </svg>
-                          )}
-                        </span>
-                        {option.label}
-                      </button>
+                        shortcutNumber={index + 1}
+                      />
                     );
                   })}
-              </div>
+              </ChoiceCardGrid>
 
               <p className="text-sm text-muted-foreground">
                 Gekozen:{" "}
@@ -996,43 +966,31 @@ export default function FlowQuestionPage() {
             )}
 
             {question.inputType === "single_select" && optionSet && (
-              <div className="grid gap-2 sm:grid-cols-2 justify-items-center">
+              <ChoiceCardGrid columns={2}>
                 {[...optionSet.options]
                   .sort((a, b) => a.order - b.order)
-                  .map((option) => {
-                    const isActive = answerString === option.value;
-
-                    return (
-                      <button
-                        key={option.value}
-                        type="button"
-                        onClick={() => setAnswerValue(option.value)}
-                        aria-pressed={isActive}
-                        className={`group relative ${
-                          isActive
-                            ? getActiveOptionButtonClass()
-                            : getBaseOptionButtonClass(false)
-                        }`}
-                      >
-                        <OptionLabelWithTooltip
-                          label={option.label}
-                          description={option.description}
-                        />
-                        <OptionTooltip description={option.description} />
-                      </button>
-                    );
-                  })}
-              </div>
+                  .map((option, index) => (
+                    <ChoiceCard
+                      key={option.value}
+                      label={option.label}
+                      description={option.description}
+                      isActive={answerString === option.value}
+                      variant="single"
+                      onClick={() => setAnswerValue(option.value)}
+                      shortcutNumber={index + 1}
+                    />
+                  ))}
+              </ChoiceCardGrid>
             )}
 
             {question.inputType === "multi_select" &&
               optionSet &&
               question.key !== "afas_products" && (
                 <div className="space-y-3">
-                  <div className="grid gap-2 sm:grid-cols-2 justify-items-center">
+                  <ChoiceCardGrid columns={2}>
                     {[...optionSet.options]
                       .sort((a, b) => a.order - b.order)
-                      .map((option) => {
+                      .map((option, index) => {
                         const isActive = answerArray.includes(option.value);
                         const maxSelections =
                           question.maxSelections ?? Number.POSITIVE_INFINITY;
@@ -1040,28 +998,19 @@ export default function FlowQuestionPage() {
                           !isActive && answerArray.length >= maxSelections;
 
                         return (
-                          <button
+                          <ChoiceCard
                             key={option.value}
-                            type="button"
-                            onClick={() => toggleMultiSelectValue(option.value)}
-                            aria-pressed={isActive}
+                            label={option.label}
+                            description={option.description}
+                            isActive={isActive}
                             disabled={disableNewSelection}
-                            className={`group relative ${
-                              isActive
-                                ? getActiveOptionButtonClass()
-                                : getBaseOptionButtonClass(disableNewSelection)
-                            }`}
-                          >
-                            <OptionLabelWithTooltip
-                              label={option.label}
-                              description={option.description}
-                              isActive={isActive}
-                            />
-                            <OptionTooltip description={option.description} />
-                          </button>
+                            variant="multi"
+                            onClick={() => toggleMultiSelectValue(option.value)}
+                            shortcutNumber={index + 1}
+                          />
                         );
                       })}
-                  </div>
+                  </ChoiceCardGrid>
 
                   {typeof question.maxSelections === "number" && (
                     <p className="text-sm text-muted-foreground">
@@ -1107,33 +1056,13 @@ export default function FlowQuestionPage() {
                             !isActive && answerArray.length >= maxSelections;
 
                           return (
-                            <button
+                            <ChoicePill
                               key={option.value}
-                              type="button"
-                              onClick={() => toggleMultiSelectValue(option.value)}
-                              aria-pressed={isActive}
+                              label={option.label}
+                              isActive={isActive}
                               disabled={disableNewSelection}
-                              className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm transition ${
-                                isActive
-                                  ? "border-[#db5f34] bg-[#ed6e41] text-white font-medium"
-                                  : disableNewSelection
-                                    ? "border-black/10 bg-white text-muted-foreground opacity-50 cursor-not-allowed"
-                                    : "border-black/15 bg-white hover:border-[#ed6e41] hover:bg-[#fef3ef]"
-                              }`}
-                            >
-                              <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full ${
-                                isActive 
-                                  ? 'bg-white/30 text-white' 
-                                  : 'border border-black/20 bg-white'
-                              }`}>
-                                {isActive && (
-                                  <svg className="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                                  </svg>
-                                )}
-                              </span>
-                              {option.label}
-                            </button>
+                              onClick={() => toggleMultiSelectValue(option.value)}
+                            />
                           );
                         })}
                       </div>
