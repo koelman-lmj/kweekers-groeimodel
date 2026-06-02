@@ -35,13 +35,14 @@ export async function POST(request: Request) {
       console.log("[v0] x-forwarded-proto:", forwardedProto, "isHttps:", isHttps);
       
       // Set auth cookie on the response
-      // MUST match the protocol - secure:true for HTTPS, secure:false for HTTP
+      // Use sameSite: "none" for cross-origin iframe scenarios (v0 preview)
+      // This requires secure: true
       response.cookies.set({
         name: "site-auth",
         value: "authenticated",
         httpOnly: true,
-        secure: isHttps,
-        sameSite: "lax",
+        secure: true,
+        sameSite: "none", // Required for cross-origin cookies in iframes
         maxAge: 60 * 60 * 24 * 7, // 7 days
         path: "/",
       });
