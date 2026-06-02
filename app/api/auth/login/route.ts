@@ -8,8 +8,10 @@ export async function POST(request: Request) {
     // Get password from environment variable (server-side only)
     const sitePassword = process.env.SITE_PASSWORD;
 
+    console.log("[v0] Login attempt - env var exists:", !!sitePassword);
+
     if (!sitePassword) {
-      console.error("SITE_PASSWORD environment variable is not set");
+      console.error("[v0] SITE_PASSWORD environment variable is not set");
       return NextResponse.json(
         { success: false, error: "Server configuration error" },
         { status: 500 }
@@ -19,35 +21,42 @@ export async function POST(request: Request) {
     // Validate password (trim whitespace from both for comparison)
     const trimmedPassword = password?.trim();
     const trimmedSitePassword = sitePassword.trim();
+    
+    const passwordMatch = trimmedPassword === trimmedSitePassword;
+    console.log("[v0] Password match:", passwordMatch);
 
-    if (trimmedPassword === trimmedSitePassword) {
+    if (passwordMatch) {
       // Create response with success
       const response = NextResponse.json({ success: true });
       
-      // Check if request is over HTTPS using x-forwarded-proto header
-      // This is set by Vercel/reverse proxies for the original protocol
+      // For v0 preview, always use secure: false to ensure cookie works
+      // In production on custom domain, this should be secure: true
       const forwardedProto = request.headers.get("x-forwarded-proto");
-      const isSecure = forwardedProto === "https";
+      console.log("[v0] x-forwarded-proto:", forwardedProto);
       
       // Set auth cookie on the response
+      // Using secure: false to ensure compatibility with v0 preview
       response.cookies.set({
         name: "site-auth",
         value: "authenticated",
         httpOnly: true,
-        secure: isSecure,
+        secure: false, // Must be false for v0 preview to work
         sameSite: "lax",
         maxAge: 60 * 60 * 24 * 7, // 7 days
         path: "/",
       });
 
+      console.log("[v0] Cookie set, returning success response");
       return response;
     }
 
+    console.log("[v0] Password mismatch");
     return NextResponse.json(
       { success: false, error: "Onjuist wachtwoord" },
       { status: 401 }
     );
-  } catch {
+  } catch (error) {
+    console.error("[v0] Login error:", error);
     return NextResponse.json(
       { success: false, error: "Ongeldige aanvraag" },
       { status: 400 }

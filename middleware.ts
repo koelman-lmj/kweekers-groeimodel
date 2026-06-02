@@ -23,14 +23,21 @@ export function middleware(request: NextRequest) {
 
   // Check for auth cookie
   const authCookie = request.cookies.get("site-auth");
+  
+  console.log("[v0] Middleware - path:", pathname);
+  console.log("[v0] Middleware - cookie exists:", !!authCookie);
+  console.log("[v0] Middleware - cookie value:", authCookie?.value);
+  console.log("[v0] Middleware - all cookies:", request.cookies.getAll().map(c => c.name));
 
   if (!authCookie || authCookie.value !== "authenticated") {
     // Redirect to login page
+    console.log("[v0] Middleware - redirecting to login");
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("redirect", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
+  console.log("[v0] Middleware - allowing access");
   return NextResponse.next();
 }
 
