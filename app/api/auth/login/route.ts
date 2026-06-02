@@ -29,24 +29,24 @@ export async function POST(request: Request) {
       // Create response with success
       const response = NextResponse.json({ success: true });
       
-      // For v0 preview, always use secure: false to ensure cookie works
-      // In production on custom domain, this should be secure: true
+      // Check if request is over HTTPS
       const forwardedProto = request.headers.get("x-forwarded-proto");
-      console.log("[v0] x-forwarded-proto:", forwardedProto);
+      const isHttps = forwardedProto === "https";
+      console.log("[v0] x-forwarded-proto:", forwardedProto, "isHttps:", isHttps);
       
       // Set auth cookie on the response
-      // Using secure: false to ensure compatibility with v0 preview
+      // MUST match the protocol - secure:true for HTTPS, secure:false for HTTP
       response.cookies.set({
         name: "site-auth",
         value: "authenticated",
         httpOnly: true,
-        secure: false, // Must be false for v0 preview to work
+        secure: isHttps,
         sameSite: "lax",
         maxAge: 60 * 60 * 24 * 7, // 7 days
         path: "/",
       });
 
-      console.log("[v0] Cookie set, returning success response");
+      console.log("[v0] Cookie set with secure:", isHttps);
       return response;
     }
 

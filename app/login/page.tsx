@@ -53,7 +53,7 @@ function LoginForm() {
   return (
     <div className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm">
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
+        <div className="space-y-2" suppressHydrationWarning>
           <label
             htmlFor="password"
             className="text-sm font-medium text-black/70"
@@ -70,6 +70,7 @@ function LoginForm() {
             required
             autoFocus
             autoComplete="current-password"
+            suppressHydrationWarning
             className="w-full rounded-xl border border-black/15 bg-white px-4 py-3 outline-none transition focus:border-[#ed6e41]/40 focus:ring-2 focus:ring-[#ed6e41]/20"
           />
         </div>
