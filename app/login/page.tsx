@@ -1,14 +1,13 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 
 function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -28,10 +27,9 @@ function LoginForm() {
       const data = await response.json();
 
       if (data.success) {
-        // Redirect to original destination or home
+        // Use window.location for hard redirect to ensure cookie is sent
         const redirect = searchParams.get("redirect") || "/";
-        router.push(redirect);
-        router.refresh();
+        window.location.href = redirect;
       } else {
         setError(data.error || "Onjuist wachtwoord");
         setPassword("");
