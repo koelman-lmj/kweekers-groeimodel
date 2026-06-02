@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 
@@ -9,6 +9,7 @@ function LoginForm() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const searchParams = useSearchParams();
+  const formRef = useRef<HTMLFormElement>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,24 +17,33 @@ function LoginForm() {
     setIsLoading(true);
 
     try {
+      const redirect = searchParams.get("redirect") || "/";
+      
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ password, redirect }),
+        credentials: "include",
       });
 
-      const data = await response.json();
-
-      if (data.success) {
-        // Use window.location for hard redirect to ensure cookie is sent
-        const redirect = searchParams.get("redirect") || "/";
-        window.location.href = redirect;
-      } else {
-        setError(data.error || "Onjuist wachtwoord");
-        setPassword("");
+      // Check if we got redirected (response.url will be different)
+      if (response.redirected) {
+        window.location.href = response.url;
+        return;
       }
+
+      // For non-redirect responses, parse JSON
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        window.location.href = redirect;
+        return;
+      }
+
+      setError(data.error || "Onjuist wachtwoord");
+      setPassword("");
     } catch {
       setError("Er is een fout opgetreden. Probeer het opnieuw.");
     } finally {
@@ -43,7 +53,7 @@ function LoginForm() {
 
   return (
     <div className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm">
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
           <label
             htmlFor="password"
@@ -53,12 +63,14 @@ function LoginForm() {
           </label>
           <input
             id="password"
+            name="password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Voer het wachtwoord in"
             required
             autoFocus
+            autoComplete="current-password"
             className="w-full rounded-xl border border-black/15 bg-white px-4 py-3 outline-none transition focus:border-[#ed6e41]/40 focus:ring-2 focus:ring-[#ed6e41]/20"
           />
         </div>
@@ -89,6 +101,7 @@ export default function LoginPage() {
             width={180}
             height={48}
             priority
+            style={{ width: "auto", height: "auto" }}
           />
           <p className="text-sm text-muted-foreground">Groeimodel</p>
         </div>
