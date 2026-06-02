@@ -9,22 +9,25 @@ export async function POST(request: Request) {
     const sitePassword = process.env.SITE_PASSWORD;
 
     if (!sitePassword) {
-      console.error("[v0] SITE_PASSWORD environment variable is not set");
+      console.error("SITE_PASSWORD environment variable is not set");
       return NextResponse.json(
         { success: false, error: "Server configuration error" },
         { status: 500 }
       );
     }
 
-    // Validate password
-    if (password === sitePassword) {
+    // Validate password (trim whitespace from both for comparison)
+    const trimmedPassword = password?.trim();
+    const trimmedSitePassword = sitePassword.trim();
+
+    if (trimmedPassword === trimmedSitePassword) {
       // Create response with success
       const response = NextResponse.json({ success: true });
       
       // Set auth cookie on the response
       response.cookies.set("site-auth", "authenticated", {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        secure: false, // Allow in development
         sameSite: "lax",
         maxAge: 60 * 60 * 24 * 7, // 7 days
         path: "/",
