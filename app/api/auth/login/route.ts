@@ -24,13 +24,16 @@ export async function POST(request: Request) {
       // Create response with success
       const response = NextResponse.json({ success: true });
       
+      // Determine if we're on HTTPS based on the request
+      const url = new URL(request.url);
+      const isSecure = url.protocol === "https:";
+      
       // Set auth cookie on the response
-      // Important: use the exact same settings that the middleware expects
       response.cookies.set({
         name: "site-auth",
         value: "authenticated",
         httpOnly: true,
-        secure: true, // Required for HTTPS (Vercel preview/production)
+        secure: isSecure, // Only set secure flag when on HTTPS
         sameSite: "lax",
         maxAge: 60 * 60 * 24 * 7, // 7 days
         path: "/",
