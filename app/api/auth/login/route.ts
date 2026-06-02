@@ -24,16 +24,17 @@ export async function POST(request: Request) {
       // Create response with success
       const response = NextResponse.json({ success: true });
       
-      // Determine if we're on HTTPS based on the request
-      const url = new URL(request.url);
-      const isSecure = url.protocol === "https:";
+      // Check if request is over HTTPS using x-forwarded-proto header
+      // This is set by Vercel/reverse proxies for the original protocol
+      const forwardedProto = request.headers.get("x-forwarded-proto");
+      const isSecure = forwardedProto === "https";
       
       // Set auth cookie on the response
       response.cookies.set({
         name: "site-auth",
         value: "authenticated",
         httpOnly: true,
-        secure: isSecure, // Only set secure flag when on HTTPS
+        secure: isSecure,
         sameSite: "lax",
         maxAge: 60 * 60 * 24 * 7, // 7 days
         path: "/",
