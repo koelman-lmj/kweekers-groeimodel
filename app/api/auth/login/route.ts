@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 
 export async function POST(request: Request) {
   try {
@@ -19,9 +18,11 @@ export async function POST(request: Request) {
 
     // Validate password
     if (password === sitePassword) {
-      // Set auth cookie
-      const cookieStore = await cookies();
-      cookieStore.set("site-auth", "authenticated", {
+      // Create response with success
+      const response = NextResponse.json({ success: true });
+      
+      // Set auth cookie on the response
+      response.cookies.set("site-auth", "authenticated", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
@@ -29,7 +30,7 @@ export async function POST(request: Request) {
         path: "/",
       });
 
-      return NextResponse.json({ success: true });
+      return response;
     }
 
     return NextResponse.json(
