@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 
@@ -8,7 +8,13 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const searchParams = useSearchParams();
+
+  // Only render the form after mount to avoid hydration issues with browser extensions
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,10 +56,25 @@ function LoginForm() {
     }
   };
 
+  // Show loading state until mounted to prevent hydration mismatch from browser extensions
+  if (!mounted) {
+    return (
+      <div className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm">
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <div className="h-4 w-24 rounded bg-black/10" />
+            <div className="h-12 rounded-xl bg-black/5" />
+          </div>
+          <div className="h-12 rounded-xl bg-[#ed6e41]/50" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm">
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2" suppressHydrationWarning>
+        <div className="space-y-2">
           <label
             htmlFor="password"
             className="text-sm font-medium text-black/70"
@@ -70,7 +91,6 @@ function LoginForm() {
             required
             autoFocus
             autoComplete="current-password"
-            suppressHydrationWarning
             className="w-full rounded-xl border border-black/15 bg-white px-4 py-3 outline-none transition focus:border-[#ed6e41]/40 focus:ring-2 focus:ring-[#ed6e41]/20"
           />
         </div>
