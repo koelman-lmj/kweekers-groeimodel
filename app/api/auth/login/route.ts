@@ -25,9 +25,14 @@ export async function POST(request: Request) {
       const response = NextResponse.json({ success: true });
       
       // Set auth cookie on the response
+      // Use secure:true in production (HTTPS), false in development (HTTP)
+      const isProduction = process.env.NODE_ENV === "production" || 
+                           process.env.VERCEL_ENV === "production" ||
+                           process.env.VERCEL_ENV === "preview";
+      
       response.cookies.set("site-auth", "authenticated", {
         httpOnly: true,
-        secure: false, // Allow in development
+        secure: isProduction,
         sameSite: "lax",
         maxAge: 60 * 60 * 24 * 7, // 7 days
         path: "/",
